@@ -94,27 +94,7 @@ class VehicleInformationView extends StatelessWidget {
                           text: "Continue",
                           onPressed: () {
                             FocusScope.of(context).unfocus();
-                            controller.showErrors.value = true;
-                            final isFormValid = _formKey.currentState!
-                                .validate();
-
-                            bool allValid = true;
-                            for (var v in controller.vehiclesList) {
-                              if (v.selectedVehicleType.value.isEmpty ||
-                                  v.commercialInsuranceFile.value == null ||
-                                  v.vehicleRegistrationFile.value == null ||
-                                  v.frontViewFile.value == null ||
-                                  v.rearViewFile.value == null ||
-                                  v.interiorViewFile.value == null) {
-                                allValid = false;
-                                break;
-                              }
-                            }
-
-                            if (isFormValid && allValid) {
-                              // Just navigate to the next page
-                              Get.toNamed(Routes.documentsuploadView);
-                            }
+                            Get.toNamed(Routes.documentsuploadView);
                           },
                         ),
                         SizedBox(height: 60.h),

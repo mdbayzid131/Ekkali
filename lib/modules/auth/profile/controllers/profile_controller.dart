@@ -60,11 +60,27 @@ class ProfileController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    nameController = TextEditingController();
-    emailController = TextEditingController();
-    phoneController = TextEditingController();
-    serviceAreaController = TextEditingController();
-    nickNameController = TextEditingController();
+    fullName.value = "John Doe";
+    email.value = "driver@ekkali.com";
+    phone.value = "+1 (555) 000-1234";
+    serviceArea.value = "Miami, FL";
+    nickName.value = "Johnny";
+    rating.value = 5.0;
+    ecn.value = "ECN-10024";
+
+    serviceAreas.value = [
+      "Miami, FL",
+      "Fort Lauderdale, FL",
+      "Palm Beach, FL",
+      "New York, NY",
+      "Los Angeles, CA",
+    ];
+
+    nameController = TextEditingController(text: fullName.value);
+    emailController = TextEditingController(text: email.value);
+    phoneController = TextEditingController(text: phone.value);
+    serviceAreaController = TextEditingController(text: serviceArea.value);
+    nickNameController = TextEditingController(text: nickName.value);
 
     companyController = TextEditingController(text: company.value);
     carTagController = TextEditingController(text: carTag.value);
@@ -72,10 +88,6 @@ class ProfileController extends GetxController {
     zelleController = TextEditingController(text: zelle.value);
     venmoController = TextEditingController(text: venmo.value);
     cashAppController = TextEditingController(text: cashApp.value);
-
-    fetchUserProfile();
-    fetchServiceAreas();
-    fetchLegalPages();
   }
 
   Future<void> fetchLegalPages() async {

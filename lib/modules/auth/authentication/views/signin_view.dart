@@ -112,17 +112,11 @@ class SignInView extends GetView<SigninController> {
                   );
                 }),
                 // ── Sign In Button ──
-                Obx(
-                  () => CustomButton(
-                    text: controller.isLoading.value
-                        ? "Signing In..."
-                        : "Sign In",
-                    onPressed: () {
-                      if (!controller.isLoading.value) {
-                        controller.login();
-                      }
-                    },
-                  ),
+                CustomButton(
+                  text: "Sign In",
+                  onPressed: () {
+                    Get.offAllNamed(Routes.bottomNabbarView);
+                  },
                 ),
                 SizedBox(height: 30.h),
                 GestureDetector(

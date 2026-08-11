@@ -58,7 +58,6 @@ class ExpenseController extends GetxController {
   void onInit() {
     super.onInit();
     _expenseService = Get.find<ExpenseService>();
-    fetchExpenses();
   }
 
   /// Calculates start and end dates based on selected filterPeriod & filterDate

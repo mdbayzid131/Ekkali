@@ -42,8 +42,6 @@ class BookingController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    fetchJobs();
-    fetchJobOffers();
   }
 
   Future<void> fetchJobs({bool isRefresh = false}) async {

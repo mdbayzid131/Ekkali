@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:moeb_26/config/routes/app_pages.dart';
 import 'package:moeb_26/config/themes/app_theme.dart';
 import 'package:moeb_26/core/widgets/CustomButton.dart';
 import 'package:moeb_26/core/widgets/CustomText.dart';
@@ -74,24 +75,16 @@ class OtpVerificationView extends GetView<OtpController> {
                           border: Border.all(color: Colors.transparent),
                         ),
                       ),
-                      onCompleted: (pin) => controller.verifyOtp(),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Enter OTP';
+                      onCompleted: (pin) {
+                        if (controller.isRegister) {
+                          Get.toNamed(Routes.applicationSubmitedView);
+                        } else {
+                          Get.toNamed(
+                            Routes.resetpasswordthreeView,
+                            arguments: {'resetToken': 'test_token'},
+                          );
                         }
-                        if (value.length < 4) {
-                          return 'Enter 4 digit OTP';
-                        }
-                        if (!RegExp(r'^[0-9]+$').hasMatch(value)) {
-                          return 'Enter Only number';
-                        }
-                        return null;
                       },
-                      forceErrorState: true,
-                      errorTextStyle: TextStyle(
-                        color: Colors.red,
-                        fontSize: 14.sp,
-                      ),
                     ),
                   ),
                   SizedBox(height: 30.h),
@@ -110,13 +103,18 @@ class OtpVerificationView extends GetView<OtpController> {
                   SizedBox(height: 30.h),
 
                   // ========== Continue Button ==========
-                  Obx(
-                    () => controller.isLoading.value
-                        ? Center(child: CircularProgressIndicator())
-                        : CustomButton(
-                            text: "Continue",
-                            onPressed: () => controller.verifyOtp(),
-                          ),
+                  CustomButton(
+                    text: "Continue",
+                    onPressed: () {
+                      if (controller.isRegister) {
+                        Get.toNamed(Routes.applicationSubmitedView);
+                      } else {
+                        Get.toNamed(
+                          Routes.resetpasswordthreeView,
+                          arguments: {'resetToken': 'test_token'},
+                        );
+                      }
+                    },
                   ),
                   SizedBox(height: 30.h),
 

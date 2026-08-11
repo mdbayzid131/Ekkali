@@ -24,9 +24,14 @@ class ServiceAreaController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    serviceAreas.assignAll([
+      ServiceAreaModel(id: '1', areaName: 'Miami, FL', city: 'Miami', status: 'ACTIVE', createdAt: DateTime.now(), updatedAt: DateTime.now()),
+      ServiceAreaModel(id: '2', areaName: 'Fort Lauderdale, FL', city: 'Fort Lauderdale', status: 'ACTIVE', createdAt: DateTime.now(), updatedAt: DateTime.now()),
+      ServiceAreaModel(id: '3', areaName: 'Palm Beach, FL', city: 'Palm Beach', status: 'ACTIVE', createdAt: DateTime.now(), updatedAt: DateTime.now()),
+      ServiceAreaModel(id: '4', areaName: 'New York, NY', city: 'New York', status: 'ACTIVE', createdAt: DateTime.now(), updatedAt: DateTime.now()),
+      ServiceAreaModel(id: '5', areaName: 'Los Angeles, CA', city: 'Los Angeles', status: 'ACTIVE', createdAt: DateTime.now(), updatedAt: DateTime.now()),
+    ]);
     _initCurrentServiceArea();
-    // Default load (initial fetch)
-    fetchServiceAreas();
     scrollController.addListener(_onScroll);
   }
 
