@@ -105,20 +105,17 @@ class ResetPasswordView extends GetView<ForgotPasswordController> {
                         SizedBox(height: 20.h),
 
                         // ── Send Button ──
-                        Obx(
-                          () => CustomButton(
-                            text: controller.isLoading.value
-                                ? "Sending..."
-                                : "Send Reset Link",
-                            onPressed: () {
-                              if (!controller.isLoading.value) {
-                                controller.forgotPassword();
-                              }
-                            },
-                            backgroundColor: Colors.white,
-                            textColor: Colors.black,
-                            borderColor: Colors.white,
-                          ),
+                        CustomButton(
+                          text: "Send Reset Link",
+                          onPressed: () {
+                            Get.toNamed(
+                              Routes.forgetotpVerificationView,
+                              arguments: {'email': controller.emailController.text.trim()},
+                            );
+                          },
+                          backgroundColor: Colors.white,
+                          textColor: Colors.black,
+                          borderColor: Colors.white,
                         ),
 
                         SizedBox(height: 20.h),

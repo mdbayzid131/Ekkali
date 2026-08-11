@@ -40,7 +40,6 @@ class MarketplaceController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    fetchItems();
     scrollController.addListener(_onScroll);
   }
 

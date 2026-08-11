@@ -116,17 +116,7 @@ class DocumentsuploadView extends GetView<SignupController> {
                 CustomButton(
                   text: "Continue",
                   onPressed: () {
-                    controller.showErrors.value = true;
-                    if (_formKey.currentState!.validate()) {
-                      bool docsValid =
-                          controller.licensePlateFile.value != null &&
-                          controller.hackLicenseFile.value != null &&
-                          controller.localPermitFile.value != null &&
-                          controller.profilePictureFile.value != null;
-                      if (docsValid) {
-                        Get.toNamed(Routes.privacyPolicySignUpView);
-                      }
-                    }
+                    Get.toNamed(Routes.privacyPolicySignUpView);
                   },
                 ),
                 SizedBox(height: 60.h),

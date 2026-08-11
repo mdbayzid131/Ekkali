@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:moeb_26/config/routes/app_pages.dart';
 import 'package:moeb_26/config/themes/app_theme.dart';
 import 'package:moeb_26/core/widgets/CustomButton.dart';
 import 'package:moeb_26/modules/auth/authentication/controllers/signup_controller.dart';
@@ -104,8 +105,15 @@ class PrivacyPolicySignUpView extends StatelessWidget {
 
                         CustomButton(
                           text: "Submit Application",
-                          loading: controller.isLoading.value,
-                          onPressed: () => controller.submitAll(),
+                          onPressed: () {
+                            Get.toNamed(
+                              Routes.otpVerificationView,
+                              arguments: {
+                                'email': controller.emailController.text,
+                                'isRegister': true,
+                              },
+                            );
+                          },
                         ),
                         SizedBox(height: 40.h),
                       ],

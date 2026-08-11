@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:moeb_26/config/routes/app_pages.dart';
 import 'package:moeb_26/config/themes/app_theme.dart';
 import 'package:moeb_26/core/utils/validators.dart';
 import '../../../../core/widgets/CustomButton.dart';
@@ -95,20 +96,14 @@ class ResetPasswordThreeView extends GetView<ResetPasswordController> {
                   SizedBox(height: 50.h),
 
                   // ── Reset Button ──
-                  Obx(
-                    () => CustomButton(
-                      text: controller.isLoading.value
-                          ? "Resetting..."
-                          : "Reset Password",
-                      onPressed: () {
-                        if (!controller.isLoading.value) {
-                          controller.resetPassword();
-                        }
-                      },
-                      backgroundColor: Colors.white,
-                      textColor: Colors.black,
-                      borderColor: Colors.white,
-                    ),
+                  CustomButton(
+                    text: "Reset Password",
+                    onPressed: () {
+                      Get.offAllNamed(Routes.successResetPasswordView);
+                    },
+                    backgroundColor: Colors.white,
+                    textColor: Colors.black,
+                    borderColor: Colors.white,
                   ),
                 ],
               ),

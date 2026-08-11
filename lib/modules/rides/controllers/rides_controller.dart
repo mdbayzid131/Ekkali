@@ -27,11 +27,6 @@ class RidesController extends GetxController {
     if (Get.arguments is Map && Get.arguments.containsKey('ridesTab')) {
       selectedTab.value = Get.arguments['ridesTab'];
     }
-    if (selectedTab.value == 0) {
-      fetchUpcomingJobs();
-    } else if (selectedTab.value == 1) {
-      fetchPastJobs();
-    }
     scrollController.addListener(_onScroll);
   }
 
@@ -64,115 +59,26 @@ class RidesController extends GetxController {
   RxList<FinishRideData> pastRides = <FinishRideData>[].obs;
 
   Future<void> fetchUpcomingJobs() async {
-    try {
-      isLoadingList.value = true;
-      upcomingPage = 1;
-      final response = await _jobRepo.getUpcomingJobs(page: upcomingPage);
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        if (response.data != null && response.data['data'] != null) {
-          final jobResponse = UpcomingRidesModel.fromJson(response.data);
-          upcomingRides.assignAll(jobResponse.data ?? []);
-          upcomingTotalPage = jobResponse.pagination?.totalPage ?? 1;
-        }
-      } else {
-        final message = response.data is Map
-            ? (response.data['message'] ?? 'Failed to fetch upcoming jobs.')
-            : 'Failed to fetch upcoming jobs.';
-        Helpers.showCustomSnackBar(message, isError: true);
-      }
-    } on DioException catch (e) {
-      final message =
-          e.response?.data['message'] ?? 'Failed to fetch upcoming jobs.';
-      Helpers.showCustomSnackBar(message, isError: true);
-    } catch (e) {
-      print("Error fetching upcoming jobs: $e");
-      Helpers.showCustomSnackBar('Something went wrong.', isError: true);
-    } finally {
-      isLoadingList.value = false;
-    }
+    // Static UI mode - API call bypassed
   }
 
   Future<void> loadMoreUpcomingJobs() async {
-    try {
-      isLoadMore.value = true;
-      upcomingPage++;
-      final response = await _jobRepo.getUpcomingJobs(page: upcomingPage);
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        if (response.data != null && response.data['data'] != null) {
-          final jobResponse = UpcomingRidesModel.fromJson(response.data);
-          upcomingRides.addAll(jobResponse.data ?? []);
-        }
-      }
-    } catch (e) {
-      print("Error loading more upcoming jobs: $e");
-      upcomingPage--;
-    } finally {
-      isLoadMore.value = false;
-    }
+    // Static UI mode - API call bypassed
   }
 
   Future<void> fetchPastJobs() async {
-    try {
-      isLoadingList.value = true;
-      pastPage = 1;
-      final response = await _jobRepo.getPastJobs(page: pastPage);
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        if (response.data != null && response.data['data'] != null) {
-          final jobResponse = FinishRidesModel.fromJson(response.data);
-          pastRides.assignAll(jobResponse.data ?? []);
-          pastTotalPage = jobResponse.pagination?.totalPage ?? 1;
-        }
-      } else {
-        final message = response.data is Map
-            ? (response.data['message'] ?? 'Failed to fetch past jobs.')
-            : 'Failed to fetch past jobs.';
-        Helpers.showCustomSnackBar(message, isError: true);
-      }
-    } on DioException catch (e) {
-      final message =
-          e.response?.data['message'] ?? 'Failed to fetch past jobs.';
-      Helpers.showCustomSnackBar(message, isError: true);
-    } catch (e) {
-      print("Error fetching past jobs: $e");
-      Helpers.showCustomSnackBar('Something went wrong.', isError: true);
-    } finally {
-      isLoadingList.value = false;
-    }
+    // Static UI mode - API call bypassed
   }
 
   Future<void> loadMorePastJobs() async {
-    try {
-      isLoadMore.value = true;
-      pastPage++;
-      final response = await _jobRepo.getPastJobs(page: pastPage);
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        if (response.data != null && response.data['data'] != null) {
-          final jobResponse = FinishRidesModel.fromJson(response.data);
-          pastRides.addAll(jobResponse.data ?? []);
-        }
-      }
-    } catch (e) {
-      print("Error loading more past jobs: $e");
-      pastPage--;
-    } finally {
-      isLoadMore.value = false;
-    }
+    // Static UI mode - API call bypassed
   }
 
   void changeTab(int index) {
     selectedTab.value = index;
-    if (index == 0) {
-      fetchUpcomingJobs();
-    } else if (index == 1) {
-      fetchPastJobs();
-    }
   }
 
   Future<void> refreshCurrentTab() async {
-    if (selectedTab.value == 0) {
-      await fetchUpcomingJobs();
-    } else if (selectedTab.value == 1) {
-      await fetchPastJobs();
-    }
+    // Static UI mode - API call bypassed
   }
 }

@@ -19,7 +19,6 @@ class DealsController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    fetchDeals();
     scrollController.addListener(_onScroll);
   }
 

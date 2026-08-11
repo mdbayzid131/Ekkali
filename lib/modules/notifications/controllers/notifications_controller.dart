@@ -18,7 +18,8 @@ class NotificationController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    loadMuteAndDeletedStates().then((_) => fetchNotifications());
+    notifications.assignAll(_getDemoNotifications());
+    loadMuteAndDeletedStates();
   }
 
   Future<void> loadMuteAndDeletedStates() async {
