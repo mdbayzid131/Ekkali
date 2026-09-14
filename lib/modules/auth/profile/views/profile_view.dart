@@ -278,7 +278,7 @@ class ProfileView extends StatelessWidget {
                         _buildSettingTile(
                           icon: Icons.workspace_premium_outlined,
                           title: "Ekkali Premium Subscription",
-                          subtitle: "Yearly plan (\$29/Yr) & benefits",
+                          subtitle: "Yearly plan & benefits",
                           iconColor: const Color(0xFFFEDB9B),
                           titleColor: const Color(0xFFFEDB9B),
                           onTap: () {
