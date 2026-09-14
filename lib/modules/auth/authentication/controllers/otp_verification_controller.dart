@@ -102,14 +102,29 @@ class OtpController extends GetxController {
           return;
         }
 
-        // ─── Registration Flow ───
         final rawData = response.data?['data'];
         final Map<String, dynamic> authData =
             rawData is Map<String, dynamic> ? rawData : {};
         final bool isApproved = authData['isApproved'] == true;
         final bool isOnboard = authData['isOnboard'] == true;
+        final String appState =
+            (authData['appState'] ?? '').toString().toUpperCase();
+        final String rejectionReason =
+            authData['rejectionReason']?.toString() ?? '';
 
-        if (isApproved) {
+        if (appState == 'REJECTED') {
+          Get.offAllNamed(
+            Routes.applicationNotApprovedView,
+            arguments: {
+              'reason': rejectionReason.isNotEmpty
+                  ? rejectionReason
+                  : 'Incomplete documents or vehicle not meeting standards',
+              'title': 'Application Not Approved',
+              'description':
+                  "Unfortunately, we couldn't approve your application at this time.",
+            },
+          );
+        } else if (isApproved) {
           Get.offAllNamed(Routes.bottomNabbarView);
         } else if (!isOnboard) {
           Get.offAllNamed(Routes.vehicleinformationView);

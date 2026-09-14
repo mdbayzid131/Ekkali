@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:moeb_26/config/constants/icon_paths.dart';
+import 'package:moeb_26/config/routes/app_pages.dart';
 import 'package:moeb_26/core/widgets/CustomText.dart';
 import 'package:moeb_26/core/widgets/CustomTextGary.dart';
 import '../../../../core/widgets/Contact_support_popup.dart';
@@ -87,6 +88,17 @@ class ApplicationNotApprovedView extends StatelessWidget {
                     showContactSupportBottomSheet();
                   },
                 ),
+                SizedBox(height: 14.h),
+                CustomButton(
+                  text: "Back to Sign In",
+                  backgroundColor: Colors.transparent,
+                  borderColor: const Color(0xFF3B4453),
+                  textColor: Colors.white,
+                  onPressed: () {
+                    Get.offAllNamed(Routes.signinView);
+                  },
+                ),
+                SizedBox(height: 20.h),
               ],
             ),
           ),

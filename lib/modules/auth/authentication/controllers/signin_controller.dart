@@ -37,8 +37,28 @@ class SigninController extends GetxController {
         final authData = response.data?['data'] ?? {};
         final bool isApproved = authData['isApproved'] == true;
         final bool isOnboard = authData['isOnboard'] == true;
+        final String appState =
+            (authData['appState'] ?? '').toString().toUpperCase();
+        final String rejectionReason =
+            authData['rejectionReason']?.toString() ?? '';
 
-        if (isApproved) {
+        if (appState == 'REJECTED') {
+          Helpers.showCustomSnackBar(
+            'Your application has been rejected',
+            isError: true,
+          );
+          Get.offAllNamed(
+            Routes.applicationNotApprovedView,
+            arguments: {
+              'reason': rejectionReason.isNotEmpty
+                  ? rejectionReason
+                  : 'Incomplete documents or vehicle not meeting standards',
+              'title': 'Application Not Approved',
+              'description':
+                  "Unfortunately, we couldn't approve your application at this time.",
+            },
+          );
+        } else if (isApproved) {
           Helpers.showCustomSnackBar('Login successful', isError: false);
           Get.offAllNamed(Routes.bottomNabbarView);
         } else if (!isOnboard) {
