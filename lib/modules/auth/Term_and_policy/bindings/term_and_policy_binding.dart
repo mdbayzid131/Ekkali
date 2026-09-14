@@ -4,6 +4,6 @@ import 'package:moeb_26/modules/auth/Term_and_policy/controller/legal_content_co
 class TermPolicyBinding extends Bindings {
   @override
   void dependencies() {
-    Get.lazyPut(() => LegalContentController());
+    Get.lazyPut(() => LegalContentController(), fenix: true);
   }
 }

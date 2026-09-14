@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:moeb_26/modules/auth/Term_and_policy/controller/legal_content_controller.dart';
 import 'package:moeb_26/modules/auth/authentication/controllers/change_pass_controller.dart';
 import 'package:moeb_26/modules/auth/authentication/controllers/forget_password_controller.dart';
 import 'package:moeb_26/modules/auth/authentication/controllers/otp_verification_controller.dart';
@@ -17,5 +18,6 @@ class AuthBinding extends Bindings {
     Get.lazyPut(() => ResetPasswordController(), fenix: true);
     Get.lazyPut(() => ForgotPasswordController(), fenix: true);
     Get.lazyPut(() => SigninController(), fenix: true);
+    Get.lazyPut(() => LegalContentController(), fenix: true);
   }
 }

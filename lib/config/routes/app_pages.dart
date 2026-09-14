@@ -199,7 +199,7 @@ class Routes {
       name: termPolicyView,
       page: () => TermPolicyView(),
       transition: Transition.noTransition,
-      binding: AuthBinding(),
+      binding: TermPolicyBinding(),
     ),
     GetPage(
       name: applicationSubmitedView,

@@ -130,20 +130,41 @@ class ProfileController extends GetxController {
     }
   }
 
+  /// Refresh all profile-related data (User profile, Vehicles, Service areas, Legal pages)
+  Future<void> refreshProfile() async {
+    await Future.wait([
+      fetchUserProfile(),
+      fetchVehicles(),
+      fetchServiceAreas(),
+      fetchLegalPages(),
+    ]);
+  }
+
   Future<void> fetchLegalPages() async {
     isLegalsLoading.value = true;
     try {
       var response = await _profileService.getLegals();
-      if (response.statusCode == 200) {
-        var dataList = response.data['data'] as List;
-        legalPages.value = dataList
-            .map(
-              (item) => {
-                'slug': item['slug'].toString(),
-                'title': item['title'].toString(),
-              },
-            )
-            .toList();
+      if (response.statusCode == 200 && response.data != null) {
+        var rawData = response.data['data'];
+        if (rawData is List) {
+          legalPages.value = rawData
+              .map(
+                (item) {
+                  final title = item['title']?.toString() ?? '';
+                  final slug = (item['slug'] != null &&
+                          item['slug'].toString().isNotEmpty)
+                      ? item['slug'].toString()
+                      : (item['_id']?.toString() ??
+                          title.toLowerCase().replaceAll(' ', '-'));
+                  return {
+                    'id': item['_id']?.toString() ?? '',
+                    'slug': slug,
+                    'title': title,
+                  };
+                },
+              )
+              .toList();
+        }
       }
     } catch (e) {
       debugPrint("Error fetching legal pages: $e");

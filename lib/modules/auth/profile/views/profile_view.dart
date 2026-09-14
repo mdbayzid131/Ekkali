@@ -28,9 +28,7 @@ class ProfileView extends StatelessWidget {
       ),
       body: SafeArea(
         child: RefreshIndicator(
-          onRefresh: () async {
-            await controller.fetchUserProfile();
-          },
+          onRefresh: () => controller.refreshProfile(),
           color: AppColors.primaryColor,
           backgroundColor: Colors.black,
           child: Obx(() {
