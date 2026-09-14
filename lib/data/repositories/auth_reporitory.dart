@@ -10,20 +10,6 @@ class AuthRepo {
   final ApiClient apiClient;
   AuthRepo({required this.apiClient});
 
-  // Future<String> getDeviceId() async {
-  //   final deviceInfo = DeviceInfoPlugin();
-  //
-  //   if (Platform.isAndroid) {
-  //     final androidInfo = await deviceInfo.androidInfo;
-  //     return androidInfo.id; // অথবা androidInfo.device, androidInfo.model
-  //   } else if (Platform.isIOS) {
-  //     final iosInfo = await deviceInfo.iosInfo;
-  //     return iosInfo.identifierForVendor ?? "unknown";
-  //   } else {
-  //     return "unsupported";
-  //   }
-  // }
-
   /// ===================== SIGNUP (CLEAN & SIMPLE) =====================
   Future<Response<dynamic>> signup({
     required String name,
@@ -46,168 +32,111 @@ class AuthRepo {
   }
 
   /// ===================== VEHICLE SETUP (SEPARATE API) =====================
+  Future<FormData> _buildVehicleFormData(VehicleModel v, int index) async {
+    final formData = FormData();
+    final make = v.makeController.text.trim();
+    final model = v.modelController.text.trim();
+    final makeAndModel = make.isNotEmpty && model.isNotEmpty
+        ? '$make $model'
+        : (make.isNotEmpty ? make : model);
+    final rawPlate = v.licensePlateController.text
+        .replaceAll('-', '')
+        .replaceAll(' ', '');
+
+    final vehicleData = {
+      "makeAndModel": makeAndModel.isEmpty
+          ? 'Vehicle ${index + 1}'
+          : makeAndModel,
+      "year": int.tryParse(v.yearController.text) ?? 2023,
+      "licensePlate": v.licensePlateController.text.trim(),
+      "type": v.selectedVehicleType.value.isEmpty
+          ? 'Sedan'
+          : v.selectedVehicleType.value,
+      "colorInside": v.colorInsideController.text.trim(),
+      "colorOutside": v.colorOutsideController.text.trim(),
+      "licensePlateRaw": rawPlate.isEmpty
+          ? v.licensePlateController.text.trim()
+          : rawPlate,
+      "vehicleRegistrationExpiryDate": _formatDateToIso(
+        v.vehicleRegistrationExpireController.text,
+      ),
+      "commercialInsuranceExpiryDate": _formatDateToIso(
+        v.commercialInsuranceExpireController.text,
+      ),
+    };
+
+    formData.fields.add(MapEntry('data', jsonEncode(vehicleData)));
+
+    if (v.vehicleRegistrationFile.value != null) {
+      formData.files.add(
+        MapEntry(
+          'vehicleRegistrationImage',
+          await MultipartFile.fromFile(v.vehicleRegistrationFile.value!.path),
+        ),
+      );
+    }
+    if (v.commercialInsuranceFile.value != null) {
+      formData.files.add(
+        MapEntry(
+          'commercialInsuranceImage',
+          await MultipartFile.fromFile(v.commercialInsuranceFile.value!.path),
+        ),
+      );
+    }
+    if (v.frontViewFile.value != null) {
+      formData.files.add(
+        MapEntry(
+          'vehiclePhotoFront',
+          await MultipartFile.fromFile(v.frontViewFile.value!.path),
+        ),
+      );
+    }
+    if (v.rearViewFile.value != null) {
+      formData.files.add(
+        MapEntry(
+          'vehiclePhotoRear',
+          await MultipartFile.fromFile(v.rearViewFile.value!.path),
+        ),
+      );
+    }
+    if (v.interiorViewFile.value != null) {
+      formData.files.add(
+        MapEntry(
+          'vehiclePhotoInterior',
+          await MultipartFile.fromFile(v.interiorViewFile.value!.path),
+        ),
+      );
+    }
+
+    return formData;
+  }
+
   Future<Response<dynamic>> addVehicle({
     required List<VehicleModel> vehicles,
   }) async {
-    final formData = FormData();
+    Response<dynamic>? lastResponse;
 
-    if (vehicles.length == 1) {
-      final v = vehicles.first;
-      final make = v.makeController.text.trim();
-      final model = v.modelController.text.trim();
-      final makeAndModel = make.isNotEmpty && model.isNotEmpty
-          ? '$make $model'
-          : (make.isNotEmpty ? make : model);
-      final rawPlate = v.licensePlateController.text
-          .replaceAll('-', '')
-          .replaceAll(' ', '');
+    for (int i = 0; i < vehicles.length; i++) {
+      final formData = await _buildVehicleFormData(vehicles[i], i);
+      final response = await apiClient.postData(
+        ApiConstants.vehicles,
+        formData,
+      );
+      lastResponse = response;
 
-      final vehicleData = {
-        "makeAndModel": makeAndModel.isEmpty ? 'Vehicle 1' : makeAndModel,
-        "year": int.tryParse(v.yearController.text) ?? 2023,
-        "licensePlate": v.licensePlateController.text,
-        "type": v.selectedVehicleType.value.isEmpty
-            ? 'Sedan'
-            : v.selectedVehicleType.value,
-        "colorInside": v.colorInsideController.text,
-        "colorOutside": v.colorOutsideController.text,
-        "licensePlateRaw":
-            rawPlate.isEmpty ? v.licensePlateController.text : rawPlate,
-        "vehicleRegistrationExpiryDate":
-            v.vehicleRegistrationExpireController.text,
-        "commercialInsuranceExpiryDate":
-            v.commercialInsuranceExpireController.text,
-      };
-
-      formData.fields.add(MapEntry('data', jsonEncode(vehicleData)));
-
-      if (v.vehicleRegistrationFile.value != null) {
-        formData.files.add(
-          MapEntry(
-            'vehicleRegistrationImage',
-            await MultipartFile.fromFile(
-              v.vehicleRegistrationFile.value!.path,
-            ),
-          ),
-        );
+      final code = response.statusCode ?? 0;
+      final isSuccess =
+          (code >= 200 && code < 300) || response.data?['success'] == true;
+      if (!isSuccess) {
+        return response;
       }
-      if (v.commercialInsuranceFile.value != null) {
-        formData.files.add(
-          MapEntry(
-            'commercialInsuranceImage',
-            await MultipartFile.fromFile(
-              v.commercialInsuranceFile.value!.path,
-            ),
-          ),
-        );
-      }
-      if (v.frontViewFile.value != null) {
-        formData.files.add(
-          MapEntry(
-            'vehiclePhotoFront',
-            await MultipartFile.fromFile(v.frontViewFile.value!.path),
-          ),
-        );
-      }
-      if (v.rearViewFile.value != null) {
-        formData.files.add(
-          MapEntry(
-            'vehiclePhotoRear',
-            await MultipartFile.fromFile(v.rearViewFile.value!.path),
-          ),
-        );
-      }
-      if (v.interiorViewFile.value != null) {
-        formData.files.add(
-          MapEntry(
-            'vehiclePhotoInterior',
-            await MultipartFile.fromFile(v.interiorViewFile.value!.path),
-          ),
-        );
-      }
-    } else {
-      // Multiple vehicles sent in ONE single API request (Scenario 5.3B)
-      final List<Map<String, dynamic>> vehiclesJson = [];
-
-      for (int i = 0; i < vehicles.length; i++) {
-        final v = vehicles[i];
-        final make = v.makeController.text.trim();
-        final model = v.modelController.text.trim();
-        final makeAndModel = make.isNotEmpty && model.isNotEmpty
-            ? '$make $model'
-            : (make.isNotEmpty ? make : model);
-        final rawPlate = v.licensePlateController.text
-            .replaceAll('-', '')
-            .replaceAll(' ', '');
-
-        vehiclesJson.add({
-          "makeAndModel":
-              makeAndModel.isEmpty ? 'Vehicle ${i + 1}' : makeAndModel,
-          "year": int.tryParse(v.yearController.text) ?? 2023,
-          "licensePlate": v.licensePlateController.text,
-          "type": v.selectedVehicleType.value.isEmpty
-              ? 'Sedan'
-              : v.selectedVehicleType.value,
-          "colorInside": v.colorInsideController.text,
-          "colorOutside": v.colorOutsideController.text,
-          "licensePlateRaw":
-              rawPlate.isEmpty ? v.licensePlateController.text : rawPlate,
-          "vehicleRegistrationExpiryDate":
-              v.vehicleRegistrationExpireController.text,
-          "commercialInsuranceExpiryDate":
-              v.commercialInsuranceExpireController.text,
-        });
-
-        if (v.vehicleRegistrationFile.value != null) {
-          formData.files.add(
-            MapEntry(
-              'vehicleRegistrationImage',
-              await MultipartFile.fromFile(
-                v.vehicleRegistrationFile.value!.path,
-              ),
-            ),
-          );
-        }
-        if (v.commercialInsuranceFile.value != null) {
-          formData.files.add(
-            MapEntry(
-              'commercialInsuranceImage',
-              await MultipartFile.fromFile(
-                v.commercialInsuranceFile.value!.path,
-              ),
-            ),
-          );
-        }
-        if (v.frontViewFile.value != null) {
-          formData.files.add(
-            MapEntry(
-              'vehiclePhotoFront',
-              await MultipartFile.fromFile(v.frontViewFile.value!.path),
-            ),
-          );
-        }
-        if (v.rearViewFile.value != null) {
-          formData.files.add(
-            MapEntry(
-              'vehiclePhotoRear',
-              await MultipartFile.fromFile(v.rearViewFile.value!.path),
-            ),
-          );
-        }
-        if (v.interiorViewFile.value != null) {
-          formData.files.add(
-            MapEntry(
-              'vehiclePhotoInterior',
-              await MultipartFile.fromFile(v.interiorViewFile.value!.path),
-            ),
-          );
-        }
-      }
-
-      formData.fields.add(MapEntry('data', jsonEncode(vehiclesJson)));
     }
 
-    return await apiClient.postData(ApiConstants.vehicles, formData);
+    return lastResponse ??
+        Response(
+          requestOptions: RequestOptions(path: ApiConstants.vehicles),
+          statusCode: 200,
+        );
   }
 
   String _formatDateToIso(String dateStr) {
@@ -234,19 +163,14 @@ class AuthRepo {
   }) async {
     final formData = FormData();
 
-    final Map<String, dynamic> docMap = {
-      "documentType": documentType,
-    };
+    final Map<String, dynamic> docMap = {"documentType": documentType};
     if (expiryDate != null && expiryDate.trim().isNotEmpty) {
       docMap["expiryDate"] = _formatDateToIso(expiryDate);
     }
 
     formData.fields.add(MapEntry('data', jsonEncode(docMap)));
     formData.files.add(
-      MapEntry(
-        'file',
-        await MultipartFile.fromFile(file.path),
-      ),
+      MapEntry('file', await MultipartFile.fromFile(file.path)),
     );
 
     return await apiClient.postData(ApiConstants.documents, formData);
@@ -330,9 +254,7 @@ class AuthRepo {
 
   /// ===================== RESEND OTP =====================
   Future<Response> resentOtp({required String email}) async {
-    return await apiClient.postData(ApiConstants.resendOtp, {
-      "email": email,
-    });
+    return await apiClient.postData(ApiConstants.resendOtp, {"email": email});
   }
 
   Future<Response> resendOtp({required String email}) async {
