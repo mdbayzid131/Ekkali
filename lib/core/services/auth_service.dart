@@ -42,7 +42,6 @@ class AuthService extends GetxService {
     required String serviceAreaId,
     required String companyName,
     required String companyRole,
-    List<String>? languages,
   }) async {
     return await _authRepo.signup(
       name: name,
@@ -52,7 +51,6 @@ class AuthService extends GetxService {
       serviceAreaId: serviceAreaId,
       companyName: companyName,
       companyRole: companyRole,
-      languages: languages,
     );
   }
 
@@ -223,10 +221,12 @@ class AuthService extends GetxService {
         }
       }
 
-      // 4. Sync subscription status for the newly logged-in user
+      // 4. Sync subscription status for the newly logged-in user (only if approved and onboarded)
       try {
-        if (Get.isRegistered<SubscriptionService>()) {
-          Get.find<SubscriptionService>().syncStatusWithBackend();
+        if (isApproved && isOnboard) {
+          if (Get.isRegistered<SubscriptionService>()) {
+            Get.find<SubscriptionService>().syncStatusWithBackend();
+          }
         }
       } catch (_) {}
     } catch (e) {

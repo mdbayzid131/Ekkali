@@ -70,13 +70,6 @@ class SplashScreenController extends GetxController {
       StorageConstants.bearerToken,
     );
     if (accessToken.isNotEmpty) {
-      // Sync subscription status with backend for logged in user
-      try {
-        if (Get.isRegistered<SubscriptionService>()) {
-          Get.find<SubscriptionService>().syncStatusWithBackend();
-        }
-      } catch (_) {}
-
       final bool? isApproved = await StorageService.getBool(
         StorageConstants.isApproved,
       );
@@ -85,6 +78,12 @@ class SplashScreenController extends GetxController {
       );
 
       if (isApproved == true) {
+        // Sync subscription status with backend for approved user
+        try {
+          if (Get.isRegistered<SubscriptionService>()) {
+            Get.find<SubscriptionService>().syncStatusWithBackend();
+          }
+        } catch (_) {}
         Get.offAllNamed(Routes.bottomNabbarView);
       } else if (isOnboard == false) {
         Get.offAllNamed(Routes.vehicleinformationView);

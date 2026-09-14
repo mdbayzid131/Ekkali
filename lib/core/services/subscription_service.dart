@@ -391,6 +391,15 @@ class SubscriptionService extends GetxService {
         return;
       }
 
+      final isApproved = await StorageService.getBool(StorageConstants.isApproved);
+      final isOnboard = await StorageService.getBool(StorageConstants.isOnboard);
+      if (isApproved != true || isOnboard != true) {
+        debugPrint(
+          '[SubscriptionService] User is pending approval or onboarding (isApproved: $isApproved, isOnboard: $isOnboard). Skipping subscription status sync.',
+        );
+        return;
+      }
+
       final response = await _repo.getSubscriptionStatus();
       if (response.statusCode == 200 && response.data != null) {
         final statusModel = SubscriptionStatusResponse.fromJson(

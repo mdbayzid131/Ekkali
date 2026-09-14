@@ -42,6 +42,9 @@ class ServiceAreaController extends GetxController {
       final token = await StorageService.getString(StorageConstants.bearerToken);
       if (token.isEmpty) return;
 
+      final isApproved = await StorageService.getBool(StorageConstants.isApproved);
+      if (isApproved != true) return;
+
       if (Get.isRegistered<UserProfileService>()) {
         final profileService = Get.find<UserProfileService>();
         profileService.getUserProfile().then((response) {

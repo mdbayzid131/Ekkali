@@ -315,7 +315,6 @@ class SignupController extends GetxController {
         serviceAreaId: selectedAreaId.value,
         companyName: companyNameController.text,
         companyRole: roleToSubmit,
-        languages: ['English'],
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {

@@ -33,7 +33,6 @@ class AuthRepo {
     required String serviceAreaId,
     required String companyName,
     required String companyRole,
-    List<String>? languages,
   }) async {
     return await apiClient.postData(ApiConstants.signup, {
       "name": name,
@@ -43,7 +42,6 @@ class AuthRepo {
       "serviceAreaId": serviceAreaId,
       "companyName": companyName,
       "companyRole": companyRole,
-      "languages": languages ?? ['English'],
     });
   }
 
