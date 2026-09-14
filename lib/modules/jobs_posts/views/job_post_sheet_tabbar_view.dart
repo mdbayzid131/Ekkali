@@ -131,6 +131,10 @@ class JobPostSheetTabBarView extends StatelessWidget {
     PostJobController controller, {
     VoidCallback? onDone,
   }) {
+    // Refresh favorite drivers & service areas to ensure latest data from backend
+    controller.fetchFavoriteDrivers();
+    controller.fetchServiceAreas();
+
     final activeTab =
         (controller.chauffeurSelectionType.value == 'favorites' ? 1 : 0).obs;
 
@@ -203,7 +207,10 @@ class JobPostSheetTabBarView extends StatelessWidget {
                   children: [
                     Expanded(
                       child: GestureDetector(
-                        onTap: () => activeTab.value = 0,
+                        onTap: () {
+                          activeTab.value = 0;
+                          controller.fetchServiceAreas();
+                        },
                         child: Container(
                           padding: EdgeInsets.symmetric(vertical: 10.h),
                           decoration: BoxDecoration(
@@ -230,7 +237,10 @@ class JobPostSheetTabBarView extends StatelessWidget {
                     SizedBox(width: 4.w),
                     Expanded(
                       child: GestureDetector(
-                        onTap: () => activeTab.value = 1,
+                        onTap: () {
+                          activeTab.value = 1;
+                          controller.fetchFavoriteDrivers();
+                        },
                         child: Container(
                           padding: EdgeInsets.symmetric(vertical: 10.h),
                           decoration: BoxDecoration(
@@ -551,13 +561,50 @@ class JobPostSheetTabBarView extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Favorite Chauffeurs',
-          style: GoogleFonts.inter(
-            fontSize: 12.sp,
-            fontWeight: FontWeight.w600,
-            color: AppColors.primaryColor,
-          ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Favorite Chauffeurs',
+              style: GoogleFonts.inter(
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w600,
+                color: AppColors.primaryColor,
+              ),
+            ),
+            Obx(
+              () => controller.isFavoriteDriversLoading.value
+                  ? SizedBox(
+                      width: 14.w,
+                      height: 14.w,
+                      child: const CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: AppColors.primaryColor,
+                      ),
+                    )
+                  : InkWell(
+                      onTap: () => controller.fetchFavoriteDrivers(),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.refresh,
+                            size: 14.sp,
+                            color: Colors.grey.shade400,
+                          ),
+                          SizedBox(width: 4.w),
+                          Text(
+                            'Refresh',
+                            style: GoogleFonts.inter(
+                              fontSize: 11.sp,
+                              color: Colors.grey.shade400,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+            ),
+          ],
         ),
         SizedBox(height: 8.h),
 

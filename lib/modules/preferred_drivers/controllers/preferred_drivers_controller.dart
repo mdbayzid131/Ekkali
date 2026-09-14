@@ -5,6 +5,7 @@ import 'package:moeb_26/core/services/api_client.dart';
 import 'package:moeb_26/core/utils/helpers.dart';
 import 'package:moeb_26/data/repositories/favorite_chauffeur_repository.dart';
 import 'package:moeb_26/data/repositories/socket_repository.dart';
+import 'package:moeb_26/modules/jobs_posts/controllers/job_post_controller.dart';
 
 class ChauffeurReviewer {
   final String id;
@@ -510,6 +511,10 @@ class PreferredDriversController extends GetxController {
             globalChauffeursList[globalIndex] = updatedChauffeur;
           }
 
+          if (Get.isRegistered<PostJobController>()) {
+            Get.find<PostJobController>().fetchFavoriteDrivers();
+          }
+
           Helpers.showCustomSnackBar(
             response.data?['message'] ??
                 "${chauffeur.name} added to your favorites!",
@@ -671,6 +676,10 @@ class PreferredDriversController extends GetxController {
         );
         if (globalIndex != -1) {
           globalChauffeursList[globalIndex] = updatedChauffeur;
+        }
+
+        if (Get.isRegistered<PostJobController>()) {
+          Get.find<PostJobController>().fetchFavoriteDrivers();
         }
 
         Helpers.showCustomSnackBar(
