@@ -66,9 +66,9 @@ class ChatDetailController extends GetxController {
 
   void setupSocket() {
     debugPrint(
-      '🔄 ChatDetailController: Setting up socket for room: chat::${chat.id}',
+      '🔄 ChatDetailController: Setting up socket for chatId: ${chat.id}',
     );
-    socketService.joinRoom('chat::${chat.id}');
+    socketService.joinChat(chat.id);
 
     _messageWorker = ever(socketService.lastReceivedMessage, (newMessage) {
       if (newMessage != null && newMessage.text.trim().isNotEmpty) {
@@ -295,7 +295,7 @@ class ChatDetailController extends GetxController {
       }
     });
     scrollController.dispose();
-    socketService.leaveRoom('chat::$closingChatId');
+    socketService.leaveChat(closingChatId);
     _messageWorker?.dispose();
     messageController.dispose();
     super.onClose();

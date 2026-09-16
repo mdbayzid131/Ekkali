@@ -1,1892 +1,227 @@
-I/ScrollIdentify(18804): on fling
-I/ScrollIdentify(18804): on fling
-I/ScrollIdentify(18804): on fling
-I/ScrollIdentify(18804): on fling
-I/Quality (18804): Skipped: false 2 cost 41.197433 refreshRate 16400613 bit true processName com.moeb26.app
-D/libMEOW (18804): meow new tls: 0xb400007c2720d5c0
-D/libMEOW (18804): applied 1 plugins for [com.moeb26.app]:
-D/libMEOW (18804):   plugin 1: [libMEOW_gift.so]: 0xb400007cd1d2f700
-D/libMEOW (18804): rebuild call chain: 0xb400007c2c4991c0
-D/libMEOW (18804): meow delete tls: 0xb400007c2720d5c0
-D/WindowManager(18804): Add to mViews: DecorView@b0f9775[ProxyBillingActivity],pkg= com.moeb26.app
-D/ViewRootImplExtImpl(18804): onDisplayChanged -1 for VRI android.view.ViewRootImpl@14f35f1
-D/InputEventReceiver(18804): Input log is disabled
-D/VRI[MainActivity](18804): onFocusEvent false
-E/OplusBracketLog(18804): [OplusViewMirrorManager] updateHostViewRootIfNeeded, not support android.view.ViewRootImpl@14f35f1
-I/libPerfCtl(18804): fbcNotifySbeRescue ret=-1
-D/BufferQueueConsumer(18804): [](id:497400000002,api:0,p:-1,c:18804) connect: controlledByApp=false
-V/ZoomWindowDecorView(18804): setLastReportedMergedConfiguration mZoomDisplayHeight: 1600 getDecorView.185571189
-D/VRI[ProxyBillingActivity](18804): registerCallbacksForSync syncBuffer=false
-D/BLASTBufferQueue(18804): [VRI[ProxyBillingActivity]#2](f:0,a:1) acquireNextBufferLocked size=720x1600 mFrameNumber=1 applyTransaction=true mTimestamp=50947611849113(auto) mPendingTransactions.size=0 graphicBufferId=80762565033992 transform=0
-D/VRI[ProxyBillingActivity](18804): Received frameCommittedCallback lastAttemptedDrawFrameNum=1 didProduceBuffer=true syncBuffer=false
-W/Parcel  (18804): Expecting binder but got null!
-D/VRI[ProxyBillingActivity](18804): draw finished.
-I/libPerfCtl(18804): fbcNotifySbeRescue ret=-1
-D/VRI[ProxyBillingActivity](18804): registerCallbacksForSync syncBuffer=false
-D/VRI[ProxyBillingActivity](18804): Received frameCommittedCallback lastAttemptedDrawFrameNum=2 didProduceBuffer=false syncBuffer=false
-D/VRI[ProxyBillingActivity](18804): draw finished.
-D/OplusScrollToTopManager(18804): com.moeb26.app/com.moeb26.app.MainActivity,This DecorView@1f6c6ab[MainActivity] change focus to false
-D/VRI[ProxyBillingActivity](18804): onFocusEvent true
-I/flutter (18804): [SubscriptionService] Purchase update: ekkali_premium_yearly | PurchaseStatus.purchased
-D/VRI[ProxyBillingActivity](18804): onFocusEvent false
-I/flutter (18804):
-I/flutter (18804): ┌ ➡️➡️➡️➡️ REQUEST ══════════════════════════════════════ ➡️➡️➡️➡️
-I/flutter (18804): │ POST https://nayem5001.binarybards.online/api/v1/subscriptions/verify-google
-I/flutter (18804): │ Headers: {Content-Type: application/json, Authorization: ***}
-I/flutter (18804): │ Body: {
-I/flutter (18804): │ Body:   "purchaseToken": "peeingdbhelbbfcddnjncpib.AO-J1OyIQcaJOcy2CqVX9oyeo2R4AMRoXcffsvh00_S7k0pQnDKb-t22VTEI9mB5nuuUfjGYgF0ZkLT_oEDeMlo9Yh8cFEqKRA",
-I/flutter (18804): │ Body:   "productId": "ekkali_premium_yearly",
-I/flutter (18804): │ Body:   "orderId": "GPA.3356-8034-0097-81501"
-I/flutter (18804): │ Body: }
-I/flutter (18804): └ ➡️➡️➡️➡️ REQUEST ══════════════════════════════════════ ➡️➡️➡️➡️
-I/flutter (18804):
-D/VRI[MainActivity](18804): onFocusEvent true
-I/flutter (18804): 📱 SocketService: App resumed, checking connection...
-D/VRI[ProxyBillingActivity](18804): setWindowStopped stopped:true
-D/OplusScrollToTopManager(18804): com.moeb26.app/com.android.billingclient.api.ProxyBillingActivity,window dying
-D/OplusScrollToTopManager(18804): com.moeb26.app/com.android.billingclient.api.ProxyBillingActivity,unregisterSystemUIBroadcastReceiver
-D/OplusScrollToTopManager(18804): com.moeb26.app/com.android.billingclient.api.ProxyBillingActivity, unregisterSystemUIBroadcastReceiver failed java.lang.IllegalArgumentException: Receiver not registered: android.view.OplusScrollToTopManager$2@e389ae
-V/ZoomWindowDecorView(18804): removeZoomView
-D/OpenGLRenderer(18804): RenderProxy::destroy: this=0xb400007c27936600, mContext=0xb400007c2c499080
-D/OpenGLRenderer(18804): SkiaOpenGLPipeline::setSurface: this=0xb400007ce5389c00, surface=NULL
-D/VRI[ProxyBillingActivity](18804): dispatchAppVisibility visible:false
-D/BLASTBufferQueue(18804): [VRI[ProxyBillingActivity]#2](f:0,a:1) destructor()
-D/BufferQueueConsumer(18804): [VRI[ProxyBillingActivity]#2(BLAST Consumer)2](id:497400000002,api:0,p:-1,c:18804) disconnect
-I/Quality (18804): Skipped: false 1 cost 21.931553 refreshRate 17459795 bit true processName com.moeb26.app
-D/OplusScrollToTopManager(18804): com.moeb26.app/com.moeb26.app.MainActivity,This DecorView@1f6c6ab[MainActivity] change focus to true
-I/flutter (18804):
-I/flutter (18804): ┌ ✅✅✅✅ RESPONSE ══════════════════════════════════════ ✅✅✅✅
-I/flutter (18804): │ [ POST 200] https://nayem5001.binarybards.online/api/v1/subscriptions/verify-google
-I/flutter (18804): │ {
-I/flutter (18804): │   "success": true,
-I/flutter (18804): │   "message": "Subscription verified successfully",
-I/flutter (18804): │   "data": {
-I/flutter (18804): │     "isPremium": true,
-I/flutter (18804): │     "expiresAt": "2026-09-06T05:39:32.141Z",
-I/flutter (18804): │     "productId": "ekkali_premium_yearly",
-I/flutter (18804): │     "platform": "android",
-I/flutter (18804): │     "orderId": "GPA.3356-8034-0097-81501"
-I/flutter (18804): │   }
-I/flutter (18804): │ }
-I/flutter (18804): └ ✅✅✅✅ RESPONSE ══════════════════════════════════════ ✅✅✅│
-I/flutter (18804):
-I/ScrollIdentify(18804): on fling
-I/ScrollIdentify(18804): on fling
-I/ScrollIdentify(18804): on fling
-I/ScrollIdentify(18804): on fling
-I/ScrollIdentify(18804): on fling
-I/ScrollIdentify(18804): on fling
-I/ScrollIdentify(18804): on fling
-I/ScrollIdentify(18804): on fling
-I/ScrollIdentify(18804): on fling
-I/ScrollIdentify(18804): on fling
-[GETX] CLOSE TO ROUTE /SubscriptionView
-I/Quality (18804): Skipped: false 5 cost 93.70382 refreshRate 16810803 bit true processName com.moeb26.app
-[GETX] "SubscriptionController" onDelete() called
-[GETX] "SubscriptionController" deleted from memory
-I/ScrollIdentify(18804): on fling
-[GETX] GOING TO ROUTE /PersonalInformationView
-W/OnBackInvokedCallback(18804): OnBackInvokedCallback is not enabled for the application.
-W/OnBackInvokedCallback(18804): Set 'android:enableOnBackInvokedCallback="true"' in the application manifest.
-D/OplusSystemUINavigationGesture(18804): [GESTURE_SIDE_BAR] swipe from 1
-D/OplusSystemUINavigationGesture(18804): [GESTURE_SIDE_BAR] Hit Side Bar Region !
-[GETX] CLOSE TO ROUTE /PersonalInformationView
-[GETX] Instance "BookingController" has been created
-[GETX] Instance "JobRepo" has been created
-[GETX] Instance "BookingController" has been initialized
-I/Quality (18804): Skipped: false 1 cost 28.567951 refreshRate 16401964 bit true processName com.moeb26.app
-I/flutter (18804):
-I/flutter (18804): ┌ ➡️➡️➡️➡️ REQUEST ══════════════════════════════════════ ➡️➡️➡️➡️
-I/flutter (18804): │ GET https://nayem5001.binarybards.online/api/v1/jobs/my-jobs?limit=10
-I/flutter (18804): │ Headers: {Content-Type: application/json, Authorization: ***}
-I/flutter (18804): │ Query: {limit: 10}
-I/flutter (18804): └ ➡️➡️➡️➡️ REQUEST ══════════════════════════════════════ ➡️➡️➡️➡️
-I/flutter (18804): 
-I/flutter (18804):
-I/flutter (18804): ┌ ➡️➡️➡️➡️ REQUEST ══════════════════════════════════════ ➡️➡️➡️➡️
-I/flutter (18804): │ GET https://nayem5001.binarybards.online/api/v1/jobs
-I/flutter (18804): │ Headers: {Content-Type: application/json, Authorization: ***}
-I/flutter (18804): └ ➡️➡️➡️➡️ REQUEST ══════════════════════════════════════ ➡️➡️➡️➡️
-I/flutter (18804): 
-I/flutter (18804):
-I/flutter (18804): ┌ ➡️➡️➡️➡️ REQUEST ══════════════════════════════════════ ➡️➡️➡️➡️
-I/flutter (18804): │ GET https://nayem5001.binarybards.online/api/v1/jobs
-I/flutter (18804): │ Headers: {Content-Type: application/json, Authorization: ***}
-I/flutter (18804): └ ➡️➡️➡️➡️ REQUEST ══════════════════════════════════════ ➡️➡️➡️➡️
-I/flutter (18804): 
-I/flutter (18804):
-I/flutter (18804): ┌ ✅✅✅✅ RESPONSE ══════════════════════════════════════ ✅✅✅✅
-I/flutter (18804): │ [ GET 200] https://nayem5001.binarybards.online/api/v1/jobs
-I/flutter (18804): │ {
-I/flutter (18804): │   "success": true,
-I/flutter (18804): │   "message": "Jobs retrieved successfully",
-I/flutter (18804): │   "cursor": {
-I/flutter (18804): │     "nextCursor": null,
-I/flutter (18804): │     "hasMore": false,
-I/flutter (18804): │     "limit": 10
-I/flutter (18804): │   },
-I/flutter (18804): │   "data": []
-I/flutter (18804): │ }
-I/flutter (18804): └ ✅✅✅✅ RESPONSE ══════════════════════════════════════ ✅✅✅│
-I/flutter (18804): 
-I/flutter (18804):
-I/flutter (18804): ┌ ✅✅✅✅ RESPONSE ══════════════════════════════════════ ✅✅✅✅
-I/flutter (18804): │ [ GET 200] https://nayem5001.binarybards.online/api/v1/jobs/my-jobs?limit=10
-I/flutter (18804): │ {
-I/flutter (18804): │   "success": true,
-I/flutter (18804): │   "message": "My jobs retrieved successfully",
-I/flutter (18804): │   "cursor": {
-I/flutter (18804): │     "nextCursor": "eyJfaWQiOiI2YTk1NTY5YmEyNzFmNzZjNmNlMTc5NTIifQ",
-I/flutter (18804): │     "hasMore": true,
-I/flutter (18804): │     "limit": 10
-I/flutter (18804): │   },
-I/flutter (18804): │   "data": [
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569ca271f76c6ce17a1a",
-I/flutter (18804): │       "jobType": "ONE WAY",
-I/flutter (18804): │       "pickup": "Four Seasons Hotel at The Surf Club (9011 Collins Ave)",
-I/flutter (18804): │       "dropoff": "Fort Lauderdale-Hollywood Int Airport (FLL), Sheltair FBO",
-I/flutter (18804): │       "asap": false,
-I/flutter (18804): │       "date": "2026-09-02T10:25:32.186Z",
-I/flutter (18804): │       "time": "16:00",
-I/flutter (18804): │       "vehicleType": "SUV",
-I/flutter (18804): │       "paymentAmount": 260,
-I/flutter (18804): │       "paymentType": "CREDIT CARD ON FILE",
-I/flutter (18804): │       "paymentStatus": "UNPAID",
-I/flutter (18804): │       "flightNumber": "PRIVATE-G650",
-I/flutter (18804): │       "instruction": "FBO departure. Greet family at Surf Club private entrance.",
-I/flutter (18804): │       "serviceArea": "Miami South Florida",
-I/flutter (18804): │       "companyName": "Palm Beach Luxury Transport",
-I/flutter (18804): │       "dispatchType": "ALL CHAUFFEURS",
-I/flutter (18804): │       "isPersonalNote": false,
-I/flutter (18804): │       "passengerName": null,
-I/flutter (18804): │       "passengerPhone": null,
-I/flutter (18804): │       "status": "PENDING",
-I/flutter (18804): │       "rideStatus": null,
-I/flutter (18804): │       "applicantCount": 1,
-I/flutter (18804): │       "applicant": {
-I/flutter (18804): │         "_id": "6a955698a271f76c6ce17608",
-I/flutter (18804): │         "name": "Carlos Mendez",
-I/flutter (18804): │         "nickname": "Carlos",
-I/flutter (18804): │         "email": "carlos.mendez@chauffeur.com",
-I/flutter (18804): │         "phone": "+13055551008",
-I/flutter (18804): │         "company": "South Beach Executive Chauffeurs",
-I/flutter (18804): │         "companyRole": "Chauffeur",
-I/flutter (18804): │         "profilePicture": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400",
-I/flutter (18804): │         "selectedVehicle": "6a955698a271f76c6ce1760b",
-I/flutter (18804): │         "averageRating": 4.9,
-I/flutter (18804): │         "totalReviews": 7
-I/flutter (18804): │       },
-I/flutter (18804): │       "assignedTo": null,
-I/flutter (18804): │       "hasReview": false,
-I/flutter (18804): │       "isReviewedByCreator": false,
-I/flutter (18804): │       "isReviewedByDriver": false,
-I/flutter (18804): │       "createdAt": "2026-08-31T10:25:32.331Z",
-I/flutter (18804): │       "updatedAt": "2026-08-31T10:25:32.331Z"
-I/flutter (18804): │     },
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569ca271f76c6ce17a12",
-I/flutter (18804): │       "jobType": "BY THE HOUR",
-I/flutter (18804): │       "pickup": "Fisher Island Ferry Terminal, VIP Slip",
-I/flutter (18804): │       "dropoff": "Hard Rock Stadium VIP Lounge (Multi-Stop F1 Event)",
-I/flutter (18804): │       "asap": false,
-I/flutter (18804): │       "date": "2026-09-03T10:25:32.186Z",
-I/flutter (18804): │       "time": "11:30",
-I/flutter (18804): │       "vehicleType": "Van",
-I/flutter (18804): │       "paymentAmount": 650,
-I/flutter (18804): │       "paymentType": "CREDIT CARD ON FILE",
-I/flutter (18804): │       "paymentStatus": "UNPAID",
-I/flutter (18804): │       "instruction": "Miami Grand Prix corporate executive group transfer. 6 hours VIP van standby with refreshments.",
-I/flutter (18804): │       "serviceArea": "Miami South Florida",
-I/flutter (18804): │       "companyName": "Palm Beach Luxury Transport",
-I/flutter (18804): │       "dispatchType": "ALL CHAUFFEURS",
-I/flutter (18804): │       "isPersonalNote": false,
-I/flutter (18804): │       "passengerName": null,
-I/flutter (18804): │       "passengerPhone": null,
-I/flutter (18804): │       "status": "ASSIGNED",
-I/flutter (18804): │       "rideStatus": "PENDING",
-I/flutter (18804): │       "applicantCount": 0,
-I/flutter (18804): │       "applicant": null,
-I/flutter (18804): │       "assignedTo": {
-I/flutter (18804): │         "_id": "6a955697a271f76c6ce17591",
-I/flutter (18804): │         "name": "Isabella Gomez",
-I/flutter (18804): │         "nickname": "Bella",
-I/flutter (18804): │         "email": "isabella.gomez@chauffeur.com",
-I/flutter (18804): │         "phone": "+13055551006",
-I/flutter (18804): │         "company": "Biscayne VIP Transport",
-I/flutter (18804): │         "companyRole": "Chauffeur",
-I/flutter (18804): │         "profilePicture": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400",
-I/flutter (18804): │         "selectedVehicle": "6a955697a271f76c6ce17594",
-I/flutter (18804): │         "averageRating": 4.9,
-I/flutter (18804): │         "totalReviews": 7
-I/flutter (18804): │       },
-I/flutter (18804): │       "hasReview": false,
-I/flutter (18804): │       "isReviewedByCreator": false,
-I/flutter (18804): │       "isReviewedByDriver": false,
-I/flutter (18804): │       "createdAt": "2026-08-31T10:25:32.317Z",
-I/flutter (18804): │       "updatedAt": "2026-09-01T14:52:56.489Z"
-I/flutter (18804): │     },
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569ca271f76c6ce1799d",
-I/flutter (18804): │       "jobType": "BY THE HOUR",
-I/flutter (18804): │       "pickup": "Four Seasons Hotel Downtown, 27 Barclay St",
-I/flutter (18804): │       "dropoff": "Teterboro Airport, Jet Aviation FBO",
-I/flutter (18804): │       "asap": false,
-I/flutter (18804): │       "date": "2026-08-15T10:25:31.894Z",
-I/flutter (18804): │       "time": "10:30",
-I/flutter (18804): │       "vehicleType": "Sedan",
-I/flutter (18804): │       "paymentAmount": 260,
-I/flutter (18804): │       "paymentType": "CREDIT CARD ON FILE",
-I/flutter (18804): │       "paymentStatus": "UNPAID",
-I/flutter (18804): │       "serviceArea": "Miami, FL",
-I/flutter (18804): │       "companyName": "Palm Beach Luxury Transport",
-I/flutter (18804): │       "dispatchType": "ALL CHAUFFEURS",
-I/flutter (18804): │       "isPersonalNote": false,
-I/flutter (18804): │       "passengerName": "VIP Executive Guest",
-I/flutter (18804): │       "passengerPhone": "+12125550199",
-I/flutter (18804): │       "status": "COMPLETED",
-I/flutter (18804): │       "rideStatus": "FINISHED",
-I/flutter (18804): │       "applicantCount": 0,
-I/flutter (18804): │       "applicant": null,
-I/flutter (18804): │       "assignedTo": {
-I/flutter (18804): │         "_id": "6a955698a271f76c6ce17608",
-I/flutter (18804): │         "name": "Carlos Mendez",
-I/flutter (18804): │         "nickname": "Carlos",
-I/flutter (18804): │         "email": "carlos.mendez@chauffeur.com",
-I/flutter (18804): │         "phone": "+13055551008",
-I/flutter (18804): │         "company": "South Beach Executive Chauffeurs",
-I/flutter (18804): │         "companyRole": "Chauffeur",
-I/flutter (18804): │         "profilePicture": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400",
-I/flutter (18804): │         "selectedVehicle": "6a955698a271f76c6ce1760b",
-I/flutter (18804): │         "averageRating": 4.9,
-I/flutter (18804): │         "totalReviews": 7
-I/flutter (18804): │       },
-I/flutter (18804): │       "hasReview": true,
-I/flutter (18804): │       "isReviewedByCreator": true,
-I/flutter (18804): │       "isReviewedByDriver": true,
-I/flutter (18804): │       "createdAt": "2026-08-31T10:25:32.078Z",
-I/flutter (18804): │       "updatedAt": "2026-08-31T10:25:32.078Z"
-I/flutter (18804): │     },
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569ca271f76c6ce17990",
-I/flutter (18804): │       "jobType": "ONE WAY",
-I/flutter (18804): │       "pickup": "The St. Regis New York, Two E 55th St",
-I/flutter (18804): │       "dropoff": "Greenwich Polo Club, VIP Pavilion",
-I/flutter (18804): │       "asap": false,
-I/flutter (18804): │       "date": "2026-08-19T10:25:31.894Z",
-I/flutter (18804): │       "time": "10:30",
-I/flutter (18804): │       "vehicleType": "SUV",
-I/flutter (18804): │       "paymentAmount": 380,
-I/flutter (18804): │       "paymentType": "CREDIT CARD ON FILE",
-I/flutter (18804): │       "paymentStatus": "UNPAID",
-I/flutter (18804): │       "serviceArea": "Los Angeles, CA",
-I/flutter (18804): │       "companyName": "Palm Beach Luxury Transport",
-I/flutter (18804): │       "dispatchType": "ALL CHAUFFEURS",
-I/flutter (18804): │       "isPersonalNote": false,
-I/flutter (18804): │       "passengerName": "VIP Executive Guest",
-I/flutter (18804): │       "passengerPhone": "+12125550199",
-I/flutter (18804): │       "status": "COMPLETED",
-I/flutter (18804): │       "rideStatus": "FINISHED",
-I/flutter (18804): │       "applicantCount": 0,
-I/flutter (18804): │       "applicant": null,
-I/flutter (18804): │       "assignedTo": {
-I/flutter (18804): │         "_id": "6a955697a271f76c6ce175d6",
-I/flutter (18804): │         "name": "James Thornton",
-I/flutter (18804): │         "nickname": "James",
-I/flutter (18804): │         "email": "james.thornton@chauffeur.com",
-I/flutter (18804): │         "phone": "+13105551007",
-I/flutter (18804): │         "company": "Sunset Strip Premier Motors",
-I/flutter (18804): │         "companyRole": "Chauffeur",
-I/flutter (18804): │         "profilePicture": "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=400",
-I/flutter (18804): │         "selectedVehicle": "6a955697a271f76c6ce175d9",
-I/flutter (18804): │         "averageRating": 4.9,
-I/flutter (18804): │         "totalReviews": 7
-I/flutter (18804): │       },
-I/flutter (18804): │       "hasReview": true,
-I/flutter (18804): │       "isReviewedByCreator": true,
-I/flutter (18804): │       "isReviewedByDriver": true,
-I/flutter (18804): │       "createdAt": "2026-08-31T10:25:32.055Z",
-I/flutter (18804): │       "updatedAt": "2026-08-31T10:25:32.055Z"
-I/flutter (18804): │     },
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569ca271f76c6ce17983",
-I/flutter (18804): │       "jobType": "ONE WAY",
-I/flutter (18804): │       "pickup": "Hudson Yards, 30 Hudson Yards",
-I/flutter (18804): │       "dropoff": "Newark Liberty International Airport, Terminal C",
-I/flutter (18804): │       "asap": false,
-I/flutter (18804): │       "date": "2026-08-23T10:25:31.894Z",
-I/flutter (18804): │       "time": "10:30",
-I/flutter (18804): │       "vehicleType": "Sedan",
-I/flutter (18804): │       "paymentAmount": 210,
-I/flutter (18804): │       "paymentType": "CREDIT CARD ON FILE",
-I/flutter (18804): │       "paymentStatus": "UNPAID",
-I/flutter (18804): │       "serviceArea": "Miami, FL",
-I/flutter (18804): │       "companyName": "Palm Beach Luxury Transport",
-I/flutter (18804): │       "dispatchType": "ALL CHAUFFEURS",
-I/flutter (18804): │       "isPersonalNote": false,
-I/flutter (18804): │       "passengerName": "VIP Executive Guest",
-I/flutter (18804): │       "passengerPhone": "+12125550199",
-I/flutter (18804): │       "status": "COMPLETED",
-I/flutter (18804): │       "rideStatus": "FINISHED",
-I/flutter (18804): │       "applicantCount": 0,
-I/flutter (18804): │       "applicant": null,
-I/flutter (18804): │       "assignedTo": {
-I/flutter (18804): │         "_id": "6a955697a271f76c6ce17591",
-I/flutter (18804): │         "name": "Isabella Gomez",
-I/flutter (18804): │         "nickname": "Bella",
-I/flutter (18804): │         "email": "isabella.gomez@chauffeur.com",
-I/flutter (18804): │         "phone": "+13055551006",
-I/flutter (18804): │         "company": "Biscayne VIP Transport",
-I/flutter (18804): │         "companyRole": "Chauffeur",
-I/flutter (18804): │         "profilePicture": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400",
-I/flutter (18804): │         "selectedVehicle": "6a955697a271f76c6ce17594",
-I/flutter (18804): │         "averageRating": 4.9,
-I/flutter (18804): │         "totalReviews": 7
-I/flutter (18804): │       },
-I/flutter (18804): │       "hasReview": true,
-I/flutter (18804): │       "isReviewedByCreator": true,
-I/flutter (18804): │       "isReviewedByDriver": true,
-I/flutter (18804): │       "createdAt": "2026-08-31T10:25:32.034Z",
-I/flutter (18804): │       "updatedAt": "2026-08-31T10:25:32.034Z"
-I/flutter (18804): │     },
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569ca271f76c6ce17979",
-I/flutter (18804): │       "jobType": "BY THE HOUR",
-I/flutter (18804): │       "pickup": "JFK International Airport, Terminal 4 (Delta Sky Club)",
-I/flutter (18804): │       "dropoff": "The Plaza Hotel, 768 5th Ave, New York, NY",
-I/flutter (18804): │       "asap": false,
-I/flutter (18804): │       "date": "2026-08-03T10:25:31.894Z",
-I/flutter (18804): │       "time": "10:30",
-I/flutter (18804): │       "vehicleType": "Sedan",
-I/flutter (18804): │       "paymentAmount": 195,
-I/flutter (18804): │       "paymentType": "CREDIT CARD ON FILE",
-I/flutter (18804): │       "paymentStatus": "UNPAID",
-I/flutter (18804): │       "serviceArea": "Miami, FL",
-I/flutter (18804): │       "companyName": "Palm Beach Luxury Transport",
-I/flutter (18804): │       "dispatchType": "ALL CHAUFFEURS",
-I/flutter (18804): │       "isPersonalNote": false,
-I/flutter (18804): │       "passengerName": "VIP Executive Guest",
-I/flutter (18804): │       "passengerPhone": "+12125550199",
-I/flutter (18804): │       "status": "COMPLETED",
-I/flutter (18804): │       "rideStatus": "FINISHED",
-I/flutter (18804): │       "applicantCount": 0,
-I/flutter (18804): │       "applicant": null,
-I/flutter (18804): │       "assignedTo": {
-I/flutter (18804): │         "_id": "6a955697a271f76c6ce17591",
-I/flutter (18804): │         "name": "Isabella Gomez",
-I/flutter (18804): │         "nickname": "Bella",
-I/flutter (18804): │         "email": "isabella.gomez@chauffeur.com",
-I/flutter (18804): │         "phone": "+13055551006",
-I/flutter (18804): │         "company": "Biscayne VIP Transport",
-I/flutter (18804): │         "companyRole": "Chauffeur",
-I/flutter (18804): │         "profilePicture": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400",
-I/flutter (18804): │         "selectedVehicle": "6a955697a271f76c6ce17594",
-I/flutter (18804): │         "averageRating": 4.9,
-I/flutter (18804): │         "totalReviews": 7
-I/flutter (18804): │       },
-I/flutter (18804): │       "hasReview": true,
-I/flutter (18804): │       "isReviewedByCreator": true,
-I/flutter (18804): │       "isReviewedByDriver": true,
-I/flutter (18804): │       "createdAt": "2026-08-31T10:25:32.017Z",
-I/flutter (18804): │       "updatedAt": "2026-08-31T10:25:32.017Z"
-I/flutter (18804): │     },
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569ca271f76c6ce17976",
-I/flutter (18804): │       "jobType": "BY THE HOUR",
-I/flutter (18804): │       "pickup": "The Mark Hotel, 25 E 77th St, Upper East Side",
-I/flutter (18804): │       "dropoff": "Lincoln Center for the Performing Arts",
-I/flutter (18804): │       "asap": false,
-I/flutter (18804): │       "date": "2026-08-27T10:25:31.894Z",
-I/flutter (18804): │       "time": "10:30",
-I/flutter (18804): │       "vehicleType": "Sedan",
-I/flutter (18804): │       "paymentAmount": 150,
-I/flutter (18804): │       "paymentType": "CREDIT CARD ON FILE",
-I/flutter (18804): │       "paymentStatus": "UNPAID",
-I/flutter (18804): │       "serviceArea": "New York City, NY",
-I/flutter (18804): │       "companyName": "Palm Beach Luxury Transport",
-I/flutter (18804): │       "dispatchType": "ALL CHAUFFEURS",
-I/flutter (18804): │       "isPersonalNote": false,
-I/flutter (18804): │       "passengerName": "VIP Executive Guest",
-I/flutter (18804): │       "passengerPhone": "+12125550199",
-I/flutter (18804): │       "status": "COMPLETED",
-I/flutter (18804): │       "rideStatus": "FINISHED",
-I/flutter (18804): │       "applicantCount": 0,
-I/flutter (18804): │       "applicant": null,
-I/flutter (18804): │       "assignedTo": {
-I/flutter (18804): │         "_id": "6a955697a271f76c6ce1755f",
-I/flutter (18804): │         "name": "Brandon Hayes",
-I/flutter (18804): │         "nickname": "Brandon",
-I/flutter (18804): │         "email": "brandon.hayes@chauffeur.com",
-I/flutter (18804): │         "phone": "+12125551005",
-I/flutter (18804): │         "company": "Tribeca Luxury Limousines",
-I/flutter (18804): │         "companyRole": "Chauffeur",
-I/flutter (18804): │         "profilePicture": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400",
-I/flutter (18804): │         "selectedVehicle": "6a955697a271f76c6ce17562",
-I/flutter (18804): │         "averageRating": 4.9,
-I/flutter (18804): │         "totalReviews": 7
-I/flutter (18804): │       },
-I/flutter (18804): │       "hasReview": true,
-I/flutter (18804): │       "isReviewedByCreator": true,
-I/flutter (18804): │       "isReviewedByDriver": true,
-I/flutter (18804): │       "createdAt": "2026-08-31T10:25:32.011Z",
-I/Quality (18804): Skipped: false 2 cost 44.95955 refreshRate 16396907 bit true processName com.moeb26.app
-W/OnBackInvokedCallback(18804): OnBackInvokedCallback is not enabled for the application.
-W/OnBackInvokedCallback(18804): Set 'android:enableOnBackInvokedCallback="true"' in the application manifest.
-I/flutter (18804): │       "updatedAt": "2026-08-31T10:25:32.011Z"
-I/flutter (18804): │     },
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569ba271f76c6ce1796c",
-I/flutter (18804): │       "jobType": "ONE WAY",
-I/flutter (18804): │       "pickup": "The Ritz-Carlton New York, Central Park (50 Central Park S)",
-I/flutter (18804): │       "dropoff": "Wall Street Financial Center (Multi-Stop Roadshow)",
-I/flutter (18804): │       "asap": false,
-I/flutter (18804): │       "date": "2026-08-07T10:25:31.894Z",
-I/flutter (18804): │       "time": "10:30",
-I/flutter (18804): │       "vehicleType": "Sedan",
-I/flutter (18804): │       "paymentAmount": 280,
-I/flutter (18804): │       "paymentType": "CREDIT CARD ON FILE",
-I/flutter (18804): │       "paymentStatus": "UNPAID",
-I/flutter (18804): │       "serviceArea": "New York City, NY",
-I/flutter (18804): │       "companyName": "Palm Beach Luxury Transport",
-I/flutter (18804): │       "dispatchType": "ALL CHAUFFEURS",
-I/flutter (18804): │       "isPersonalNote": false,
-I/flutter (18804): │       "passengerName": "VIP Executive Guest",
-I/flutter (18804): │       "passengerPhone": "+12125550199",
-I/flutter (18804): │       "status": "COMPLETED",
-I/flutter (18804): │       "rideStatus": "FINISHED",
-I/flutter (18804): │       "applicantCount": 0,
-I/flutter (18804): │       "applicant": null,
-I/flutter (18804): │       "assignedTo": {
-I/flutter (18804): │         "_id": "6a955697a271f76c6ce1755f",
-I/flutter (18804): │         "name": "Brandon Hayes",
-I/flutter (18804): │         "nickname": "Brandon",
-I/flutter (18804): │         "email": "brandon.hayes@chauffeur.com",
-I/flutter (18804): │         "phone": "+12125551005",
-I/flutter (18804): │         "company": "Tribeca Luxury Limousines",
-I/flutter (18804): │         "companyRole": "Chauffeur",
-I/flutter (18804): │         "profilePicture": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400",
-I/flutter (18804): │         "selectedVehicle": "6a955697a271f76c6ce17562",
-I/flutter (18804): │         "averageRating": 4.9,
-I/flutter (18804): │         "totalReviews": 7
-I/flutter (18804): │       },
-I/flutter (18804): │       "hasReview": true,
-I/flutter (18804): │       "isReviewedByCreator": true,
-I/flutter (18804): │       "isReviewedByDriver": true,
-I/flutter (18804): │       "createdAt": "2026-08-31T10:25:31.995Z",
-I/flutter (18804): │       "updatedAt": "2026-08-31T10:25:31.995Z"
-I/flutter (18804): │     },
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569ba271f76c6ce1795f",
-I/flutter (18804): │       "jobType": "ONE WAY",
-I/flutter (18804): │       "pickup": "LaGuardia Airport, Terminal B (VIP Pickup)",
-I/flutter (18804): │       "dropoff": "Baccarat Hotel New York, 28 W 53rd St",
-I/flutter (18804): │       "asap": false,
-I/flutter (18804): │       "date": "2026-08-11T10:25:31.894Z",
-I/flutter (18804): │       "time": "10:30",
-I/flutter (18804): │       "vehicleType": "SUV",
-I/flutter (18804): │       "paymentAmount": 175,
-I/flutter (18804): │       "paymentType": "CREDIT CARD ON FILE",
-I/flutter (18804): │       "paymentStatus": "UNPAID",
-I/flutter (18804): │       "serviceArea": "Los Angeles, CA",
-I/flutter (18804): │       "companyName": "Palm Beach Luxury Transport",
-I/flutter (18804): │       "dispatchType": "ALL CHAUFFEURS",
-I/flutter (18804): │       "isPersonalNote": false,
-I/flutter (18804): │       "passengerName": "VIP Executive Guest",
-I/flutter (18804): │       "passengerPhone": "+12125550199",
-I/flutter (18804): │       "status": "COMPLETED",
-I/flutter (18804): │       "rideStatus": "FINISHED",
-I/flutter (18804): │       "applicantCount": 0,
-I/flutter (18804): │       "applicant": null,
-I/flutter (18804): │       "assignedTo": {
-I/flutter (18804): │         "_id": "6a955696a271f76c6ce1752d",
-I/flutter (18804): │         "name": "David Rossi",
-I/flutter (18804): │         "nickname": "Dave",
-I/flutter (18804): │         "email": "david.rossi@chauffeur.com",
-I/flutter (18804): │         "phone": "+13105551004",
-I/flutter (18804): │         "company": "Beverly Hills Executive Fleet",
-I/flutter (18804): │         "companyRole": "Chauffeur",
-I/flutter (18804): │         "profilePicture": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400",
-I/flutter (18804): │         "selectedVehicle": "6a955697a271f76c6ce17530",
-I/flutter (18804): │         "averageRating": 4.9,
-I/flutter (18804): │         "totalReviews": 7
-I/flutter (18804): │       },
-I/flutter (18804): │       "hasReview": true,
-I/flutter (18804): │       "isReviewedByCreator": true,
-I/flutter (18804): │       "isReviewedByDriver": true,
-I/flutter (18804): │       "createdAt": "2026-08-31T10:25:31.974Z",
-I/flutter (18804): │       "updatedAt": "2026-08-31T10:25:31.974Z"
-I/flutter (18804): │     },
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569ba271f76c6ce17952",
-I/flutter (18804): │       "jobType": "BY THE HOUR",
-I/flutter (18804): │       "pickup": "Four Seasons Hotel Downtown, 27 Barclay St",
-I/flutter (18804): │       "dropoff": "Teterboro Airport, Jet Aviation FBO",
-I/flutter (18804): │       "asap": false,
-I/flutter (18804): │       "date": "2026-08-15T10:25:31.894Z",
-I/flutter (18804): │       "time": "10:30",
-I/flutter (18804): │       "vehicleType": "Sedan",
-I/flutter (18804): │       "paymentAmount": 260,
-I/flutter (18804): │       "paymentType": "CREDIT CARD ON FILE",
-I/flutter (18804): │       "paymentStatus": "UNPAID",
-I/flutter (18804): │       "serviceArea": "Miami, FL",
-I/flutter (18804): │       "companyName": "Palm Beach Luxury Transport",
-I/flutter (18804): │       "dispatchType": "ALL CHAUFFEURS",
-I/flutter (18804): │       "isPersonalNote": false,
-I/flutter (18804): │       "passengerName": "VIP Executive Guest",
-I/flutter (18804): │       "passengerPhone": "+12125550199",
-I/flutter (18804): │       "status": "COMPLETED",
-I/flutter (18804): │       "rideStatus": "FINISHED",
-I/flutter (18804): │       "applicantCount": 0,
-I/flutter (18804): │       "applicant": null,
-I/flutter (18804): │       "assignedTo": {
-I/flutter (18804): │         "_id": "6a955696a271f76c6ce174e8",
-I/flutter (18804): │         "name": "Sophia Laurent",
-I/flutter (18804): │         "nickname": "Sophia",
-I/flutter (18804): │         "email": "sophia.laurent@chauffeur.com",
-I/flutter (18804): │         "phone": "+13055551003",
-I/flutter (18804): │         "company": "Miami Ocean Drive Luxury VIP",
-I/flutter (18804): │         "companyRole": "Chauffeur",
-I/flutter (18804): │         "profilePicture": "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=400",
-I/flutter (18804): │         "selectedVehicle": "6a955696a271f76c6ce174eb",
-I/flutter (18804): │         "averageRating": 4.9,
-I/flutter (18804): │         "totalReviews": 7
-I/flutter (18804): │       },
-I/flutter (18804): │       "hasReview": true,
-I/flutter (18804): │       "isReviewedByCreator": true,
-I/flutter (18804): │       "isReviewedByDriver": true,
-I/flutter (18804): │       "createdAt": "2026-08-31T10:25:31.956Z",
-I/flutter (18804): │       "updatedAt": "2026-08-31T10:25:31.956Z"
-I/flutter (18804): │     }
-I/flutter (18804): │   ]
-I/flutter (18804): │ }
-I/flutter (18804): └ ✅✅✅✅ RESPONSE ══════════════════════════════════════ ✅✅✅│
-I/flutter (18804): 
-I/flutter (18804):
-I/flutter (18804): ┌ ✅✅✅✅ RESPONSE ══════════════════════════════════════ ✅✅✅✅
-I/flutter (18804): │ [ GET 200] https://nayem5001.binarybards.online/api/v1/jobs
-I/flutter (18804): │ {
-I/flutter (18804): │   "success": true,
-I/flutter (18804): │   "message": "Jobs retrieved successfully",
-I/flutter (18804): │   "cursor": {
-I/flutter (18804): │     "nextCursor": null,
-I/flutter (18804): │     "hasMore": false,
-I/flutter (18804): │     "limit": 10
-I/flutter (18804): │   },
-I/flutter (18804): │   "data": []
-I/flutter (18804): │ }
-I/flutter (18804): └ ✅✅✅✅ RESPONSE ══════════════════════════════════════ ✅✅✅│
-I/flutter (18804):
-[GETX] GOING TO ROUTE /MyScheduleView
-I/Quality (18804): Skipped: false 1 cost 20.80492 refreshRate 16666667 bit true processName com.moeb26.app
-[GETX] Instance "MyScheduleController" has been created
-[GETX] Instance "MyScheduleController" has been initialized
-I/flutter (18804):
-I/flutter (18804): ┌ ➡️➡️➡️➡️ REQUEST ══════════════════════════════════════ ➡️➡️➡️➡️
-I/flutter (18804): │ GET https://nayem5001.binarybards.online/api/v1/jobs/calendar?month=9&year=2026
-I/flutter (18804): │ Headers: {Content-Type: application/json, Authorization: ***}
-I/flutter (18804): │ Query: {month: 9, year: 2026}
-I/flutter (18804): └ ➡️➡️➡️➡️ REQUEST ══════════════════════════════════════ ➡️➡️➡️➡️
-I/flutter (18804): 
-I/flutter (18804):
-I/flutter (18804): ┌ ✅✅✅✅ RESPONSE ══════════════════════════════════════ ✅✅✅✅
-I/flutter (18804): │ [ GET 200] https://nayem5001.binarybards.online/api/v1/jobs/calendar?month=9&year=2026
-I/flutter (18804): │ {
-I/flutter (18804): │   "success": true,
-I/flutter (18804): │   "message": "Calendar jobs retrieved successfully",
-I/flutter (18804): │   "data": {
-I/flutter (18804): │     "eventDates": [
-I/flutter (18804): │       "2026-09-02",
-I/flutter (18804): │       "2026-09-03"
-I/flutter (18804): │     ],
-I/flutter (18804): │     "events": [
-I/flutter (18804): │       {
-I/flutter (18804): │         "_id": "6a95569ca271f76c6ce17a1a",
-I/flutter (18804): │         "jobType": "ONE WAY",
-I/flutter (18804): │         "passengerName": null,
-I/flutter (18804): │         "passengerPhone": null,
-I/flutter (18804): │         "pickup": "Four Seasons Hotel at The Surf Club (9011 Collins Ave)",
-I/flutter (18804): │         "dropoff": "Fort Lauderdale-Hollywood Int Airport (FLL), Sheltair FBO",
-I/flutter (18804): │         "date": "2026-09-02T10:25:32.186Z",
-I/flutter (18804): │         "time": "16:00",
-I/flutter (18804): │         "vehicleType": "SUV",
-I/flutter (18804): │         "paymentAmount": 260,
-I/flutter (18804): │         "paymentType": "CREDIT CARD ON FILE",
-I/flutter (18804): │         "status": "PENDING",
-I/flutter (18804): │         "paymentStatus": "UNPAID",
-I/flutter (18804): │         "instruction": "FBO departure. Greet family at Surf Club private entrance.",
-I/flutter (18804): │         "flightNumber": "PRIVATE-G650",
-I/flutter (18804): │         "dispatchType": "ALL CHAUFFEURS",
-I/flutter (18804): │         "isPersonalNote": false,
-I/flutter (18804): │         "createdAt": "2026-08-31T10:25:32.331Z",
-I/flutter (18804): │         "updatedAt": "2026-08-31T10:25:32.331Z"
-I/flutter (18804): │       },
-I/flutter (18804): │       {
-I/flutter (18804): │         "_id": "6a95569ca271f76c6ce17a12",
-I/flutter (18804): │         "jobType": "BY THE HOUR",
-I/flutter (18804): │         "passengerName": null,
-I/flutter (18804): │         "passengerPhone": null,
-I/flutter (18804): │         "pickup": "Fisher Island Ferry Terminal, VIP Slip",
-I/flutter (18804): │         "dropoff": "Hard Rock Stadium VIP Lounge (Multi-Stop F1 Event)",
-I/flutter (18804): │         "date": "2026-09-03T10:25:32.186Z",
-I/flutter (18804): │         "time": "11:30",
-I/flutter (18804): │         "vehicleType": "Van",
-I/flutter (18804): │         "paymentAmount": 650,
-I/flutter (18804): │         "paymentType": "CREDIT CARD ON FILE",
-I/flutter (18804): │         "status": "ASSIGNED",
-I/flutter (18804): │         "paymentStatus": "UNPAID",
-I/flutter (18804): │         "instruction": "Miami Grand Prix corporate executive group transfer. 6 hours VIP van standby with refreshments.",
-I/flutter (18804): │         "flightNumber": null,
-I/flutter (18804): │         "dispatchType": "ALL CHAUFFEURS",
-I/flutter (18804): │         "isPersonalNote": false,
-I/flutter (18804): │         "createdAt": "2026-08-31T10:25:32.317Z",
-I/flutter (18804): │         "updatedAt": "2026-09-01T14:52:56.489Z"
-I/flutter (18804): │       }
-I/flutter (18804): │     ]
-I/flutter (18804): │   }
-I/flutter (18804): │ }
-I/flutter (18804): └ ✅✅✅✅ RESPONSE ══════════════════════════════════════ ✅✅✅│
-I/flutter (18804):
-[GETX] CLOSE TO ROUTE /MyScheduleView
-[GETX] "MyScheduleController" onDelete() called
-[GETX] "MyScheduleController" deleted from memory
-I/ScrollIdentify(18804): on fling
-[GETX] OPEN BOTTOMSHEET 195049068
-W/OnBackInvokedCallback(18804): OnBackInvokedCallback is not enabled for the application.
-W/OnBackInvokedCallback(18804): Set 'android:enableOnBackInvokedCallback="true"' in the application manifest.
-[GETX] CLOSE BOTTOMSHEET 195049068
-I/Quality (18804): Skipped: false 1 cost 24.356073 refreshRate 18402315 bit true processName com.moeb26.app
-I/flutter (18804):
-I/flutter (18804): ┌ ➡️➡️➡️➡️ REQUEST ══════════════════════════════════════ ➡️➡️➡️➡️
-I/flutter (18804): │ POST https://nayem5001.binarybards.online/api/v1/auth/logout
-I/flutter (18804): │ Headers: {Content-Type: application/json, Authorization: ***}
-I/flutter (18804): │ Body: {
-I/flutter (18804): │ Body:   "deviceToken": "fUjbP35PRWuwTdlp4pE-lA:APA91bHn0nWpPl_9APwxJDHdCDPrbgCPGuD4HjPGsfu_4s6dhjtjyZLQLGrf6_FOKT6TxW8cXy3QaYNaBN6Pa0g_Nsj-A-ue8fDMVBem3iyjwDW8mrVPlQY"
-I/flutter (18804): │ Body: }
-I/flutter (18804): └ ➡️➡️➡️➡️ REQUEST ══════════════════════════════════════ ➡️➡️➡️➡️
-I/flutter (18804): 
-I/flutter (18804):
-I/flutter (18804): ┌ ✅✅✅✅ RESPONSE ══════════════════════════════════════ ✅✅✅✅
-I/flutter (18804): │ [ POST 200] https://nayem5001.binarybards.online/api/v1/auth/logout
-I/flutter (18804): │ {
-I/flutter (18804): │   "success": true,
-I/flutter (18804): │   "message": "User logged out successfully."
-I/flutter (18804): │ }
-I/flutter (18804): └ ✅✅✅✅ RESPONSE ══════════════════════════════════════ ✅✅✅│
-I/flutter (18804):
-[GETX] GOING TO ROUTE /SignInView
-[GETX] REMOVING ROUTE /BottomNabbarView
-[GETX] Instance "ServiceAreaService" has been created
-[GETX] Instance "ServiceAreaService" has been initialized
-[GETX] Instance "ServiceAreaController" has been created
-[GETX] Instance "ServiceAreaController" has been initialized
-[GETX] Instance "SigninController" has been created
-[GETX] Instance "SigninController" has been initialized
-I/flutter (18804):
-I/flutter (18804): ┌ ➡️➡️➡️➡️ REQUEST ══════════════════════════════════════ ➡️➡️➡️➡️
-I/flutter (18804): │ GET https://nayem5001.binarybards.online/api/v1/service-areas/options?limit=50
-I/flutter (18804): │ Headers: {Content-Type: application/json}
-I/flutter (18804): │ Query: {limit: 50}
-I/flutter (18804): └ ➡️➡️➡️➡️ REQUEST ══════════════════════════════════════ ➡️➡️➡️➡️
-I/flutter (18804):
-[GETX] "NavigationController" onDelete() called
-[GETX] "NavigationController" deleted from memory
-[GETX] "ChatController" onDelete() called
-[GETX] "ProfileController" onDelete() called
-[GETX] "JobOfferController" onDelete() called
-[GETX] "JobOfferController" deleted from memory
-[GETX] "NotificationController" onDelete() called
-[GETX] "NotificationController" deleted from memory
-[GETX] "BookingController" onDelete() called
-I/flutter (18804):
-I/flutter (18804): ┌ ✅✅✅✅ RESPONSE ══════════════════════════════════════ ✅✅✅✅
-I/flutter (18804): │ [ GET 200] https://nayem5001.binarybards.online/api/v1/service-areas/options?limit=50
-I/flutter (18804): │ {
-I/flutter (18804): │   "success": true,
-I/flutter (18804): │   "message": "Service area options retrieved successfully",
-I/flutter (18804): │   "cursor": {
-I/flutter (18804): │     "nextCursor": null,
-I/flutter (18804): │     "hasMore": false,
-I/flutter (18804): │     "limit": 50
-I/flutter (18804): │   },
-I/flutter (18804): │   "data": [
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569561f4ff5a4cbcfea6",
-I/flutter (18804): │       "areaName": "Miami, FL",
-I/flutter (18804): │       "cities": [
-I/flutter (18804): │         "Miami, FL",
-I/flutter (18804): │         "Miami Beach, FL",
-I/flutter (18804): │         "Coral Gables, FL",
-I/flutter (18804): │         "Brickell, FL",
-I/flutter (18804): │         "Doral, FL",
-I/flutter (18804): │         "Aventura, FL",
-I/flutter (18804): │         "Key Biscayne, FL"
-I/flutter (18804): │       ]
-I/flutter (18804): │     },
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569561f4ff5a4cbcfea7",
-I/flutter (18804): │       "areaName": "Fort Lauderdale, FL",
-I/flutter (18804): │       "cities": [
-I/flutter (18804): │         "Fort Lauderdale, FL",
-I/flutter (18804): │         "Hollywood, FL",
-I/flutter (18804): │         "Pompano Beach, FL",
-I/flutter (18804): │         "Davie, FL",
-I/flutter (18804): │         "Plantation, FL",
-I/flutter (18804): │         "Sunrise, FL"
-I/flutter (18804): │       ]
-I/flutter (18804): │     },
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569561f4ff5a4cbcfea8",
-I/flutter (18804): │       "areaName": "West Palm Beach, FL",
-I/flutter (18804): │       "cities": [
-I/flutter (18804): │         "West Palm Beach, FL",
-I/flutter (18804): │         "Palm Beach, FL",
-I/flutter (18804): │         "Jupiter, FL",
-I/flutter (18804): │         "Wellington, FL",
-I/flutter (18804): │         "Palm Beach Gardens, FL"
-I/flutter (18804): │       ]
-I/flutter (18804): │     },
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569561f4ff5a4cbcfea9",
-I/flutter (18804): │       "areaName": "Boca Raton, FL",
-I/flutter (18804): │       "cities": [
-I/flutter (18804): │         "Boca Raton, FL",
-I/flutter (18804): │         "Delray Beach, FL",
-I/flutter (18804): │         "Boynton Beach, FL",
-I/flutter (18804): │         "Deerfield Beach, FL"
-I/flutter (18804): │       ]
-I/flutter (18804): │     },
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569561f4ff5a4cbcfeaa",
-I/flutter (18804): │       "areaName": "Orlando, FL",
-I/flutter (18804): │       "cities": [
-I/flutter (18804): │         "Orlando, FL",
-I/flutter (18804): │         "Kissimmee, FL",
-I/flutter (18804): │         "Winter Park, FL",
-I/flutter (18804): │         "Lake Buena Vista, FL",
-I/flutter (18804): │         "Sanford, FL",
-I/flutter (18804): │         "Altamonte Springs, FL"
-I/flutter (18804): │       ]
-I/flutter (18804): │     },
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569561f4ff5a4cbcfeab",
-I/flutter (18804): │       "areaName": "Tampa, FL",
-I/flutter (18804): │       "cities": [
-I/flutter (18804): │         "Tampa, FL",
-I/flutter (18804): │         "St. Petersburg, FL",
-I/flutter (18804): │         "Clearwater, FL",
-I/flutter (18804): │         "Brandon, FL",
-I/flutter (18804): │         "Ybor City, FL"
-I/flutter (18804): │       ]
-I/flutter (18804): │     },
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569561f4ff5a4cbcfeac",
-I/flutter (18804): │       "areaName": "Jacksonville, FL",
-I/flutter (18804): │       "cities": [
-I/flutter (18804): │         "Jacksonville, FL",
-I/flutter (18804): │         "Jacksonville Beach, FL",
-I/flutter (18804): │         "St. Augustine, FL",
-I/flutter (18804): │         "Ponte Vedra Beach, FL",
-I/flutter (18804): │         "Orange Park, FL"
-I/flutter (18804): │       ]
-I/flutter (18804): │     },
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569561f4ff5a4cbcfead",
-I/flutter (18804): │       "areaName": "Naples, FL",
-I/flutter (18804): │       "cities": [
-I/flutter (18804): │         "Naples, FL",
-I/flutter (18804): │         "Marco Island, FL",
-I/flutter (18804): │         "Bonita Springs, FL",
-I/flutter (18804): │         "Estero, FL"
-I/flutter (18804): │       ]
-I/flutter (18804): │     },
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569561f4ff5a4cbcfeae",
-I/flutter (18804): │       "areaName": "Sarasota, FL",
-I/flutter (18804): │       "cities": [
-I/flutter (18804): │         "Sarasota, FL",
-I/flutter (18804): │         "Bradenton, FL",
-I/flutter (18804): │         "Venice, FL",
-I/flutter (18804): │         "Lakewood Ranch, FL",
-I/flutter (18804): │         "Siesta Key, FL"
-I/flutter (18804): │       ]
-I/flutter (18804): │     },
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569561f4ff5a4cbcfeaf",
-I/flutter (18804): │       "areaName": "Fort Myers, FL",
-I/flutter (18804): │       "cities": [
-I/flutter (18804): │         "Fort Myers, FL",
-I/flutter (18804): │         "Cape Coral, FL",
-I/flutter (18804): │         "Sanibel, FL",
-I/flutter (18804): │         "Fort Myers Beach, FL",
-I/flutter (18804): │         "Lehigh Acres, FL"
-I/flutter (18804): │       ]
-I/flutter (18804): │     },
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569561f4ff5a4cbcfeb0",
-I/flutter (18804): │       "areaName": "Los Angeles, CA",
-I/flutter (18804): │       "cities": [
-I/flutter (18804): │         "Los Angeles, CA",
-I/flutter (18804): │         "Beverly Hills, CA",
-I/flutter (18804): │         "Santa Monica, CA",
-I/flutter (18804): │         "West Hollywood, CA",
-I/flutter (18804): │         "Pasadena, CA",
-I/flutter (18804): │         "Long Beach, CA",
-I/flutter (18804): │         "Burbank, CA",
-I/flutter (18804): │         "Culver City, CA"
-I/flutter (18804): │       ]
-I/flutter (18804): │     },
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569561f4ff5a4cbcfeb1",
-I/flutter (18804): │       "areaName": "San Francisco, CA",
-I/flutter (18804): │       "cities": [
-I/flutter (18804): │         "San Francisco, CA",
-I/flutter (18804): │         "Oakland, CA",
-I/flutter (18804): │         "Berkeley, CA",
-I/flutter (18804): │         "San Mateo, CA",
-I/flutter (18804): │         "Palo Alto, CA",
-I/flutter (18804): │         "Sausalito, CA"
-I/flutter (18804): │       ]
-I/flutter (18804): │     },
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569561f4ff5a4cbcfeb2",
-I/flutter (18804): │       "areaName": "San Diego, CA",
-I/flutter (18804): │       "cities": [
-I/flutter (18804): │         "San Diego, CA",
-I/flutter (18804): │         "La Jolla, CA",
-I/flutter (18804): │         "Chula Vista, CA",
-I/flutter (18804): │         "Coronado, CA",
-I/flutter (18804): │         "Carlsbad, CA",
-I/flutter (18804): │         "Del Mar, CA",
-I/flutter (18804): │         "Encinitas, CA"
-I/flutter (18804): │       ]
-I/flutter (18804): │     },
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569561f4ff5a4cbcfeb3",
-I/flutter (18804): │       "areaName": "San Jose, CA",
-I/flutter (18804): │       "cities": [
-I/flutter (18804): │         "San Jose, CA",
-I/flutter (18804): │         "Santa Clara, CA",
-I/flutter (18804): │         "Sunnyvale, CA",
-I/flutter (18804): │         "Mountain View, CA",
-I/flutter (18804): │         "Cupertino, CA",
-I/flutter (18804): │         "Los Gatos, CA"
-I/flutter (18804): │       ]
-I/flutter (18804): │     },
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569561f4ff5a4cbcfeb4",
-I/flutter (18804): │       "areaName": "Sacramento, CA",
-I/flutter (18804): │       "cities": [
-I/flutter (18804): │         "Sacramento, CA",
-I/flutter (18804): │         "Roseville, CA",
-I/flutter (18804): │         "Folsom, CA",
-I/flutter (18804): │         "Elk Grove, CA",
-I/flutter (18804): │         "Davis, CA",
-I/flutter (18804): │         "Rocklin, CA"
-I/flutter (18804): │       ]
-I/flutter (18804): │     },
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569561f4ff5a4cbcfeb5",
-I/flutter (18804): │       "areaName": "Santa Barbara, CA",
-I/flutter (18804): │       "cities": [
-I/flutter (18804): │         "Santa Barbara, CA",
-I/flutter (18804): │         "Montecito, CA",
-I/flutter (18804): │         "Goleta, CA",
-I/flutter (18804): │         "Carpinteria, CA",
-I/flutter (18804): │         "Summerland, CA"
-I/flutter (18804): │       ]
-I/flutter (18804): │     },
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569561f4ff5a4cbcfeb6",
-I/flutter (18804): │       "areaName": "Dallas, TX",
-I/flutter (18804): │       "cities": [
-I/flutter (18804): │         "Dallas, TX",
-I/flutter (18804): │         "Fort Worth, TX",
-I/flutter (18804): │         "Arlington, TX",
-I/flutter (18804): │         "Plano, TX",
-I/flutter (18804): │         "Irving, TX",
-I/flutter (18804): │         "Frisco, TX",
-I/flutter (18804): │         "McKinney, TX"
-I/flutter (18804): │       ]
-I/flutter (18804): │     },
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569561f4ff5a4cbcfeb7",
-I/flutter (18804): │       "areaName": "Houston, TX",
-I/flutter (18804): │       "cities": [
-I/flutter (18804): │         "Houston, TX",
-I/flutter (18804): │         "The Woodlands, TX",
-I/flutter (18804): │         "Sugar Land, TX",
-I/flutter (18804): │         "Katy, TX",
-I/flutter (18804): │         "Pearland, TX",
-I/flutter (18804): │         "Spring, TX"
-I/flutter (18804): │       ]
-I/flutter (18804): │     },
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569561f4ff5a4cbcfeb8",
-I/flutter (18804): │       "areaName": "Austin, TX",
-I/flutter (18804): │       "cities": [
-I/flutter (18804): │         "Austin, TX",
-I/flutter (18804): │         "Round Rock, TX",
-I/flutter (18804): │         "Cedar Park, TX",
-I/flutter (18804): │         "Georgetown, TX",
-I/flutter (18804): │         "San Marcos, TX",
-I/flutter (18804): │         "Pflugerville, TX"
-I/flutter (18804): │       ]
-I/flutter (18804): │     },
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569561f4ff5a4cbcfeb9",
-I/flutter (18804): │       "areaName": "San Antonio, TX",
-I/flutter (18804): │       "cities": [
-I/flutter (18804): │         "San Antonio, TX",
-I/flutter (18804): │         "New Braunfels, TX",
-I/flutter (18804): │         "Boerne, TX",
-I/flutter (18804): │         "Schertz, TX",
-I/flutter (18804): │         "Cibolo, TX"
-I/flutter (18804): │       ]
-I/flutter (18804): │     },
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569561f4ff5a4cbcfeba",
-I/flutter (18804): │       "areaName": "New York City, NY",
-I/flutter (18804): │       "cities": [
-I/flutter (18804): │         "New York City, NY",
-I/flutter (18804): │         "Manhattan, NY",
-I/flutter (18804): │         "Brooklyn, NY",
-I/flutter (18804): │         "Queens, NY",
-I/flutter (18804): │         "Bronx, NY",
-I/flutter (18804): │         "Staten Island, NY",
-I/flutter (18804): │         "Long Island, NY"
-I/flutter (18804): │       ]
-I/flutter (18804): │     },
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569561f4ff5a4cbcfebb",
-I/flutter (18804): │       "areaName": "Chicago, IL",
-I/flutter (18804): │       "cities": [
-I/flutter (18804): │         "Chicago, IL",
-I/flutter (18804): │         "Naperville, IL",
-I/flutter (18804): │         "Evanston, IL",
-I/flutter (18804): │         "Schaumburg, IL",
-I/flutter (18804): │         "Oak Park, IL",
-I/flutter (18804): │         "Rosemont, IL"
-I/flutter (18804): │       ]
-I/flutter (18804): │     },
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569561f4ff5a4cbcfebc",
-I/flutter (18804): │       "areaName": "Washington, DC",
-I/flutter (18804): │       "cities": [
-I/flutter (18804): │         "Washington, DC",
-I/flutter (18804): │         "Arlington, DC",
-I/flutter (18804): │         "Alexandria, DC",
-I/flutter (18804): │         "Bethesda, DC",
-I/flutter (18804): │         "Silver Spring, DC",
-I/flutter (18804): │         "Tysons, DC",
-I/flutter (18804): │         "Reston, DC"
-I/flutter (18804): │       ]
-I/flutter (18804): │     },
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569561f4ff5a4cbcfebd",
-I/flutter (18804): │       "areaName": "Las Vegas, NV",
-I/flutter (18804): │       "cities": [
-I/flutter (18804): │         "Las Vegas, NV",
-I/flutter (18804): │         "Henderson, NV",
-I/flutter (18804): │         "North Las Vegas, NV",
-I/flutter (18804): │         "Paradise, NV",
-I/flutter (18804): │         "Summerlin, NV",
-I/flutter (18804): │         "Spring Valley, NV"
-I/flutter (18804): │       ]
-I/flutter (18804): │     },
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569561f4ff5a4cbcfebe",
-I/flutter (18804): │       "areaName": "Boston, MA",
-I/flutter (18804): │       "cities": [
-I/flutter (18804): │         "Boston, MA",
-I/flutter (18804): │         "Cambridge, MA",
-I/flutter (18804): │         "Brookline, MA",
-I/flutter (18804): │         "Newton, MA",
-I/flutter (18804): │         "Somerville, MA",
-I/flutter (18804): │         "Quincy, MA",
-I/flutter (18804): │         "Waltham, MA"
-I/flutter (18804): │       ]
-I/flutter (18804): │     },
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569561f4ff5a4cbcfebf",
-I/flutter (18804): │       "areaName": "Atlanta, GA",
-I/flutter (18804): │       "cities": [
-I/flutter (18804): │         "Atlanta, GA",
-I/flutter (18804): │         "Sandy Springs, GA",
-I/flutter (18804): │         "Alpharetta, GA",
-I/flutter (18804): │         "Marietta, GA",
-I/flutter (18804): │         "Roswell, GA",
-I/flutter (18804): │         "Buckhead, GA",
-I/flutter (18804): │         "Duluth, GA"
-I/flutter (18804): │       ]
-I/flutter (18804): │     },
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569561f4ff5a4cbcfec0",
-I/flutter (18804): │       "areaName": "Seattle, WA",
-I/flutter (18804): │       "cities": [
-I/flutter (18804): │         "Seattle, WA",
-I/flutter (18804): │         "Bellevue, WA",
-I/flutter (18804): │         "Redmond, WA",
-I/flutter (18804): │         "Tacoma, WA",
-I/flutter (18804): │         "Kirkland, WA",
-I/flutter (18804): │         "Renton, WA",
-I/flutter (18804): │         "Everett, WA"
-I/flutter (18804): │       ]
-I/flutter (18804): │     },
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569561f4ff5a4cbcfec1",
-I/flutter (18804): │       "areaName": "Denver, CO",
-I/flutter (18804): │       "cities": [
-I/flutter (18804): │         "Denver, CO",
-I/flutter (18804): │         "Aurora, CO",
-I/flutter (18804): │         "Boulder, CO",
-I/flutter (18804): │         "Lakewood, CO",
-I/flutter (18804): │         "Centennial, CO",
-I/flutter (18804): │         "Cherry Creek, CO"
-I/flutter (18804): │       ]
-I/flutter (18804): │     },
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569561f4ff5a4cbcfec2",
-I/flutter (18804): │       "areaName": "Aspen, CO",
-I/flutter (18804): │       "cities": [
-I/flutter (18804): │         "Aspen, CO",
-I/flutter (18804): │         "Snowmass Village, CO",
-I/flutter (18804): │         "Basalt, CO",
-I/flutter (18804): │         "Carbondale, CO",
-I/flutter (18804): │         "Glenwood Springs, CO"
-I/flutter (18804): │       ]
-I/flutter (18804): │     },
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569561f4ff5a4cbcfec3",
-I/flutter (18804): │       "areaName": "Phoenix, AZ",
-I/flutter (18804): │       "cities": [
-I/flutter (18804): │         "Phoenix, AZ",
-I/flutter (18804): │         "Mesa, AZ",
-I/flutter (18804): │         "Chandler, AZ",
-I/flutter (18804): │         "Tempe, AZ",
-I/flutter (18804): │         "Glendale, AZ",
-I/flutter (18804): │         "Gilbert, AZ"
-I/flutter (18804): │       ]
-I/flutter (18804): │     },
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569561f4ff5a4cbcfec4",
-I/flutter (18804): │       "areaName": "Scottsdale, AZ",
-I/flutter (18804): │       "cities": [
-I/flutter (18804): │         "Scottsdale, AZ",
-I/flutter (18804): │         "Paradise Valley, AZ",
-I/flutter (18804): │         "Fountain Hills, AZ",
-I/flutter (18804): │         "Cave Creek, AZ",
-I/flutter (18804): │         "Carefree, AZ"
-I/flutter (18804): │       ]
-I/flutter (18804): │     },
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569561f4ff5a4cbcfec5",
-I/flutter (18804): │       "areaName": "Philadelphia, PA",
-I/flutter (18804): │       "cities": [
-I/flutter (18804): │         "Philadelphia, PA",
-I/flutter (18804): │         "King of Prussia, PA",
-I/flutter (18804): │         "Center City, PA",
-I/flutter (18804): │         "Main Line, PA",
-I/flutter (18804): │         "Chester, PA",
-I/flutter (18804): │         "Bensalem, PA"
-I/flutter (18804): │       ]
-I/flutter (18804): │     },
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569561f4ff5a4cbcfec6",
-I/flutter (18804): │       "areaName": "Pittsburgh, PA",
-I/flutter (18804): │       "cities": [
-I/flutter (18804): │         "Pittsburgh, PA",
-I/flutter (18804): │         "Monroeville, PA",
-I/flutter (18804): │         "Cranberry Township, PA",
-I/flutter (18804): │         "Mount Lebanon, PA",
-I/flutter (18804): │         "Shadyside, PA"
-I/flutter (18804): │       ]
-I/flutter (18804): │     },
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569561f4ff5a4cbcfec7",
-I/flutter (18804): │       "areaName": "Charlotte, NC",
-I/flutter (18804): │       "cities": [
-I/flutter (18804): │         "Charlotte, NC",
-I/flutter (18804): │         "Concord, NC",
-I/flutter (18804): │         "Huntersville, NC",
-I/flutter (18804): │         "Matthews, NC",
-I/flutter (18804): │         "Ballantyne, NC",
-I/flutter (18804): │         "Gastonia, NC"
-I/flutter (18804): │       ]
-I/flutter (18804): │     },
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569561f4ff5a4cbcfec8",
-I/flutter (18804): │       "areaName": "Raleigh, NC",
-I/flutter (18804): │       "cities": [
-I/flutter (18804): │         "Raleigh, NC",
-I/flutter (18804): │         "Durham, NC",
-I/flutter (18804): │         "Chapel Hill, NC",
-I/flutter (18804): │         "Cary, NC",
-I/flutter (18804): │         "Wake Forest, NC",
-I/flutter (18804): │         "Morrisville, NC"
-I/flutter (18804): │       ]
-I/flutter (18804): │     },
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569561f4ff5a4cbcfec9",
-I/flutter (18804): │       "areaName": "Nashville, TN",
-I/flutter (18804): │       "cities": [
-I/flutter (18804): │         "Nashville, TN",
-I/flutter (18804): │         "Franklin, TN",
-I/flutter (18804): │         "Brentwood, TN",
-I/flutter (18804): │         "Murfreesboro, TN",
-I/flutter (18804): │         "Hendersonville, TN",
-I/flutter (18804): │         "Mount Juliet, TN"
-I/flutter (18804): │       ]
-I/flutter (18804): │     },
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569561f4ff5a4cbcfeca",
-I/flutter (18804): │       "areaName": "Minneapolis, MN",
-I/flutter (18804): │       "cities": [
-I/flutter (18804): │         "Minneapolis, MN",
-I/flutter (18804): │         "St. Paul, MN",
-I/flutter (18804): │         "Bloomington, MN",
-I/flutter (18804): │         "Edina, MN",
-I/flutter (18804): │         "Minnetonka, MN",
-I/flutter (18804): │         "Plymouth, MN"
-I/flutter (18804): │       ]
-I/flutter (18804): │     },
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569561f4ff5a4cbcfecb",
-I/flutter (18804): │       "areaName": "New Orleans, LA",
-I/flutter (18804): │       "cities": [
-I/flutter (18804): │         "New Orleans, LA",
-I/flutter (18804): │         "Metairie, LA",
-I/flutter (18804): │         "Kenner, LA",
-I/flutter (18804): │         "French Quarter, LA",
-I/flutter (18804): │         "Garden District, LA",
-I/flutter (18804): │         "Slidell, LA"
-I/flutter (18804): │       ]
-I/flutter (18804): │     },
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569561f4ff5a4cbcfecc",
-I/flutter (18804): │       "areaName": "Salt Lake City, UT",
-I/flutter (18804): │       "cities": [
-I/flutter (18804): │         "Salt Lake City, UT",
-I/flutter (18804): │         "Park City, UT",
-I/flutter (18804): │         "Provo, UT",
-I/flutter (18804): │         "Sandy, UT",
-I/flutter (18804): │         "West Valley City, UT",
-I/flutter (18804): │         "Draper, UT"
-I/flutter (18804): │       ]
-I/flutter (18804): │     },
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569561f4ff5a4cbcfecd",
-I/flutter (18804): │       "areaName": "Portland, OR",
-I/flutter (18804): │       "cities": [
-I/flutter (18804): │         "Portland, OR",
-I/flutter (18804): │         "Beaverton, OR",
-I/flutter (18804): │         "Gresham, OR",
-I/flutter (18804): │         "Hillsboro, OR",
-I/flutter (18804): │         "Lake Oswego, OR",
-I/flutter (18804): │         "Tigard, OR"
-I/flutter (18804): │       ]
-I/flutter (18804): │     },
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569561f4ff5a4cbcfece",
-I/flutter (18804): │       "areaName": "Detroit, MI",
-I/flutter (18804): │       "cities": [
-I/flutter (18804): │         "Detroit, MI",
-I/flutter (18804): │         "Troy, MI",
-I/flutter (18804): │         "Dearborn, MI",
-I/flutter (18804): │         "Ann Arbor, MI",
-I/flutter (18804): │         "Birmingham, MI",
-I/flutter (18804): │         "Royal Oak, MI",
-I/flutter (18804): │         "Southfield, MI"
-I/flutter (18804): │       ]
-I/flutter (18804): │     },
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569561f4ff5a4cbcfecf",
-I/flutter (18804): │       "areaName": "Kansas City, MO",
-I/flutter (18804): │       "cities": [
-I/flutter (18804): │         "Kansas City, MO",
-I/flutter (18804): │         "Overland Park, MO",
-I/flutter (18804): │         "Olathe, MO",
-I/flutter (18804): │         "Lee's Summit, MO",
-I/flutter (18804): │         "Independence, MO",
-I/flutter (18804): │         "Blue Springs, MO"
-I/flutter (18804): │       ]
-I/flutter (18804): │     },
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569561f4ff5a4cbcfed0",
-I/flutter (18804): │       "areaName": "St. Louis, MO",
-I/flutter (18804): │       "cities": [
-I/flutter (18804): │         "St. Louis, MO",
-I/flutter (18804): │         "Clayton, MO",
-I/flutter (18804): │         "Chesterfield, MO",
-I/flutter (18804): │         "St. Charles, MO",
-I/flutter (18804): │         "Creve Coeur, MO",
-I/flutter (18804): │         "Ballwin, MO"
-I/flutter (18804): │       ]
-I/flutter (18804): │     },
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569561f4ff5a4cbcfed1",
-I/flutter (18804): │       "areaName": "Columbus, OH",
-I/flutter (18804): │       "cities": [
-I/flutter (18804): │         "Columbus, OH",
-I/flutter (18804): │         "Dublin, OH",
-I/flutter (18804): │         "Westerville, OH",
-I/flutter (18804): │         "Upper Arlington, OH",
-I/flutter (18804): │         "New Albany, OH",
-I/flutter (18804): │         "Grove City, OH"
-I/flutter (18804): │       ]
-I/flutter (18804): │     },
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569561f4ff5a4cbcfed2",
-I/flutter (18804): │       "areaName": "Cincinnati, OH",
-I/flutter (18804): │       "cities": [
-I/flutter (18804): │         "Cincinnati, OH",
-I/flutter (18804): │         "Mason, OH",
-I/flutter (18804): │         "Norwood, OH",
-I/flutter (18804): │         "Blue Ash, OH",
-I/flutter (18804): │         "Hyde Park, OH",
-I/flutter (18804): │         "West Chester, OH"
-I/flutter (18804): │       ]
-I/flutter (18804): │     },
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569561f4ff5a4cbcfed3",
-I/flutter (18804): │       "areaName": "Cleveland, OH",
-I/flutter (18804): │       "cities": [
-I/flutter (18804): │         "Cleveland, OH",
-I/flutter (18804): │         "Akron, OH",
-I/flutter (18804): │         "Parma, OH",
-I/flutter (18804): │         "Lakewood, OH",
-I/flutter (18804): │         "Beachwood, OH",
-I/flutter (18804): │         "Westlake, OH"
-I/flutter (18804): │       ]
-I/flutter (18804): │     },
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569561f4ff5a4cbcfed4",
-I/flutter (18804): │       "areaName": "Indianapolis, IN",
-I/flutter (18804): │       "cities": [
-I/flutter (18804): │         "Indianapolis, IN",
-I/flutter (18804): │         "Carmel, IN",
-I/flutter (18804): │         "Fishers, IN",
-I/flutter (18804): │         "Noblesville, IN",
-I/flutter (18804): │         "Zionsville, IN",
-I/flutter (18804): │         "Greenwood, IN"
-I/flutter (18804): │       ]
-I/flutter (18804): │     },
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569561f4ff5a4cbcfed5",
-I/flutter (18804): │       "areaName": "Richmond, VA",
-I/flutter (18804): │       "cities": [
-I/flutter (18804): │         "Richmond, VA",
-I/flutter (18804): │         "Henrico, VA",
-I/flutter (18804): │         "Chesterfield, VA",
-I/flutter (18804): │         "Short Pump, VA",
-I/flutter (18804): │         "Glen Allen, VA",
-I/flutter (18804): │         "Midlothian, VA"
-I/flutter (18804): │       ]
-I/flutter (18804): │     },
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569561f4ff5a4cbcfed6",
-I/flutter (18804): │       "areaName": "Charleston, SC",
-I/flutter (18804): │       "cities": [
-I/flutter (18804): │         "Charleston, SC",
-I/flutter (18804): │         "North Charleston, SC",
-I/flutter (18804): │         "Mount Pleasant, SC",
-I/flutter (18804): │         "Summerville, SC",
-I/flutter (18804): │         "Kiawah Island, SC",
-I/flutter (18804): │         "Isle of Palms, SC"
-I/flutter (18804): │       ]
-I/flutter (18804): │     },
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569561f4ff5a4cbcfed7",
-I/flutter (18804): │       "areaName": "Greenwich, CT",
-I/flutter (18804): │       "cities": [
-I/flutter (18804): │         "Greenwich, CT",
-I/flutter (18804): │         "Stamford, CT",
-I/flutter (18804): │         "Norwalk, CT",
-I/flutter (18804): │         "Darien, CT",
-I/flutter (18804): │         "New Canaan, CT",
-I/flutter (18804): │         "Westport, CT"
-I/flutter (18804): │       ]
-I/flutter (18804): │     }
-I/flutter (18804): │   ]
-I/flutter (18804): │ }
-I/flutter (18804): └ ✅✅✅✅ RESPONSE ══════════════════════════════════════ ✅✅✅│
-I/flutter (18804):
-I/flutter (18804): Service Areas loaded: 50 items
-I/Quality (18804): Skipped: false 2 cost 35.1665 refreshRate 16400931 bit true processName com.moeb26.app
-D/InputMethodManager(18804): showSoftInput() view=io.flutter.embedding.android.FlutterView{64b51b6 VFE...... .F...... 0,0-720,1519 #1 aid=1073741824 viewInfo = AutoLayoutViewInfo{mIsImageType=false, mIsFlatView=false, mWidthType=1, mHeightType=1, mScaleType=null, mFillBackgroundPattern=1, mNeedStretchItems=false, mMeasureChanged=false, mNewMeasuredHeight=0, mOldMeasuredHeight=0, mExtraInfo=}} flags=0 reason=SHOW_SOFT_INPUT
-D/InputConnectionAdaptor(18804): The input method toggled cursor monitoring on
-W/OnBackInvokedCallback(18804): OnBackInvokedCallback is not enabled for the application.
-W/OnBackInvokedCallback(18804): Set 'android:enableOnBackInvokedCallback="true"' in the application manifest.
-D/InsetsController(18804): show(ime(), fromIme=true)
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/InputConnectionAdaptor(18804): The input method toggled cursor monitoring off
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/OpenGLRenderer(18804): SkiaOpenGLPipeline::setSurface: this=0xb400007ce5389c00, surface=NULL
-D/InputMethodManager(18804): showSoftInput() view=io.flutter.embedding.android.FlutterView{64b51b6 VFE...... .F...... 0,0-720,1519 #1 aid=1073741824 viewInfo = AutoLayoutViewInfo{mIsImageType=false, mIsFlatView=false, mWidthType=1, mHeightType=1, mScaleType=null, mFillBackgroundPattern=1, mNeedStretchItems=false, mMeasureChanged=false, mNewMeasuredHeight=0, mOldMeasuredHeight=0, mExtraInfo=}} flags=0 reason=SHOW_SOFT_INPUT
-D/InputConnectionAdaptor(18804): The input method toggled cursor monitoring on
-W/OnBackInvokedCallback(18804): OnBackInvokedCallback is not enabled for the application.
-W/OnBackInvokedCallback(18804): Set 'android:enableOnBackInvokedCallback="true"' in the application manifest.
-D/InsetsController(18804): show(ime(), fromIme=true)
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/InputMethodManager(18804): showSoftInput() view=io.flutter.embedding.android.FlutterView{64b51b6 VFE...... .F...... 0,0-720,1519 #1 aid=1073741824 viewInfo = AutoLayoutViewInfo{mIsImageType=false, mIsFlatView=false, mWidthType=1, mHeightType=1, mScaleType=null, mFillBackgroundPattern=1, mNeedStretchItems=false, mMeasureChanged=false, mNewMeasuredHeight=0, mOldMeasuredHeight=0, mExtraInfo=}} flags=0 reason=SHOW_SOFT_INPUT
-D/InputConnectionAdaptor(18804): The input method toggled cursor monitoring on
-D/InputConnectionAdaptor(18804): The input method toggled cursor monitoring off
-D/InputConnectionAdaptor(18804): The input method toggled cursor monitoring on
-D/InsetsController(18804): show(ime(), fromIme=true)
-D/InsetsController(18804): show(ime(), fromIme=true)
-I/Quality (18804): Skipped: false 2 cost 44.45275 refreshRate 16797915 bit true processName com.moeb26.app
-D/InputConnectionAdaptor(18804): The input method toggled cursor monitoring off
-I/Quality (18804): Skipped: false 1 cost 18.33624 refreshRate 16806848 bit true processName com.moeb26.app
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-I/flutter (18804):
-I/flutter (18804): ┌ ➡️➡️➡️➡️ REQUEST ══════════════════════════════════════ ➡️➡️➡️➡️
-I/flutter (18804): │ POST https://nayem5001.binarybards.online/api/v1/auth/login
-I/flutter (18804): │ Headers: {Content-Type: application/json}
-I/flutter (18804): │ Body: {
-I/flutter (18804): │ Body:   "email": "marcus.sterling@chauffeur.com",
-I/flutter (18804): │ Body:   "password": "Password123!",
-I/flutter (18804): │ Body:   "deviceToken": "fUjbP35PRWuwTdlp4pE-lA:APA91bHn0nWpPl_9APwxJDHdCDPrbgCPGuD4HjPGsfu_4s6dhjtjyZLQLGrf6_FOKT6TxW8cXy3QaYNaBN6Pa0g_Nsj-A-ue8fDMVBem3iyjwDW8mrVPlQY"
-I/flutter (18804): │ Body: }
-I/flutter (18804): └ ➡️➡️➡️➡️ REQUEST ══════════════════════════════════════ ➡️➡️➡️➡️
-I/flutter (18804):
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-I/Quality (18804): Skipped: true 2 cost 41.528584 refreshRate 16949013 bit true processName com.moeb26.app
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-D/FlutterJNI(18804): Sending viewport metrics to the engine.
-I/flutter (18804):
-I/flutter (18804): ┌ ✅✅✅✅ RESPONSE ══════════════════════════════════════ ✅✅✅✅
-I/flutter (18804): │ [ POST 200] https://nayem5001.binarybards.online/api/v1/auth/login
-I/flutter (18804): │ {
-I/flutter (18804): │   "success": true,
-I/flutter (18804): │   "message": "User logged in successfully.",
-I/flutter (18804): │   "data": {
-I/flutter (18804): │     "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhOTU1Njk2YTI3MWY3NmM2Y2UxNzRiNiIsInJvbGUiOiJVU0VSIiwiZW1haWwiOiJtYXJjdXMuc3RlcmxpbmdAY2hhdWZmZXVyLmNvbSIsImFwcFN0YXRlIjoiQUNUSVZFIiwiYWNjb3VudFN0YXRlIjoiVkVSSUZJRUQiLCJzZXJ2aWNlQXJlYUlkIjoiNmE5NTU2OTU2MWY0ZmY1YTRjYmNmZWJhIiwic2VydmljZUFyZWEiOiJOZXcgWW9yayBDaXR5LCBOWSIsImlhdCI6MTc4ODY3MTQzNCwiZXhwIjoxNzg4NzU3ODM0fQ.GwpLKMhpy56rfslnTe1wUKWpy9J7CX5YzFEbzUIFziM",
-I/flutter (18804): │     "isOnboard": true,
-I/flutter (18804): │     "isApproved": true,
-I/flutter (18804): │     "appState": "ACTIVE",
-I/flutter (18804): │     "mustChangePassword": false
-I/flutter (18804): │   }
-I/flutter (18804): │ }
-I/flutter (18804): └ ✅✅✅✅ RESPONSE ══════════════════════════════════════ ✅✅✅│
-I/flutter (18804):
-I/flutter (18804): ℹ️ SocketService: Socket already connected, skipping init
-[GETX] GOING TO ROUTE /BottomNabbarView
-[GETX] REMOVING ROUTE /SignInView
-[GETX] Instance "NavigationController" has been created
-[GETX] Instance "NavigationController" has been initialized
-[GETX] Instance "ChatController" has been created
-[GETX] Instance "ChatController" has been initialized
-[GETX] Instance "ProfileController" has been created
-[GETX] Instance "UserProfileService" has been created
-[GETX] Instance "UserProfileRepo" has been created
-[GETX] Instance "ProfileController" has been initialized
-[GETX] Instance "JobOfferController" has been created
-[GETX] Instance "JobOfferController" has been initialized
-[GETX] Instance "NotificationController" has been created
-[GETX] Instance "NotificationController" has been initialized
-I/flutter (18804):
-I/flutter (18804): ┌ ➡️➡️➡️➡️ REQUEST ══════════════════════════════════════ ➡️➡️➡️➡️
-I/flutter (18804): │ GET https://nayem5001.binarybards.online/api/v1/chats
-I/flutter (18804): │ Headers: {Content-Type: application/json, Authorization: ***}
-I/flutter (18804): └ ➡️➡️➡️➡️ REQUEST ══════════════════════════════════════ ➡️➡️➡️➡️
-I/flutter (18804): 
-I/flutter (18804):
-I/flutter (18804): ┌ ➡️➡️➡️➡️ REQUEST ══════════════════════════════════════ ➡️➡️➡️➡️
-I/flutter (18804): │ GET https://nayem5001.binarybards.online/api/v1/user/profile
-I/flutter (18804): │ Headers: {Content-Type: application/json, Authorization: ***}
-I/flutter (18804): └ ➡️➡️➡️➡️ REQUEST ══════════════════════════════════════ ➡️➡️➡️➡️
-I/flutter (18804): 
-I/flutter (18804):
-I/flutter (18804): ┌ ➡️➡️➡️➡️ REQUEST ══════════════════════════════════════ ➡️➡️➡️➡️
-I/flutter (18804): │ GET https://nayem5001.binarybards.online/api/v1/vehicles
-I/flutter (18804): │ Headers: {Content-Type: application/json, Authorization: ***}
-I/flutter (18804): └ ➡️➡️➡️➡️ REQUEST ══════════════════════════════════════ ➡️➡️➡️➡️
-I/flutter (18804): 
-I/flutter (18804):
-I/flutter (18804): ┌ ➡️➡️➡️➡️ REQUEST ══════════════════════════════════════ ➡️➡️➡️➡️
-I/flutter (18804): │ GET https://nayem5001.binarybards.online/api/v1/service-areas/options
-I/flutter (18804): │ Headers: {Content-Type: application/json, Authorization: ***}
-I/flutter (18804): └ ➡️➡️➡️➡️ REQUEST ══════════════════════════════════════ ➡️➡️➡️➡️
-I/flutter (18804): 
-I/flutter (18804):
-I/flutter (18804): ┌ ➡️➡️➡️➡️ REQUEST ══════════════════════════════════════ ➡️➡️➡️➡️
-I/flutter (18804): │ GET https://nayem5001.binarybards.online/api/v1/legals
-I/flutter (18804): │ Headers: {Content-Type: application/json, Authorization: ***}
-I/flutter (18804): └ ➡️➡️➡️➡️ REQUEST ══════════════════════════════════════ ➡️➡️➡️➡️
-I/flutter (18804): 
-I/flutter (18804):
-I/flutter (18804): ┌ ➡️➡️➡️➡️ REQUEST ══════════════════════════════════════ ➡️➡️➡️➡️
-I/flutter (18804): │ GET https://nayem5001.binarybards.online/api/v1/jobs
-I/flutter (18804): │ Headers: {Content-Type: application/json, Authorization: ***}
-I/flutter (18804): └ ➡️➡️➡️➡️ REQUEST ══════════════════════════════════════ ➡️➡️➡️➡️
-I/flutter (18804): 
-I/flutter (18804):
-I/flutter (18804): ┌ ➡️➡️➡️➡️ REQUEST ══════════════════════════════════════ ➡️➡️➡️➡️
-I/flutter (18804): │ GET https://nayem5001.binarybards.online/api/v1/community-chats/room
-I/flutter (18804): │ Headers: {Content-Type: application/json, Authorization: ***}
-I/flutter (18804): └ ➡️➡️➡️➡️ REQUEST ══════════════════════════════════════ ➡️➡️➡️➡️
-I/flutter (18804): 
-I/flutter (18804):
-I/flutter (18804): ┌ ➡️➡️➡️➡️ REQUEST ══════════════════════════════════════ ➡️➡️➡️➡️
-I/flutter (18804): │ GET https://nayem5001.binarybards.online/api/v1/notifications
-I/flutter (18804): │ Headers: {Content-Type: application/json, Authorization: ***}
-I/flutter (18804): └ ➡️➡️➡️➡️ REQUEST ══════════════════════════════════════ ➡️➡️➡️➡️
-I/flutter (18804):
-[GETX] "ServiceAreaController" onDelete() called
-I/flutter (18804):
-I/flutter (18804): ┌ ✅✅✅✅ RESPONSE ══════════════════════════════════════ ✅✅✅✅
-I/flutter (18804): │ [ GET 200] https://nayem5001.binarybards.online/api/v1/chats
-I/flutter (18804): │ {
-I/flutter (18804): │   "success": true,
-I/flutter (18804): │   "message": "Chats retrieved successfully",
-I/flutter (18804): │   "data": [
-I/flutter (18804): │     {
-I/flutter (18804): │       "participants": [
-I/flutter (18804): │         {
-I/flutter (18804): │           "name": "Alexander Wright",
-I/flutter (18804): │           "profilePicture": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400",
-I/flutter (18804): │           "id": "6a955695a271f76c6ce17471"
-I/flutter (18804): │         },
-I/flutter (18804): │         {
-I/flutter (18804): │           "name": "Marcus Sterling",
-I/flutter (18804): │           "profilePicture": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400",
-I/flutter (18804): │           "id": "6a955696a271f76c6ce174b6"
-I/flutter (18804): │         }
-I/flutter (18804): │       ],
-I/flutter (18804): │       "jobId": {
-I/flutter (18804): │         "jobType": "ONE WAY",
-I/flutter (18804): │         "pickup": "The Ritz-Carlton New York, Central Park (50 Central Park S)",
-I/flutter (18804): │         "dropoff": "JFK International Airport, Terminal 4 (Delta Sky Club)",
-I/flutter (18804): │         "date": "2026-09-02T10:25:32.186Z",
-I/flutter (18804): │         "time": "14:30",
-I/flutter (18804): │         "paymentAmount": 195,
-I/flutter (18804): │         "status": "PENDING",
-I/flutter (18804): │         "id": "6a95569ca271f76c6ce179d6"
-I/flutter (18804): │       },
-I/flutter (18804): │       "lastMessage": "Perfect. The client appreciates punctual curbside greeting at Central Park South.",
-I/flutter (18804): │       "lastMessageAt": "2026-08-31T09:45:32.186Z",
-I/flutter (18804): │       "createdAt": "2026-08-31T10:25:32.189Z",
-I/flutter (18804): │       "updatedAt": "2026-08-31T10:25:32.189Z",
-I/flutter (18804): │       "id": "6a95569ca271f76c6ce179d8",
-I/flutter (18804): │       "unreadCount": 3,
-I/flutter (18804): │       "isRead": false
-I/flutter (18804): │     }
-I/flutter (18804): │   ]
-I/flutter (18804): │ }
-I/flutter (18804): └ ✅✅✅✅ RESPONSE ══════════════════════════════════════ ✅✅✅│
-I/flutter (18804):
-[GETX] "ServiceAreaController" deleted from memory
-I/flutter (18804):
-I/flutter (18804): ┌ ✅✅✅✅ RESPONSE ══════════════════════════════════════ ✅✅✅✅
-I/flutter (18804): │ [ GET 200] https://nayem5001.binarybards.online/api/v1/legals
-I/flutter (18804): │ {
-I/flutter (18804): │   "success": true,
-I/flutter (18804): │   "message": "Legal pages retrieved successfully",
-I/flutter (18804): │   "data": [
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a93048840eea6135b3300a3",
-I/flutter (18804): │       "title": "Terms and policy",
-I/flutter (18804): │       "createdAt": "2026-08-29T16:10:48.076Z",
-I/flutter (18804): │       "updatedAt": "2026-08-29T16:10:48.076Z"
-I/flutter (18804): │     },
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a92ff2040eea6135b32fdff",
-I/flutter (18804): │       "title": "Teram and policy",
-I/flutter (18804): │       "createdAt": "2026-08-29T15:47:44.102Z",
-I/flutter (18804): │       "updatedAt": "2026-08-29T16:00:57.315Z"
-I/flutter (18804): │     }
-I/flutter (18804): │   ]
-I/flutter (18804): │ }
-I/flutter (18804): └ ✅✅✅✅ RESPONSE ══════════════════════════════════════ ✅✅✅│
-I/flutter (18804): 
-I/flutter (18804):
-I/flutter (18804): ┌ ✅✅✅✅ RESPONSE ══════════════════════════════════════ ✅✅✅✅
-I/flutter (18804): │ [ GET 200] https://nayem5001.binarybards.online/api/v1/service-areas/options
-I/flutter (18804): │ {
-I/flutter (18804): │   "success": true,
-I/flutter (18804): │   "message": "Service area options retrieved successfully",
-I/flutter (18804): │   "cursor": {
-I/flutter (18804): │     "nextCursor": "eyJfaWQiOiI2YTk1NTY5NTYxZjRmZjVhNGNiY2ZlYWYifQ",
-I/flutter (18804): │     "hasMore": true,
-I/flutter (18804): │     "limit": 10
-I/flutter (18804): │   },
-I/flutter (18804): │   "data": [
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569561f4ff5a4cbcfea6",
-I/flutter (18804): │       "areaName": "Miami, FL",
-I/flutter (18804): │       "cities": [
-I/flutter (18804): │         "Miami, FL",
-I/flutter (18804): │         "Miami Beach, FL",
-I/flutter (18804): │         "Coral Gables, FL",
-I/flutter (18804): │         "Brickell, FL",
-I/flutter (18804): │         "Doral, FL",
-I/flutter (18804): │         "Aventura, FL",
-I/flutter (18804): │         "Key Biscayne, FL"
-I/flutter (18804): │       ]
-I/flutter (18804): │     },
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569561f4ff5a4cbcfea7",
-I/flutter (18804): │       "areaName": "Fort Lauderdale, FL",
-I/flutter (18804): │       "cities": [
-I/flutter (18804): │         "Fort Lauderdale, FL",
-I/flutter (18804): │         "Hollywood, FL",
-I/flutter (18804): │         "Pompano Beach, FL",
-I/flutter (18804): │         "Davie, FL",
-I/flutter (18804): │         "Plantation, FL",
-I/flutter (18804): │         "Sunrise, FL"
-I/flutter (18804): │       ]
-I/flutter (18804): │     },
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569561f4ff5a4cbcfea8",
-I/flutter (18804): │       "areaName": "West Palm Beach, FL",
-I/flutter (18804): │       "cities": [
-I/flutter (18804): │         "West Palm Beach, FL",
-I/flutter (18804): │         "Palm Beach, FL",
-I/flutter (18804): │         "Jupiter, FL",
-I/flutter (18804): │         "Wellington, FL",
-I/flutter (18804): │         "Palm Beach Gardens, FL"
-I/flutter (18804): │       ]
-I/flutter (18804): │     },
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569561f4ff5a4cbcfea9",
-I/flutter (18804): │       "areaName": "Boca Raton, FL",
-I/flutter (18804): │       "cities": [
-I/flutter (18804): │         "Boca Raton, FL",
-I/flutter (18804): │         "Delray Beach, FL",
-I/flutter (18804): │         "Boynton Beach, FL",
-I/flutter (18804): │         "Deerfield Beach, FL"
-I/flutter (18804): │       ]
-I/flutter (18804): │     },
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569561f4ff5a4cbcfeaa",
-I/flutter (18804): │       "areaName": "Orlando, FL",
-I/flutter (18804): │       "cities": [
-I/flutter (18804): │         "Orlando, FL",
-I/flutter (18804): │         "Kissimmee, FL",
-I/flutter (18804): │         "Winter Park, FL",
-I/flutter (18804): │         "Lake Buena Vista, FL",
-I/flutter (18804): │         "Sanford, FL",
-I/flutter (18804): │         "Altamonte Springs, FL"
-I/flutter (18804): │       ]
-I/flutter (18804): │     },
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569561f4ff5a4cbcfeab",
-I/flutter (18804): │       "areaName": "Tampa, FL",
-I/flutter (18804): │       "cities": [
-I/flutter (18804): │         "Tampa, FL",
-I/flutter (18804): │         "St. Petersburg, FL",
-I/flutter (18804): │         "Clearwater, FL",
-I/flutter (18804): │         "Brandon, FL",
-I/flutter (18804): │         "Ybor City, FL"
-I/flutter (18804): │       ]
-I/flutter (18804): │     },
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569561f4ff5a4cbcfeac",
-I/flutter (18804): │       "areaName": "Jacksonville, FL",
-I/flutter (18804): │       "cities": [
-I/flutter (18804): │         "Jacksonville, FL",
-I/flutter (18804): │         "Jacksonville Beach, FL",
-I/flutter (18804): │         "St. Augustine, FL",
-I/flutter (18804): │         "Ponte Vedra Beach, FL",
-I/flutter (18804): │         "Orange Park, FL"
-I/flutter (18804): │       ]
-I/flutter (18804): │     },
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569561f4ff5a4cbcfead",
-I/flutter (18804): │       "areaName": "Naples, FL",
-I/flutter (18804): │       "cities": [
-I/flutter (18804): │         "Naples, FL",
-I/flutter (18804): │         "Marco Island, FL",
-I/flutter (18804): │         "Bonita Springs, FL",
-I/flutter (18804): │         "Estero, FL"
-I/flutter (18804): │       ]
-I/flutter (18804): │     },
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569561f4ff5a4cbcfeae",
-I/flutter (18804): │       "areaName": "Sarasota, FL",
-I/flutter (18804): │       "cities": [
-I/flutter (18804): │         "Sarasota, FL",
-I/flutter (18804): │         "Bradenton, FL",
-I/flutter (18804): │         "Venice, FL",
-I/flutter (18804): │         "Lakewood Ranch, FL",
-I/flutter (18804): │         "Siesta Key, FL"
-I/flutter (18804): │       ]
-I/flutter (18804): │     },
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a95569561f4ff5a4cbcfeaf",
-I/flutter (18804): │       "areaName": "Fort Myers, FL",
-I/flutter (18804): │       "cities": [
-I/flutter (18804): │         "Fort Myers, FL",
-I/flutter (18804): │         "Cape Coral, FL",
-I/flutter (18804): │         "Sanibel, FL",
-I/flutter (18804): │         "Fort Myers Beach, FL",
-I/flutter (18804): │         "Lehigh Acres, FL"
-I/flutter (18804): │       ]
-I/flutter (18804): │     }
-I/flutter (18804): │   ]
-I/flutter (18804): │ }
-I/flutter (18804): └ ✅✅✅✅ RESPONSE ══════════════════════════════════════ ✅✅✅│
-I/flutter (18804): 
-I/flutter (18804):
-I/flutter (18804): ┌ ✅✅✅✅ RESPONSE ══════════════════════════════════════ ✅✅✅✅
-I/flutter (18804): │ [ GET 200] https://nayem5001.binarybards.online/api/v1/user/profile
-I/flutter (18804): │ {
-I/flutter (18804): │   "success": true,
-I/flutter (18804): │   "message": "Profile data retrieved successfully",
-I/flutter (18804): │   "data": {
-I/flutter (18804): │     "mustChangePassword": false,
-I/flutter (18804): │     "name": "Marcus Sterling",
-I/flutter (18804): │     "nickname": "Marcus",
-I/flutter (18804): │     "email": "marcus.sterling@chauffeur.com",
-I/flutter (18804): │     "phone": "+12125551002",
-I/flutter (18804): │     "serviceAreaId": "6a95569561f4ff5a4cbcfeba",
-I/flutter (18804): │     "serviceArea": "New York City, NY",
-I/flutter (18804): │     "companyName": "Manhattan Black Car Club",
-I/flutter (18804): │     "company": "Manhattan Black Car Club",
-I/flutter (18804): │     "companyRole": "Chauffeur",
-I/flutter (18804): │     "profilePicture": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400",
-I/flutter (18804): │     "accountState": "VERIFIED",
-I/flutter (18804): │     "appState": "ACTIVE",
-I/flutter (18804): │     "isOnboard": true,
-I/flutter (18804): │     "suspensionOrigin": null,
-I/flutter (18804): │     "selectedVehicle": "6a955696a271f76c6ce174b9",
-I/flutter (18804): │     "badges": [],
-I/flutter (18804): │     "paymentMethods": {
-I/flutter (18804): │       "zelle": {
-I/flutter (18804): │         "email": "marcus.sterling@zellepay.com"
-I/flutter (18804): │       },
-I/flutter (18804): │       "cardPayment": {
-I/flutter (18804): │         "status": "ACCEPTED"
-I/flutter (18804): │       }
-I/flutter (18804): │     },
-I/flutter (18804): │     "approvedAt": null,
-I/flutter (18804): │     "approvedBy": null,
-I/flutter (18804): │     "blockReason": null,
-I/flutter (18804): │     "suspendedAt": null,
-I/flutter (18804): │     "suspendedBy": null,
-I/flutter (18804): │     "rejectionReason": null,
-I/flutter (18804): │     "rejectedAt": null,
-I/flutter (18804): │     "rejectedBy": null,
-I/flutter (18804): │     "reactivatedAt": null,
-I/flutter (18804): │     "reactivatedBy": null,
-I/flutter (18804): │     "createdAt": "2026-08-31T10:25:26.255Z",
-I/flutter (18804): │     "updatedAt": "2026-09-06T05:10:34.712Z",
-I/flutter (18804): │     "id": "6a955696a271f76c6ce174b6"
-I/flutter (18804): │   }
-I/flutter (18804): │ }
-I/flutter (18804): └ ✅✅✅✅ RESPONSE ══════════════════════════════════════ ✅✅✅│
-I/flutter (18804): 
-I/flutter (18804):
-I/flutter (18804): ┌ ✅✅✅✅ RESPONSE ══════════════════════════════════════ ✅✅✅✅
-I/flutter (18804): │ [ GET 200] https://nayem5001.binarybards.online/api/v1/notifications
-I/flutter (18804): │ {
-I/flutter (18804): │   "success": true,
-I/flutter (18804): │   "message": "Notifications fetched",
-I/flutter (18804): │   "pagination": {
-I/flutter (18804): │     "page": 1,
-I/flutter (18804): │     "limit": 20,
-I/flutter (18804): │     "total": 0,
-I/flutter (18804): │     "totalPage": 1,
-I/flutter (18804): │     "unreadCount": 0
-I/flutter (18804): │   },
-I/flutter (18804): │   "data": []
-I/flutter (18804): │ }
-I/flutter (18804): └ ✅✅✅✅ RESPONSE ══════════════════════════════════════ ✅✅✅│
-I/flutter (18804): 
-I/flutter (18804):
-I/flutter (18804): ┌ ✅✅✅✅ RESPONSE ══════════════════════════════════════ ✅✅✅✅
-I/flutter (18804): │ [ GET 200] https://nayem5001.binarybards.online/api/v1/jobs
-I/flutter (18804): │ {
-I/flutter (18804): │   "success": true,
-I/flutter (18804): │   "message": "Jobs retrieved successfully",
-I/flutter (18804): │   "cursor": {
-I/flutter (18804): │     "nextCursor": null,
-I/flutter (18804): │     "hasMore": false,
-I/flutter (18804): │     "limit": 10
-I/flutter (18804): │   },
-I/flutter (18804): │   "data": []
-I/flutter (18804): │ }
-I/flutter (18804): └ ✅✅✅✅ RESPONSE ══════════════════════════════════════ ✅✅✅│
-I/flutter (18804): 
-I/flutter (18804):
-I/flutter (18804): ┌ ✅✅✅✅ RESPONSE ══════════════════════════════════════ ✅✅✅✅
-I/flutter (18804): │ [ GET 200] https://nayem5001.binarybards.online/api/v1/vehicles
-I/flutter (18804): │ {
-I/flutter (18804): │   "success": true,
-I/flutter (18804): │   "message": "Vehicles retrieved successfully",
-I/flutter (18804): │   "data": [
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a955696a271f76c6ce174bf",
-I/flutter (18804): │       "type": "Sedan",
-I/flutter (18804): │       "makeAndModel": "BMW 760i xDrive Sedan",
-I/flutter (18804): │       "year": 2024,
-I/flutter (18804): │       "licensePlate": "NY-CH-1012",
-I/flutter (18804): │       "status": "APPROVED",
-I/flutter (18804): │       "rejectionReason": null,
-I/flutter (18804): │       "version": 1,
-I/flutter (18804): │       "createdAt": "2026-08-31T10:25:26.486Z"
-I/flutter (18804): │     },
-I/flutter (18804): │     {
-I/flutter (18804): │       "_id": "6a955696a271f76c6ce174b9",
-I/flutter (18804): │       "type": "SUV",
-I/flutter (18804): │       "makeAndModel": "Cadillac Escalade ESV Premium Luxury",
-I/flutter (18804): │       "year": 2024,
-I/flutter (18804): │       "licensePlate": "NY-CH-1002",
-I/flutter (18804): │       "status": "APPROVED",
-I/flutter (18804): │       "rejectionReason": null,
-I/flutter (18804): │       "version": 1,
-I/flutter (18804): │       "createdAt": "2026-08-31T10:25:26.479Z"
-I/flutter (18804): │     }
-I/flutter (18804): │   ]
-I/flutter (18804): │ }
-I/flutter (18804): └ ✅✅✅✅ RESPONSE ══════════════════════════════════════ ✅✅✅│
-I/flutter (18804): 
-I/flutter (18804):
-I/flutter (18804): ┌ ✅✅✅✅ RESPONSE ══════════════════════════════════════ ✅✅✅✅
-I/flutter (18804): │ [ GET 200] https://nayem5001.binarybards.online/api/v1/community-chats/room
-I/flutter (18804): │ {
-I/flutter (18804): │   "success": true,
-I/flutter (18804): │   "message": "Community room retrieved successfully",
-I/flutter (18804): │   "data": {
-I/flutter (18804): │     "name": "New York City, NY Network",
-I/flutter (18804): │     "serviceArea": "New York City, NY",
-I/flutter (18804): │     "totalMembers": 8,
-I/flutter (18804): │     "lastMessage": null,
-I/flutter (18804): │     "lastMessageAt": null,
-I/flutter (18804): │     "unreadCount": 0,
-I/flutter (18804): │     "isRead": true
-I/flutter (18804): │   }
-I/flutter (18804): │ }
-I/flutter (18804): └ ✅✅✅✅ RESPONSE ══════════════════════════════════════ ✅✅✅│
-I/flutter (18804):
-W/OnBackInvokedCallback(18804): OnBackInvokedCallback is not enabled for the application.
-W/OnBackInvokedCallback(18804): Set 'android:enableOnBackInvokedCallback="true"' in the application manifest.
-[GETX] GOING TO ROUTE /MyScheduleView
-[GETX] Instance "MyScheduleController" has been created
-[GETX] Instance "MyScheduleController" has been initialized
-I/flutter (18804):
-I/flutter (18804): ┌ ➡️➡️➡️➡️ REQUEST ══════════════════════════════════════ ➡️➡️➡️➡️
-I/flutter (18804): │ GET https://nayem5001.binarybards.online/api/v1/jobs/calendar?month=9&year=2026
-I/flutter (18804): │ Headers: {Content-Type: application/json, Authorization: ***}
-I/flutter (18804): │ Query: {month: 9, year: 2026}
-I/flutter (18804): └ ➡️➡️➡️➡️ REQUEST ══════════════════════════════════════ ➡️➡️➡️➡️
-I/flutter (18804): 
-I/flutter (18804):
-I/flutter (18804): ┌ ✅✅✅✅ RESPONSE ══════════════════════════════════════ ✅✅✅✅
-I/flutter (18804): │ [ GET 200] https://nayem5001.binarybards.online/api/v1/jobs/calendar?month=9&year=2026
-I/flutter (18804): │ {
-I/flutter (18804): │   "success": true,
-I/flutter (18804): │   "message": "Calendar jobs retrieved successfully",
-I/flutter (18804): │   "data": {
-I/flutter (18804): │     "eventDates": [
-I/flutter (18804): │       "2026-09-01"
-I/flutter (18804): │     ],
-I/flutter (18804): │     "events": [
-I/flutter (18804): │       {
-I/flutter (18804): │         "_id": "6a95569ca271f76c6ce179ea",
-I/flutter (18804): │         "jobType": "ONE WAY",
-I/flutter (18804): │         "passengerName": null,
-I/flutter (18804): │         "passengerPhone": null,
-I/flutter (18804): │         "pickup": "Baccarat Hotel New York (28 W 53rd St)",
-I/flutter (18804): │         "dropoff": "Teterboro Airport, Private Jet Terminal (Jet Aviation)",
-I/flutter (18804): │         "date": "2026-09-01T10:25:32.186Z",
-I/flutter (18804): │         "time": "11:00",
-I/flutter (18804): │         "vehicleType": "Sedan",
-I/flutter (18804): │         "paymentAmount": 280,
-I/flutter (18804): │         "paymentType": "CREDIT CARD ON FILE",
-I/flutter (18804): │         "status": "ASSIGNED",
-I/flutter (18804): │         "paymentStatus": "UNPAID",
-I/flutter (18804): │         "instruction": "Private tarmac escort pass. Back console champagne request.",
-I/flutter (18804): │         "flightNumber": "N789VIP",
-I/flutter (18804): │         "dispatchType": "ALL CHAUFFEURS",
-I/flutter (18804): │         "isPersonalNote": false,
-I/flutter (18804): │         "createdAt": "2026-08-31T10:25:32.230Z",
-I/flutter (18804): │         "updatedAt": "2026-08-31T10:25:32.230Z"
-I/flutter (18804): │       }
-I/flutter (18804): │     ]
-I/flutter (18804): │   }
-I/flutter (18804): │ }
-I/flutter (18804): └ ✅✅✅✅ RESPONSE ══════════════════════════════════════ ✅✅✅│
-I/flutter (18804):
-[GETX] CLOSE TO ROUTE /MyScheduleView
-I/Quality (18804): Skipped: false 2 cost 41.991177 refreshRate 16666667 bit true processName com.moeb26.app
-[GETX] "MyScheduleController" onDelete() called
-[GETX] "MyScheduleController" deleted from memory
-W/OnBackInvokedCallback(18804): OnBackInvokedCallback is not enabled for the application.
-W/OnBackInvokedCallback(18804): Set 'android:enableOnBackInvokedCallback="true"' in the application manifest.
-I/Quality (18804): Skipped: false 1 cost 18.579008 refreshRate 16383681 bit true processName com.moeb26.app
-[GETX] GOING TO ROUTE /SubscriptionView
-[GETX] Instance "SubscriptionController" has been created
-[GETX] Instance "SubscriptionController" has been initialized
-I/Quality (18804): Skipped: false 15 cost 253.01096 refreshRate 16823079 bit true processName com.moeb26.app
-W/OnBackInvokedCallback(18804): OnBackInvokedCallback is not enabled for the application.
-W/OnBackInvokedCallback(18804): Set 'android:enableOnBackInvokedCallback="true"' in the application manifest.
-I/flutter (18804): [SubscriptionService] Product loaded: Ekkali Premium (Ekkali - Ride & Job Booking) (BDT 13,000.00)
+Searched for "socket"
+
+ফ্রন্টএন্ড (React Native / Expo App এবং Admin Dashboard)-এর জন্য নিচে একটি পূর্ণাঙ্গ ও প্র্যাক্টিক্যাল **Socket Integration Guideline** দেওয়া হলো। 
+
+এটি ফলো করলে মোবাইল অ্যাপে কোনো **"Pull-to-Refresh"** ছাড়াই ইনস্ট্যান্ট স্ক্রিন আপডেট হবে:
+
+---
+
+### ১. সকেট কানেকশন ও অটো-রুম (Connection Setup)
+
+ইউজার লগইন করার পর সকেট ইনিশিয়ালাইজ করার সময় `auth.token`-এ ইউজারের JWT টোকেন পাঠাতে হবে।
+
+```typescript
+// services/socket.ts
+import { io, Socket } from 'socket.io-client';
+
+let socket: Socket | null = null;
+
+export const initSocket = (userToken: string) => {
+  if (socket?.connected) return socket;
+
+  socket = io('YOUR_BACKEND_URL', {
+    auth: { token: userToken },
+    transports: ['websocket'],
+    reconnection: true,
+    reconnectionAttempts: 5,
+  });
+
+  socket.on('connect', () => {
+    console.log('✅ Socket connected:', socket?.id);
+  });
+
+  socket.on('disconnect', (reason) => {
+    console.log('❌ Socket disconnected:', reason);
+  });
+
+  return socket;
+};
+
+export const getSocket = () => socket;
+```
+
+> **ব্যাকএন্ড সুবিধা:** টোকেন দিয়ে কানেক্ট হওয়ার সাথে সাথে ব্যাকএন্ড স্বয়ংক্রিয়ভাবে ইউজারকে দুটি রুমে জয়েন করিয়ে নেয়:
+> 1. `user::<userId>` (ইউজারের নিজস্ব নোটিফিকেশন, জব অ্যাসাইনমেন্ট ও ক্যান্সেলেশনের জন্য)
+> 2. `community::<serviceArea>` (ইউজারের লোকাল এরিয়ার নতুন জব ফিডের জন্য)
+
+---
+
+### ২. স্ক্রিন অনুযায়ী ইভেন্ট গাইডলাইন
+
+#### স্ক্রিন ১: Available Jobs / Driver Feed Screen (ড্রাইভারদের জন্য)
+এখানে কোনো রিফ্রেশ ছাড়া নতুন জব আসবে এবং অন্য কেউ নিয়ে নিলে রিমুভ হয়ে যাবে।
+
+```typescript
+// screens/AvailableJobsScreen.tsx
+import { useEffect, useState } from 'react';
+import { getSocket } from '../services/socket';
+
+export const AvailableJobsScreen = () => {
+  const [jobs, setJobs] = useState<Job[]>([]);
+
+  useEffect(() => {
+    const socket = getSocket();
+    if (!socket) return;
+
+    // ১. নতুন জব পোস্ট হলে ফিডের শীর্ষে যুক্ত হবে
+    const handleJobCreated = ({ job }: { job: Job }) => {
+      setJobs((prevJobs) => [job, ...prevJobs]);
+    };
+
+    // ২. কোনো জব অন্য কেউ নিয়ে নিলে বা ক্যান্সেল হলে ফিড থেকে সাথে সাথে মুছে যাবে
+    const handleJobRemoved = ({ jobId }: { jobId: string }) => {
+      setJobs((prevJobs) => prevJobs.filter((j) => j._id !== jobId));
+    };
+
+    socket.on('JOB_CREATED', handleJobCreated);
+    socket.on('JOB_REMOVED_FROM_FEED', handleJobRemoved);
+
+    return () => {
+      socket.off('JOB_CREATED', handleJobCreated);
+      socket.off('JOB_REMOVED_FROM_FEED', handleJobRemoved);
+    };
+  }, []);
+
+  return (/* JSX */);
+};
+```
+
+---
+
+#### স্ক্রিন ২: My Created Jobs Screen (অপারেটর / জব ক্রিয়েটরের জন্য)
+ড্রাইভার যখন জবটিতে অ্যাপ্লাই করবে, রিফ্রেশ ছাড়াই সাথে সাথে ব্যাজ বা নোটিফিকেশন আপডেট হবে।
+
+```typescript
+// screens/MyJobsScreen.tsx
+useEffect(() => {
+  const socket = getSocket();
+  if (!socket) return;
+
+  // ড্রাইভার অ্যাপ্লাই করলে
+  const handleApplicationReceived = (data: { jobId: string; applicant: any }) => {
+    // UI-তে ইনস্ট্যান্ট অ্যাপ্লিক্যান্ট শো করুন অথবা টোস্ট নোটিফিকেশন দিন
+    console.log('New driver applied:', data.applicant.name);
+    // React Query / State আপডেট:
+    updateJobApplicantState(data.jobId, data.applicant);
+  };
+
+  socket.on('JOB_APPLICATION_RECEIVED', handleApplicationReceived);
+
+  return () => {
+    socket.off('JOB_APPLICATION_RECEIVED', handleApplicationReceived);
+  };
+}, []);
+```
+
+---
+
+#### স্ক্রিন ৩: My Rides / Upcoming Rides Screen (ড্রাইভারদের জন্য)
+ক্রিয়েটর যখন ড্রাইভারকে জবটি দেবে, তখন ড্রাইভারের "Upcoming Rides" ট্যাবে স্বয়ংক্রিয়ভাবে জবটি চলে আসবে।
+
+```typescript
+// screens/MyRidesScreen.tsx
+useEffect(() => {
+  const socket = getSocket();
+  if (!socket) return;
+
+  // যখন জবটি এই ড্রাইভারকে অ্যাসাইন করা হয়
+  const handleJobAssigned = (data: { jobId: string; status: string; job: any }) => {
+    // ড্রাইভারের আপকামিং রাইডস লিস্টে জবটি ইনস্ট্যান্ট যোগ করুন
+    setUpcomingRides((prev) => [data.job || data, ...prev]);
+    showToast('Success', 'You have been assigned to a new ride!');
+  };
+
+  socket.on('JOB_ASSIGNED', handleJobAssigned);
+
+  return () => {
+    socket.off('JOB_ASSIGNED', handleJobAssigned);
+  };
+}, []);
+```
+
+---
+
+#### স্ক্রিন ৪: Live Ride Tracking / Job Details Screen (উভয়ের জন্য)
+ড্রাইভার বা ক্রিয়েটর যখন জব ডিটেইলস স্ক্রিনে থাকবে, তখন রাইড স্ট্যাটাস লাইভ আপডেট দেখতে পাবে।
+
+```typescript
+// screens/JobDetailsScreen.tsx
+useEffect(() => {
+  const socket = getSocket();
+  if (!socket || !jobId) return;
+
+  // ১. এই নির্দিষ্ট জবের রুমে জয়েন করুন
+  socket.emit('JOIN_JOB', { jobId });
+
+  // ২. লাইভ রাইড স্ট্যাটাস প্রগ্রেস (ON THE WAY -> AT THE LOCATION -> POB -> FINISHED)
+  const handleRideStatusUpdated = ({ jobId: updatedId, rideStatus, status }: any) => {
+    if (updatedId === jobId) {
+      setCurrentRideStatus(rideStatus); // লাইভ স্টেপার/ম্যাপ আপডেট
+    }
+  };
+
+  // ৩. যদি জবটি ক্যান্সেল করা হয়
+  const handleJobCancelled = ({ jobId: cancelledId }: any) => {
+    if (cancelledId === jobId) {
+      alert('This ride has been cancelled by the creator.');
+      navigation.goBack();
+    }
+  };
+
+  socket.on('RIDE_STATUS_UPDATED', handleRideStatusUpdated);
+  socket.on('JOB_CANCELLED', handleJobCancelled);
+
+  return () => {
+    // স্ক্রিন থেকে বের হওয়ার সময় লিভ করুন এবং ইভেন্ট লিসনার রিমুভ করুন
+    socket.emit('LEAVE_JOB', { jobId });
+    socket.off('RIDE_STATUS_UPDATED', handleRideStatusUpdated);
+    socket.off('JOB_CANCELLED', handleJobCancelled);
+  };
+}, [jobId]);
+```
+
+---
+
+#### স্ক্রিন ৫: Real-Time Chat Screen (১-অন-১ চ্যাট)
+চ্যাট স্ক্রিন ওপেন থাকলে কোনো পুল-ডাউন বা রিফ্রেশ ছাড়া মেসেজ লাইভ দেখা যাবে।
+
+```typescript
+// screens/ChatScreen.tsx
+useEffect(() => {
+  const socket = getSocket();
+  if (!socket || !chatId) return;
+
+  // ১. চ্যাট রুমে জয়েন করুন
+  socket.emit('JOIN_CHAT', { chatId });
+
+  // ২. নতুন মেসেজ রিসিভ করুন
+  const handleNewMessage = ({ chatId: msgChatId, message }: any) => {
+    if (msgChatId === chatId) {
+      setMessages((prev) => [...prev, message]);
+    }
+  };
+
+  socket.on('NEW_MESSAGE', handleNewMessage);
+
+  return () => {
+    socket.emit('LEAVE_CHAT', { chatId });
+    socket.off('NEW_MESSAGE', handleNewMessage);
+  };
+}, [chatId]);
+```
+
+---
+
+### ৩. সামারি ইভেন্ট টেবিল (Quick Reference)
+
+| ইভেন্ট নাম (`Event`) | কে লিসেন করবে? | কখন ট্রিগার হয়? | ক্লায়েন্টের করণীয় |
+| :--- | :--- | :--- | :--- |
+| **`JOB_CREATED`** | ড্রাইভার (Feed) | নতুন জব পোস্ট হলে | ফিডে জবটি যুক্ত করা |
+| **`JOB_REMOVED_FROM_FEED`** | ড্রাইভার (Feed) | জবটি অন্য কেউ নিলে / ক্যান্সেল হলে | ফিড থেকে জবটি রিমুভ করা |
+| **`JOB_APPLICATION_RECEIVED`** | ক্রিয়েটর (My Jobs) | ড্রাইভার অ্যাপ্লাই করলে | অ্যাপ্লিক্যান্ট কাউন্ট / কার্ড আপডেট করা |
+| **`JOB_ASSIGNED`** | ড্রাইভার (My Rides) | ড্রাইভারকে জব অ্যাসাইন করা হলে | My Rides লিস্টে ইনস্ট্যান্ট যুক্ত করা |
+| **`RIDE_STATUS_UPDATED`** | ক্রিয়েটর ও ড্রাইভার | স্ট্যাটাস আপডেট হলে (`ON THE WAY` ইত্যাদি) | লাইভ স্ট্যাটাস স্টেপার আপডেট করা |
+| **`JOB_CANCELLED`** | ক্রিয়েটর ও ড্রাইভার | জব ক্যান্সেল হলে | UI-তে "Cancelled" দেখানো |
+| **`NEW_MESSAGE`** | উভয় চ্যাট পার্টনার | চ্যাটে মেসেজ আসলে | মেসেজ লিস্টে সাথে সাথে অ্যাপেন্ড করা |
+
+এই প্যাটার্নে কোড করলে ক্লায়েন্টকে আর কোনো স্ক্রিনেই **Pull-to-refresh** করতে হবে না, সবকিছু রিয়েল-টাইমে আপডেট হবে।

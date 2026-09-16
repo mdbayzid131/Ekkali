@@ -11,6 +11,7 @@ import 'package:moeb_26/core/widgets/Custom_InfoBox.dart';
 import 'package:moeb_26/data/models/my_jobs_model.dart';
 import 'package:moeb_26/core/services/api_client.dart';
 import 'package:moeb_26/core/utils/helpers.dart';
+import 'package:moeb_26/core/services/socket_service.dart';
 import 'package:moeb_26/core/widgets/CustomButton.dart';
 import 'package:moeb_26/data/repositories/socket_repository.dart';
 import 'package:moeb_26/modules/preferred_drivers/controllers/preferred_drivers_controller.dart';
@@ -28,6 +29,8 @@ class _MyJobProgressDetailsViewState extends State<MyJobProgressDetailsView> {
   final BookingController controller = Get.isRegistered<BookingController>()
       ? Get.find<BookingController>()
       : Get.put(BookingController());
+  SocketService? socketService;
+  final List<Worker> _socketWorkers = [];
   JobData? initialJob;
   String? jobId;
 
@@ -49,9 +52,97 @@ class _MyJobProgressDetailsViewState extends State<MyJobProgressDetailsView> {
       controller.myJobView.value = initialJob;
     }
 
+    if (Get.isRegistered<SocketService>()) {
+      socketService = Get.find<SocketService>();
+    }
+
+    _setupJobSocket();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _refreshJob();
     });
+  }
+
+  void _setupJobSocket() {
+    if (socketService == null || jobId == null || jobId!.isEmpty) return;
+
+    // 1. Join the job room
+    socketService!.joinJob(jobId!);
+
+    // 2. Listen for Ride Status Updates (RIDE_STATUS_UPDATED)
+    _socketWorkers.add(
+      ever(socketService!.lastRideStatusUpdated, (data) {
+        if (data == null) return;
+        try {
+          String? updatedJobId;
+          String? newRideStatus;
+
+          if (data is Map) {
+            updatedJobId = data['jobId']?.toString() ??
+                data['id']?.toString() ??
+                data['_id']?.toString();
+            newRideStatus =
+                data['rideStatus']?.toString() ?? data['status']?.toString();
+          }
+
+          if (updatedJobId == jobId && newRideStatus != null) {
+            debugPrint(
+              "✨ MyJobProgressDetails: Live status updated to: $newRideStatus",
+            );
+            if (controller.myJobView.value != null) {
+              controller.myJobView.value!.rideStatus = newRideStatus;
+              controller.myJobView.refresh();
+            }
+          }
+        } catch (e) {
+          debugPrint("❌ MyJobProgressDetails: Error handling RIDE_STATUS_UPDATED: $e");
+        }
+      }),
+    );
+
+    // 3. Listen for Job Cancellation (JOB_CANCELLED)
+    _socketWorkers.add(
+      ever(socketService!.lastJobCancelled, (data) {
+        if (data == null) return;
+        try {
+          String? cancelledJobId;
+          if (data is Map) {
+            cancelledJobId = data['jobId']?.toString() ??
+                data['id']?.toString() ??
+                data['_id']?.toString();
+          } else if (data is String) {
+            cancelledJobId = data;
+          }
+
+          if (cancelledJobId == jobId) {
+            debugPrint("🚨 MyJobProgressDetails: Live job cancelled");
+            if (controller.myJobView.value != null) {
+              controller.myJobView.value!.status = "CANCELLED";
+              controller.myJobView.value!.rideStatus = "CANCELLED";
+              controller.myJobView.refresh();
+            }
+            Helpers.showCustomSnackBar(
+              "This ride has been cancelled.",
+              isError: true,
+            );
+          }
+        } catch (e) {
+          debugPrint("❌ MyJobProgressDetails: Error handling JOB_CANCELLED: $e");
+        }
+      }),
+    );
+  }
+
+  @override
+  void dispose() {
+    if (socketService != null && jobId != null && jobId!.isNotEmpty) {
+      socketService!.leaveJob(jobId!);
+    }
+    for (var worker in _socketWorkers) {
+      worker.dispose();
+    }
+    _socketWorkers.clear();
+    super.dispose();
   }
 
   Future<void> _refreshJob() async {

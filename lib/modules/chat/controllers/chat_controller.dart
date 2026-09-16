@@ -50,6 +50,10 @@ class ChatController extends GetxController {
       );
       if (response.statusCode == 200 && response.data != null) {
         communityRoom.value = CommunityRoom.fromJson(response.data['data']);
+        final actualArea = communityRoom.value?.serviceArea ?? targetArea;
+        if (actualArea.isNotEmpty) {
+          socketService.joinCommunity(actualArea);
+        }
         return;
       }
     } catch (e) {
@@ -57,17 +61,19 @@ class ChatController extends GetxController {
     }
 
     // Default Live Chat tile info
+    final String fallbackArea = serviceArea ?? "Global";
     communityRoom.value = CommunityRoom(
       name: "Live Chat",
-      serviceArea: "Global",
+      serviceArea: fallbackArea,
       lastMessage: "Welcome to the live chat room!",
       lastMessageAt: null,
     );
+    socketService.joinCommunity(fallbackArea);
   }
 
   void markChatAsRead(String chatId) {
     int index = chats.indexWhere((c) => c.id == chatId);
-    if (index != -1 && (!chats[index].isRead || chats[index].unreadCount > 0)) {
+    if (index != -1) {
       chats[index].isRead = true;
       chats[index].unreadCount = 0;
       chats.refresh();
@@ -75,8 +81,7 @@ class ChatController extends GetxController {
   }
 
   void markCommunityAsRead() {
-    if (communityRoom.value != null &&
-        (!communityRoom.value!.isRead || communityRoom.value!.unreadCount > 0)) {
+    if (communityRoom.value != null) {
       final current = communityRoom.value!;
       communityRoom.value = CommunityRoom(
         name: current.name,
@@ -87,6 +92,7 @@ class ChatController extends GetxController {
         unreadCount: 0,
         isRead: true,
       );
+      communityRoom.refresh();
     }
   }
 
@@ -126,41 +132,53 @@ class ChatController extends GetxController {
 
     // Listen for community messages
     ever(socketService.lastReceivedCommunityMessage, (newCommMsg) {
-      if (newCommMsg != null && communityRoom.value != null) {
-        final currentRoom = communityRoom.value!;
+      if (newCommMsg != null) {
+        debugPrint('📥 ChatController: Received community event payload: $newCommMsg');
         String? text;
         String? createdAt;
         String? senderId;
 
+        dynamic msgData = newCommMsg;
         if (newCommMsg is Map) {
-          if (newCommMsg['message'] is Map) {
-            text = newCommMsg['message']['text']?.toString();
-            createdAt = newCommMsg['message']['createdAt']?.toString();
-            final sData = newCommMsg['message']['sender'];
-            if (sData is Map) {
-              senderId = sData['id']?.toString() ?? sData['_id']?.toString();
-            } else if (sData is String) {
-              senderId = sData;
-            }
-          } else {
-            text = newCommMsg['text']?.toString();
-            createdAt = newCommMsg['createdAt']?.toString();
-            final sData = newCommMsg['sender'];
-            if (sData is Map) {
-              senderId = sData['id']?.toString() ?? sData['_id']?.toString();
-            } else if (sData is String) {
-              senderId = sData;
+          if (newCommMsg['message'] != null) {
+            msgData = newCommMsg['message'];
+          } else if (newCommMsg['data'] != null) {
+            msgData = newCommMsg['data'];
+            if (msgData is Map && msgData['message'] != null) {
+              msgData = msgData['message'];
             }
           }
         }
 
+        if (msgData is Map) {
+          text = msgData['text']?.toString() ??
+              msgData['message']?.toString() ??
+              msgData['content']?.toString();
+          createdAt = msgData['createdAt']?.toString();
+          final sData = msgData['sender'];
+          if (sData is Map) {
+            senderId = sData['id']?.toString() ??
+                sData['_id']?.toString() ??
+                sData['userId']?.toString();
+          } else if (sData is String) {
+            senderId = sData;
+          }
+        } else if (msgData is String) {
+          text = msgData;
+        }
+
         if (text != null && text.isNotEmpty) {
+          final currentRoom = communityRoom.value ??
+              CommunityRoom(
+                name: "Live Chat",
+                serviceArea: "Global",
+              );
           final isFromOther =
               senderId != null && senderId != userService.userId;
           final isCurrentlyViewingCommunity = socketService.isCommunityActive;
 
           communityRoom.value = CommunityRoom(
-            name: currentRoom.name,
+            name: currentRoom.name.isNotEmpty ? currentRoom.name : "Live Chat",
             serviceArea: currentRoom.serviceArea,
             totalMembers: currentRoom.totalMembers,
             lastMessage: text,
@@ -172,6 +190,8 @@ class ChatController extends GetxController {
                 ? true
                 : (isFromOther ? false : currentRoom.isRead),
           );
+          communityRoom.refresh();
+          debugPrint('✨ ChatController: Updated Live Chat tile with lastMessage: $text');
         }
       }
     });

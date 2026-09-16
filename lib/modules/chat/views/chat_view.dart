@@ -138,9 +138,10 @@ class ChatView extends StatelessWidget {
 
     return InkWell(
       onTap: () {
-        room.isRead = true;
-        room.unreadCount = 0;
-        Get.toNamed(Routes.chatCommunityDetailView, arguments: room);
+        controller.markCommunityAsRead();
+        Get.toNamed(Routes.chatCommunityDetailView, arguments: room)?.then((_) {
+          controller.markCommunityAsRead();
+        });
       },
       borderRadius: BorderRadius.circular(12.r),
       child: Padding(
@@ -283,11 +284,9 @@ class ChatView extends StatelessWidget {
       child: InkWell(
         onTap: () {
           // Mark locally as read when user taps to open
-          chat.isRead = true;
-          chat.unreadCount = 0;
-          controller.chats.refresh();
+          controller.markChatAsRead(chat.id);
           Get.toNamed(Routes.chatDetailView, arguments: chat)?.then((_) {
-            controller.chats.refresh();
+            controller.markChatAsRead(chat.id);
           });
         },
         borderRadius: BorderRadius.circular(12.r),

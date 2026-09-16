@@ -1,12 +1,15 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:moeb_26/core/services/socket_service.dart';
 import 'package:moeb_26/core/utils/helpers.dart';
 import 'package:moeb_26/data/models/my_rides_model.dart';
 import 'package:moeb_26/data/repositories/job_repository.dart';
 
 class RidesController extends GetxController {
   final JobRepo _jobRepo = Get.find<JobRepo>();
+  SocketService? _socketService;
+
   RxBool isLoadingList = false.obs;
   RxBool isLoadMore = false.obs;
 
@@ -24,11 +27,17 @@ class RidesController extends GetxController {
   RxList<RideData> upcomingRides = <RideData>[].obs;
   RxList<RideData> pastRides = <RideData>[].obs;
 
+  final List<Worker> _socketWorkers = [];
+
   @override
   void onInit() {
     super.onInit();
     if (Get.arguments is Map && Get.arguments.containsKey('ridesTab')) {
       selectedTab.value = Get.arguments['ridesTab'];
+    }
+    if (Get.isRegistered<SocketService>()) {
+      _socketService = Get.find<SocketService>();
+      _setupSocketListeners();
     }
     if (selectedTab.value == 0) {
       fetchUpcomingJobs();
@@ -38,8 +47,99 @@ class RidesController extends GetxController {
     scrollController.addListener(_onScroll);
   }
 
+  void _setupSocketListeners() {
+    if (_socketService == null) return;
+
+    // 1. Listen for new assigned jobs (JOB_ASSIGNED)
+    _socketWorkers.add(
+      ever(_socketService!.lastJobAssigned, (data) {
+        if (data == null) return;
+        try {
+          Map<String, dynamic>? jobMap;
+          if (data is Map<String, dynamic>) {
+            if (data.containsKey('job') && data['job'] is Map<String, dynamic>) {
+              jobMap = data['job'];
+            } else if (data.containsKey('data') && data['data'] is Map<String, dynamic>) {
+              jobMap = data['data'];
+            } else {
+              jobMap = data;
+            }
+          }
+
+          if (jobMap != null) {
+            final newRide = RideData.fromJson(jobMap);
+            if (newRide.id.isNotEmpty && !upcomingRides.any((r) => r.id == newRide.id)) {
+              upcomingRides.insert(0, newRide);
+              Helpers.showCustomSnackBar(
+                "You have been assigned to a new ride!",
+                isError: false,
+              );
+              debugPrint("✨ RidesController: Real-time JOB_ASSIGNED added [${newRide.id}]");
+            }
+          }
+        } catch (e) {
+          debugPrint("❌ RidesController: Error handling JOB_ASSIGNED: $e");
+        }
+      }),
+    );
+
+    // 2. Listen for Ride Status Updates (RIDE_STATUS_UPDATED)
+    _socketWorkers.add(
+      ever(_socketService!.lastRideStatusUpdated, (data) {
+        if (data == null) return;
+        try {
+          String? targetJobId;
+          String? newStatus;
+          if (data is Map) {
+            targetJobId = data['jobId']?.toString() ??
+                data['id']?.toString() ??
+                data['_id']?.toString();
+            newStatus = data['rideStatus']?.toString() ?? data['status']?.toString();
+          }
+
+          if (targetJobId != null && targetJobId.isNotEmpty) {
+            if (newStatus == "FINISHED" || newStatus == "COMPLETED") {
+              // Refresh lists to properly move to past rides
+              refreshCurrentTab();
+            }
+          }
+        } catch (e) {
+          debugPrint("❌ RidesController: Error handling RIDE_STATUS_UPDATED: $e");
+        }
+      }),
+    );
+
+    // 3. Listen for Job Cancellations (JOB_CANCELLED)
+    _socketWorkers.add(
+      ever(_socketService!.lastJobCancelled, (data) {
+        if (data == null) return;
+        try {
+          String? targetJobId;
+          if (data is Map) {
+            targetJobId = data['jobId']?.toString() ??
+                data['id']?.toString() ??
+                data['_id']?.toString();
+          } else if (data is String) {
+            targetJobId = data;
+          }
+
+          if (targetJobId != null && targetJobId.isNotEmpty) {
+            upcomingRides.removeWhere((r) => r.id == targetJobId);
+            debugPrint("🗑️ RidesController: Real-time cancelled ride removed [$targetJobId]");
+          }
+        } catch (e) {
+          debugPrint("❌ RidesController: Error handling JOB_CANCELLED: $e");
+        }
+      }),
+    );
+  }
+
   @override
   void onClose() {
+    for (var worker in _socketWorkers) {
+      worker.dispose();
+    }
+    _socketWorkers.clear();
     scrollController.dispose();
     super.onClose();
   }

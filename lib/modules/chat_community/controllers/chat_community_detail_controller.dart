@@ -152,10 +152,9 @@ class CommunityChatDetailController extends GetxController {
 
   void changeState(String newState) {
     if (selectedState.value == newState) return;
-    socketService.leaveRoom('community::${selectedState.value}');
     selectedState.value = newState;
     StorageService.setString(_kSelectedCommunityServiceArea, newState);
-    socketService.joinRoom('community::$newState');
+    socketService.joinCommunity(newState);
     fetchMessages();
     if (Get.isRegistered<ChatController>()) {
       Get.find<ChatController>().fetchCommunityRoom(serviceArea: newState);
@@ -164,11 +163,8 @@ class CommunityChatDetailController extends GetxController {
 
   void setupSocket() {
     final String currentArea = selectedState.value;
-    debugPrint('🔄 CommunityChatDetailController: Joining socket room: community::$currentArea');
-    socketService.joinRoom('community::$currentArea');
-    if (room.serviceArea.isNotEmpty && room.serviceArea != currentArea) {
-      socketService.joinRoom('community::${room.serviceArea}');
-    }
+    debugPrint('🔄 CommunityChatDetailController: Joining community: $currentArea');
+    socketService.joinCommunity(currentArea);
 
     _commWorker = ever(socketService.lastReceivedCommunityMessage, (data) {
       if (data != null) {
@@ -408,7 +404,6 @@ class CommunityChatDetailController extends GetxController {
       }
     });
     scrollController.dispose();
-    socketService.leaveRoom('community::${selectedState.value}');
     _commWorker?.dispose();
     messageController.dispose();
     super.onClose();
