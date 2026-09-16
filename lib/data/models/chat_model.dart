@@ -77,14 +77,14 @@ class ChatPreview {
 
   ChatPreview({
     required this.id,
-    required this.participants,
+    this.participants = const [],
     this.item,
     this.jobId,
     this.lastMessage,
     this.lastMessageAt,
-    required this.createdBy,
-    required this.createdAt,
-    required this.updatedAt,
+    this.createdBy = '',
+    this.createdAt = '',
+    this.updatedAt = '',
     this.unreadCount = 0,
     this.isRead = true,
   });

@@ -43,4 +43,20 @@ class NotificationsService extends GetxService {
       rethrow;
     }
   }
+
+  Future<Response> registerDeviceToken(String token) async {
+    try {
+      return await _notificationsRepo.registerDeviceToken(token);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<Response> unregisterDeviceToken(String token) async {
+    try {
+      return await _notificationsRepo.unregisterDeviceToken(token);
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

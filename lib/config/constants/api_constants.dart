@@ -59,6 +59,7 @@ class ApiConstants {
   //Notifications
   static const String notifications = '/notifications';
   static const String notificationsReadAll = '/notifications/read-all';
+  static const String deviceToken = '/notifications/device-token';
   //Service Areas
   static const String serviceAreas = '/service-areas/options';
 

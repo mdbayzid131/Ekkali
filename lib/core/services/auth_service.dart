@@ -7,6 +7,7 @@ import 'package:moeb_26/config/constants/app_constants.dart';
 import 'package:moeb_26/config/constants/storage_constants.dart';
 import 'package:moeb_26/config/routes/app_pages.dart';
 import 'package:moeb_26/core/services/api_client.dart';
+import 'package:moeb_26/core/services/firebase_notification_service.dart';
 import 'package:moeb_26/core/services/socket_service.dart';
 import 'package:moeb_26/core/services/storege_service.dart';
 import 'package:moeb_26/core/services/subscription_service.dart';
@@ -117,6 +118,12 @@ class AuthService extends GetxService {
   /// ===================== LOGOUT =====================
   Future<Response> logout() async {
     try {
+      try {
+        await FirebaseNotificationService.removeTokenFromBackend();
+      } catch (e) {
+        debugPrint("Error removing device token on logout: $e");
+      }
+
       final response = await _authRepo.logout(
         deviceToken: AppConstants.fcmToken,
       );
@@ -199,6 +206,12 @@ class AuthService extends GetxService {
 
         try {
           Get.find<SocketService>().initSocket();
+        } catch (_) {}
+
+        try {
+          await FirebaseNotificationService.sendTokenToBackend(
+            AppConstants.fcmToken,
+          );
         } catch (_) {}
       }
 

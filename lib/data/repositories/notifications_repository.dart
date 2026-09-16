@@ -27,4 +27,18 @@ class NotificationsRepo {
       '${ApiConstants.notifications}/$notificationId',
     );
   }
+
+  Future<Response> registerDeviceToken(String token) async {
+    return await apiClient.postData(
+      ApiConstants.deviceToken,
+      {'token': token},
+    );
+  }
+
+  Future<Response> unregisterDeviceToken(String token) async {
+    return await apiClient.deleteData(
+      ApiConstants.deviceToken,
+      body: {'token': token},
+    );
+  }
 }

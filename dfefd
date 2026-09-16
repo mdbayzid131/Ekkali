@@ -1,0 +1,68 @@
+Viewed .env:1-60
+Created test-firebase.ts
+Ran command: `npx tsx C:\Users\Khaled\.gemini\antigravity-ide\brain\8b11b5ea-f9f0-4333-a38d-c1aa9210d91b\scratch\test-firebase.ts`
+Listed directory scripts
+Created test-firebase.ts
+Ran command: `npx tsx scripts/test-firebase.ts`
+Created check-tokens.ts
+Ran command: `npx tsx scripts/check-tokens.ts`
+Created test-real-push.ts
+Ran command: `npx tsx scripts/test-real-push.ts`
+Viewed logger.ts:1-40
+Ran command: `powershell -Command "Remove-Item -Path scripts/test-firebase.ts, scripts/check-tokens.ts, scripts/test-real-push.ts -Force -ErrorAction SilentlyContinue"`
+Ran command: `powershell -Command "Remove-Item -Path 'C:\Users\Khaled\.gemini\antigravity-ide\brain\8b11b5ea-f9f0-4333-a38d-c1aa9210d91b\scratch\test-firebase.ts' -Force -ErrorAction SilentlyContinue"`
+
+আমি ব্যাকএন্ড কোড, আপনার বর্তমান `.env` ফাইল এবং লোকাল MongoDB ডাটাবেসে থাকা ডিভাইস টোকেনগুলো দিয়ে **সরাসরি Google FCM সার্ভারে লাইভ টেস্ট চালিয়েছি**।
+
+লাইভ টেস্টে পরিষ্কারভাবে বের হয়ে এসেছে কেন পুশ নোটিফিকেশন যাচ্ছিল না। নিচে মূল কারণগুলো এবং সমাধানের উপায় দেওয়া হলো:
+
+---
+
+### ১. সবচেয়ে বড় কারণ (iOS / iPhone এর ক্ষেত্রে): `Invalid APNs credential`
+আমরা যখন ডাটাবেসে থাকা টোকেনগুলোতে টেস্ট মেসেজ পাঠিয়েছি, iOS টোকেনগুলোর জন্য Firebase সরাসরি এই এরর দিয়েছে:
+> **`❌ FAILED! Error code: messaging/third-party-auth-error`**  
+> **`Error message: Invalid APNs credential.`**
+
+* **এর মানে কী?**  
+  iPhone-এ নোটিফিকেশন পাঠানোর জন্য Firebase-কে Apple-এর সার্ভার (APNs)-এর সাথে কানেক্ট হতে হয়।
+* **সমস্যা:** আপনার Firebase Console (`ekkali-ed609` প্রোজেক্টে) Apple-এর **APNs Auth Key (`.p8` ফাইল)** বা সার্টিফিকেট আপলোড করা নেই অথবা ভুল আছে।  
+* **সমাধান:**  
+  1. Firebase Console-এ যান (`https://console.firebase.google.com`).
+  2. প্রোজেক্ট সিলেক্ট করুন (`ekkali-ed609`) → **Project Settings** (গিয়ার আইকন) → **Cloud Messaging** ট্যাবে যান।
+  3. নিচে **Apple app configuration** সেকশনে গিয়ে আপনার Apple Developer Account-এর **APNs Authentication Key (`.p8` key)**, **Key ID** এবং **Team ID** আপলোড করে দিন।
+
+---
+
+### ২. ডাটাবেসে ইউজারের টোকেন নেই (`deviceTokens = []`)
+আমরা আপনার MongoDB ডাটাবেসের ২৮ জন ইউজারের প্রোফাইল চেক করেছি:
+* মাত্র **৩ জন** ইউজারের প্রোফাইলে টোকেন আছে।
+* বাকি ২৫ জন ইউজার (যেমন: `Anar`, `hamid coco`, `Administrator`) সবার প্রোফাইলে **`deviceTokens: []` (খালি)**!
+* **ফলাফল:** আপনি যদি নতুন কোনো অ্যাকাউন্ট দিয়ে টেস্ট করেন, তার প্রোফাইলে টোকেন সেভ না থাকলে ব্যাকএন্ড নোটিফিকেশন পাঠাবে কার কাছে? টোকেন না থাকলে ব্যাকএন্ড স্বাভাবিকভাবেই পুশ স্কিপ করে দেয়।
+
+---
+
+### ৩. মোবাইল অ্যাপে ভুল টোকেন জেনারেট হওয়া (`ExponentPushToken`)
+আপনার মোবাইল অ্যাপটি Expo দিয়ে তৈরি (`joeysass25-app`):
+* **ভুল পদ্ধতি:** ফ্রন্টএন্ড ডেভেলপার যদি `Notifications.getExpoPushTokenAsync()` ব্যবহার করে, তাহলে এটি `ExponentPushToken[...]` তৈরি করে। এই টোকেন Firebase Admin SDK চিনতে পারে না এবং `messaging/invalid-argument` এরর দেয়।
+* **সঠিক পদ্ধতি:** ফ্রন্টএন্ডে অবশ্যই **`Notifications.getDevicePushTokenAsync()`** কল করে পাওয়া আসল নেটিভ টোকেন পাঠাতে হবে।
+
+---
+
+### ৪. Android-এ নোটিফিকেশন কিন্তু সফলভাবে যাচ্ছে!
+আমরা ডাটাবেসে থাকা Android টোকেনগুলোতে পাঠিয়ে দেখেছি:
+* `Marcus Sterling (marcus.sterling@chauffeur.com)`:  
+  👉 **`✅ SUCCESS! Message ID: projects/ekkali-ed609/messages/0:1789553562003197...`**
+* `Md Bayzid test (xeloc86486@hebase.com)`:  
+  👉 **`✅ SUCCESS! Message ID: projects/ekkali-ed609/messages/0:1789553566359498...`**
+
+তার মানে **ব্যাকএন্ডের Firebase সার্ভিস অ্যাকাউন্ট এবং FCM ডেলিভারি সিস্টেম সম্পূর্ণ ঠিক আছে এবং কাজ করছে**।
+
+---
+
+### 🛠 সমাধান করতে আপনাকে যা চেক করতে হবে (Action Items):
+
+1. **আইফোনে টেস্ট করলে:** Firebase Console-এ গিয়ে Apple **APNs Key (`.p8`)** যোগ করুন।
+2. **যে ইউজার দিয়ে টেস্ট করছেন:** চেক করুন তার প্রোফাইলে টোকেন আছে কিনা:
+   - অ্যাপ থেকে লগআউট করে আবার লগইন করুন অথবা `POST /api/v1/notifications/device-token` এ টোকেন পাঠান।
+3. **মোবাইলে পারমিশন ও চ্যানেল:**
+   - ফোনে অ্যাপটির নোটিফিকেশন পারমিশন "Allow" করা আছে কিনা এবং Android-এ নোটিফিকেশন চ্যানেল তৈরি করা আছে কিনা নিশ্চিত করুন।
