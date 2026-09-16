@@ -4,7 +4,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:moeb_26/config/themes/app_theme.dart';
-import 'package:moeb_26/core/widgets/ImagePreviewPopup.dart';
 import 'package:moeb_26/core/widgets/custom_sub_appbar.dart';
 import 'package:moeb_26/core/widgets/CustomButton.dart';
 import 'package:moeb_26/modules/auth/authentication/controllers/personal_document_controller.dart';
@@ -89,6 +88,12 @@ class _PersonalDocumentDetailViewState
       ? controller.hackLicenseExpireController
       : controller.localPermitExpireController;
 
+  RxString get expiryRx => isDL
+      ? controller.drivingLicenseExpiry
+      : isHL
+      ? controller.hackLicenseExpiry
+      : controller.localPermitExpiry;
+
   RxBool get isUpdatingRx => isDL
       ? controller.isUpdatingDrivingLicense
       : isHL
@@ -134,9 +139,13 @@ class _PersonalDocumentDetailViewState
                 _buildExpiryDateCard(context),
                 SizedBox(height: 24.h),
 
-                // 4. Update Action Button
+                // 4. Update/Upload Action Button
                 CustomButton(
-                  text: isUpdating ? "Updating..." : "Save & Update Document",
+                  text: isUpdating
+                      ? "Saving..."
+                      : (docIdRx.value != null && docIdRx.value!.isNotEmpty
+                          ? "Save & Update Document"
+                          : "Upload & Save Document"),
                   loading: isUpdating,
                   onPressed: () async {
                     await controller.updateSingleDocument(docType);
@@ -147,7 +156,7 @@ class _PersonalDocumentDetailViewState
                 // Helper Note
                 Center(
                   child: Text(
-                    "All document updates are verified for transport compliance.",
+                    "All document uploads and updates are verified for transport compliance.",
                     textAlign: TextAlign.center,
                     style: GoogleFonts.inter(
                       color: const Color(0xFF64748B),
@@ -166,7 +175,7 @@ class _PersonalDocumentDetailViewState
 
   /// Unified Header Card (No duplicate cards)
   Widget _buildHeaderCard(String? status) {
-    final normalized = (status ?? 'PENDING').toUpperCase();
+    final normalized = (status ?? '').toUpperCase();
     final isApproved = normalized == 'APPROVED';
     final isPending =
         normalized.contains('PENDING') ||
@@ -187,6 +196,9 @@ class _PersonalDocumentDetailViewState
     } else if (isRejected) {
       subtitle = "Action Required (Rejected)";
       subtitleColor = const Color(0xFFF87171);
+    } else if (status == null || status.isEmpty) {
+      subtitle = "Document Not Uploaded Yet";
+      subtitleColor = const Color(0xFF94A3B8);
     } else {
       subtitle = "Official Credential";
       subtitleColor = const Color(0xFF94A3B8);
@@ -376,7 +388,7 @@ class _PersonalDocumentDetailViewState
                         width: double.infinity,
                         height: double.infinity,
                         fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Center(
+                        errorBuilder: (context, error, stackTrace) => Center(
                           child: Icon(
                             Icons.broken_image_rounded,
                             color: const Color(0xFF64748B),
@@ -579,7 +591,11 @@ class _PersonalDocumentDetailViewState
           SizedBox(height: 12.h),
 
           GestureDetector(
-            onTap: () => controller.selectDate(context, expireController),
+            onTap: () => controller.selectDate(
+              context,
+              expireController,
+              expiryRx: expiryRx,
+            ),
             child: Container(
               padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 13.h),
               decoration: BoxDecoration(
@@ -590,20 +606,20 @@ class _PersonalDocumentDetailViewState
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    expireController.text.isNotEmpty
-                        ? expireController.text
-                        : "YYYY-MM-DD",
-                    style: GoogleFonts.inter(
-                      color: expireController.text.isNotEmpty
-                          ? Colors.white
-                          : const Color(0xFF64748B),
-                      fontSize: 13.sp,
-                      fontWeight: expireController.text.isNotEmpty
-                          ? FontWeight.w500
-                          : FontWeight.w400,
-                    ),
-                  ),
+                  Obx(() {
+                    final date = expiryRx.value.isNotEmpty
+                        ? expiryRx.value
+                        : expireController.text.trim();
+                    final hasDate = date.isNotEmpty;
+                    return Text(
+                      hasDate ? date : "YYYY-MM-DD",
+                      style: GoogleFonts.inter(
+                        color: hasDate ? Colors.white : const Color(0xFF64748B),
+                        fontSize: 13.sp,
+                        fontWeight: hasDate ? FontWeight.w500 : FontWeight.w400,
+                      ),
+                    );
+                  }),
                   Icon(
                     Icons.calendar_today_rounded,
                     color: const Color(0xFF94A3B8),
@@ -620,7 +636,26 @@ class _PersonalDocumentDetailViewState
 
   /// Clean, Soft Status Badge
   Widget _buildStatusBadge(String? status) {
-    final normalized = (status ?? 'PENDING').toUpperCase();
+    if (status == null || status.isEmpty) {
+      return Container(
+        padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1E293B),
+          borderRadius: BorderRadius.circular(6.r),
+          border: Border.all(color: const Color(0xFF334155), width: 0.8),
+        ),
+        child: Text(
+          "Not Uploaded",
+          style: GoogleFonts.inter(
+            color: const Color(0xFF94A3B8),
+            fontSize: 10.5.sp,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      );
+    }
+
+    final normalized = status.toUpperCase();
     Color bg;
     Color border;
     Color textColor;

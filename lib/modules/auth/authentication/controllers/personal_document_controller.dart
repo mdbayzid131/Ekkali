@@ -11,12 +11,8 @@ import 'package:moeb_26/data/models/compliance_document_model.dart';
 import 'package:moeb_26/data/repositories/compliance_document_repository.dart';
 
 /// Standalone controller for Compliance Documents
-/// Dedicated solely to:
-/// 1. Fetching compliance documents (GET /api/v1/documents/licenses)
-/// 2. Updating compliance document expiry date & file (PATCH /api/v1/documents/:id)
 class PersonalDocumentController extends GetxController {
   final ImagePicker _imagePicker = ImagePicker();
-
   late final ComplianceDocumentRepository _documentRepo;
 
   PersonalDocumentController() {
@@ -28,37 +24,41 @@ class PersonalDocumentController extends GetxController {
           );
   }
 
-  var isLoading = false.obs;
+  final isLoading = false.obs;
 
   // Document IDs from server (for PATCH /api/v1/documents/:id)
-  var drivingLicenseId = RxnString();
-  var hackLicenseId = RxnString();
-  var localPermitId = RxnString();
+  final drivingLicenseId = RxnString();
+  final hackLicenseId = RxnString();
+  final localPermitId = RxnString();
 
   // Document Statuses from server
-  var drivingLicenseStatus = RxnString();
-  var hackLicenseStatus = RxnString();
-  var localPermitStatus = RxnString();
+  final drivingLicenseStatus = RxnString();
+  final hackLicenseStatus = RxnString();
+  final localPermitStatus = RxnString();
 
   // Individual Card Loading States
-  var isUpdatingDrivingLicense = false.obs;
-  var isUpdatingHackLicense = false.obs;
-  var isUpdatingLocalPermit = false.obs;
+  final isUpdatingDrivingLicense = false.obs;
+  final isUpdatingHackLicense = false.obs;
+  final isUpdatingLocalPermit = false.obs;
 
   // RX variables for newly picked local files
-  var drivingLicenseFile = Rx<File?>(null);
-  var hackLicenseFile = Rx<File?>(null);
-  var localPermitFile = Rx<File?>(null);
+  final drivingLicenseFile = Rx<File?>(null);
+  final hackLicenseFile = Rx<File?>(null);
+  final localPermitFile = Rx<File?>(null);
 
   // Existing image/file URLs from server
-  var drivingLicenseUrl = RxnString();
-  var hackLicenseUrl = RxnString();
-  var localPermitUrl = RxnString();
+  final drivingLicenseUrl = RxnString();
+  final hackLicenseUrl = RxnString();
+  final localPermitUrl = RxnString();
 
-  // Controllers for Expiry Dates
+  // Controllers & Reactive Expiry Dates
   final drivingLicenseExpireController = TextEditingController();
   final hackLicenseExpireController = TextEditingController();
   final localPermitExpireController = TextEditingController();
+
+  final drivingLicenseExpiry = ''.obs;
+  final hackLicenseExpiry = ''.obs;
+  final localPermitExpiry = ''.obs;
 
   @override
   void onInit() {
@@ -78,33 +78,11 @@ class PersonalDocumentController extends GetxController {
           response.data['data'] is List) {
         final List list = response.data['data'];
         for (var item in list) {
-          if (item is! Map) continue;
-          final doc = ComplianceDocumentModel.fromJson(
-            Map<String, dynamic>.from(item),
-          );
-          final docType = doc.documentType.toUpperCase();
-
-          if (docType == 'DRIVING_LICENSE') {
-            drivingLicenseId.value = doc.id;
-            drivingLicenseStatus.value = doc.status;
-            drivingLicenseUrl.value = doc.fullFileUrl;
-            if (doc.formattedExpiryDate.isNotEmpty) {
-              drivingLicenseExpireController.text = doc.formattedExpiryDate;
-            }
-          } else if (docType == 'HACK_LICENSE') {
-            hackLicenseId.value = doc.id;
-            hackLicenseStatus.value = doc.status;
-            hackLicenseUrl.value = doc.fullFileUrl;
-            if (doc.formattedExpiryDate.isNotEmpty) {
-              hackLicenseExpireController.text = doc.formattedExpiryDate;
-            }
-          } else if (docType == 'LOCAL_PERMIT') {
-            localPermitId.value = doc.id;
-            localPermitStatus.value = doc.status;
-            localPermitUrl.value = doc.fullFileUrl;
-            if (doc.formattedExpiryDate.isNotEmpty) {
-              localPermitExpireController.text = doc.formattedExpiryDate;
-            }
+          if (item is Map) {
+            final doc = ComplianceDocumentModel.fromJson(
+              Map<String, dynamic>.from(item),
+            );
+            _applyDocState(doc.documentType, doc);
           }
         }
       }
@@ -115,68 +93,31 @@ class PersonalDocumentController extends GetxController {
     }
   }
 
-  /// 2. PATCH /api/v1/documents/:id
+  /// 2. Save (Update or Upload) compliance document
   Future<void> updateSingleDocument(String documentType) async {
-    final bool isDL = documentType == 'DRIVING_LICENSE';
-    final bool isHL = documentType == 'HACK_LICENSE';
-
-    final String title = isDL
-        ? "Driving License"
-        : isHL
-            ? "Hack License"
-            : "Local Permit";
-
-    final RxnString docIdRx = isDL
-        ? drivingLicenseId
-        : isHL
-            ? hackLicenseId
-            : localPermitId;
-
-    final RxnString statusRx = isDL
-        ? drivingLicenseStatus
-        : isHL
-            ? hackLicenseStatus
-            : localPermitStatus;
-
-    final RxnString urlRx = isDL
-        ? drivingLicenseUrl
-        : isHL
-            ? hackLicenseUrl
-            : localPermitUrl;
-
-    final Rx<File?> fileRx = isDL
-        ? drivingLicenseFile
-        : isHL
-            ? hackLicenseFile
-            : localPermitFile;
-
-    final TextEditingController expireController = isDL
-        ? drivingLicenseExpireController
-        : isHL
-            ? hackLicenseExpireController
-            : localPermitExpireController;
-
-    final RxBool isUpdatingRx = isDL
-        ? isUpdatingDrivingLicense
-        : isHL
-            ? isUpdatingHackLicense
-            : isUpdatingLocalPermit;
+    final title = _getTitle(documentType);
+    final docIdRx = _getDocIdRx(documentType);
+    final fileRx = _getFileRx(documentType);
+    final expireController = _getExpireController(documentType);
+    final isUpdatingRx = _getIsUpdatingRx(documentType);
 
     final docId = docIdRx.value;
     final file = fileRx.value;
     final expiryText = expireController.text.trim();
 
-    if (file == null && expiryText.isEmpty) {
+    // Strict Validation: Expiration date is mandatory
+    if (expiryText.isEmpty) {
       Helpers.showCustomSnackBar(
-        'Please select an expiration date or attach a file to update $title.',
+        'Please select the official expiration date for $title.',
         isError: true,
       );
       return;
     }
 
-    if (docId == null || docId.isEmpty) {
+    // New upload requires a file
+    if ((docId == null || docId.isEmpty) && file == null) {
       Helpers.showCustomSnackBar(
-        'Document ID not found for $title.',
+        'Please attach a document file (Photo or PDF) to upload $title.',
         isError: true,
       );
       return;
@@ -185,39 +126,55 @@ class PersonalDocumentController extends GetxController {
     try {
       isUpdatingRx.value = true;
 
-      final response = await _documentRepo.updateDocument(
-        documentId: docId,
-        expiryDate: expiryText.isNotEmpty ? expiryText : null,
-        file: file,
-      );
+      // Call PATCH if exists, or POST if new
+      final response = (docId != null && docId.isNotEmpty)
+          ? await _documentRepo.updateDocument(
+              documentId: docId,
+              expiryDate: expiryText.isNotEmpty ? expiryText : null,
+              file: file,
+            )
+          : await _documentRepo.uploadDocument(
+              documentType: documentType,
+              file: file!,
+              expiryDate: expiryText.isNotEmpty ? expiryText : null,
+            );
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
+      final code = response.statusCode ?? 0;
+      final isSuccess =
+          (code >= 200 && code < 300) || response.data?['success'] == true;
+
+      if (isSuccess) {
         fileRx.value = null; // Clear local picked file
-        if (response.data?['data'] is Map) {
-          final updatedDoc = ComplianceDocumentModel.fromJson(
-            Map<String, dynamic>.from(response.data['data']),
-          );
-          statusRx.value = updatedDoc.status;
-          if (updatedDoc.fullFileUrl != null &&
-              updatedDoc.fullFileUrl!.isNotEmpty) {
-            urlRx.value = updatedDoc.fullFileUrl;
-          }
-          if (updatedDoc.formattedExpiryDate.isNotEmpty) {
-            expireController.text = updatedDoc.formattedExpiryDate;
-          }
+
+        // Extract response data (supports both Map and List responses)
+        final rawData = response.data?['data'];
+        Map<String, dynamic>? docMap;
+        if (rawData is Map) {
+          docMap = Map<String, dynamic>.from(rawData);
+        } else if (rawData is List &&
+            rawData.isNotEmpty &&
+            rawData.first is Map) {
+          docMap = Map<String, dynamic>.from(rawData.first);
         }
-        Helpers.showCustomSnackBar(
-          '$title updated successfully.',
-          isError: false,
-        );
+
+        if (docMap != null) {
+          final doc = ComplianceDocumentModel.fromJson(docMap);
+          _applyDocState(documentType, doc);
+        }
+
+        final msg = response.data?['message'] ??
+            (docId != null && docId.isNotEmpty
+                ? '$title updated successfully.'
+                : '$title uploaded successfully.');
+        Helpers.showCustomSnackBar(msg, isError: false);
       } else {
-        final msg = response.data?['message'] ?? 'Failed to update $title.';
+        final msg = response.data?['message'] ?? 'Failed to save $title.';
         Helpers.showCustomSnackBar(msg, isError: true);
       }
     } catch (e) {
-      debugPrint("Error updating $title: $e");
+      debugPrint("Error saving $title: $e");
       Helpers.showCustomSnackBar(
-        'Something went wrong updating $title.',
+        'Something went wrong saving $title.',
         isError: true,
       );
     } finally {
@@ -225,11 +182,78 @@ class PersonalDocumentController extends GetxController {
     }
   }
 
-  /// Date picker dialog
+  // ─── Helper Mapping Functions ──────────────────────────────────────────────
+
+  String _getTitle(String type) => type == 'DRIVING_LICENSE'
+      ? "Driving License"
+      : type == 'HACK_LICENSE'
+          ? "Hack License"
+          : "Local Permit";
+
+  RxnString _getDocIdRx(String type) => type == 'DRIVING_LICENSE'
+      ? drivingLicenseId
+      : type == 'HACK_LICENSE'
+          ? hackLicenseId
+          : localPermitId;
+
+  RxnString _getStatusRx(String type) => type == 'DRIVING_LICENSE'
+      ? drivingLicenseStatus
+      : type == 'HACK_LICENSE'
+          ? hackLicenseStatus
+          : localPermitStatus;
+
+  RxnString _getUrlRx(String type) => type == 'DRIVING_LICENSE'
+      ? drivingLicenseUrl
+      : type == 'HACK_LICENSE'
+          ? hackLicenseUrl
+          : localPermitUrl;
+
+  Rx<File?> _getFileRx(String type) => type == 'DRIVING_LICENSE'
+      ? drivingLicenseFile
+      : type == 'HACK_LICENSE'
+          ? hackLicenseFile
+          : localPermitFile;
+
+  TextEditingController _getExpireController(String type) =>
+      type == 'DRIVING_LICENSE'
+          ? drivingLicenseExpireController
+          : type == 'HACK_LICENSE'
+              ? hackLicenseExpireController
+              : localPermitExpireController;
+
+  RxString getExpiryRx(String type) => type.toUpperCase() == 'DRIVING_LICENSE'
+      ? drivingLicenseExpiry
+      : type.toUpperCase() == 'HACK_LICENSE'
+          ? hackLicenseExpiry
+          : localPermitExpiry;
+
+  RxBool _getIsUpdatingRx(String type) => type == 'DRIVING_LICENSE'
+      ? isUpdatingDrivingLicense
+      : type == 'HACK_LICENSE'
+          ? isUpdatingHackLicense
+          : isUpdatingLocalPermit;
+
+  void _applyDocState(String documentType, ComplianceDocumentModel doc) {
+    final type = documentType.toUpperCase();
+    _getDocIdRx(type).value = doc.id;
+    _getStatusRx(type).value = doc.status;
+    if (doc.fullFileUrl != null && doc.fullFileUrl!.isNotEmpty) {
+      _getUrlRx(type).value = doc.fullFileUrl;
+    }
+    if (doc.formattedExpiryDate.isNotEmpty) {
+      _getExpireController(type).text = doc.formattedExpiryDate;
+      getExpiryRx(type).value = doc.formattedExpiryDate;
+    }
+  }
+
+  // ─── Date Picker & Media Picking ────────────────────────────────────────────
+
   Future<void> selectDate(
     BuildContext context,
-    TextEditingController controller,
-  ) async {
+    TextEditingController controller, {
+    RxString? expiryRx,
+    String? documentType,
+  }) async {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
@@ -243,19 +267,42 @@ class PersonalDocumentController extends GetxController {
             surface: Color(0xFF1E2939),
             onSurface: Colors.white,
           ),
-          dialogTheme: DialogThemeData(
-            backgroundColor: const Color(0xFF1E2939),
+          dialogTheme: const DialogThemeData(
+            backgroundColor: Color(0xFF1E2939),
           ),
         ),
         child: child!,
       ),
     );
     if (picked != null) {
-      controller.text = DateFormat('yyyy-MM-dd').format(picked);
+      final formatted = DateFormat('yyyy-MM-dd').format(picked);
+      controller.text = formatted;
+      if (expiryRx != null) {
+        expiryRx.value = formatted;
+      } else if (documentType != null) {
+        getExpiryRx(documentType).value = formatted;
+      }
+      update();
     }
   }
 
   bool _isPicking = false;
+
+  Future<void> _processPickedFile(File file, Rx<File?> target) async {
+    final path = file.path.toLowerCase();
+    final isImage = !path.endsWith('.pdf');
+    final processed = isImage ? await Helpers.compressImage(file) : file;
+    final fileSize = await processed.length();
+
+    if (fileSize > 1024 * 1024) {
+      Helpers.showCustomSnackBar(
+        'Maximum file size allowed is 1MB',
+        isError: true,
+      );
+      return;
+    }
+    target.value = processed;
+  }
 
   Future<void> pickFromCamera(Rx<File?> target) async {
     if (_isPicking) return;
@@ -266,17 +313,7 @@ class PersonalDocumentController extends GetxController {
         imageQuality: 80,
       );
       if (image != null) {
-        final file = File(image.path);
-        final compressed = await Helpers.compressImage(file);
-        final fileSize = await compressed.length();
-        if (fileSize > 1024 * 1024) {
-          Helpers.showCustomSnackBar(
-            'Maximum file size allowed is 1MB',
-            isError: true,
-          );
-          return;
-        }
-        target.value = compressed;
+        await _processPickedFile(File(image.path), target);
       }
     } catch (e) {
       Helpers.error('Error picking from camera: $e');
@@ -291,16 +328,7 @@ class PersonalDocumentController extends GetxController {
     try {
       final File? file = await MediaPickerHelper.pickSingleImage(context);
       if (file != null) {
-        final compressed = await Helpers.compressImage(file);
-        final fileSize = await compressed.length();
-        if (fileSize > 1024 * 1024) {
-          Helpers.showCustomSnackBar(
-            'Maximum file size allowed is 1MB',
-            isError: true,
-          );
-          return;
-        }
-        target.value = compressed;
+        await _processPickedFile(file, target);
       }
     } catch (e) {
       Helpers.error('Error picking from gallery: $e');
@@ -315,31 +343,7 @@ class PersonalDocumentController extends GetxController {
     try {
       final File? file = await MediaPickerHelper.showImageOrPdfPicker(context);
       if (file != null) {
-        final path = file.path.toLowerCase();
-        final isImage = !path.endsWith('.pdf');
-
-        if (isImage) {
-          final compressed = await Helpers.compressImage(file);
-          final fileSize = await compressed.length();
-          if (fileSize > 1024 * 1024) {
-            Helpers.showCustomSnackBar(
-              'Maximum file size allowed is 1MB',
-              isError: true,
-            );
-            return;
-          }
-          target.value = compressed;
-        } else {
-          final fileSize = await file.length();
-          if (fileSize > 1024 * 1024) {
-            Helpers.showCustomSnackBar(
-              'Maximum file size allowed is 1MB',
-              isError: true,
-            );
-            return;
-          }
-          target.value = file;
-        }
+        await _processPickedFile(file, target);
       }
     } catch (e) {
       Helpers.error('Error picking from file: $e');
@@ -362,7 +366,6 @@ class PersonalDocumentController extends GetxController {
     return name;
   }
 
-  /// Shows preview dialog for server URL or local picked file
   void previewImage(
     BuildContext context,
     Rx<File?> fileRx,

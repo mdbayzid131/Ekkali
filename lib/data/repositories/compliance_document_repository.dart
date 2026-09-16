@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:intl/intl.dart';
@@ -48,6 +49,31 @@ class ComplianceDocumentRepository {
         },
       );
     }
+  }
+
+  /// 3. POST /api/v1/documents
+  /// Uploads a new document when docId does not exist yet (matches signup upload endpoint)
+  Future<Response<dynamic>> uploadDocument({
+    required String documentType,
+    required File file,
+    String? expiryDate,
+  }) async {
+    final formData = FormData();
+
+    final Map<String, dynamic> docMap = {"documentType": documentType};
+    if (expiryDate != null && expiryDate.trim().isNotEmpty) {
+      final formattedDate = _formatDateToIso(expiryDate);
+      if (formattedDate.isNotEmpty) {
+        docMap["expiryDate"] = formattedDate;
+      }
+    }
+
+    formData.fields.add(MapEntry('data', jsonEncode(docMap)));
+    formData.files.add(
+      MapEntry('file', await MultipartFile.fromFile(file.path)),
+    );
+
+    return await apiClient.postData(ApiConstants.documents, formData);
   }
 
   String _formatDateToIso(String dateStr) {

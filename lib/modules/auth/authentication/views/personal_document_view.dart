@@ -60,6 +60,7 @@ class PersonalDocumentView extends StatelessWidget {
                 statusRx: controller.drivingLicenseStatus,
                 urlRx: controller.drivingLicenseUrl,
                 expireController: controller.drivingLicenseExpireController,
+                expiryRx: controller.drivingLicenseExpiry,
               ),
 
               _buildDocumentCard(
@@ -69,6 +70,7 @@ class PersonalDocumentView extends StatelessWidget {
                 statusRx: controller.hackLicenseStatus,
                 urlRx: controller.hackLicenseUrl,
                 expireController: controller.hackLicenseExpireController,
+                expiryRx: controller.hackLicenseExpiry,
               ),
 
               _buildDocumentCard(
@@ -78,6 +80,7 @@ class PersonalDocumentView extends StatelessWidget {
                 statusRx: controller.localPermitStatus,
                 urlRx: controller.localPermitUrl,
                 expireController: controller.localPermitExpireController,
+                expiryRx: controller.localPermitExpiry,
               ),
 
               SizedBox(height: 16.h),
@@ -118,11 +121,14 @@ class PersonalDocumentView extends StatelessWidget {
     required RxnString statusRx,
     required RxnString urlRx,
     required TextEditingController expireController,
+    required RxString expiryRx,
   }) {
     return Obx(() {
       final status = statusRx.value;
       final url = urlRx.value;
-      final expiryDate = expireController.text.trim();
+      final expiryDate = expiryRx.value.isNotEmpty
+          ? expiryRx.value
+          : expireController.text.trim();
       final hasUrl = url != null && url.isNotEmpty;
 
       return Container(
@@ -239,7 +245,26 @@ class PersonalDocumentView extends StatelessWidget {
 
   /// Clean, Soft Status Badge
   Widget _buildStatusBadge(String? status) {
-    final normalized = (status ?? 'PENDING').toUpperCase();
+    if (status == null || status.isEmpty) {
+      return Container(
+        padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1E293B),
+          borderRadius: BorderRadius.circular(6.r),
+          border: Border.all(color: const Color(0xFF334155), width: 0.8),
+        ),
+        child: Text(
+          "Not Uploaded",
+          style: GoogleFonts.inter(
+            color: const Color(0xFF94A3B8),
+            fontSize: 10.5.sp,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      );
+    }
+
+    final normalized = status.toUpperCase();
     Color bg;
     Color border;
     Color textColor;
