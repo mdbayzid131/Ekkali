@@ -339,8 +339,8 @@ class PostJobController extends GetxController {
       if (response.statusCode == 200 || response.statusCode == 201) {
         Helpers.showCustomSnackBar('Job created successfully!', isError: false);
 
-        Get.back(); // Close bottom sheet
-        Get.toNamed(Routes.myJobsView);
+        Get.back(); // Close bottom sheet / page
+        // Get.toNamed(Routes.myJobsView);
       } else {
         final message = response.data is Map
             ? (response.data['message'] ?? 'Something went wrong.')
@@ -432,8 +432,8 @@ class PostJobController extends GetxController {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         Helpers.showCustomSnackBar('Job created successfully!', isError: false);
-        Get.back();
-        Get.toNamed(Routes.myJobsView);
+        Get.back(); // Close bottom sheet / page
+        // Get.toNamed(Routes.myJobsView);
       } else {
         final message = response.data is Map
             ? (response.data['message'] ?? 'Something went wrong.')

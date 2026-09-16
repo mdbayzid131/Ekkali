@@ -32,37 +32,47 @@ class JobOfferView extends StatelessWidget {
           children: [
             SizedBox(height: 15.h),
             // Top Action Buttons Header
-            Row(
-              children: [
-                Expanded(
-                  child: CustomJobButton(
-                    text: "New Job",
-                    padding: EdgeInsets.symmetric(
-                      vertical: 12.h,
-                      horizontal: 8.w,
-                    ),
-                    onPressed: () {
-                      Get.to(() => const JobPostSheetTabBarView());
-                    },
-                  ),
-                ),
-                SizedBox(width: 12.w),
-                Expanded(
-                  child: CustomJobButton(
-                    text: "My Jobs",
-                    iconPath: AppIcons.edit_icon_myjob,
-                    iconSize: 18.w,
-                    padding: EdgeInsets.symmetric(
-                      vertical: 12.h,
-                      horizontal: 8.w,
-                    ),
-                    onPressed: () {
-                      Get.toNamed(Routes.myJobsView);
-                    },
-                  ),
-                ),
-              ],
+            CustomJobButton(
+              text: "New Job",
+              padding: EdgeInsets.symmetric(
+                vertical: 14.h,
+                horizontal: 8.w,
+              ),
+              onPressed: () {
+                Get.to(() => const JobPostSheetTabBarView());
+              },
             ),
+            // Row(
+            //   children: [
+            //     Expanded(
+            //       child: CustomJobButton(
+            //         text: "New Job",
+            //         padding: EdgeInsets.symmetric(
+            //           vertical: 12.h,
+            //           horizontal: 8.w,
+            //         ),
+            //         onPressed: () {
+            //           Get.to(() => const JobPostSheetTabBarView());
+            //         },
+            //       ),
+            //     ),
+            //     SizedBox(width: 12.w),
+            //     Expanded(
+            //       child: CustomJobButton(
+            //         text: "My Jobs",
+            //         iconPath: AppIcons.edit_icon_myjob,
+            //         iconSize: 18.w,
+            //         padding: EdgeInsets.symmetric(
+            //           vertical: 12.h,
+            //           horizontal: 8.w,
+            //         ),
+            //         onPressed: () {
+            //           Get.toNamed(Routes.myJobsView);
+            //         },
+            //       ),
+            //     ),
+            //   ],
+            // ),
             SizedBox(height: 15.h),
 
             // Job Offers List
