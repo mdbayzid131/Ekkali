@@ -36,39 +36,46 @@ class SubscriptionController extends GetxController {
   // ─── Feature List ─────────────────────────────────────────────────────────────
   final List<Map<String, String>> features = [
     {
-      'title': 'Job Opportunities & Overflow',
-      'subtitle': 'Access jobs posted by other chauffeurs and grow your business',
+      'title': 'Job Opportunities',
+      'subtitle':
+          'Access job opportunities posted by other chauffeurs and grow your business.',
       'icon': 'job',
     },
     {
       'title': 'Preferred Chauffeur Network',
-      'subtitle': 'Build your trusted network and connect with top chauffeurs',
+      'subtitle':
+          'Build your trusted network and connect with professional chauffeurs you can rely on.',
       'icon': 'network',
     },
     {
-      'title': 'Live State & Regional Chats',
-      'subtitle': 'Communicate in real-time with chauffeurs in your area',
+      'title': 'Live Service Area Chats',
+      'subtitle':
+          'Communicate in real time with chauffeurs in your service area or connect with other service areas.',
       'icon': 'chat',
     },
     {
-      'title': 'Invoice Creator & Schedule',
-      'subtitle': 'Manage private bookings and create professional invoices easily',
+      'title': 'Invoice Creator, Schedule & Expense Tracker',
+      'subtitle':
+          'Manage your private bookings, create professional invoices, organize your schedule, and track your business expenses.',
       'icon': 'invoice',
     },
     {
       'title': 'Meet & Greet Sign Creator',
-      'subtitle': 'Create professional airport and client welcome signs',
+      'subtitle':
+          'Create professional airport and client welcome signs with ease.',
       'icon': 'flight',
     },
     {
       'title': 'Marketplace – Buy & Sell',
-      'subtitle': 'Buy and sell items or services related to your business',
+      'subtitle':
+          'Buy and sell business-related items, equipment, or services within the Ekkali network.',
       'icon': 'marketplace',
       'isNew': 'true',
     },
     {
       'title': 'Deals & Exclusive Offers',
-      'subtitle': 'Access exclusive deals, discounts, and tools for chauffeurs',
+      'subtitle':
+          'Access exclusive deals, discounts, and special offers from businesses serving the chauffeur industry.',
       'icon': 'deals',
     },
   ];

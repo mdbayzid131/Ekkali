@@ -78,7 +78,8 @@ class _MyJobProgressDetailsViewState extends State<MyJobProgressDetailsView> {
           String? newRideStatus;
 
           if (data is Map) {
-            updatedJobId = data['jobId']?.toString() ??
+            updatedJobId =
+                data['jobId']?.toString() ??
                 data['id']?.toString() ??
                 data['_id']?.toString();
             newRideStatus =
@@ -95,7 +96,9 @@ class _MyJobProgressDetailsViewState extends State<MyJobProgressDetailsView> {
             }
           }
         } catch (e) {
-          debugPrint("❌ MyJobProgressDetails: Error handling RIDE_STATUS_UPDATED: $e");
+          debugPrint(
+            "❌ MyJobProgressDetails: Error handling RIDE_STATUS_UPDATED: $e",
+          );
         }
       }),
     );
@@ -107,7 +110,8 @@ class _MyJobProgressDetailsViewState extends State<MyJobProgressDetailsView> {
         try {
           String? cancelledJobId;
           if (data is Map) {
-            cancelledJobId = data['jobId']?.toString() ??
+            cancelledJobId =
+                data['jobId']?.toString() ??
                 data['id']?.toString() ??
                 data['_id']?.toString();
           } else if (data is String) {
@@ -127,7 +131,9 @@ class _MyJobProgressDetailsViewState extends State<MyJobProgressDetailsView> {
             );
           }
         } catch (e) {
-          debugPrint("❌ MyJobProgressDetails: Error handling JOB_CANCELLED: $e");
+          debugPrint(
+            "❌ MyJobProgressDetails: Error handling JOB_CANCELLED: $e",
+          );
         }
       }),
     );
@@ -209,16 +215,22 @@ class _MyJobProgressDetailsViewState extends State<MyJobProgressDetailsView> {
 
             if (job == null) {
               return const Center(
-                child: CircularProgressIndicator(
-                  color: AppColors.primaryColor,
-                ),
+                child: CircularProgressIndicator(color: AppColors.primaryColor),
               );
             }
 
             // Format date and time
             String displayDateTime = "N/A";
             if (job.asap == true) {
-              displayDateTime = "ASAP";
+              String datePart = "Today";
+              if (job.createdAt != null && job.createdAt!.isNotEmpty) {
+                try {
+                  final parsedDate = DateTime.parse(job.createdAt!).toLocal();
+                  datePart =
+                      "Today, ${DateFormat('MMM dd').format(parsedDate)}";
+                } catch (_) {}
+              }
+              displayDateTime = "$datePart • ASAP";
             } else {
               String dateStr = "";
               if (job.date != null &&
@@ -262,10 +274,16 @@ class _MyJobProgressDetailsViewState extends State<MyJobProgressDetailsView> {
 
             String driverDisplayName = "Driver";
             if (driver != null) {
-              final hasName = driver.name != null && driver.name!.trim().isNotEmpty;
-              final hasNick = driver.nickname != null && driver.nickname!.trim().isNotEmpty;
-              if (hasName && hasNick && driver.name!.trim().toLowerCase() != driver.nickname!.trim().toLowerCase()) {
-                driverDisplayName = "${driver.name!.trim()} (${driver.nickname!.trim()})";
+              final hasName =
+                  driver.name != null && driver.name!.trim().isNotEmpty;
+              final hasNick =
+                  driver.nickname != null && driver.nickname!.trim().isNotEmpty;
+              if (hasName &&
+                  hasNick &&
+                  driver.name!.trim().toLowerCase() !=
+                      driver.nickname!.trim().toLowerCase()) {
+                driverDisplayName =
+                    "${driver.name!.trim()} (${driver.nickname!.trim()})";
               } else if (hasName) {
                 driverDisplayName = driver.name!.trim();
               } else if (hasNick) {
@@ -275,7 +293,8 @@ class _MyJobProgressDetailsViewState extends State<MyJobProgressDetailsView> {
 
             final String? participantId =
                 driver?.id ?? job.assignedTo?.id ?? job.applicant?.driver?.id;
-            final String driverProfileImage = driver?.profilePicture ??
+            final String driverProfileImage =
+                driver?.profilePicture ??
                 job.assignedTo?.profilePicture ??
                 job.applicant?.driver?.profilePicture ??
                 AppImages.profile_image;
@@ -298,28 +317,42 @@ class _MyJobProgressDetailsViewState extends State<MyJobProgressDetailsView> {
                         driverName: driverDisplayName,
                         driverImage: driverProfileImage,
                         rating: "${driver?.averageRating ?? 0.0}",
-                        onProfilePressed: (participantId != null && participantId.isNotEmpty)
+                        onProfilePressed:
+                            (participantId != null && participantId.isNotEmpty)
                             ? () {
                                 final preferredController =
-                                    Get.isRegistered<PreferredDriversController>()
-                                        ? Get.find<PreferredDriversController>()
-                                        : Get.put(PreferredDriversController());
+                                    Get.isRegistered<
+                                      PreferredDriversController
+                                    >()
+                                    ? Get.find<PreferredDriversController>()
+                                    : Get.put(PreferredDriversController());
 
                                 preferredController.openChauffeurProfile(
                                   userId: participantId,
-                                  name: driver?.name ?? driver?.nickname ?? 'Chauffeur',
+                                  name:
+                                      driver?.name ??
+                                      driver?.nickname ??
+                                      'Chauffeur',
                                   imageUrl: driver?.profilePicture ?? '',
                                 );
                               }
                             : null,
                         onChatPressed: () async {
-                          if (participantId != null && participantId.isNotEmpty) {
+                          if (participantId != null &&
+                              participantId.isNotEmpty) {
                             try {
-                              final socketRepo = Get.isRegistered<SocketRepository>()
+                              final socketRepo =
+                                  Get.isRegistered<SocketRepository>()
                                   ? Get.find<SocketRepository>()
-                                  : Get.put(SocketRepository(apiClient: Get.find<ApiClient>()));
+                                  : Get.put(
+                                      SocketRepository(
+                                        apiClient: Get.find<ApiClient>(),
+                                      ),
+                                    );
 
-                              final chat = await socketRepo.createChat(participantId);
+                              final chat = await socketRepo.createChat(
+                                participantId,
+                              );
                               if (chat != null) {
                                 Get.toNamed(
                                   Routes.chatDetailView,
@@ -539,7 +572,7 @@ class _MyJobProgressDetailsViewState extends State<MyJobProgressDetailsView> {
       {"label": "On The Way", "icon": Icons.directions_car_outlined},
       {"label": "At Location", "icon": Icons.location_on_outlined},
       {"label": "POB", "icon": Icons.person_pin_circle_outlined},
-      {"label": "Completed", "icon": Icons.task_alt},
+      {"label": "Finished", "icon": Icons.task_alt},
     ];
 
     final isFinished = activeStep == 4;
@@ -571,12 +604,12 @@ class _MyJobProgressDetailsViewState extends State<MyJobProgressDetailsView> {
                 decoration: BoxDecoration(
                   color: isFinished
                       ? const Color(0xFF10B981).withValues(alpha: 0.15)
-                      : AppColors.orange100.withValues(alpha: 0.15),
+                      : AppColors.primaryColor.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(20.r),
                   border: Border.all(
                     color: isFinished
                         ? const Color(0xFF10B981)
-                        : AppColors.orange100,
+                        : AppColors.primaryColor,
                   ),
                 ),
                 child: Text(
@@ -584,7 +617,7 @@ class _MyJobProgressDetailsViewState extends State<MyJobProgressDetailsView> {
                   style: GoogleFonts.inter(
                     color: isFinished
                         ? const Color(0xFF10B981)
-                        : AppColors.orange100,
+                        : AppColors.primaryColor,
                     fontSize: 11.sp,
                     fontWeight: FontWeight.bold,
                   ),
@@ -602,7 +635,7 @@ class _MyJobProgressDetailsViewState extends State<MyJobProgressDetailsView> {
               final Color color = isCompletedStep
                   ? const Color(0xFF10B981)
                   : (isCurrentStep
-                        ? AppColors.orange100
+                        ? AppColors.primaryColor
                         : const Color(0xFF52525B));
 
               return Expanded(
@@ -621,7 +654,7 @@ class _MyJobProgressDetailsViewState extends State<MyJobProgressDetailsView> {
                                       0xFF10B981,
                                     ).withValues(alpha: 0.15)
                                   : (isCurrentStep
-                                        ? AppColors.orange100.withValues(
+                                        ? AppColors.primaryColor.withValues(
                                             alpha: 0.15,
                                           )
                                         : Colors.white.withValues(alpha: 0.05)),
@@ -715,24 +748,24 @@ class _MyJobProgressDetailsViewState extends State<MyJobProgressDetailsView> {
                     child: ClipOval(
                       child: driverImage.isNotEmpty
                           ? (driverImage.startsWith('http')
-                              ? Image.network(
-                                  driverImage,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (_, __, ___) => Icon(
-                                    Icons.person_outline,
-                                    color: const Color(0xFFFEDB9B),
-                                    size: 20.sp,
-                                  ),
-                                )
-                              : Image.asset(
-                                  driverImage,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (_, __, ___) => Icon(
-                                    Icons.person_outline,
-                                    color: const Color(0xFFFEDB9B),
-                                    size: 20.sp,
-                                  ),
-                                ))
+                                ? Image.network(
+                                    driverImage,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, _, _) => Icon(
+                                      Icons.person_outline,
+                                      color: const Color(0xFFFEDB9B),
+                                      size: 20.sp,
+                                    ),
+                                  )
+                                : Image.asset(
+                                    driverImage,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, _, _) => Icon(
+                                      Icons.person_outline,
+                                      color: const Color(0xFFFEDB9B),
+                                      size: 20.sp,
+                                    ),
+                                  ))
                           : Icon(
                               Icons.person_outline,
                               color: const Color(0xFFFEDB9B),
@@ -792,13 +825,13 @@ class _MyJobProgressDetailsViewState extends State<MyJobProgressDetailsView> {
             icon: Container(
               padding: EdgeInsets.all(8.w),
               decoration: BoxDecoration(
-                color: AppColors.orange100.withValues(alpha: 0.15),
+                color: AppColors.primaryColor.withValues(alpha: 0.15),
                 shape: BoxShape.circle,
-                border: Border.all(color: AppColors.orange100),
+                border: Border.all(color: AppColors.primaryColor),
               ),
               child: const Icon(
                 Icons.chat_bubble_outline,
-                color: AppColors.orange100,
+                color: AppColors.primaryColor,
                 size: 18,
               ),
             ),
@@ -869,8 +902,9 @@ class _MyJobProgressDetailsViewState extends State<MyJobProgressDetailsView> {
                         if (Get.isDialogOpen == true) {
                           Get.back(); // 1. Close dialog
                         }
-                        final success =
-                            await controller.cancelJobOffer(jobId: jobId);
+                        final success = await controller.cancelJobOffer(
+                          jobId: jobId,
+                        );
                         if (success) {
                           Get.back(); // 2. Exit ride details page and return to My Jobs
                           Helpers.showCustomSnackBar(
