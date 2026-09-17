@@ -1,103 +1,23 @@
 import 'dart:io';
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:wechat_assets_picker/wechat_assets_picker.dart';
+import 'package:image_picker/image_picker.dart';
 
 class MediaPickerHelper {
-  /// Check photo library permissions and redirect to settings if denied
-  static Future<bool> checkPermission(BuildContext context) async {
+  static final ImagePicker _imagePicker = ImagePicker();
+
+  /// Picks a single image from the gallery using Google Play-compliant system Photo Picker (No storage permissions required).
+  static Future<File?> pickSingleImage([BuildContext? context]) async {
     try {
-      final PermissionState ps = await PhotoManager.requestPermissionExtend();
-      if (ps == PermissionState.denied || ps == PermissionState.restricted) {
-        await _showPermissionSettingsDialog(context);
-        return false;
-      }
-      return true;
-    } catch (e) {
-      debugPrint("Error checking permission: $e");
-      return false;
-    }
-  }
-
-  /// Show settings dialog for permissions
-  static Future<void> _showPermissionSettingsDialog(
-    BuildContext context,
-  ) async {
-    await Get.dialog(
-      AlertDialog(
-        backgroundColor: const Color(0xFF1E2632),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16.r),
-        ),
-        title: Text(
-          "Permission Required",
-          style: GoogleFonts.inter(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: 16.sp,
-          ),
-        ),
-        content: Text(
-          "We need access to your photo library to let you select and upload images. Please enable it in Settings.",
-          style: GoogleFonts.inter(color: Colors.grey, fontSize: 14.sp),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: Text(
-              "Cancel",
-              style: GoogleFonts.inter(
-                color: Colors.grey,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Get.back();
-              PhotoManager.openSetting();
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF6C63FF),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8.r),
-              ),
-            ),
-            child: Text(
-              "Open Settings",
-              style: GoogleFonts.inter(
-                color: Colors.white,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ],
-      ),
-      barrierColor: Colors.black54,
-    );
-  }
-
-  /// Picks a single image from the gallery and returns a File.
-  static Future<File?> pickSingleImage(BuildContext context) async {
-    final hasPermission = await checkPermission(context);
-    if (!hasPermission) return null;
-
-    try {
-      final List<AssetEntity>? result = await AssetPicker.pickAssets(
-        context,
-        pickerConfig: const AssetPickerConfig(
-          maxAssets: 1,
-          requestType: RequestType.image,
-          themeColor: Color(0xFF6C63FF),
-          textDelegate: EnglishAssetPickerTextDelegate(),
-        ),
+      final XFile? picked = await _imagePicker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 85,
       );
-
-      if (result != null && result.isNotEmpty) {
-        return (await result.first.file) ?? (await result.first.originFile);
+      if (picked != null) {
+        return File(picked.path);
       }
     } catch (e) {
       debugPrint("Error picking single image: $e");
@@ -105,34 +25,18 @@ class MediaPickerHelper {
     return null;
   }
 
-  /// Picks multiple images from the gallery and returns a list of Files.
-  static Future<List<File>?> pickMultiImages(
-    BuildContext context, {
+  /// Picks multiple images from the gallery using Google Play-compliant system Photo Picker.
+  static Future<List<File>?> pickMultiImages([
+    BuildContext? context,
     int maxImages = 9,
-  }) async {
-    final hasPermission = await checkPermission(context);
-    if (!hasPermission) return null;
-
+  ]) async {
     try {
-      final List<AssetEntity>? result = await AssetPicker.pickAssets(
-        context,
-        pickerConfig: AssetPickerConfig(
-          maxAssets: maxImages,
-          requestType: RequestType.image,
-          themeColor: const Color(0xFF6C63FF),
-          textDelegate: const EnglishAssetPickerTextDelegate(),
-        ),
+      final List<XFile> pickedList = await _imagePicker.pickMultiImage(
+        imageQuality: 85,
+        limit: maxImages,
       );
-
-      if (result != null && result.isNotEmpty) {
-        final List<File> files = [];
-        for (final entity in result) {
-          final file = (await entity.file) ?? (await entity.originFile);
-          if (file != null) {
-            files.add(file);
-          }
-        }
-        return files;
+      if (pickedList.isNotEmpty) {
+        return pickedList.map((x) => File(x.path)).toList();
       }
     } catch (e) {
       debugPrint("Error picking multiple images: $e");
@@ -140,9 +44,9 @@ class MediaPickerHelper {
     return null;
   }
 
-  /// Shows a premium dialog popup to choose between picking an image from WeChat Picker or a PDF document.
+  /// Shows dialog popup to choose between picking an image from Gallery or a PDF document.
   static Future<File?> showImageOrPdfPicker(BuildContext context) async {
-    final File? selectedFile = await Get.dialog<File?>(
+    final String? action = await Get.dialog<String>(
       Dialog(
         backgroundColor: Colors.transparent,
         child: Material(
@@ -150,7 +54,7 @@ class MediaPickerHelper {
           child: Container(
             padding: EdgeInsets.all(20.w),
             decoration: BoxDecoration(
-              color: Colors.black, // Black background matching application dialogs
+              color: Colors.black,
               borderRadius: BorderRadius.circular(16.r),
               border: Border.all(
                 color: const Color(0xFF374151),
@@ -184,7 +88,7 @@ class MediaPickerHelper {
                   leading: Container(
                     padding: EdgeInsets.all(8.r),
                     decoration: BoxDecoration(
-                      color: Colors.grey.withAlpha(51), // 20% opacity
+                      color: Colors.grey.withAlpha(51),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(Icons.image_outlined, color: Colors.grey),
@@ -201,10 +105,7 @@ class MediaPickerHelper {
                     "Choose a photo from your library",
                     style: GoogleFonts.inter(color: Colors.grey, fontSize: 11.sp),
                   ),
-                  onTap: () async {
-                    final File? file = await pickSingleImage(context);
-                    Get.back(result: file);
-                  },
+                  onTap: () => Get.back(result: 'image'),
                 ),
                 const Divider(color: Colors.white12),
                 ListTile(
@@ -212,7 +113,7 @@ class MediaPickerHelper {
                   leading: Container(
                     padding: EdgeInsets.all(8.r),
                     decoration: BoxDecoration(
-                      color: Colors.grey.withAlpha(51), // 20% opacity
+                      color: Colors.grey.withAlpha(51),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
@@ -232,32 +133,32 @@ class MediaPickerHelper {
                     "Choose a PDF file from storage",
                     style: GoogleFonts.inter(color: Colors.grey, fontSize: 11.sp),
                   ),
-                  onTap: () async {
-                    try {
-                      final FilePickerResult? result = await FilePicker.platform
-                          .pickFiles(
-                            type: FileType.custom,
-                            allowedExtensions: ['pdf'],
-                          );
-                      if (result != null && result.files.single.path != null) {
-                        Get.back(result: File(result.files.single.path!));
-                      } else {
-                        Get.back(result: null);
-                      }
-                    } catch (e) {
-                      debugPrint("Error picking PDF: $e");
-                      Get.back(result: null);
-                    }
-                  },
+                  onTap: () => Get.back(result: 'pdf'),
                 ),
               ],
             ),
           ),
         ),
       ),
-      barrierColor: Colors.black.withOpacity(0.74),
+      barrierColor: Colors.black.withAlpha(188),
     );
 
-    return selectedFile;
+    if (action == 'image') {
+      return await pickSingleImage();
+    } else if (action == 'pdf') {
+      try {
+        final FilePickerResult? result = await FilePicker.platform.pickFiles(
+          type: FileType.custom,
+          allowedExtensions: ['pdf'],
+        );
+        if (result != null && result.files.single.path != null) {
+          return File(result.files.single.path!);
+        }
+      } catch (e) {
+        debugPrint("Error picking PDF: $e");
+      }
+    }
+
+    return null;
   }
 }

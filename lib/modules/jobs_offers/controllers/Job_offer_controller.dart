@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:moeb_26/config/routes/app_pages.dart';
 import 'package:moeb_26/core/services/job_service.dart';
+import 'package:moeb_26/core/services/user_service.dart';
 import 'package:moeb_26/core/utils/helpers.dart';
 import 'package:moeb_26/core/services/socket_service.dart';
 import 'package:moeb_26/data/models/job_offer_model.dart';
@@ -45,9 +46,11 @@ class JobOfferController extends GetxController {
         try {
           Map<String, dynamic>? jobMap;
           if (data is Map<String, dynamic>) {
-            if (data.containsKey('job') && data['job'] is Map<String, dynamic>) {
+            if (data.containsKey('job') &&
+                data['job'] is Map<String, dynamic>) {
               jobMap = data['job'];
-            } else if (data.containsKey('data') && data['data'] is Map<String, dynamic>) {
+            } else if (data.containsKey('data') &&
+                data['data'] is Map<String, dynamic>) {
               jobMap = data['data'];
             } else {
               jobMap = data;
@@ -56,14 +59,33 @@ class JobOfferController extends GetxController {
 
           if (jobMap != null) {
             final newJob = JobOfferModel.fromJson(jobMap);
-            if (newJob.id.isNotEmpty && !jobOffers.any((j) => j.id == newJob.id)) {
+            final currentUserId = Get.isRegistered<UserService>()
+                ? Get.find<UserService>().userId
+                : '';
+
+            // Ignore jobs created by the current logged-in user
+            if (currentUserId.isNotEmpty &&
+                newJob.createdBy != null &&
+                newJob.createdBy == currentUserId) {
+              debugPrint(
+                "🚫 JobOfferController: Ignored self-created job from feed [${newJob.id}]",
+              );
+              return;
+            }
+
+            if (newJob.id.isNotEmpty &&
+                !jobOffers.any((j) => j.id == newJob.id)) {
               jobOffers.insert(0, newJob);
               _groupOffersByDate(jobOffers);
-              debugPrint("✨ JobOfferController: Real-time JOB_CREATED added [${newJob.id}]");
+              debugPrint(
+                "✨ JobOfferController: Real-time JOB_CREATED added [${newJob.id}]",
+              );
             }
           }
         } catch (e) {
-          debugPrint("❌ JobOfferController: Error parsing JOB_CREATED data: $e");
+          debugPrint(
+            "❌ JobOfferController: Error parsing JOB_CREATED data: $e",
+          );
         }
       }),
     );
@@ -75,7 +97,8 @@ class JobOfferController extends GetxController {
         try {
           String? targetJobId;
           if (data is Map) {
-            targetJobId = data['jobId']?.toString() ??
+            targetJobId =
+                data['jobId']?.toString() ??
                 data['id']?.toString() ??
                 data['_id']?.toString();
           } else if (data is String) {
@@ -87,11 +110,15 @@ class JobOfferController extends GetxController {
             jobOffers.removeWhere((item) => item.id == targetJobId);
             if (jobOffers.length != initialLength) {
               _groupOffersByDate(jobOffers);
-              debugPrint("🗑️ JobOfferController: Real-time JOB_REMOVED_FROM_FEED removed [$targetJobId]");
+              debugPrint(
+                "🗑️ JobOfferController: Real-time JOB_REMOVED_FROM_FEED removed [$targetJobId]",
+              );
             }
           }
         } catch (e) {
-          debugPrint("❌ JobOfferController: Error parsing JOB_REMOVED_FROM_FEED data: $e");
+          debugPrint(
+            "❌ JobOfferController: Error parsing JOB_REMOVED_FROM_FEED data: $e",
+          );
         }
       }),
     );
@@ -117,6 +144,9 @@ class JobOfferController extends GetxController {
       if (response.statusCode == 200 || response.statusCode == 201) {
         final dynamic rawData = response.data?['data'];
         final List<dynamic> list = (rawData is List) ? rawData : [];
+        final currentUserId = Get.isRegistered<UserService>()
+            ? Get.find<UserService>().userId
+            : '';
 
         final items = list
             .map((item) {
@@ -128,6 +158,12 @@ class JobOfferController extends GetxController {
               }
             })
             .whereType<JobOfferModel>()
+            .where(
+              (j) =>
+                  currentUserId.isEmpty ||
+                  j.createdBy == null ||
+                  j.createdBy != currentUserId,
+            )
             .toList();
 
         jobOffers.assignAll(items);
@@ -193,13 +229,10 @@ class JobOfferController extends GetxController {
         _groupOffersByDate(jobOffers);
 
         // Navigate to Application Status / Review screen
-        Get.toNamed(
-          Routes.requestSubmittedView,
-          arguments: job.toJson(),
-        );
+        Get.toNamed(Routes.requestSubmittedView, arguments: job.toJson());
       } else {
-        final message = response.data?['message']?.toString() ??
-            'Failed to apply for job.';
+        final message =
+            response.data?['message']?.toString() ?? 'Failed to apply for job.';
         Helpers.showCustomSnackBar(message, isError: true);
       }
     } on DioException catch (e) {

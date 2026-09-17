@@ -69,7 +69,10 @@ class PostJobController extends GetxController {
   Future<void> fetchServiceAreas() async {
     isServiceAreasLoading.value = true;
     try {
-      final response = await _serviceAreasRepo.getAllServiceAreas(page: 1, limit: 50);
+      final response = await _serviceAreasRepo.getAllServiceAreas(
+        page: 1,
+        limit: 50,
+      );
       if (response.statusCode == 200 || response.statusCode == 201) {
         final List<dynamic> dataList = response.data is Map
             ? (response.data['data'] ?? response.data['service_areas'] ?? [])
@@ -85,7 +88,6 @@ class PostJobController extends GetxController {
       isServiceAreasLoading.value = false;
     }
   }
-
 
   String get chauffeurSelectionText {
     if (chauffeurSelectionType.value == 'global') {
@@ -291,17 +293,19 @@ class PostJobController extends GetxController {
 
       final String normalizedPayment =
           (paymentType.toUpperCase().contains("COLLECT") &&
-                  !paymentType.toUpperCase().contains("CREDIT"))
-              ? "COLLECT PAYMENT"
-              : "CREDIT CARD ON FILE";
+              !paymentType.toUpperCase().contains("CREDIT"))
+          ? "COLLECT PAYMENT"
+          : "CREDIT CARD ON FILE";
 
       final bool isTargeted =
           chauffeurSelectionType.value == 'favorites' &&
-              selectedDrivers.isNotEmpty;
-      final String dispatchType =
-          isTargeted ? "TARGETED CHAUFFEURS" : "ALL CHAUFFEURS";
-      final List<String> targetedChauffeurs =
-          isTargeted ? selectedDrivers.toList() : [];
+          selectedDrivers.isNotEmpty;
+      final String dispatchType = isTargeted
+          ? "TARGETED CHAUFFEURS"
+          : "ALL CHAUFFEURS";
+      final List<String> targetedChauffeurs = isTargeted
+          ? selectedDrivers.toList()
+          : [];
 
       List<String> serviceAreaIds = [];
       if (!isTargeted && selectedServiceAreas.isNotEmpty) {
@@ -329,18 +333,22 @@ class PostJobController extends GetxController {
         paymentAmount: double.tryParse(paymentAmount) ?? 0,
         paymentType: normalizedPayment,
         dispatchType: dispatchType,
-        instruction:
-            instruction?.isNotEmpty == true ? instruction : null,
+        instruction: instruction?.isNotEmpty == true ? instruction : null,
         targetedChauffeurs: targetedChauffeurs,
         serviceAreaId: serviceAreaIds.isNotEmpty ? serviceAreaIds.first : null,
         serviceAreaIds: serviceAreaIds.isNotEmpty ? serviceAreaIds : null,
       );
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        Helpers.showCustomSnackBar('Job created successfully!', isError: false);
+      final int code = response.statusCode ?? 0;
+      final bool isSuccess =
+          (code >= 200 && code < 300) || response.data?['success'] == true;
 
-        Get.back(); // Close bottom sheet / page
-        // Get.toNamed(Routes.myJobsView);
+      if (isSuccess) {
+        Get.back(); // Pop JobPostSheetTabBarView back to JobOfferView
+        Helpers.showCustomSnackBar(
+          response.data?['message']?.toString() ?? 'Job created successfully!',
+          isError: false,
+        );
       } else {
         final message = response.data is Map
             ? (response.data['message'] ?? 'Something went wrong.')
@@ -382,17 +390,19 @@ class PostJobController extends GetxController {
 
       final String normalizedPayment =
           (paymentType.toUpperCase().contains("COLLECT") &&
-                  !paymentType.toUpperCase().contains("CREDIT"))
-              ? "COLLECT PAYMENT"
-              : "CREDIT CARD ON FILE";
+              !paymentType.toUpperCase().contains("CREDIT"))
+          ? "COLLECT PAYMENT"
+          : "CREDIT CARD ON FILE";
 
       final bool isTargeted =
           chauffeurSelectionType.value == 'favorites' &&
-              selectedDrivers.isNotEmpty;
-      final String dispatchType =
-          isTargeted ? "TARGETED CHAUFFEURS" : "ALL CHAUFFEURS";
-      final List<String> targetedChauffeurs =
-          isTargeted ? selectedDrivers.toList() : [];
+          selectedDrivers.isNotEmpty;
+      final String dispatchType = isTargeted
+          ? "TARGETED CHAUFFEURS"
+          : "ALL CHAUFFEURS";
+      final List<String> targetedChauffeurs = isTargeted
+          ? selectedDrivers.toList()
+          : [];
 
       List<String> serviceAreaIds = [];
       if (!isTargeted && selectedServiceAreas.isNotEmpty) {
@@ -410,8 +420,8 @@ class PostJobController extends GetxController {
 
       final String finalDropoff =
           (dropoffLocation != null && dropoffLocation.isNotEmpty)
-              ? dropoffLocation
-              : "By the hour";
+          ? dropoffLocation
+          : "By the hour";
 
       final response = await _jobService.createJob(
         jobType: "BY THE HOUR",
@@ -430,10 +440,16 @@ class PostJobController extends GetxController {
         serviceAreaIds: serviceAreaIds.isNotEmpty ? serviceAreaIds : null,
       );
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        Helpers.showCustomSnackBar('Job created successfully!', isError: false);
-        Get.back(); // Close bottom sheet / page
-        // Get.toNamed(Routes.myJobsView);
+      final int code = response.statusCode ?? 0;
+      final bool isSuccess =
+          (code >= 200 && code < 300) || response.data?['success'] == true;
+
+      if (isSuccess) {
+        Get.back(); // Pop JobPostSheetTabBarView back to JobOfferView
+        Helpers.showCustomSnackBar(
+          response.data?['message']?.toString() ?? 'Job created successfully!',
+          isError: false,
+        );
       } else {
         final message = response.data is Map
             ? (response.data['message'] ?? 'Something went wrong.')

@@ -34,10 +34,7 @@ class JobOfferView extends StatelessWidget {
             // Top Action Buttons Header
             CustomJobButton(
               text: "New Job",
-              padding: EdgeInsets.symmetric(
-                vertical: 14.h,
-                horizontal: 8.w,
-              ),
+              padding: EdgeInsets.symmetric(vertical: 14.h, horizontal: 8.w),
               onPressed: () {
                 Get.to(() => const JobPostSheetTabBarView());
               },
@@ -78,7 +75,8 @@ class JobOfferView extends StatelessWidget {
             // Job Offers List
             Expanded(
               child: Obx(() {
-                if (controller.isLoading.value && controller.jobOffers.isEmpty) {
+                if (controller.isLoading.value &&
+                    controller.jobOffers.isEmpty) {
                   return Center(
                     child: CircularProgressIndicator(
                       color: AppColors.primaryColor,
@@ -172,8 +170,8 @@ class JobOfferView extends StatelessWidget {
                   );
                 }
 
-                final groupEntries =
-                    controller.groupedJobOffers.entries.toList();
+                final groupEntries = controller.groupedJobOffers.entries
+                    .toList();
 
                 return RefreshIndicator(
                   color: AppColors.primaryColor,
@@ -236,7 +234,9 @@ class JobOfferView extends StatelessWidget {
                                     companyName: job.companyName,
                                     vehicleType: job.vehicleType,
                                     paymentType: job.paymentType,
-                                    amount: job.paymentAmount.toStringAsFixed(2),
+                                    amount: job.paymentAmount.toStringAsFixed(
+                                      2,
+                                    ),
                                     flightNumber: job.flightNumber,
                                     specialInstructions: job.instruction,
                                     actionButtonText: "Apply to Job",

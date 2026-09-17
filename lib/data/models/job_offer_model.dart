@@ -18,6 +18,7 @@ class JobOfferModel {
   final String passengerName;
   final String? instruction;
   final String? flightNumber;
+  final String? createdBy;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -41,6 +42,7 @@ class JobOfferModel {
     required this.passengerName,
     this.instruction,
     this.flightNumber,
+    this.createdBy,
     this.createdAt,
     this.updatedAt,
   });
@@ -53,7 +55,8 @@ class JobOfferModel {
 
   factory JobOfferModel.fromJson(Map<String, dynamic> json) {
     final rawId = json['_id']?.toString() ?? json['id']?.toString() ?? '';
-    final rawBookingNo = json['bookingNo']?.toString() ??
+    final rawBookingNo =
+        json['bookingNo']?.toString() ??
         (rawId.length >= 6
             ? 'OFFER-${rawId.substring(rawId.length - 6).toUpperCase()}'
             : 'OFFER-$rawId');
@@ -85,10 +88,12 @@ class JobOfferModel {
       id: rawId,
       bookingNo: rawBookingNo,
       jobType: json['jobType']?.toString() ?? 'ONE WAY',
-      pickup: json['pickup']?.toString() ??
+      pickup:
+          json['pickup']?.toString() ??
           json['pickupLocation']?.toString() ??
           '',
-      dropoff: json['dropoff']?.toString() ??
+      dropoff:
+          json['dropoff']?.toString() ??
           json['dropoffLocation']?.toString() ??
           '',
       pickupNotes: json['pickupNotes']?.toString(),
@@ -96,26 +101,38 @@ class JobOfferModel {
       asap: isAsap,
       date: parsedDate,
       time: parsedTime,
-      vehicleType: json['vehicleType']?.toString() ??
+      vehicleType:
+          json['vehicleType']?.toString() ??
           json['type']?.toString() ??
           'Sedan',
       paymentAmount: parsedAmount,
-      paymentType: json['paymentType']?.toString() ??
+      paymentType:
+          json['paymentType']?.toString() ??
           json['payment']?.toString() ??
           'CREDIT CARD ON FILE',
       status: json['status']?.toString() ?? 'PENDING',
       rideStatus: json['rideStatus']?.toString(),
-      companyName: json['companyName']?.toString() ??
-          json['company']?.toString() ??
-          '',
-      passengerName: json['passengerName']?.toString() ??
+      companyName:
+          json['companyName']?.toString() ?? json['company']?.toString() ?? '',
+      passengerName:
+          json['passengerName']?.toString() ??
           json['passenger']?.toString() ??
           'Client',
-      instruction: json['instruction']?.toString() ??
+      instruction:
+          json['instruction']?.toString() ??
           json['instructions']?.toString() ??
           json['specialInstructions']?.toString(),
-      flightNumber: json['flightNumber']?.toString() ??
-          json['flight']?.toString(),
+      flightNumber:
+          json['flightNumber']?.toString() ?? json['flight']?.toString(),
+      createdBy: (json['createdBy'] is Map)
+          ? (json['createdBy']['id'] ?? json['createdBy']['_id'])?.toString()
+          : (json['createdBy'] ??
+                    json['userId'] ??
+                    (json['user'] is Map
+                        ? (json['user']['id'] ?? json['user']['_id'])
+                        : json['user']) ??
+                    json['creator'])
+                ?.toString(),
       createdAt: json['createdAt'] != null
           ? DateTime.tryParse(json['createdAt'].toString())
           : null,
@@ -156,6 +173,7 @@ class JobOfferModel {
       'instructions': instruction,
       'flightNumber': flightNumber,
       'flight': flightNumber,
+      'createdBy': createdBy,
     };
   }
 }

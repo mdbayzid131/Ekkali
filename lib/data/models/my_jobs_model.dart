@@ -16,7 +16,9 @@ class MyJobsModel {
     if (json['data'] != null) {
       data = <JobData>[];
       json['data'].forEach((v) {
-        data!.add(JobData.fromJson(v));
+        if (v is Map) {
+          data!.add(JobData.fromJson(Map<String, dynamic>.from(v)));
+        }
       });
     }
   }
@@ -43,6 +45,8 @@ class JobData {
   String? jobType;
   String? pickupLocation;
   String? dropoffLocation;
+  String? pickupNotes;
+  String? dropoffNotes;
   String? companyName;
   String? flightNumber;
   bool? asap;
@@ -57,7 +61,7 @@ class JobData {
   String? status;
   String? rideStatus;
   int? applicantCount;
-  dynamic createdBy;
+  dynamic createdBy; // Driver object or String
   String? createdAt;
   String? updatedAt;
   bool? hasReview;
@@ -74,6 +78,8 @@ class JobData {
     this.jobType,
     this.pickupLocation,
     this.dropoffLocation,
+    this.pickupNotes,
+    this.dropoffNotes,
     this.flightNumber,
     this.asap,
     this.date,
@@ -100,91 +106,68 @@ class JobData {
     this.isReviewedByDriver,
   });
 
-  JobData.fromJson(Map<String, dynamic> json) {
-    companyName = json['companyName'];
-    id = json['_id'] ?? json['id'];
-    jobType = json['jobType'];
-    pickupLocation = json['pickup'] ?? json['pickupLocation'];
-    dropoffLocation = json['dropoff'] ?? json['dropoffLocation'];
-    flightNumber = json['flightNumber'];
-    asap = json['asap'];
-    date = json['date'];
-    time = json['time'];
-    vehicleType = json['vehicleType'];
-    paymentAmount = json['paymentAmount'] != null
-        ? (num.tryParse(json['paymentAmount'].toString())?.toInt() ?? 0)
-        : null;
-    paymentType = json['paymentType'];
-    instruction = json['instruction'];
-    serviceArea = json['serviceArea'] is Map
-        ? (json['serviceArea']['areaName']?.toString() ??
-            json['serviceArea']['name']?.toString())
-        : json['serviceArea']?.toString();
-    dispatchType = json['dispatchType'];
-    status = json['status'];
-    rideStatus = json['rideStatus'];
-    applicantCount = json['applicantCount'] != null
-        ? (num.tryParse(json['applicantCount'].toString())?.toInt() ?? 0)
-        : 0;
-    hasReview = json['hasReview'];
-    isReviewedByCreator = json['isReviewedByCreator'];
-    isReviewedByDriver = json['isReviewedByDriver'];
-
-    // Handle createdBy as either String or Driver Object
-    if (json['createdBy'] is Map<String, dynamic>) {
-      createdBy = Driver.fromJson(json['createdBy']);
+  factory JobData.fromJson(Map<String, dynamic> json) {
+    dynamic parsedCreatedBy;
+    if (json['createdBy'] is Map) {
+      parsedCreatedBy = Driver.fromJson(Map<String, dynamic>.from(json['createdBy']));
     } else {
-      createdBy = json['createdBy']?.toString();
+      parsedCreatedBy = json['createdBy']?.toString();
     }
 
-    createdAt = json['createdAt'];
-    updatedAt = json['updatedAt'];
-
-    reviewByDriver = json['reviewByDriver'] != null
-        ? Review.fromJson(json['reviewByDriver'])
-        : null;
-
-    reviewByCreator = json['reviewByCreator'] != null
-        ? Review.fromJson(json['reviewByCreator'])
-        : null;
-
-    assignedTo = json['assignedTo'] != null
-        ? Driver.fromJson(json['assignedTo'])
-        : null;
-
-    applicant = json['applicant'] != null
-        ? Applicant.fromJson(json['applicant'])
-        : null;
-  }
-}
-
-class Review {
-  int? rating;
-  String? comment;
-  String? reviewedAt;
-
-  Review({this.rating, this.comment, this.reviewedAt});
-
-  Review.fromJson(Map<String, dynamic> json) {
-    rating = json['rating'];
-    comment = json['comment'];
-    reviewedAt = json['reviewedAt'];
-  }
-}
-
-class Applicant {
-  Driver? driver;
-  String? appliedAt;
-
-  Applicant({this.driver, this.appliedAt});
-
-  Applicant.fromJson(Map<String, dynamic> json) {
-    if (json['driver'] != null) {
-      driver = Driver.fromJson(json['driver']);
-    } else if (json['name'] != null || json['_id'] != null) {
-      driver = Driver.fromJson(json);
+    String? comp = json['companyName']?.toString();
+    if (comp == null || comp.isEmpty) {
+      if (parsedCreatedBy is Driver) {
+        comp = parsedCreatedBy.company ?? parsedCreatedBy.name;
+      }
     }
-    appliedAt = json['appliedAt'];
+
+    return JobData(
+      id: json['_id'] ?? json['id'],
+      jobType: json['jobType'],
+      pickupLocation: json['pickup'] ?? json['pickupLocation'],
+      dropoffLocation: json['dropoff'] ?? json['dropoffLocation'],
+      pickupNotes: json['pickupNotes'],
+      dropoffNotes: json['dropoffNotes'],
+      flightNumber: json['flightNumber'],
+      asap: json['asap'] == true,
+      date: json['date'],
+      time: json['time'],
+      vehicleType: json['vehicleType'] ?? json['type'],
+      paymentAmount: json['paymentAmount'] != null
+          ? (num.tryParse(json['paymentAmount'].toString())?.toInt() ?? 0)
+          : null,
+      paymentType: json['paymentType'],
+      instruction: json['instruction'],
+      serviceArea: json['serviceArea'] is Map
+          ? (json['serviceArea']['areaName']?.toString() ??
+              json['serviceArea']['name']?.toString())
+          : json['serviceArea']?.toString(),
+      dispatchType: json['dispatchType'],
+      status: json['status'],
+      rideStatus: json['rideStatus'],
+      applicantCount: json['applicantCount'] != null
+          ? (num.tryParse(json['applicantCount'].toString())?.toInt() ?? 0)
+          : 0,
+      hasReview: json['hasReview'],
+      isReviewedByCreator: json['isReviewedByCreator'],
+      isReviewedByDriver: json['isReviewedByDriver'],
+      createdBy: parsedCreatedBy,
+      companyName: comp,
+      createdAt: json['createdAt'],
+      updatedAt: json['updatedAt'],
+      reviewByDriver: json['reviewByDriver'] != null
+          ? Review.fromJson(Map<String, dynamic>.from(json['reviewByDriver']))
+          : null,
+      reviewByCreator: json['reviewByCreator'] != null
+          ? Review.fromJson(Map<String, dynamic>.from(json['reviewByCreator']))
+          : null,
+      assignedTo: json['assignedTo'] != null
+          ? Driver.fromJson(Map<String, dynamic>.from(json['assignedTo']))
+          : null,
+      applicant: json['applicant'] != null
+          ? Applicant.fromJson(Map<String, dynamic>.from(json['applicant']))
+          : null,
+    );
   }
 }
 
@@ -197,6 +180,7 @@ class Driver {
   String? companyRole;
   String? profilePicture;
   String? nickname;
+  dynamic selectedVehicle;
   List<Vehicle>? vehicles;
   double? averageRating;
   int? totalReviews;
@@ -210,29 +194,75 @@ class Driver {
     this.companyRole,
     this.profilePicture,
     this.nickname,
+    this.selectedVehicle,
     this.vehicles,
     this.averageRating,
     this.totalReviews,
   });
 
-  Driver.fromJson(Map<String, dynamic> json) {
-    id = json['_id'];
-    name = json['name'];
-    email = json['email'];
-    phone = json['phone'];
-    company = json['company'];
-    companyRole = json['companyRole'];
-    profilePicture = json['profilePicture'];
-    nickname = json['nickname'];
-    averageRating = (json['averageRating'] as num?)?.toDouble();
-    totalReviews = json['totalReviews'];
-
-    if (json['vehicles'] != null) {
-      vehicles = <Vehicle>[];
-      json['vehicles'].forEach((v) {
-        vehicles!.add(Vehicle.fromJson(v));
-      });
+  factory Driver.fromJson(Map<String, dynamic> json) {
+    String? comp;
+    if (json['company'] is Map) {
+      comp = json['company']['name']?.toString() ?? json['company']['companyName']?.toString();
+    } else if (json['company'] != null) {
+      comp = json['company'].toString();
+    } else if (json['companyName'] != null) {
+      comp = json['companyName'].toString();
     }
+
+    return Driver(
+      id: json['_id'] ?? json['id'],
+      name: json['name'],
+      email: json['email'],
+      phone: json['phone'],
+      company: comp,
+      companyRole: json['companyRole'],
+      profilePicture: json['profilePicture'],
+      nickname: json['nickname'],
+      selectedVehicle: json['selectedVehicle'],
+      averageRating: (json['averageRating'] is num)
+          ? (json['averageRating'] as num).toDouble()
+          : double.tryParse(json['averageRating']?.toString() ?? ''),
+      totalReviews: (json['totalReviews'] is num)
+          ? (json['totalReviews'] as num).toInt()
+          : int.tryParse(json['totalReviews']?.toString() ?? ''),
+      vehicles: json['vehicles'] != null && json['vehicles'] is List
+          ? (json['vehicles'] as List)
+              .map((v) => v is Map ? Vehicle.fromJson(Map<String, dynamic>.from(v)) : null)
+              .whereType<Vehicle>()
+              .toList()
+          : null,
+    );
+  }
+}
+
+class Review {
+  int? rating;
+  String? comment;
+  String? reviewedAt;
+
+  Review({this.rating, this.comment, this.reviewedAt});
+
+  Review.fromJson(Map<String, dynamic> json) {
+    rating = json['rating'] != null ? num.tryParse(json['rating'].toString())?.toInt() : null;
+    comment = json['comment']?.toString();
+    reviewedAt = json['reviewedAt']?.toString();
+  }
+}
+
+class Applicant {
+  Driver? driver;
+  String? appliedAt;
+
+  Applicant({this.driver, this.appliedAt});
+
+  Applicant.fromJson(Map<String, dynamic> json) {
+    if (json['driver'] != null && json['driver'] is Map) {
+      driver = Driver.fromJson(Map<String, dynamic>.from(json['driver']));
+    } else if (json['name'] != null || json['_id'] != null) {
+      driver = Driver.fromJson(json);
+    }
+    appliedAt = json['appliedAt']?.toString();
   }
 }
 
@@ -257,14 +287,16 @@ class Vehicle {
     this.licensePlate,
   });
 
-  Vehicle.fromJson(Map<String, dynamic> json) {
-    id = json['_id'];
-    carType = json['carType'];
-    make = json['make'];
-    model = json['model'];
-    colorInside = json['colorInside'];
-    colorOutside = json['colorOutside'];
-    year = json['year'];
-    licensePlate = json['licensePlate'];
+  factory Vehicle.fromJson(Map<String, dynamic> json) {
+    return Vehicle(
+      id: json['_id'] ?? json['id'],
+      carType: json['carType'] ?? json['vehicleType'],
+      make: json['make'],
+      model: json['model'],
+      colorInside: json['colorInside'],
+      colorOutside: json['colorOutside'],
+      year: json['year'] != null ? num.tryParse(json['year'].toString())?.toInt() : null,
+      licensePlate: json['licensePlate'],
+    );
   }
 }
