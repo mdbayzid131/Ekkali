@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:moeb_26/config/constants/icon_paths.dart';
 import 'package:moeb_26/modules/bottom_nab_bar/controllers/bottom_nabbar_controller.dart';
+import 'package:moeb_26/modules/chat/controllers/chat_controller.dart';
 import 'package:moeb_26/modules/chat/views/chat_view.dart';
 import 'package:moeb_26/modules/jobs_offers/views/Job_offer_view.dart';
 import 'package:moeb_26/modules/rides/views/rides_view.dart';
@@ -24,6 +25,9 @@ class BottomNabbarView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final NavigationController navController = Get.find<NavigationController>();
+    final ChatController chatController = Get.isRegistered<ChatController>()
+        ? Get.find<ChatController>()
+        : Get.put(ChatController());
 
     return SafeArea(
       child: Scaffold(
@@ -42,7 +46,8 @@ class BottomNabbarView extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: List.generate(
                 5,
-                (index) => _buildCustomIcon(index, navController),
+                (index) =>
+                    _buildCustomIcon(index, navController, chatController),
               ),
             ),
           ),
@@ -51,7 +56,11 @@ class BottomNabbarView extends StatelessWidget {
     );
   }
 
-  Widget _buildCustomIcon(int index, NavigationController navController) {
+  Widget _buildCustomIcon(
+    int index,
+    NavigationController navController,
+    ChatController chatController,
+  ) {
     final bool isSelected = navController.currentIndex.value == index;
 
     return GestureDetector(
@@ -59,24 +68,74 @@ class BottomNabbarView extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
-            height: 45.w,
-            width: 45.w,
-            decoration: BoxDecoration(
-              color: isSelected ? const Color(0xFF000000) : Colors.transparent,
-              borderRadius: BorderRadius.circular(16.r),
-            ),
-            alignment: Alignment.center,
-            child: SvgPicture.asset(
-              _getSvgForIndex(index),
-              width: 24.w,
-              height: 24.w,
-              colorFilter: ColorFilter.mode(
-                isSelected ? Colors.white : Colors.grey,
-                BlendMode.srcIn,
+          Stack(
+            clipBehavior: Clip.none,
+            children: [
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                height: 45.w,
+                width: 45.w,
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? const Color(0xFF000000)
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(16.r),
+                ),
+                alignment: Alignment.center,
+                child: SvgPicture.asset(
+                  _getSvgForIndex(index),
+                  width: 24.w,
+                  height: 24.w,
+                  colorFilter: ColorFilter.mode(
+                    isSelected ? Colors.white : Colors.grey,
+                    BlendMode.srcIn,
+                  ),
+                ),
               ),
-            ),
+              if (index == 2)
+                Obx(() {
+                  final unreadCount = chatController.unreadUsersCount;
+                  if (unreadCount <= 0) return const SizedBox.shrink();
+
+                  return Positioned(
+                    top: 2.h,
+                    right: 2.w,
+                    child: Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: unreadCount > 9 ? 4.w : 0,
+                        vertical: 1.h,
+                      ),
+                      constraints: BoxConstraints(
+                        minWidth: 16.w,
+                        minHeight: 16.w,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFEF4444),
+                        shape: unreadCount > 9
+                            ? BoxShape.rectangle
+                            : BoxShape.circle,
+                        borderRadius: unreadCount > 9
+                            ? BorderRadius.circular(10.r)
+                            : null,
+                        border: Border.all(
+                          color: const Color(0xFF191919),
+                          width: 1.5.w,
+                        ),
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        unreadCount > 99 ? '99+' : '$unreadCount',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 9.sp,
+                          fontWeight: FontWeight.bold,
+                          height: 1.1,
+                        ),
+                      ),
+                    ),
+                  );
+                }),
+            ],
           ),
           SizedBox(height: 5.h), // Add some space between icon and label
           Text(

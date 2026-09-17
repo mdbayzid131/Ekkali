@@ -21,6 +21,16 @@ class ChatController extends GetxController {
   var isLoading = false.obs;
   var selectedChatIdForDelete = "".obs;
 
+  /// Returns count of distinct conversations that have unread messages (Users + Live Chat)
+  int get unreadUsersCount {
+    int userCount = chats.where((c) => (c.unreadCount > 0) || !c.isRead).length;
+    final comm = communityRoom.value;
+    if (comm != null && ((comm.unreadCount > 0) || !comm.isRead)) {
+      userCount += 1;
+    }
+    return userCount;
+  }
+
   void toggleDeleteIcon(String chatId) {
     if (selectedChatIdForDelete.value == chatId) {
       selectedChatIdForDelete.value = "";
