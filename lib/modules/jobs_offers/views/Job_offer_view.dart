@@ -161,30 +161,29 @@ class JobOfferView extends StatelessWidget {
                         parent: BouncingScrollPhysics(),
                       ),
                       children: [
-                        SizedBox(height: 120.h),
+                        SizedBox(height: 150.h),
                         Center(
                           child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(
-                                Icons.work_outline_rounded,
-                                color: Colors.grey[600],
-                                size: 48.sp,
-                              ),
-                              SizedBox(height: 12.h),
                               Text(
-                                "No job offers available right now",
+                                "No offers at this time",
+                                textAlign: TextAlign.center,
                                 style: GoogleFonts.inter(
-                                  color: Colors.white70,
-                                  fontSize: 15.sp,
-                                  fontWeight: FontWeight.w500,
+                                  color: Colors.white,
+                                  fontSize: 19.sp,
+                                  fontWeight: FontWeight.w600,
+                                  letterSpacing: 0.2,
                                 ),
                               ),
-                              SizedBox(height: 6.h),
+                              SizedBox(height: 8.h),
                               Text(
-                                "Pull down to refresh new broadcast rides",
+                                "Available ride offers will be here",
+                                textAlign: TextAlign.center,
                                 style: GoogleFonts.inter(
-                                  color: Colors.grey[500],
-                                  fontSize: 12.sp,
+                                  color: const Color(0xFF9E9E9E),
+                                  fontSize: 13.5.sp,
+                                  fontWeight: FontWeight.w400,
                                 ),
                               ),
                             ],

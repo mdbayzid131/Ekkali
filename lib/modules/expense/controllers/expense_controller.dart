@@ -572,24 +572,12 @@ class ExpenseController extends GetxController {
             return [
               pw.Header(
                 level: 0,
-                child: pw.Row(
-                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                  children: [
-                    pw.Text(
-                      "Expense Tracker Report",
-                      style: pw.TextStyle(
-                        fontSize: 22,
-                        fontWeight: pw.FontWeight.bold,
-                      ),
-                    ),
-                    pw.Text(
-                      DateFormat('dd MMM yyyy').format(DateTime.now()),
-                      style: const pw.TextStyle(
-                        fontSize: 12,
-                        color: PdfColors.grey700,
-                      ),
-                    ),
-                  ],
+                child: pw.Text(
+                  "Expense Tracker Report",
+                  style: pw.TextStyle(
+                    fontSize: 22,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
                 ),
               ),
               pw.SizedBox(height: 16),
