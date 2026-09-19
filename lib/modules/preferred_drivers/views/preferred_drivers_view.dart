@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:moeb_26/core/services/subscription_service.dart';
+import 'package:moeb_26/core/widgets/premium_lock_widget.dart';
 import 'package:moeb_26/config/themes/app_theme.dart';
 import 'package:moeb_26/core/widgets/Custom_AppBar.dart';
 import '../controllers/preferred_drivers_controller.dart';
@@ -23,61 +25,76 @@ class PreferredDriversView extends StatelessWidget {
           title: 'Favorite Chauffeurs',
           notificationCount: 3,
         ),
-        body: Column(
-          children: [
-            SizedBox(height: 12.h),
+        body: Obx(() {
+          final isPrem = Get.isRegistered<SubscriptionService>()
+              ? Get.find<SubscriptionService>().isPremium.value
+              : false;
 
-            // ── Tab Bar ──────────────────────────────────────────────
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20.w),
-              child: Container(
-                height: 46.h,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF1A1A1A),
-                  borderRadius: BorderRadius.circular(12.r),
-                  border: Border.all(color: const Color(0xFF2C2C2C)),
+          if (!isPrem) {
+            return const PremiumLockWidget(
+              icon: Icons.favorite_border_rounded,
+              title: "Unlock Preferred Chauffeurs",
+              description:
+                  "Subscribe to Ekkali Premium to discover top-rated luxury chauffeurs, build your private driver network, and dispatch rides directly.",
+            );
+          }
+
+          return Column(
+            children: [
+              SizedBox(height: 12.h),
+
+              // ── Tab Bar ──────────────────────────────────────────────
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20.w),
+                child: Container(
+                  height: 46.h,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1A1A1A),
+                    borderRadius: BorderRadius.circular(12.r),
+                    border: Border.all(color: const Color(0xFF2C2C2C)),
+                  ),
+                  child: TabBar(
+                    labelColor: Colors.black,
+                    unselectedLabelColor: Colors.grey,
+                    indicator: BoxDecoration(
+                      color: AppColors.primaryColor,
+                      borderRadius: BorderRadius.circular(10.r),
+                    ),
+                    indicatorSize: TabBarIndicatorSize.tab,
+                    dividerColor: Colors.transparent,
+                    labelStyle: GoogleFonts.inter(
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    unselectedLabelStyle: GoogleFonts.inter(
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    tabs: const [
+                      Tab(text: 'My Favorites'),
+                      Tab(text: 'Find Chauffeurs'),
+                    ],
+                  ),
                 ),
-                child: TabBar(
-                  labelColor: Colors.black,
-                  unselectedLabelColor: Colors.grey,
-                  indicator: BoxDecoration(
-                    color: AppColors.primaryColor,
-                    borderRadius: BorderRadius.circular(10.r),
-                  ),
-                  indicatorSize: TabBarIndicatorSize.tab,
-                  dividerColor: Colors.transparent,
-                  labelStyle: GoogleFonts.inter(
-                    fontSize: 13.sp,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  unselectedLabelStyle: GoogleFonts.inter(
-                    fontSize: 13.sp,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  tabs: const [
-                    Tab(text: 'My Favorites'),
-                    Tab(text: 'Find Chauffeurs'),
+              ),
+
+              SizedBox(height: 12.h),
+
+              // ── Tab Content ──────────────────────────────────────────
+              Expanded(
+                child: TabBarView(
+                  children: [
+                    // ── Tab 1: My Favorites ──────────────────────────
+                    _MyFavoritesTab(controller: controller),
+
+                    // ── Tab 2: Find Drivers ──────────────────────────
+                    _FindDriversTab(controller: controller),
                   ],
                 ),
               ),
-            ),
-
-            SizedBox(height: 12.h),
-
-            // ── Tab Content ──────────────────────────────────────────
-            Expanded(
-              child: TabBarView(
-                children: [
-                  // ── Tab 1: My Favorites ──────────────────────────
-                  _MyFavoritesTab(controller: controller),
-
-                  // ── Tab 2: Find Drivers ──────────────────────────
-                  _FindDriversTab(controller: controller),
-                ],
-              ),
-            ),
-          ],
-        ),
+            ],
+          );
+        }),
       ),
     );
   }

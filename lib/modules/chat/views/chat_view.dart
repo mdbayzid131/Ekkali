@@ -5,6 +5,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:moeb_26/config/themes/app_theme.dart';
 import 'package:moeb_26/config/routes/app_pages.dart';
 import 'package:moeb_26/core/services/user_service.dart';
+import 'package:moeb_26/core/services/subscription_service.dart';
+import 'package:moeb_26/core/widgets/premium_lock_widget.dart';
 import 'package:moeb_26/core/widgets/Custom_AppBar.dart';
 import 'package:moeb_26/data/models/chat_model.dart';
 import '../controllers/chat_controller.dart';
@@ -26,89 +28,103 @@ class ChatView extends StatelessWidget {
         child: SafeArea(
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 20.w),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(height: 15.h),
+            child: Obx(() {
+              final isPrem = Get.isRegistered<SubscriptionService>()
+                  ? Get.find<SubscriptionService>().isPremium.value
+                  : false;
 
-                // ── Search Bar ──
-                TextFormField(
-                  onChanged: (value) => controller.filterChats(value),
-                  style: GoogleFonts.inter(
-                    color: Colors.white,
-                    fontSize: 16.sp,
-                  ),
-                  decoration: InputDecoration(
-                    hintText: 'Search messages...',
-                    hintStyle: GoogleFonts.inter(
-                      color: Colors.grey,
+              if (!isPrem) {
+                return const PremiumLockWidget(
+                  icon: Icons.chat_bubble_outline_rounded,
+                  title: "Unlock Chauffeur Community & Chat",
+                  description:
+                      "Subscribe to Ekkali Premium to message operators, network in community channels, and coordinate ride logistics.",
+                );
+              }
+
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(height: 15.h),
+
+                  // ── Search Bar ──
+                  TextFormField(
+                    onChanged: (value) => controller.filterChats(value),
+                    style: GoogleFonts.inter(
+                      color: Colors.white,
                       fontSize: 16.sp,
                     ),
-                    filled: true,
-                    fillColor: const Color(0xff1A1A1A),
-                    prefixIcon: Padding(
-                      padding: EdgeInsets.only(left: 12.w, right: 8.w),
-                      child: Icon(
-                        Icons.search,
+                    decoration: InputDecoration(
+                      hintText: 'Search messages...',
+                      hintStyle: GoogleFonts.inter(
                         color: Colors.grey,
-                        size: 24.sp,
+                        fontSize: 16.sp,
                       ),
-                    ),
-                    prefixIconConstraints: BoxConstraints(
-                      minWidth: 40.w,
-                      minHeight: 40.h,
-                    ),
-                    contentPadding: EdgeInsets.symmetric(
-                      vertical: 12.h,
-                      horizontal: 16.w,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16.r),
-                      borderSide: BorderSide(
-                        color: const Color(0xff242424),
-                        width: 1.w,
+                      filled: true,
+                      fillColor: const Color(0xff1A1A1A),
+                      prefixIcon: Padding(
+                        padding: EdgeInsets.only(left: 12.w, right: 8.w),
+                        child: Icon(
+                          Icons.search,
+                          color: Colors.grey,
+                          size: 24.sp,
+                        ),
                       ),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16.r),
-                      borderSide: BorderSide(
-                        color: AppColors.primaryColor,
-                        width: 1.w,
+                      prefixIconConstraints: BoxConstraints(
+                        minWidth: 40.w,
+                        minHeight: 40.h,
                       ),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16.r),
-                      borderSide: BorderSide(
-                        color: const Color(0xff242424),
-                        width: 1.w,
+                      contentPadding: EdgeInsets.symmetric(
+                        vertical: 12.h,
+                        horizontal: 16.w,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16.r),
+                        borderSide: BorderSide(
+                          color: const Color(0xff242424),
+                          width: 1.w,
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16.r),
+                        borderSide: BorderSide(
+                          color: AppColors.primaryColor,
+                          width: 1.w,
+                        ),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16.r),
+                        borderSide: BorderSide(
+                          color: const Color(0xff242424),
+                          width: 1.w,
+                        ),
                       ),
                     ),
                   ),
-                ),
-                SizedBox(height: 10.h),
+                  SizedBox(height: 10.h),
 
-                // ── Chat List ──
-                Expanded(
-                  child: RefreshIndicator(
-                    onRefresh: () async {
-                      await controller.fetchChats();
-                      await controller.fetchCommunityRoom();
-                    },
-                    color: AppColors.primaryColor,
-                    backgroundColor: const Color(0xff1A1A1A),
-                    child: Obx(() {
-                      if (controller.isLoading.value &&
-                          controller.chats.isEmpty) {
-                        return const Center(child: CircularProgressIndicator());
-                      }
+                  // ── Chat List ──
+                  Expanded(
+                    child: RefreshIndicator(
+                      onRefresh: () async {
+                        await controller.fetchChats();
+                        await controller.fetchCommunityRoom();
+                      },
+                      color: AppColors.primaryColor,
+                      backgroundColor: const Color(0xff1A1A1A),
+                      child: Obx(() {
+                        if (controller.isLoading.value &&
+                            controller.chats.isEmpty) {
+                          return const Center(child: CircularProgressIndicator());
+                        }
 
-                      final communityRoom = controller.communityRoom.value;
+                        final communityRoom = controller.communityRoom.value;
 
-                      return ListView.builder(
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        itemCount:
-                            controller.filteredChats.length +
-                            (communityRoom != null ? 1 : 0),
+                        return ListView.builder(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          itemCount:
+                              controller.filteredChats.length +
+                              (communityRoom != null ? 1 : 0),
                         itemBuilder: (context, index) {
                           if (communityRoom != null && index == 0) {
                             return _buildCommunityChatTile(communityRoom);
@@ -125,12 +141,13 @@ class ChatView extends StatelessWidget {
                   ),
                 ),
               ],
-            ),
-          ),
+            );
+          }),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   /// ── Community Chat Tile ──
   Widget _buildCommunityChatTile(CommunityRoom room) {

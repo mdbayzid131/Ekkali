@@ -9,6 +9,8 @@ import 'package:moeb_26/core/services/api_client.dart';
 import 'package:moeb_26/core/utils/helpers.dart';
 import 'package:moeb_26/data/models/my_rides_model.dart';
 import 'package:moeb_26/data/repositories/socket_repository.dart';
+import 'package:moeb_26/core/services/subscription_service.dart';
+import 'package:moeb_26/core/widgets/premium_lock_widget.dart';
 import 'package:moeb_26/modules/rides/widgets/RideCard.dart';
 import 'package:moeb_26/modules/rides/widgets/RideDetailSheet.dart';
 import '../../../core/widgets/Custom_AppBar.dart';
@@ -152,6 +154,19 @@ class _RidesViewState extends State<RidesView> {
             /// RIDES LIST
             Expanded(
               child: Obx(() {
+                final isPrem = Get.isRegistered<SubscriptionService>()
+                    ? Get.find<SubscriptionService>().isPremium.value
+                    : false;
+
+                if (!isPrem) {
+                  return const PremiumLockWidget(
+                    icon: Icons.directions_car_filled_rounded,
+                    title: "Unlock Your Active Rides",
+                    description:
+                        "Subscribe to Ekkali Premium to manage assigned rides, accept chauffeur bookings, and track active trip statuses.",
+                  );
+                }
+
                 return controller.selectedTab.value == 0
                     ? _buildUpcomingList()
                     : _buildPastList();

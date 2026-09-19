@@ -3,14 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:moeb_26/config/constants/icon_paths.dart';
-import 'package:moeb_26/config/routes/app_pages.dart';
 import 'package:moeb_26/config/themes/app_theme.dart';
 import 'package:moeb_26/core/widgets/Custom_Job_Button.dart';
 import 'package:moeb_26/data/models/job_offer_model.dart';
 import 'package:moeb_26/modules/jobs_offers/controllers/Job_offer_controller.dart';
 import 'package:moeb_26/modules/jobs_offers/widgets/JobOfferCard.dart';
 import 'package:moeb_26/modules/jobs_offers/widgets/JobOfferDetailSheet.dart';
+import 'package:moeb_26/core/services/subscription_service.dart';
+import 'package:moeb_26/core/widgets/premium_lock_widget.dart';
+import 'package:moeb_26/core/widgets/premium_required_dialog.dart';
 import '../../../core/widgets/Custom_AppBar.dart';
 import '../../jobs_posts/views/job_post_sheet_tabbar_view.dart';
 
@@ -36,6 +37,17 @@ class JobOfferView extends StatelessWidget {
               text: "New Job",
               padding: EdgeInsets.symmetric(vertical: 14.h, horizontal: 8.w),
               onPressed: () {
+                final isPrem = Get.isRegistered<SubscriptionService>()
+                    ? Get.find<SubscriptionService>().isPremium.value
+                    : false;
+                if (!isPrem) {
+                  PremiumRequiredDialog.show(
+                    title: "Post a New Job",
+                    message:
+                        "Posting broadcast jobs is an exclusive Ekkali Premium feature. Upgrade to post jobs and find luxury chauffeurs!",
+                  );
+                  return;
+                }
                 Get.to(() => const JobPostSheetTabBarView());
               },
             ),
@@ -75,6 +87,19 @@ class JobOfferView extends StatelessWidget {
             // Job Offers List
             Expanded(
               child: Obx(() {
+                final isPrem = Get.isRegistered<SubscriptionService>()
+                    ? Get.find<SubscriptionService>().isPremium.value
+                    : false;
+
+                if (!isPrem) {
+                  return const PremiumLockWidget(
+                    icon: Icons.work_outline_rounded,
+                    title: "Unlock Exclusive Job Offers",
+                    description:
+                        "Subscribe to Ekkali Premium to browse luxury chauffeur ride requests, view client payouts, and apply instantly.",
+                  );
+                }
+
                 if (controller.isLoading.value &&
                     controller.jobOffers.isEmpty) {
                   return Center(
