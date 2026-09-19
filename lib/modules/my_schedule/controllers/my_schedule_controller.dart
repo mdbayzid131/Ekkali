@@ -312,6 +312,7 @@ class MyScheduleController extends GetxController {
       String? serviceAreaId;
       List<String>? targetedChauffeurs;
 
+      List<String> serviceAreaIds = [];
       if (postJobController != null) {
         final selectionType = postJobController.chauffeurSelectionType.value;
         if (selectionType == 'favorites' &&
@@ -320,14 +321,18 @@ class MyScheduleController extends GetxController {
           targetedChauffeurs = postJobController.selectedDrivers.toList();
         } else if (postJobController.selectedServiceAreas.isNotEmpty) {
           dispatchType = "ALL CHAUFFEURS";
-          final areaName = postJobController.selectedServiceAreas.first;
-          final areaModel = postJobController.serviceAreas.firstWhereOrNull(
-            (a) =>
-                a.areaName.trim().toLowerCase() ==
-                areaName.trim().toLowerCase(),
-          );
-          if (areaModel != null) {
-            serviceAreaId = areaModel.id;
+          for (final areaName in postJobController.selectedServiceAreas) {
+            final areaModel = postJobController.serviceAreas.firstWhereOrNull(
+              (a) =>
+                  a.areaName.trim().toLowerCase() ==
+                  areaName.trim().toLowerCase(),
+            );
+            if (areaModel != null && areaModel.id.isNotEmpty) {
+              serviceAreaIds.add(areaModel.id);
+            }
+          }
+          if (serviceAreaIds.isNotEmpty) {
+            serviceAreaId = serviceAreaIds.first;
           }
         }
       }
@@ -336,6 +341,7 @@ class MyScheduleController extends GetxController {
         jobId: job.id,
         dispatchType: dispatchType,
         serviceAreaId: serviceAreaId,
+        serviceAreaIds: serviceAreaIds.isNotEmpty ? serviceAreaIds : null,
         targetedChauffeurs: targetedChauffeurs,
       );
 
