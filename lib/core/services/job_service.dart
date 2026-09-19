@@ -134,6 +134,7 @@ class JobService extends GetxService {
     String? passengerPhone,
     String? dispatchType,
     String? serviceAreaId,
+    List<String>? serviceAreaIds,
     List<String>? targetedChauffeurs,
   }) async {
     try {
@@ -154,6 +155,7 @@ class JobService extends GetxService {
         passengerPhone: passengerPhone,
         dispatchType: dispatchType,
         serviceAreaId: serviceAreaId,
+        serviceAreaIds: serviceAreaIds,
         targetedChauffeurs: targetedChauffeurs,
       );
     } catch (e) {

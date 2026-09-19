@@ -169,6 +169,7 @@ class JobRepo {
     String? passengerPhone,
     String? dispatchType,
     String? serviceAreaId,
+    List<String>? serviceAreaIds,
     List<String>? targetedChauffeurs,
     bool asap = false,
   }) async {
@@ -206,10 +207,14 @@ class JobRepo {
 
     if (dispatchType != null && dispatchType.isNotEmpty) {
       body["dispatchType"] = dispatchType;
-      if (dispatchType == "ALL CHAUFFEURS" &&
-          serviceAreaId != null &&
-          serviceAreaId.isNotEmpty) {
-        body["serviceAreaId"] = serviceAreaId;
+      if (dispatchType == "ALL CHAUFFEURS") {
+        if (serviceAreaIds != null && serviceAreaIds.isNotEmpty) {
+          body["serviceAreaIds"] = serviceAreaIds;
+          body["serviceAreaId"] = serviceAreaIds.first;
+        } else if (serviceAreaId != null && serviceAreaId.isNotEmpty) {
+          body["serviceAreaIds"] = [serviceAreaId];
+          body["serviceAreaId"] = serviceAreaId;
+        }
       } else if (dispatchType == "TARGETED CHAUFFEURS" &&
           targetedChauffeurs != null) {
         body["targetedChauffeurs"] = targetedChauffeurs;
