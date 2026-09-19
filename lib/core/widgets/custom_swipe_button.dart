@@ -19,8 +19,8 @@ class CustomSwipeButton extends StatefulWidget {
     required this.onSwipeComplete,
     this.height = 54,
     this.backgroundColor = const Color(0xFF161616),
-    this.activeColor = const Color(0xFFD08700),
-    this.thumbColor = const Color(0xFFFEDB9B),
+    this.activeColor = const Color(0xFFFFDCA1),
+    this.thumbColor = const Color(0xFFFFDCA1),
     this.textColor = Colors.white,
   });
 

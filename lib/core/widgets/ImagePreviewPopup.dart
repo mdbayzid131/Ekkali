@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:moeb_26/config/themes/app_theme.dart';
 import 'package:flutter_cached_pdfview/flutter_cached_pdfview.dart';
 
 class ImagePreviewPopup extends StatelessWidget {
@@ -66,7 +67,7 @@ class ImagePreviewPopup extends StatelessWidget {
                             imageUrl!,
                             placeholder: (progress) => const Center(
                               child: CircularProgressIndicator(
-                                color: Color(0xFFF1A107),
+                                color: AppColors.primaryColor,
                               ),
                             ),
                             errorWidget: (error) =>
@@ -92,7 +93,7 @@ class ImagePreviewPopup extends StatelessWidget {
                                           if (loadingProgress == null) return child;
                                           return const Center(
                                             child: CircularProgressIndicator(
-                                              color: Color(0xFFF1A107),
+                                              color: AppColors.primaryColor,
                                             ),
                                           );
                                         },

@@ -3,7 +3,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:moeb_26/config/constants/image_paths.dart';
+import 'package:moeb_26/config/themes/app_theme.dart';
 import 'package:moeb_26/core/widgets/Custom_AppBar.dart';
+import 'package:moeb_26/core/widgets/CustomButton.dart';
 import 'package:moeb_26/modules/auth/profile/controllers/profile_controller.dart';
 
 class PersonalInformationView extends StatelessWidget {
@@ -36,12 +38,12 @@ class PersonalInformationView extends StatelessWidget {
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: const Color(0xFFD08700),
+                          color: AppColors.primaryColor,
                           width: 2.w,
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xFFD08700).withValues(alpha: 0.2),
+                            color: AppColors.primaryColor.withValues(alpha: 0.2),
                             blurRadius: 15,
                             spreadRadius: 2,
                           ),
@@ -73,7 +75,7 @@ class PersonalInformationView extends StatelessWidget {
                         child: Container(
                           padding: EdgeInsets.all(6.r),
                           decoration: const BoxDecoration(
-                            color: Color(0xFFD08700),
+                            color: AppColors.primaryColor,
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
@@ -103,7 +105,7 @@ class PersonalInformationView extends StatelessWidget {
                       children: [
                         Icon(
                           Icons.verified,
-                          color: const Color(0xFFD08700),
+                          color: AppColors.primaryColor,
                           size: 15.sp,
                         ),
                         SizedBox(width: 4.w),
@@ -126,7 +128,7 @@ class PersonalInformationView extends StatelessWidget {
               Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  'Edit Personal & Chauffeur Details',
+                  'Edit Personal Details',
                   style: GoogleFonts.inter(
                     color: const Color(0xFFD5C4AB),
                     fontSize: 15.sp,
@@ -177,26 +179,20 @@ class PersonalInformationView extends StatelessWidget {
                 icon: Icons.business_outlined,
               ),
 
-              // Service Area
+              // Service Area (Locked like Email)
               _buildInputField(
                 label: 'Service Area',
                 controller: controller.serviceAreaController,
+                readOnly: true,
                 icon: Icons.map_outlined,
+                suffixIcon: Icon(
+                  Icons.lock_outline,
+                  color: const Color(0xFF71717A),
+                  size: 18.sp,
+                ),
               ),
 
-              // Car - Tag / Vehicle Class
-              _buildInputField(
-                label: 'Car - Tag / Vehicle Class',
-                controller: controller.carTagController,
-                icon: Icons.directions_car_outlined,
-              ),
 
-              // Languages Spoken
-              _buildInputField(
-                label: 'Languages Spoken',
-                controller: controller.languagesController,
-                icon: Icons.translate_outlined,
-              ),
 
               // Nick Name
               _buildInputField(
@@ -219,38 +215,15 @@ class PersonalInformationView extends StatelessWidget {
               top: BorderSide(color: Color(0xFF1E1E1E), width: 1),
             ),
           ),
-          child: SizedBox(
-            height: 50.h,
-            child: Obx(
-              () => ElevatedButton.icon(
-                onPressed: controller.isUpdating.value
-                    ? null
-                    : () => controller.saveProfile(),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFD08700),
-                  foregroundColor: Colors.black,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14.r),
-                  ),
-                ),
-                icon: controller.isUpdating.value
-                    ? SizedBox(
-                        width: 18.w,
-                        height: 18.w,
-                        child: const CircularProgressIndicator(
-                          color: Colors.black,
-                          strokeWidth: 2,
-                        ),
-                      )
-                    : const Icon(Icons.check_circle_outline, color: Colors.black),
-                label: Text(
-                  controller.isUpdating.value ? "Saving..." : "Save Information",
-                  style: GoogleFonts.inter(
-                    fontSize: 15.sp,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
+          child: Obx(
+            () => CustomButton(
+              text: controller.isUpdating.value ? "Saving..." : "Save Information",
+              onPressed: () => controller.saveProfile(),
+              icon: controller.isUpdating.value
+                  ? null
+                  : const Icon(Icons.check_circle_outline, color: Colors.black),
+              loading: controller.isUpdating.value,
+              padding: EdgeInsets.symmetric(vertical: 14.h),
             ),
           ),
         ),
@@ -293,7 +266,7 @@ class PersonalInformationView extends StatelessWidget {
               fillColor: readOnly
                   ? const Color(0xFF111111)
                   : const Color(0xFF1A1A1A),
-              prefixIcon: Icon(icon, color: const Color(0xFFD5C4AB), size: 19.sp),
+              prefixIcon: Icon(icon, color: Colors.white70, size: 19.sp),
               suffixIcon: suffixIcon,
               contentPadding: EdgeInsets.symmetric(
                 horizontal: 16.w,
@@ -320,7 +293,7 @@ class PersonalInformationView extends StatelessWidget {
                 borderSide: BorderSide(
                   color: readOnly
                       ? const Color(0xFF1E1E1E)
-                      : const Color(0xFFD08700),
+                      : AppColors.primaryColor,
                   width: readOnly ? 1 : 1.5,
                 ),
               ),

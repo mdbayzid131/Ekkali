@@ -1,6 +1,8 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:dio/dio.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
@@ -15,7 +17,66 @@ class ExpenseController extends GetxController {
 
   var expenses = <ExpenseModel>[].obs;
   var isLoading = false.obs;
+  var isLoadingMore = false.obs;
   var totalAmount = 0.0.obs;
+
+  /// Download receipt image helper method
+  Future<void> downloadReceiptImage(String imagePath) async {
+    try {
+      if (imagePath.isEmpty) return;
+
+      Uint8List? imageBytes;
+
+      if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+        final dio = Dio();
+        final response = await dio.get<List<int>>(
+          imagePath,
+          options: Options(responseType: ResponseType.bytes),
+        );
+        if (response.data != null) {
+          imageBytes = Uint8List.fromList(response.data!);
+        }
+      } else {
+        final file = File(imagePath);
+        if (await file.exists()) {
+          imageBytes = await file.readAsBytes();
+        }
+      }
+
+      if (imageBytes != null && imageBytes.isNotEmpty) {
+        final isPng = imagePath.toLowerCase().endsWith('.png');
+        final fileName =
+            'receipt_${DateTime.now().millisecondsSinceEpoch}.${isPng ? 'png' : 'jpg'}';
+
+        await Printing.sharePdf(
+          bytes: imageBytes,
+          filename: fileName,
+        );
+      } else {
+        Get.snackbar(
+          'Download Failed',
+          'Receipt image could not be loaded.',
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: const Color(0xFF1E1E20),
+          colorText: Colors.white,
+        );
+      }
+    } catch (e) {
+      debugPrint('Error sharing/downloading receipt image: $e');
+      Get.snackbar(
+        'Download Failed',
+        'Could not save receipt image. Please try again.',
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: const Color(0xFF1E1E20),
+        colorText: Colors.white,
+      );
+    }
+  }
+
+  // Cursor Pagination state
+  var nextCursor = RxnString();
+  var hasMore = false.obs;
+  final ScrollController scrollController = ScrollController();
 
   // Input fields controllers
   final amountController = TextEditingController();
@@ -58,7 +119,18 @@ class ExpenseController extends GetxController {
   void onInit() {
     super.onInit();
     _expenseService = Get.find<ExpenseService>();
+    scrollController.addListener(_onScroll);
     fetchExpenses();
+  }
+
+  void _onScroll() {
+    if (scrollController.hasClients &&
+        scrollController.position.pixels >=
+            scrollController.position.maxScrollExtent - 200) {
+      if (hasMore.value && !isLoadingMore.value && !isLoading.value) {
+        loadMoreExpenses();
+      }
+    }
   }
 
   /// Calculates start and end dates based on selected filterPeriod & filterDate
@@ -74,10 +146,15 @@ class ExpenseController extends GetxController {
     }
   }
 
-  /// Fetch expenses from backend API using date range filter
-  Future<void> fetchExpenses() async {
+  /// Fetch expenses from backend API using date range filter & cursor pagination
+  Future<void> fetchExpenses({bool isRefresh = false}) async {
     try {
-      isLoading.value = true;
+      if (!isRefresh) {
+        isLoading.value = true;
+      }
+      nextCursor.value = null;
+      hasMore.value = false;
+
       final range = _getDateRange();
       final response = await _expenseService.fetchExpenses(
         startDate: range.start,
@@ -86,7 +163,16 @@ class ExpenseController extends GetxController {
       );
 
       if (response.statusCode == 200 && response.data != null) {
-        final List<dynamic> dataList = response.data['data'] is List ? response.data['data'] : [];
+        final cursorData = response.data['cursor'];
+        if (cursorData is Map) {
+          nextCursor.value = cursorData['nextCursor']?.toString();
+          hasMore.value = cursorData['hasMore'] == true;
+        } else {
+          hasMore.value = false;
+        }
+
+        final List<dynamic> dataList =
+            response.data['data'] is List ? response.data['data'] : [];
         final loadedExpenses = dataList
             .map((item) => ExpenseModel.fromJson(item as Map<String, dynamic>))
             .toList();
@@ -97,6 +183,44 @@ class ExpenseController extends GetxController {
       Helpers.debug('Error fetching expenses: $e');
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  /// Load more expenses when scrolling down
+  Future<void> loadMoreExpenses() async {
+    if (isLoadingMore.value || !hasMore.value || nextCursor.value == null) {
+      return;
+    }
+    try {
+      isLoadingMore.value = true;
+      final range = _getDateRange();
+      final response = await _expenseService.fetchExpenses(
+        startDate: range.start,
+        endDate: range.end,
+        cursor: nextCursor.value,
+        limit: 1000,
+      );
+
+      if (response.statusCode == 200 && response.data != null) {
+        final cursorData = response.data['cursor'];
+        if (cursorData is Map) {
+          nextCursor.value = cursorData['nextCursor']?.toString();
+          hasMore.value = cursorData['hasMore'] == true;
+        } else {
+          hasMore.value = false;
+        }
+
+        final List<dynamic> dataList =
+            response.data['data'] is List ? response.data['data'] : [];
+        final moreExpenses = dataList
+            .map((item) => ExpenseModel.fromJson(item as Map<String, dynamic>))
+            .toList();
+        expenses.addAll(moreExpenses);
+      }
+    } catch (e) {
+      Helpers.debug('Error loading more expenses: $e');
+    } finally {
+      isLoadingMore.value = false;
     }
   }
 
@@ -223,12 +347,7 @@ class ExpenseController extends GetxController {
         existingImageUrl.value = null;
       }
     } catch (e) {
-      Get.snackbar(
-        "Error",
-        "Failed to pick image: $e",
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      Helpers.showCustomSnackBar("Failed to pick image: $e", isError: true);
     }
   }
 
@@ -267,12 +386,7 @@ class ExpenseController extends GetxController {
     final amount = double.tryParse(amountText);
 
     if (amount == null || amount <= 0) {
-      Get.snackbar(
-        "Invalid Input",
-        "Please enter a valid amount",
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      Helpers.showCustomSnackBar("Please enter a valid amount", isError: true);
       return;
     }
 
@@ -293,27 +407,15 @@ class ExpenseController extends GetxController {
         filterDate.value = addedDate;
         fetchExpenses();
 
-        Get.snackbar(
-          "Success",
-          "Expense added successfully",
-          backgroundColor: const Color(0xFFD08700),
-          colorText: Colors.white,
-        );
+        Helpers.showCustomSnackBar("Expense added successfully", isError: false);
       } else {
-        Get.snackbar(
-          "Error",
+        Helpers.showCustomSnackBar(
           response.data?['message'] ?? "Failed to add expense",
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
+          isError: true,
         );
       }
     } catch (e) {
-      Get.snackbar(
-        "Error",
-        "Failed to add expense: $e",
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      Helpers.showCustomSnackBar("Failed to add expense: $e", isError: true);
     } finally {
       isLoading.value = false;
     }
@@ -324,12 +426,7 @@ class ExpenseController extends GetxController {
     final amount = double.tryParse(amountText);
 
     if (amount == null || amount <= 0) {
-      Get.snackbar(
-        "Invalid Input",
-        "Please enter a valid amount",
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      Helpers.showCustomSnackBar("Please enter a valid amount", isError: true);
       return;
     }
 
@@ -349,27 +446,15 @@ class ExpenseController extends GetxController {
         Get.back(); // close modal
         fetchExpenses();
 
-        Get.snackbar(
-          "Success",
-          "Expense updated successfully",
-          backgroundColor: const Color(0xFFD08700),
-          colorText: Colors.white,
-        );
+        Helpers.showCustomSnackBar("Expense updated successfully", isError: false);
       } else {
-        Get.snackbar(
-          "Error",
+        Helpers.showCustomSnackBar(
           response.data?['message'] ?? "Failed to update expense",
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
+          isError: true,
         );
       }
     } catch (e) {
-      Get.snackbar(
-        "Error",
-        "Failed to update expense: $e",
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      Helpers.showCustomSnackBar("Failed to update expense: $e", isError: true);
     } finally {
       isLoading.value = false;
     }
@@ -388,39 +473,31 @@ class ExpenseController extends GetxController {
       final response = await _expenseService.deleteExpense(id);
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        Get.snackbar(
-          "Deleted",
-          "Expense deleted successfully",
-          backgroundColor: Colors.redAccent,
-          colorText: Colors.white,
-          duration: const Duration(seconds: 2),
-        );
+        Helpers.showCustomSnackBar("Expense deleted successfully", isError: false);
       } else {
         // Rollback if server call fails
         expenses.insert(index, removedExpense);
         fetchTotalExpenses();
-        Get.snackbar(
-          "Error",
+        Helpers.showCustomSnackBar(
           response.data?['message'] ?? "Failed to delete expense",
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
+          isError: true,
         );
       }
     } catch (e) {
       // Rollback on network failure
       expenses.insert(index, removedExpense);
       fetchTotalExpenses();
-      Get.snackbar(
-        "Error",
-        "Failed to delete expense: $e",
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      Helpers.showCustomSnackBar("Failed to delete expense: $e", isError: true);
     }
   }
 
   Future<void> exportToCSV() async {
     try {
+      if (filteredExpenses.isEmpty) {
+        Helpers.showCustomSnackBar("No expenses to export", isError: true);
+        return;
+      }
+
       final csvContent = StringBuffer();
       csvContent.writeln('ID,Date,Category,Description,Amount');
       for (var e in filteredExpenses) {
@@ -428,9 +505,12 @@ class ExpenseController extends GetxController {
         final cleanCategory = e.category.replaceAll('"', '""');
         final cleanDesc = e.description.replaceAll('"', '""');
         csvContent.writeln(
-          '${e.id},"$formattedDate","$cleanCategory","$cleanDesc",${e.amount}',
+          '${e.id},"$formattedDate","$cleanCategory","$cleanDesc",${e.amount.toStringAsFixed(2)}',
         );
       }
+
+      // Append Total row
+      csvContent.writeln(',,,Total,${filteredTotalAmount.toStringAsFixed(2)}');
 
       final tempDir = Directory.systemTemp;
       final file = File(
@@ -444,16 +524,12 @@ class ExpenseController extends GetxController {
             'expense_report_${DateFormat('yyyyMMdd').format(DateTime.now())}.csv',
       );
     } catch (e) {
-      Get.snackbar(
-        "Export Failed",
-        e.toString(),
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      Helpers.showCustomSnackBar("Export Failed: $e", isError: true);
     }
   }
 
   String _sanitizeForPdf(String text) {
+    if (text.isEmpty) return '';
     final buffer = StringBuffer();
     for (var char in text.runes) {
       if ((char >= 32 && char <= 126) ||
@@ -469,11 +545,29 @@ class ExpenseController extends GetxController {
 
   Future<void> exportToPDF() async {
     try {
-      final pdf = pw.Document();
+      if (filteredExpenses.isEmpty) {
+        Helpers.showCustomSnackBar("No expenses to export", isError: true);
+        return;
+      }
+
+      pw.ThemeData theme;
+      try {
+        final font = await PdfGoogleFonts.robotoRegular();
+        final boldFont = await PdfGoogleFonts.robotoBold();
+        theme = pw.ThemeData.withFont(base: font, bold: boldFont);
+      } catch (_) {
+        theme = pw.ThemeData.withFont(
+          base: pw.Font.helvetica(),
+          bold: pw.Font.helveticaBold(),
+        );
+      }
+
+      final pdf = pw.Document(theme: theme);
 
       pdf.addPage(
         pw.MultiPage(
           pageFormat: PdfPageFormat.a4,
+          margin: const pw.EdgeInsets.all(32),
           build: (pw.Context context) {
             return [
               pw.Header(
@@ -484,17 +578,39 @@ class ExpenseController extends GetxController {
                     pw.Text(
                       "Expense Tracker Report",
                       style: pw.TextStyle(
-                        fontSize: 24,
+                        fontSize: 22,
                         fontWeight: pw.FontWeight.bold,
                       ),
                     ),
-                    pw.Text(DateFormat('dd MMM yyyy').format(DateTime.now())),
+                    pw.Text(
+                      DateFormat('dd MMM yyyy').format(DateTime.now()),
+                      style: const pw.TextStyle(
+                        fontSize: 12,
+                        color: PdfColors.grey700,
+                      ),
+                    ),
                   ],
                 ),
               ),
-              pw.SizedBox(height: 20),
+              pw.SizedBox(height: 16),
               pw.TableHelper.fromTextArray(
                 headers: ['Date', 'Category', 'Description', 'Amount (\$)'],
+                headerStyle: pw.TextStyle(
+                  fontWeight: pw.FontWeight.bold,
+                  color: PdfColors.white,
+                  fontSize: 10,
+                ),
+                headerDecoration: const pw.BoxDecoration(
+                  color: PdfColor.fromInt(0xFF1E1E20),
+                ),
+                cellStyle: const pw.TextStyle(fontSize: 9),
+                cellAlignment: pw.Alignment.centerLeft,
+                cellAlignments: {
+                  0: pw.Alignment.centerLeft,
+                  1: pw.Alignment.centerLeft,
+                  2: pw.Alignment.centerLeft,
+                  3: pw.Alignment.centerRight,
+                },
                 data: filteredExpenses
                     .map(
                       (e) => [
@@ -506,14 +622,26 @@ class ExpenseController extends GetxController {
                     )
                     .toList(),
               ),
-              pw.SizedBox(height: 20),
+              pw.SizedBox(height: 16),
               pw.Align(
                 alignment: pw.Alignment.centerRight,
-                child: pw.Text(
-                  "Total: \$${filteredTotalAmount.toStringAsFixed(2)}",
-                  style: pw.TextStyle(
-                    fontSize: 16,
-                    fontWeight: pw.FontWeight.bold,
+                child: pw.Container(
+                  padding: const pw.EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  decoration: pw.BoxDecoration(
+                    border: pw.Border.all(color: PdfColors.grey300),
+                    borderRadius: const pw.BorderRadius.all(
+                      pw.Radius.circular(6),
+                    ),
+                  ),
+                  child: pw.Text(
+                    "Total Amount: \$${filteredTotalAmount.toStringAsFixed(2)}",
+                    style: pw.TextStyle(
+                      fontSize: 14,
+                      fontWeight: pw.FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
@@ -522,23 +650,21 @@ class ExpenseController extends GetxController {
         ),
       );
 
-      await Printing.layoutPdf(
-        onLayout: (PdfPageFormat format) async => pdf.save(),
-        name:
+      final pdfBytes = await pdf.save();
+
+      await Printing.sharePdf(
+        bytes: pdfBytes,
+        filename:
             'expense_report_${DateFormat('yyyyMMdd').format(DateTime.now())}.pdf',
       );
     } catch (e) {
-      Get.snackbar(
-        "Export Failed",
-        e.toString(),
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      Helpers.showCustomSnackBar("Export Failed: $e", isError: true);
     }
   }
 
   @override
   void onClose() {
+    scrollController.dispose();
     amountController.dispose();
     descriptionController.dispose();
     super.onClose();

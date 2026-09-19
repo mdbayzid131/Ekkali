@@ -7,7 +7,7 @@ class AppColors {
   //Gray colors
   static const gray100 = Color(0xFFA1A1A1);
   static const orange100 = Color(0xFFD08700);
-  static const Color primaryColor = Color(0xFF6C63FF);
+  static const Color primaryColor = Color(0xFFFFDCA1);
   static const Color white100 = Color(0xFFFFFFFF);
 }
 

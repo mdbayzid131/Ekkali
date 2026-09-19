@@ -4,12 +4,14 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:moeb_26/config/constants/icon_paths.dart';
+import 'package:moeb_26/core/widgets/CustomButton.dart';
 import 'package:moeb_26/data/models/market_place_model.dart';
 import 'package:moeb_26/core/widgets/ContactSellerPopup.dart';
 import 'package:moeb_26/core/widgets/ImagePreviewPopup.dart';
 import 'package:moeb_26/core/widgets/SellItemBottomSheet.dart';
 import 'package:moeb_26/modules/market_place/controllers/market_place_controller.dart';
 import 'package:moeb_26/modules/my_items/controllers/my_items_controller.dart';
+import 'package:moeb_26/modules/preferred_drivers/controllers/preferred_drivers_controller.dart';
 
 class MarketplaceItemDetailView extends StatefulWidget {
   final ItemData item;
@@ -231,25 +233,31 @@ class _MarketplaceItemDetailViewState extends State<MarketplaceItemDetailView> {
                         SizedBox(height: 16.h),
 
                         // Specs Row (Condition / Status)
-                        Row(
+                        Wrap(
+                          spacing: 10.w,
+                          runSpacing: 8.h,
                           children: [
-                            if (widget.item.condition != null && widget.item.condition!.isNotEmpty) ...[
+                            if (widget.item.condition != null &&
+                                widget.item.condition!.trim().isNotEmpty &&
+                                widget.item.condition!.trim().toLowerCase() != 'none' &&
+                                widget.item.condition!.trim().toLowerCase() != 'null' &&
+                                widget.item.condition!.trim().toLowerCase() != 'n/a')
                               _buildBadge(
                                 label: "Condition: ${widget.item.condition}",
                                 backgroundColor: const Color(0xFF1F1C1C),
                                 textColor: const Color(0xFFD5C4AB),
                               ),
-                              SizedBox(width: 10.w),
-                            ],
                             if (widget.item.status != null)
                               _buildBadge(
                                 label: widget.item.status!.toUpperCase(),
-                                backgroundColor: widget.item.status == 'Active'
-                                    ? Colors.green.withValues(alpha: 0.15)
-                                    : Colors.orange.withValues(alpha: 0.15),
-                                textColor: widget.item.status == 'Active'
-                                    ? Colors.green
-                                    : Colors.orange,
+                                backgroundColor:
+                                    widget.item.status!.toUpperCase() == 'SOLD'
+                                    ? Colors.red.withValues(alpha: 0.15)
+                                    : Colors.green.withValues(alpha: 0.15),
+                                textColor:
+                                    widget.item.status!.toUpperCase() == 'SOLD'
+                                    ? Colors.redAccent
+                                    : Colors.green,
                               ),
                           ],
                         ),
@@ -292,86 +300,118 @@ class _MarketplaceItemDetailViewState extends State<MarketplaceItemDetailView> {
                             ),
                           ),
                           SizedBox(height: 12.h),
-                          Container(
-                            padding: EdgeInsets.all(16.w),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF1A1A1A),
-                              borderRadius: BorderRadius.circular(16.r),
-                              border: Border.all(
-                                color: const Color(0xFF242424),
+                          GestureDetector(
+                            behavior: HitTestBehavior.opaque,
+                            onTap: () {
+                              final seller = widget.item.createdBy;
+                              if (seller != null &&
+                                  (seller.id?.isNotEmpty ?? false)) {
+                                final preferredController =
+                                    Get.isRegistered<
+                                      PreferredDriversController
+                                    >()
+                                    ? Get.find<PreferredDriversController>()
+                                    : Get.put(PreferredDriversController());
+
+                                preferredController.openChauffeurProfile(
+                                  userId: seller.id!,
+                                  name: seller.name ?? "Seller",
+                                  imageUrl: seller.profilePicture ?? "",
+                                );
+                              }
+                            },
+                            child: Container(
+                              padding: EdgeInsets.all(16.w),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF1A1A1A),
+                                borderRadius: BorderRadius.circular(16.r),
+                                border: Border.all(
+                                  color: const Color(0xFF242424),
+                                ),
                               ),
-                            ),
-                            child: Row(
-                              children: [
-                                CircleAvatar(
-                                  radius: 24.r,
-                                  backgroundImage:
-                                      (widget.item.createdBy?.profilePicture !=
-                                              null &&
-                                          widget
-                                              .item
-                                              .createdBy!
-                                              .profilePicture!
-                                              .isNotEmpty)
-                                      ? NetworkImage(
-                                          widget
-                                              .item
-                                              .createdBy!
-                                              .profilePicture!,
-                                        )
-                                      : null,
-                                  backgroundColor: const Color(0xFF27272A),
-                                  child:
-                                      (widget.item.createdBy?.profilePicture ==
-                                              null ||
-                                          widget
-                                              .item
-                                              .createdBy!
-                                              .profilePicture!
-                                              .isEmpty)
-                                      ? Text(
-                                          widget.item.createdBy?.name
-                                                  ?.substring(0, 1)
-                                                  .toUpperCase() ??
-                                              "S",
+                              child: Row(
+                                children: [
+                                  CircleAvatar(
+                                    radius: 24.r,
+                                    backgroundImage:
+                                        (widget
+                                                    .item
+                                                    .createdBy
+                                                    ?.profilePicture !=
+                                                null &&
+                                            widget
+                                                .item
+                                                .createdBy!
+                                                .profilePicture!
+                                                .isNotEmpty)
+                                        ? NetworkImage(
+                                            widget
+                                                .item
+                                                .createdBy!
+                                                .profilePicture!,
+                                          )
+                                        : null,
+                                    backgroundColor: const Color(0xFF27272A),
+                                    child:
+                                        (widget
+                                                    .item
+                                                    .createdBy
+                                                    ?.profilePicture ==
+                                                null ||
+                                            widget
+                                                .item
+                                                .createdBy!
+                                                .profilePicture!
+                                                .isEmpty)
+                                        ? Text(
+                                            widget.item.createdBy?.name
+                                                    ?.substring(0, 1)
+                                                    .toUpperCase() ??
+                                                "S",
+                                            style: GoogleFonts.inter(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          )
+                                        : null,
+                                  ),
+                                  SizedBox(width: 14.w),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          widget.item.createdBy?.name ??
+                                              "Unknown Seller",
                                           style: GoogleFonts.inter(
                                             color: Colors.white,
+                                            fontSize: 15.sp,
                                             fontWeight: FontWeight.bold,
                                           ),
-                                        )
-                                      : null,
-                                ),
-                                SizedBox(width: 14.w),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        widget.item.createdBy?.name ??
-                                            "Unknown Seller",
-                                        style: GoogleFonts.inter(
-                                          color: Colors.white,
-                                          fontSize: 15.sp,
-                                          fontWeight: FontWeight.bold,
                                         ),
-                                      ),
-                                      if (widget.item.createdBy?.email !=
-                                          null) ...[
-                                        SizedBox(height: 4.h),
-                                        Text(
-                                          widget.item.createdBy!.email!,
-                                          style: GoogleFonts.inter(
-                                            color: Colors.grey.shade500,
-                                            fontSize: 13.sp,
+                                        if (widget.item.createdBy?.email !=
+                                            null) ...[
+                                          SizedBox(height: 4.h),
+                                          Text(
+                                            widget.item.createdBy!.email!,
+                                            style: GoogleFonts.inter(
+                                              color: Colors.grey.shade500,
+                                              fontSize: 13.sp,
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
                                           ),
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
+                                        ],
                                       ],
-                                    ],
+                                    ),
                                   ),
-                                ),
-                              ],
+                                  Icon(
+                                    Icons.arrow_forward_ios_rounded,
+                                    size: 14.sp,
+                                    color: const Color(0xFF94A3B8),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ],
@@ -398,143 +438,172 @@ class _MarketplaceItemDetailViewState extends State<MarketplaceItemDetailView> {
               ),
             ),
             child: widget.isOwnItem
-                ? Row(
-                    children: [
-                      // Edit Button
-                      Expanded(
-                        flex: 2,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            final MarketplaceController mpc;
-                            if (Get.isRegistered<MarketplaceController>()) {
-                              mpc = Get.find<MarketplaceController>();
-                            } else {
-                              mpc = Get.put(MarketplaceController());
-                            }
-                            mpc.prefillForEdit(
-                              widget.item.title ?? '',
-                              widget.item.price?.toString() ?? '0',
-                              widget.item.location ?? '',
-                              widget.item.condition ?? '',
-                              widget.item.description ?? '',
-                              widget.item.photos ?? [],
-                            );
-                            Get.bottomSheet(
-                              SellItemBottomSheet(editItemId: widget.item.id),
-                              isScrollControlled: true,
-                              backgroundColor: Colors.transparent,
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(
-                              0xFFFF9800,
-                            ), // Match brand orange
-                            foregroundColor: Colors.white,
-                            padding: EdgeInsets.symmetric(vertical: 16.h),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16.r),
-                            ),
-                            elevation: 0,
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.edit,
+                ? (widget.item.status?.toUpperCase() != 'SOLD'
+                      ? Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            CustomButton(
+                              onPressed: () async {
+                                final MyItemsController controller;
+                                if (Get.isRegistered<MyItemsController>()) {
+                                  controller = Get.find<MyItemsController>();
+                                } else {
+                                  controller = Get.put(MyItemsController());
+                                }
+                                await controller.markAsSold(
+                                  widget.item.id ?? '',
+                                );
+                                setState(() {
+                                  widget.item.status = 'SOLD';
+                                });
+                              },
+                              text: "Mark as Sold",
+                              backgroundColor: const Color(0xFF22C55E),
+                              textColor: Colors.black,
+                              icon: Icon(
+                                Icons.check_circle_outline,
                                 size: 18.sp,
-                                color: Colors.white,
+                                color: Colors.black,
                               ),
-                              SizedBox(width: 8.w),
-                              Text(
-                                "Edit Item",
-                                style: GoogleFonts.inter(
-                                  fontSize: 16.sp,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      SizedBox(width: 12.w),
-                      // Delete Button
-                      Expanded(
-                        flex: 1,
-                        child: ElevatedButton(
-                          onPressed: () => _showDeleteDialog(context),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF1E1E1E),
-                            foregroundColor: Colors.red,
-                            padding: EdgeInsets.symmetric(vertical: 16.h),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16.r),
-                              side: const BorderSide(color: Color(0xFF2E2E2E)),
+                              padding: EdgeInsets.symmetric(vertical: 14.h),
                             ),
-                            elevation: 0,
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.delete_outline,
-                                size: 18.sp,
-                                color: Colors.red,
-                              ),
-                              SizedBox(width: 4.w),
-                              Text(
-                                "Delete",
-                                style: GoogleFonts.inter(
-                                  fontSize: 16.sp,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.red,
+                            SizedBox(height: 10.h),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: CustomButton(
+                                    onPressed: () {
+                                      final MarketplaceController mpc;
+                                      if (Get.isRegistered<
+                                        MarketplaceController
+                                      >()) {
+                                        mpc = Get.find<MarketplaceController>();
+                                      } else {
+                                        mpc = Get.put(MarketplaceController());
+                                      }
+                                      mpc.prefillForEdit(
+                                        widget.item.title ?? '',
+                                        widget.item.price?.toString() ?? '0',
+                                        widget.item.location ?? '',
+                                        widget.item.condition ?? '',
+                                        widget.item.description ?? '',
+                                        widget.item.photos ?? [],
+                                      );
+                                      Get.bottomSheet(
+                                        SellItemBottomSheet(
+                                          editItemId: widget.item.id,
+                                        ),
+                                        isScrollControlled: true,
+                                        backgroundColor: Colors.transparent,
+                                      );
+                                    },
+                                    text: "Edit Item",
+                                    icon: Icon(
+                                      Icons.edit_outlined,
+                                      size: 18.sp,
+                                      color: Colors.black,
+                                    ),
+                                    padding: EdgeInsets.symmetric(
+                                      vertical: 14.h,
+                                    ),
+                                  ),
                                 ),
+                                SizedBox(width: 10.w),
+                                Expanded(
+                                  child: CustomButton(
+                                    onPressed: () => _showDeleteDialog(context),
+                                    text: "Delete",
+                                    textColor: Colors.redAccent,
+                                    backgroundColor: const Color(0xFF1E1E1E),
+                                    borderColor: const Color(0xFF2E2E2E),
+                                    icon: Icon(
+                                      Icons.delete_outline,
+                                      size: 18.sp,
+                                      color: Colors.redAccent,
+                                    ),
+                                    padding: EdgeInsets.symmetric(
+                                      vertical: 14.h,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        )
+                      : Row(
+                          children: [
+                            Expanded(
+                              child: CustomButton(
+                                onPressed: () {
+                                  final MarketplaceController mpc;
+                                  if (Get.isRegistered<
+                                    MarketplaceController
+                                  >()) {
+                                    mpc = Get.find<MarketplaceController>();
+                                  } else {
+                                    mpc = Get.put(MarketplaceController());
+                                  }
+                                  mpc.prefillForEdit(
+                                    widget.item.title ?? '',
+                                    widget.item.price?.toString() ?? '0',
+                                    widget.item.location ?? '',
+                                    widget.item.condition ?? '',
+                                    widget.item.description ?? '',
+                                    widget.item.photos ?? [],
+                                  );
+                                  Get.bottomSheet(
+                                    SellItemBottomSheet(
+                                      editItemId: widget.item.id,
+                                    ),
+                                    isScrollControlled: true,
+                                    backgroundColor: Colors.transparent,
+                                  );
+                                },
+                                text: "Edit Item",
+                                icon: Icon(
+                                  Icons.edit_outlined,
+                                  size: 18.sp,
+                                  color: Colors.black,
+                                ),
+                                padding: EdgeInsets.symmetric(vertical: 14.h),
                               ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  )
+                            ),
+                            SizedBox(width: 10.w),
+                            Expanded(
+                              child: CustomButton(
+                                onPressed: () => _showDeleteDialog(context),
+                                text: "Delete",
+                                textColor: Colors.redAccent,
+                                backgroundColor: const Color(0xFF1E1E1E),
+                                borderColor: const Color(0xFF2E2E2E),
+                                icon: Icon(
+                                  Icons.delete_outline,
+                                  size: 18.sp,
+                                  color: Colors.redAccent,
+                                ),
+                                padding: EdgeInsets.symmetric(vertical: 14.h),
+                              ),
+                            ),
+                          ],
+                        ))
                 : Row(
                     children: [
                       Expanded(
-                        child: ElevatedButton(
+                        child: CustomButton(
                           onPressed: () {
                             Get.dialog(ContactSellerPopup(item: widget.item));
                           },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(
-                              0xFFFF9800,
-                            ), // Match brand orange
-                            foregroundColor: Colors.white,
-                            padding: EdgeInsets.symmetric(vertical: 16.h),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16.r),
+                          text: "Contact Seller",
+                          icon: SvgPicture.asset(
+                            AppIcons.contact_icon,
+                            height: 18.sp,
+                            width: 18.sp,
+                            colorFilter: const ColorFilter.mode(
+                              Colors.black,
+                              BlendMode.srcIn,
                             ),
-                            elevation: 0,
                           ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              SvgPicture.asset(
-                                AppIcons.contact_icon,
-                                height: 18.sp,
-                                width: 18.sp,
-                                colorFilter: const ColorFilter.mode(
-                                  Colors.white,
-                                  BlendMode.srcIn,
-                                ),
-                              ),
-                              SizedBox(width: 8.w),
-                              Text(
-                                "Contact Seller",
-                                style: GoogleFonts.inter(
-                                  fontSize: 16.sp,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
+                          padding: EdgeInsets.symmetric(vertical: 14.h),
                         ),
                       ),
                     ],

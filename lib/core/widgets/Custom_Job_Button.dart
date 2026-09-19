@@ -44,8 +44,8 @@ class CustomJobButton extends StatelessWidget {
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
           backgroundColor:
-              backgroundColor ?? AppColors.orange100, // Default to orange
-          foregroundColor: textColor ?? Colors.white, // Default to white text
+              backgroundColor ?? AppColors.primaryColor, // Default to primaryColor
+          foregroundColor: textColor ?? Colors.black, // Default to black text
           elevation: 0,
           padding:
               padding ??

@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:moeb_26/config/themes/app_theme.dart';
+import 'package:moeb_26/core/widgets/CustomButton.dart';
 import '../controllers/invoice_controller.dart';
 
 class InvoiceProfileSettingsView extends GetView<InvoiceController> {
@@ -48,7 +50,7 @@ class InvoiceProfileSettingsView extends GetView<InvoiceController> {
           children: [
             Expanded(
               child: RefreshIndicator(
-                color: const Color(0xFFD08700),
+                color: AppColors.primaryColor,
                 backgroundColor: Colors.black,
                 onRefresh: () => controller.fetchInvoiceProfileFromApi(),
                 child: SingleChildScrollView(
@@ -247,35 +249,11 @@ class InvoiceProfileSettingsView extends GetView<InvoiceController> {
                   top: BorderSide(color: Color(0xFF1E1E1E), width: 1),
                 ),
               ),
-              child: SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () => controller.saveProfileSettings(),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFD08700), // Bright orange-yellow
-                    foregroundColor: Colors.black,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12.r),
-                    ),
-                    padding: EdgeInsets.symmetric(vertical: 16.h),
-                  ),
-                  child: controller.isLoading.value
-                      ? SizedBox(
-                          width: 20.w,
-                          height: 20.w,
-                          child: const CircularProgressIndicator(
-                            strokeWidth: 2.5,
-                            color: Colors.black,
-                          ),
-                        )
-                      : Text(
-                          'Save',
-                          style: GoogleFonts.inter(
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                ),
+              child: CustomButton(
+                text: 'Save',
+                loading: controller.isLoading.value,
+                onPressed: () => controller.saveProfileSettings(),
+                padding: EdgeInsets.symmetric(vertical: 14.h),
               ),
             ),
           ],

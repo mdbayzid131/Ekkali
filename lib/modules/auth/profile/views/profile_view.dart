@@ -3,13 +3,13 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:moeb_26/config/routes/app_pages.dart';
+import 'package:moeb_26/config/themes/app_theme.dart';
 import 'package:moeb_26/config/constants/image_paths.dart';
 import 'package:moeb_26/modules/auth/profile/controllers/profile_controller.dart';
 import 'package:moeb_26/modules/auth/profile/views/personal_information_view.dart';
 import 'package:moeb_26/modules/auth/profile/views/payment_information_view.dart';
 import 'package:moeb_26/core/widgets/LogoutBottomSheet.dart';
 import 'package:moeb_26/core/widgets/Contact_support_popup.dart';
-import 'package:moeb_26/core/widgets/DeleteAccountBottomSheet.dart';
 import 'package:moeb_26/core/widgets/Custom_AppBar.dart';
 
 class ProfileView extends StatelessWidget {
@@ -28,16 +28,14 @@ class ProfileView extends StatelessWidget {
       ),
       body: SafeArea(
         child: RefreshIndicator(
-          onRefresh: () async {
-            await controller.fetchUserProfile();
-          },
-          color: const Color(0xFFD08700),
+          onRefresh: () => controller.refreshProfile(),
+          color: AppColors.primaryColor,
           backgroundColor: Colors.black,
           child: Obx(() {
             if (controller.isLoading.value &&
                 controller.userProfile.value == null) {
               return const Center(
-                child: CircularProgressIndicator(color: Color(0xFFD08700)),
+                child: CircularProgressIndicator(color: AppColors.primaryColor),
               );
             }
             return SingleChildScrollView(
@@ -47,74 +45,35 @@ class ProfileView extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   // --- HEADER PROFILE CARD ---
-                  Stack(
-                    children: [
-                      Container(
-                        width: 105.w,
-                        height: 105.w,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: const Color(0xFFD08700),
-                            width: 2.w,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color(
-                                0xFFD08700,
-                              ).withValues(alpha: 0.2),
-                              blurRadius: 15,
-                              spreadRadius: 2,
+                  Container(
+                    width: 105.w,
+                    height: 105.w,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: AppColors.primaryColor,
+                        width: 2.w,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.primaryColor.withValues(alpha: 0.2),
+                          blurRadius: 15,
+                          spreadRadius: 2,
+                        ),
+                      ],
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(55.w),
+                      child: controller.profilePicture.value.isNotEmpty
+                          ? Image.network(
+                              controller.profilePicture.value,
+                              fit: BoxFit.cover,
+                            )
+                          : Image.asset(
+                              AppImages.sadat_image,
+                              fit: BoxFit.cover,
                             ),
-                          ],
-                        ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(55.w),
-                          child: controller.profilePicture.value.isNotEmpty
-                              ? Image.network(
-                                  controller.profilePicture.value,
-                                  fit: BoxFit.cover,
-                                )
-                              : Image.asset(
-                                  AppImages.sadat_image,
-                                  fit: BoxFit.cover,
-                                ),
-                        ),
-                      ),
-                      Positioned(
-                        bottom: 0,
-                        right: 2.w,
-                        child: Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 9.w,
-                            vertical: 3.h,
-                          ),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFD08700),
-                            borderRadius: BorderRadius.circular(12.r),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.star,
-                                color: Colors.black,
-                                size: 12.sp,
-                              ),
-                              SizedBox(width: 2.w),
-                              Text(
-                                controller.rating.value.toStringAsFixed(1),
-                                style: GoogleFonts.inter(
-                                  color: Colors.black,
-                                  fontSize: 11.sp,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                   SizedBox(height: 12.h),
 
@@ -133,27 +92,54 @@ class ProfileView extends StatelessWidget {
                   ),
                   SizedBox(height: 4.h),
 
-                  // --- VERIFIED BADGE ---
+                  // --- BADGES FROM API ---
                   Obx(() {
-                    final isVerified =
-                        controller.userProfile.value?.verified ?? false;
-                    if (!isVerified) return const SizedBox.shrink();
+                    final badges = controller.userProfile.value?.badges ?? [];
+                    if (badges.isEmpty) return const SizedBox.shrink();
 
                     return Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              ' ⭐ Ekkali Partner',
-                              style: GoogleFonts.inter(
-                                color: const Color(0xFFD5C4AB),
-                                fontSize: 12.sp,
-                                fontWeight: FontWeight.w500,
+                        SizedBox(height: 6.h),
+                        Wrap(
+                          spacing: 6.w,
+                          runSpacing: 4.h,
+                          alignment: WrapAlignment.center,
+                          children: badges.map((b) {
+                            return Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 10.w,
+                                vertical: 3.h,
                               ),
-                            ),
-                          ],
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF27272A),
+                                borderRadius: BorderRadius.circular(12.r),
+                                border: Border.all(
+                                  color: const Color(0xFF3F3F46),
+                                  width: 0.8,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.star,
+                                    color: AppColors.primaryColor,
+                                    size: 11.sp,
+                                  ),
+                                  SizedBox(width: 4.w),
+                                  Text(
+                                    b,
+                                    style: GoogleFonts.inter(
+                                      color: const Color(0xFFD5C4AB),
+                                      fontSize: 11.sp,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }).toList(),
                         ),
                         SizedBox(height: 10.h),
                       ],
@@ -161,7 +147,8 @@ class ProfileView extends StatelessWidget {
                   }),
                   SizedBox(height: 14.h),
 
-                  // --- EKKALI PREMIUM SUBSCRIPTION BANNER ---
+                  // --- EKKALI PREMIUM SUBSCRIPTION BANNER (COMMENTED OUT) ---
+                  /*
                   GestureDetector(
                     onTap: () => Get.toNamed(Routes.subscriptionView),
                     child: Container(
@@ -178,12 +165,12 @@ class ProfileView extends StatelessWidget {
                         ),
                         borderRadius: BorderRadius.circular(16.r),
                         border: Border.all(
-                          color: const Color(0xFFD08700),
+                          color: AppColors.primaryColor,
                           width: 1.5,
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xFFD08700).withValues(alpha: 0.2),
+                            color: AppColors.primaryColor.withValues(alpha: 0.2),
                             blurRadius: 10,
                             spreadRadius: 1,
                           ),
@@ -194,7 +181,7 @@ class ProfileView extends StatelessWidget {
                           Container(
                             padding: EdgeInsets.all(10.r),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFD08700),
+                              color: AppColors.primaryColor,
                               shape: BoxShape.circle,
                             ),
                             child: Icon(
@@ -225,7 +212,7 @@ class ProfileView extends StatelessWidget {
                                         vertical: 2.h,
                                       ),
                                       decoration: BoxDecoration(
-                                        color: const Color(0xFFD08700),
+                                        color: AppColors.primaryColor,
                                         borderRadius: BorderRadius.circular(6.r),
                                       ),
                                       child: Text(
@@ -260,6 +247,7 @@ class ProfileView extends StatelessWidget {
                     ),
                   ),
                   SizedBox(height: 20.h),
+                  */
 
                   // --- CATEGORY 1: ACCOUNT & CHAUFFEUR DETAILS ---
                   Align(
@@ -290,7 +278,7 @@ class ProfileView extends StatelessWidget {
                         _buildSettingTile(
                           icon: Icons.workspace_premium_outlined,
                           title: "Ekkali Premium Subscription",
-                          subtitle: "Yearly plan (\$29/Yr) & benefits",
+                          subtitle: "Yearly plan & benefits",
                           iconColor: const Color(0xFFFEDB9B),
                           titleColor: const Color(0xFFFEDB9B),
                           onTap: () {
@@ -301,7 +289,7 @@ class ProfileView extends StatelessWidget {
                         _buildSettingTile(
                           icon: Icons.person_outline_rounded,
                           title: "My information",
-                          subtitle: "Manage email, phone, company & languages",
+                          subtitle: "Manage email, phone, and company",
                           onTap: () {
                             Get.to(() => const PersonalInformationView());
                           },
@@ -321,13 +309,7 @@ class ProfileView extends StatelessWidget {
                           title: "My Vehicles",
                           subtitle: "Manage and select active vehicles",
                           onTap: () {
-                            Get.toNamed(
-                              Routes.allVehicleView,
-                              arguments: {
-                                "vehicles":
-                                    controller.userProfile.value?.vehicles,
-                              },
-                            );
+                            Get.toNamed(Routes.allVehicleView);
                           },
                         ),
                         _buildTileDivider(),
@@ -503,7 +485,7 @@ class ProfileView extends StatelessWidget {
         ),
         child: Icon(
           icon,
-          color: iconColor ?? const Color(0xFFD5C4AB),
+          color: iconColor ?? Colors.white70,
           size: 19.sp,
         ),
       ),

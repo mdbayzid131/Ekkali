@@ -3,27 +3,18 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:moeb_26/config/routes/app_pages.dart';
+import 'package:moeb_26/core/services/api_client.dart';
 import 'package:moeb_26/core/services/job_service.dart';
 import 'package:moeb_26/core/utils/helpers.dart';
-
-class FavoriteChauffeurSelection {
-  final String name;
-  final String imageUrl;
-  final String vehicleName;
-  final double rating;
-  final bool isTopRated;
-
-  FavoriteChauffeurSelection({
-    required this.name,
-    required this.imageUrl,
-    required this.vehicleName,
-    required this.rating,
-    this.isTopRated = false,
-  });
-}
+import 'package:moeb_26/data/models/favorite_chauffeur_model.dart';
+import 'package:moeb_26/data/models/service_area_model.dart';
+import 'package:moeb_26/data/repositories/favorite_chauffeur_repository.dart';
+import 'package:moeb_26/data/repositories/serviceAreas_repository.dart';
 
 class PostJobController extends GetxController {
   final JobService _jobService = Get.find<JobService>();
+  late final FavoriteChauffeurRepo _favoriteRepo;
+  late final ServiceAreasRepo _serviceAreasRepo;
 
   // Job Type & Vehicle
   var jobType = 'One Way'.obs;
@@ -35,84 +26,73 @@ class PostJobController extends GetxController {
   var selectedDrivers = <String>[].obs;
   var selectedServiceAreas = <String>[].obs;
 
-  final Map<String, List<String>> stateServiceAreas = {
-    'Florida': [
-      'Miami, FL',
-      'Fort Lauderdale, FL',
-      'West Palm Beach, FL',
-      'Boca Raton, FL',
-      'Orlando, FL',
-      'Tampa, FL',
-      'Jacksonville, FL',
-      'Naples, FL',
-      'Sarasota, FL',
-      'Fort Myers, FL',
-    ],
-    'California': [
-      'Los Angeles, CA',
-      'San Francisco, CA',
-      'San Diego, CA',
-      'San Jose, CA',
-      'Sacramento, CA',
-      'Santa Barbara, CA',
-    ],
-    'Texas': ['Dallas, TX', 'Houston, TX', 'Austin, TX', 'San Antonio, TX'],
-    'New York': ['New York City, NY'],
-    'Illinois': ['Chicago, IL'],
-    'District of Columbia': ['Washington, DC'],
-    'Nevada': ['Las Vegas, NV'],
-    'Massachusetts': ['Boston, MA'],
-    'Georgia': ['Atlanta, GA'],
-    'Washington State': ['Seattle, WA'],
-    'Colorado': ['Denver, CO', 'Aspen, CO'],
-    'Arizona': ['Phoenix, AZ', 'Scottsdale, AZ'],
-    'Pennsylvania': ['Philadelphia, PA', 'Pittsburgh, PA'],
-    'North Carolina': ['Charlotte, NC', 'Raleigh, NC'],
-    'Tennessee': ['Nashville, TN'],
-    'Minnesota': ['Minneapolis, MN'],
-    'Louisiana': ['New Orleans, LA'],
-    'Utah': ['Salt Lake City, UT'],
-    'Oregon': ['Portland, OR'],
-    'Michigan': ['Detroit, MI'],
-    'Missouri': ['Kansas City, MO', 'St. Louis, MO'],
-    'Ohio': ['Columbus, OH', 'Cincinnati, OH', 'Cleveland, OH'],
-    'Indiana': ['Indianapolis, IN'],
-    'Virginia': ['Richmond, VA'],
-    'South Carolina': ['Charleston, SC'],
-    'Connecticut': ['Greenwich, CT'],
-  };
+  final RxList<FavoriteChauffeurModel> favoriteDrivers =
+      <FavoriteChauffeurModel>[].obs;
+  final RxBool isFavoriteDriversLoading = false.obs;
 
-  final List<FavoriteChauffeurSelection> favoriteDrivers = [
-    FavoriteChauffeurSelection(
-      name: 'Marcus J.',
-      imageUrl:
-          'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=150',
-      vehicleName: 'Mercedes S-Class',
-      rating: 4.98,
-      isTopRated: true,
-    ),
-    FavoriteChauffeurSelection(
-      name: 'Elena V.',
-      imageUrl:
-          'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
-      vehicleName: 'Audi e-tron GT',
-      rating: 4.95,
-      isTopRated: false,
-    ),
-    FavoriteChauffeurSelection(
-      name: 'Julian K.',
-      imageUrl:
-          'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
-      vehicleName: 'Range Rover Vogue',
-      rating: 4.92,
-      isTopRated: false,
-    ),
-  ];
+  final RxList<ServiceAreaModel> serviceAreas = <ServiceAreaModel>[].obs;
+  final RxBool isServiceAreasLoading = false.obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    _favoriteRepo = Get.isRegistered<FavoriteChauffeurRepo>()
+        ? Get.find<FavoriteChauffeurRepo>()
+        : Get.put(FavoriteChauffeurRepo(apiClient: Get.find<ApiClient>()));
+
+    _serviceAreasRepo = Get.isRegistered<ServiceAreasRepo>()
+        ? Get.find<ServiceAreasRepo>()
+        : Get.put(ServiceAreasRepo(apiClient: Get.find<ApiClient>()));
+
+    fetchFavoriteDrivers();
+    fetchServiceAreas();
+  }
+
+  Future<void> fetchFavoriteDrivers() async {
+    isFavoriteDriversLoading.value = true;
+    try {
+      final response = await _favoriteRepo.getFavorites(limit: 50);
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final List<dynamic> dataList = response.data?['data'] ?? [];
+        final items = dataList
+            .map((e) => FavoriteChauffeurModel.fromJson(e))
+            .toList();
+        favoriteDrivers.assignAll(items);
+      }
+    } catch (e) {
+      debugPrint("Error fetching favorite chauffeurs for job post: $e");
+    } finally {
+      isFavoriteDriversLoading.value = false;
+    }
+  }
+
+  Future<void> fetchServiceAreas() async {
+    isServiceAreasLoading.value = true;
+    try {
+      final response = await _serviceAreasRepo.getAllServiceAreas(
+        page: 1,
+        limit: 50,
+      );
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final List<dynamic> dataList = response.data is Map
+            ? (response.data['data'] ?? response.data['service_areas'] ?? [])
+            : (response.data is List ? response.data : []);
+        final items = dataList
+            .map((e) => ServiceAreaModel.fromJson(Map<String, dynamic>.from(e)))
+            .toList();
+        serviceAreas.assignAll(items);
+      }
+    } catch (e) {
+      debugPrint("Error fetching service areas for job post: $e");
+    } finally {
+      isServiceAreasLoading.value = false;
+    }
+  }
 
   String get chauffeurSelectionText {
     if (chauffeurSelectionType.value == 'global') {
       if (selectedServiceAreas.isEmpty) {
-        return 'Select Service Area';
+        return 'Auto-assign: All Chauffeurs';
       }
       final cities = selectedServiceAreas
           .map((city) => city.split(',').first.trim())
@@ -120,7 +100,11 @@ class PostJobController extends GetxController {
       return 'Auto-assign: $cities';
     } else if (chauffeurSelectionType.value == 'favorites' &&
         selectedDrivers.isNotEmpty) {
-      return 'Preferred: ${selectedDrivers.join(', ')}';
+      final names = favoriteDrivers
+          .where((d) => selectedDrivers.contains(d.id))
+          .map((d) => d.name)
+          .join(', ');
+      return names.isNotEmpty ? 'Preferred: $names' : 'Preferred Chauffeur';
     }
     return 'Select Chauffeur / Service Area';
   }
@@ -130,19 +114,19 @@ class PostJobController extends GetxController {
     selectedDrivers.clear();
   }
 
-  void toggleDriverSelection(String name) {
+  void toggleDriverSelection(String driverId) {
     if (chauffeurSelectionType.value != 'favorites') {
       chauffeurSelectionType.value = 'favorites';
       selectedDrivers.clear();
       selectedServiceAreas.clear();
     }
-    if (selectedDrivers.contains(name)) {
-      selectedDrivers.remove(name);
+    if (selectedDrivers.contains(driverId)) {
+      selectedDrivers.remove(driverId);
       if (selectedDrivers.isEmpty) {
         chauffeurSelectionType.value = '';
       }
     } else {
-      selectedDrivers.add(name);
+      selectedDrivers.add(driverId);
     }
   }
 
@@ -159,6 +143,23 @@ class PostJobController extends GetxController {
       }
     } else {
       selectedServiceAreas.add(area);
+    }
+  }
+
+  var expandedCitiesAreas = <String>{}.obs;
+
+  void toggleShowAllCities(String areaName) {
+    if (expandedCitiesAreas.contains(areaName)) {
+      expandedCitiesAreas.remove(areaName);
+    } else {
+      expandedCitiesAreas.add(areaName);
+    }
+  }
+
+  void clearServiceAreaSelection() {
+    selectedServiceAreas.clear();
+    if (chauffeurSelectionType.value == 'global') {
+      chauffeurSelectionType.value = '';
     }
   }
 
@@ -254,7 +255,7 @@ class PostJobController extends GetxController {
     if (picked != null && picked != selectedTime.value) {
       selectedTime.value = picked;
 
-      // Format to 12-hour AM/PM
+      // Format to 12-hour AM/PM for display
       final now = DateTime.now();
       final dateTime = DateTime(
         now.year,
@@ -282,30 +283,72 @@ class PostJobController extends GetxController {
     try {
       isLoading.value = true;
 
+      final isAsapRide = asap == true;
+      final String? formattedDate = !isAsapRide && date != null
+          ? "${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}"
+          : null;
+      final String? formattedTimeStr = !isAsapRide && time != null
+          ? "${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}"
+          : null;
+
+      final String normalizedPayment =
+          (paymentType.toUpperCase().contains("COLLECT") &&
+              !paymentType.toUpperCase().contains("CREDIT"))
+          ? "COLLECT PAYMENT"
+          : "CREDIT CARD ON FILE";
+
+      final bool isTargeted =
+          chauffeurSelectionType.value == 'favorites' &&
+          selectedDrivers.isNotEmpty;
+      final String dispatchType = isTargeted
+          ? "TARGETED CHAUFFEURS"
+          : "ALL CHAUFFEURS";
+      final List<String> targetedChauffeurs = isTargeted
+          ? selectedDrivers.toList()
+          : [];
+
+      List<String> serviceAreaIds = [];
+      if (!isTargeted && selectedServiceAreas.isNotEmpty) {
+        for (final areaName in selectedServiceAreas) {
+          final areaModel = serviceAreas.firstWhereOrNull(
+            (a) =>
+                a.areaName.trim().toLowerCase() ==
+                areaName.trim().toLowerCase(),
+          );
+          if (areaModel != null && areaModel.id.isNotEmpty) {
+            serviceAreaIds.add(areaModel.id);
+          }
+        }
+      }
+
       final response = await _jobService.createJob(
         jobType: "ONE WAY",
-        pickupLocation: pickupLocation,
-        dropoffLocation: dropoffLocation,
-        flightNumber: flightNumber,
-        date: asap == true ? null : date?.toUtc().toIso8601String(),
-        time: asap == true ? null : time?.format(Get.context!),
-        asap: asap,
+        pickup: pickupLocation,
+        dropoff: dropoffLocation,
+        flightNumber: flightNumber.isNotEmpty ? flightNumber : null,
+        date: formattedDate,
+        time: formattedTimeStr,
+        asap: isAsapRide,
         vehicleType: selectedVehicle.value,
         paymentAmount: double.tryParse(paymentAmount) ?? 0,
-        paymentType: paymentType == 'Credit Card on File'
-            ? 'NO COLLECT'
-            : 'COLLECT',
-        instruction: instruction,
-        driverSelection: chauffeurSelectionType.value == 'global'
-            ? 'Service Area: ${selectedServiceAreas.join(', ')}'
-            : selectedDrivers.join(', '),
+        paymentType: normalizedPayment,
+        dispatchType: dispatchType,
+        instruction: instruction?.isNotEmpty == true ? instruction : null,
+        targetedChauffeurs: targetedChauffeurs,
+        serviceAreaId: serviceAreaIds.isNotEmpty ? serviceAreaIds.first : null,
+        serviceAreaIds: serviceAreaIds.isNotEmpty ? serviceAreaIds : null,
       );
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        Helpers.showCustomSnackBar('Job created successfully!', isError: false);
+      final int code = response.statusCode ?? 0;
+      final bool isSuccess =
+          (code >= 200 && code < 300) || response.data?['success'] == true;
 
-        Get.back(); // Close bottom sheet
-        Get.toNamed(Routes.myJobsView);
+      if (isSuccess) {
+        Get.back(); // Pop JobPostSheetTabBarView back to JobOfferView
+        Helpers.showCustomSnackBar(
+          response.data?['message']?.toString() ?? 'Job created successfully!',
+          isError: false,
+        );
       } else {
         final message = response.data is Map
             ? (response.data['message'] ?? 'Something went wrong.')
@@ -327,8 +370,9 @@ class PostJobController extends GetxController {
     required String pickupLocation,
     String? dropoffLocation,
     String? duration,
-    required DateTime date,
-    required TimeOfDay time,
+    DateTime? date,
+    TimeOfDay? time,
+    bool? asap,
     required String paymentAmount,
     required String paymentType,
     required String? instruction,
@@ -336,28 +380,76 @@ class PostJobController extends GetxController {
     try {
       isLoading.value = true;
 
+      final isAsapRide = asap == true;
+      final String? formattedDate = !isAsapRide && date != null
+          ? "${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}"
+          : null;
+      final String? formattedTimeStr = !isAsapRide && time != null
+          ? "${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}"
+          : null;
+
+      final String normalizedPayment =
+          (paymentType.toUpperCase().contains("COLLECT") &&
+              !paymentType.toUpperCase().contains("CREDIT"))
+          ? "COLLECT PAYMENT"
+          : "CREDIT CARD ON FILE";
+
+      final bool isTargeted =
+          chauffeurSelectionType.value == 'favorites' &&
+          selectedDrivers.isNotEmpty;
+      final String dispatchType = isTargeted
+          ? "TARGETED CHAUFFEURS"
+          : "ALL CHAUFFEURS";
+      final List<String> targetedChauffeurs = isTargeted
+          ? selectedDrivers.toList()
+          : [];
+
+      List<String> serviceAreaIds = [];
+      if (!isTargeted && selectedServiceAreas.isNotEmpty) {
+        for (final areaName in selectedServiceAreas) {
+          final areaModel = serviceAreas.firstWhereOrNull(
+            (a) =>
+                a.areaName.trim().toLowerCase() ==
+                areaName.trim().toLowerCase(),
+          );
+          if (areaModel != null && areaModel.id.isNotEmpty) {
+            serviceAreaIds.add(areaModel.id);
+          }
+        }
+      }
+
+      final String finalDropoff =
+          (dropoffLocation != null && dropoffLocation.isNotEmpty)
+          ? dropoffLocation
+          : "By the hour";
+
       final response = await _jobService.createJob(
         jobType: "BY THE HOUR",
-        pickupLocation: pickupLocation,
-        dropoffLocation: dropoffLocation,
-        duration: duration,
-        date: date.toUtc().toIso8601String(),
-        time: time.format(Get.context!),
+        pickup: pickupLocation,
+        dropoff: finalDropoff,
+        date: formattedDate,
+        time: formattedTimeStr,
+        asap: isAsapRide,
         vehicleType: selectedVehicle.value,
         paymentAmount: double.tryParse(paymentAmount) ?? 0,
-        paymentType: paymentType == 'Credit Card on File'
-            ? 'NO COLLECT'
-            : 'COLLECT',
-        instruction: instruction,
-        driverSelection: chauffeurSelectionType.value == 'global'
-            ? 'Service Area: ${selectedServiceAreas.join(', ')}'
-            : selectedDrivers.join(', '),
+        paymentType: normalizedPayment,
+        dispatchType: dispatchType,
+        instruction: instruction?.isNotEmpty == true ? instruction : null,
+        targetedChauffeurs: targetedChauffeurs,
+        serviceAreaId: serviceAreaIds.isNotEmpty ? serviceAreaIds.first : null,
+        serviceAreaIds: serviceAreaIds.isNotEmpty ? serviceAreaIds : null,
       );
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        Helpers.showCustomSnackBar('Job created successfully!', isError: false);
-        Get.back();
-        Get.toNamed(Routes.myJobsView);
+      final int code = response.statusCode ?? 0;
+      final bool isSuccess =
+          (code >= 200 && code < 300) || response.data?['success'] == true;
+
+      if (isSuccess) {
+        Get.back(); // Pop JobPostSheetTabBarView back to JobOfferView
+        Helpers.showCustomSnackBar(
+          response.data?['message']?.toString() ?? 'Job created successfully!',
+          isError: false,
+        );
       } else {
         final message = response.data is Map
             ? (response.data['message'] ?? 'Something went wrong.')

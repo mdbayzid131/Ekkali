@@ -72,22 +72,33 @@ class ChatPreview {
   final String createdBy;
   final String createdAt;
   final String updatedAt;
+  int unreadCount;
+  bool isRead;
 
   ChatPreview({
     required this.id,
-    required this.participants,
+    this.participants = const [],
     this.item,
     this.jobId,
     this.lastMessage,
     this.lastMessageAt,
-    required this.createdBy,
-    required this.createdAt,
-    required this.updatedAt,
+    this.createdBy = '',
+    this.createdAt = '',
+    this.updatedAt = '',
+    this.unreadCount = 0,
+    this.isRead = true,
   });
 
   factory ChatPreview.fromJson(Map<String, dynamic> json) {
+    final unread = json['unreadCount'] is int
+        ? json['unreadCount'] as int
+        : int.tryParse(json['unreadCount']?.toString() ?? '0') ?? 0;
+    final isReadVal = json['isRead'] is bool
+        ? json['isRead'] as bool
+        : (unread == 0);
+
     return ChatPreview(
-      id: json['_id'] ?? '',
+      id: json['_id']?.toString() ?? json['id']?.toString() ?? '',
       participants: json['participants'] != null
           ? (json['participants'] as List)
                 .map((p) => ChatParticipant.fromJson(p))
@@ -96,12 +107,16 @@ class ChatPreview {
       item: json['itemId'] != null && json['itemId'] is Map
           ? ChatItem.fromJson(json['itemId'])
           : null,
-      jobId: json['jobId'] is String ? json['jobId'] : null,
+      jobId: json['jobId'] is Map
+          ? json['jobId']['id']?.toString() ?? json['jobId']['_id']?.toString()
+          : json['jobId']?.toString(),
       lastMessage: json['lastMessage'],
       lastMessageAt: json['lastMessageAt'],
-      createdBy: json['createdBy'] ?? '',
-      createdAt: json['createdAt'] ?? '',
-      updatedAt: json['updatedAt'] ?? '',
+      createdBy: json['createdBy']?.toString() ?? '',
+      createdAt: json['createdAt']?.toString() ?? '',
+      updatedAt: json['updatedAt']?.toString() ?? '',
+      unreadCount: unread,
+      isRead: isReadVal,
     );
   }
 

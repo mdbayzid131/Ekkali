@@ -5,7 +5,6 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:moeb_26/config/constants/icon_paths.dart';
-import 'package:moeb_26/config/routes/app_pages.dart';
 import 'package:moeb_26/data/models/chat_community_model.dart';
 import 'package:moeb_26/modules/chat_community/controllers/chat_community_detail_controller.dart';
 import 'package:moeb_26/modules/preferred_drivers/controllers/preferred_drivers_controller.dart';
@@ -32,14 +31,31 @@ class ChatCommunityDetailView extends StatelessWidget {
                   return const Center(child: CircularProgressIndicator());
                 }
                 return ListView.builder(
+                  controller: controller.scrollController,
                   padding: EdgeInsets.symmetric(
                     horizontal: 10.w,
                     vertical: 10.h,
                   ),
-                  itemCount: controller.messages.length,
+                  itemCount: controller.messages.length +
+                      (controller.isLoadingMore.value ? 1 : 0),
                   reverse: true, // Show latest messages at the bottom
                   physics: const BouncingScrollPhysics(),
                   itemBuilder: (context, index) {
+                    if (index == controller.messages.length) {
+                      return Padding(
+                        padding: EdgeInsets.symmetric(vertical: 12.h),
+                        child: const Center(
+                          child: SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Color(0xFFFEDB9B),
+                            ),
+                          ),
+                        ),
+                      );
+                    }
                     final message = controller.messages[index];
                     return _buildMessageBubble(message);
                   },
@@ -155,11 +171,16 @@ class ChatCommunityDetailView extends StatelessWidget {
                   dropdownStyleData: DropdownStyleData(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(10.r),
-                      color: Colors.black,
+                      color: const Color(0xFF161618),
+                      border: Border.all(color: const Color(0xFF27272A)),
                     ),
-                    width: 160.w,
+                    maxHeight: 250.h,
+                    width: 170.w,
                   ),
-                  items: controller.states.map((state) {
+                  items: (controller.states.isNotEmpty
+                          ? controller.states
+                          : [controller.selectedState.value])
+                      .map((state) {
                     return DropdownMenuItem(
                       value: state,
                       child: Text(
@@ -186,7 +207,8 @@ class ChatCommunityDetailView extends StatelessWidget {
   }
 
   Widget _buildMessageBubble(CommunityMessage message) {
-    final bool isMe = message.sender.id == controller.userService.userId;
+    final String currentUserId = controller.userService.userId;
+    final bool isMe = message.sender.id == currentUserId;
 
     final avatar = GestureDetector(
       onTap: () {
@@ -195,13 +217,11 @@ class ChatCommunityDetailView extends StatelessWidget {
             ? Get.find<PreferredDriversController>()
             : Get.put(PreferredDriversController());
 
-        final namePart = message.sender.name.split(' ').first.toLowerCase();
-        final chauffeur = preferredController.chauffeursList.firstWhere(
-          (c) => c.name.toLowerCase().startsWith(namePart),
-          orElse: () => preferredController.chauffeursList.first,
+        preferredController.openChauffeurProfile(
+          userId: message.sender.id,
+          name: message.sender.name,
+          imageUrl: message.sender.profilePicture ?? '',
         );
-        preferredController.selectedChauffeur.value = chauffeur;
-        Get.toNamed(Routes.preferredDriverProfileView);
       },
       child: Container(
         margin: EdgeInsets.only(right: 8.w, bottom: 4.h),
@@ -242,6 +262,26 @@ class ChatCommunityDetailView extends StatelessWidget {
     );
 
     final parsed = ReplyParsedMessage.parse(message.text);
+    String? replyUser = parsed.replyToUser;
+    String? replyText = parsed.replyToText;
+
+    if (replyUser == null && message.replyToMessage != null) {
+      final rMsg = message.replyToMessage!;
+      replyUser = rMsg.sender.id == currentUserId ? 'You' : rMsg.sender.name;
+      replyText = rMsg.text;
+    } else if (replyUser == null && message.replyTo != null) {
+      final original =
+          controller.messages.firstWhereOrNull((m) => m.id == message.replyTo);
+      if (original != null) {
+        replyUser =
+            original.sender.id == currentUserId ? 'You' : original.sender.name;
+        replyText = original.text;
+      }
+    }
+
+    if (replyText != null && replyText.startsWith('[REPLY:')) {
+      replyText = replyText.split(']').skip(1).join(']');
+    }
 
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 6.h),
@@ -266,23 +306,18 @@ class ChatCommunityDetailView extends StatelessWidget {
                             ? Get.find<PreferredDriversController>()
                             : Get.put(PreferredDriversController());
 
-                        final namePart = message.sender.name
-                            .split(' ')
-                            .first
-                            .toLowerCase();
-                        final chauffeur = preferredController.chauffeursList
-                            .firstWhere(
-                              (c) => c.name.toLowerCase().startsWith(namePart),
-                              orElse: () =>
-                                  preferredController.chauffeursList.first,
-                            );
-                        preferredController.selectedChauffeur.value = chauffeur;
-                        Get.toNamed(Routes.preferredDriverProfileView);
+                        preferredController.openChauffeurProfile(
+                          userId: message.sender.id,
+                          name: message.sender.name,
+                          imageUrl: message.sender.profilePicture ?? '',
+                        );
                       },
                       child: Padding(
                         padding: EdgeInsets.only(left: 4.w, bottom: 4.h),
                         child: Text(
-                          message.sender.name,
+                          message.sender.name.isNotEmpty
+                              ? message.sender.name
+                              : 'Chauffeur',
                           style: GoogleFonts.inter(
                             color: Colors.white,
                             fontSize: 12.sp,
@@ -336,8 +371,7 @@ class ChatCommunityDetailView extends StatelessWidget {
                                   )
                                   .toList(),
                             ),
-                          if (parsed.replyToUser != null &&
-                              parsed.replyToText != null)
+                          if (replyUser != null && replyText != null)
                             Container(
                               margin: EdgeInsets.only(bottom: 6.h),
                               padding: EdgeInsets.symmetric(
@@ -358,7 +392,7 @@ class ChatCommunityDetailView extends StatelessWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    parsed.replyToUser!,
+                                    replyUser,
                                     style: GoogleFonts.inter(
                                       color: const Color(0xFFD08700),
                                       fontSize: 11.sp,
@@ -369,7 +403,7 @@ class ChatCommunityDetailView extends StatelessWidget {
                                   ),
                                   SizedBox(height: 2.h),
                                   Text(
-                                    parsed.replyToText!,
+                                    replyText,
                                     style: GoogleFonts.inter(
                                       color: Colors.white70,
                                       fontSize: 12.sp,
@@ -699,23 +733,19 @@ class ChatCommunityDetailView extends StatelessWidget {
             ),
           ),
           SizedBox(width: 10.w),
-          // Send Button with loader support
+          // Send Button
           Padding(
             padding: EdgeInsets.only(bottom: 10.h),
-            child: Obx(
-              () => controller.isSending.value
-                  ? const CircularProgressIndicator(color: Color(0xffD4A843))
-                  : GestureDetector(
-                      onTap: () => controller.sendMessage(),
-                      child: SvgPicture.asset(
-                        AppIcons.send_message_icon,
-                        height: 24.sp,
-                        colorFilter: const ColorFilter.mode(
-                          Colors.white,
-                          BlendMode.srcIn,
-                        ),
-                      ),
-                    ),
+            child: GestureDetector(
+              onTap: () => controller.sendMessage(),
+              child: SvgPicture.asset(
+                AppIcons.send_message_icon,
+                height: 24.sp,
+                colorFilter: const ColorFilter.mode(
+                  Colors.white,
+                  BlendMode.srcIn,
+                ),
+              ),
             ),
           ),
         ],

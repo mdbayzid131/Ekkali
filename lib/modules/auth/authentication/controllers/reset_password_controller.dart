@@ -60,8 +60,6 @@ class ResetPasswordController extends GetxController {
 
   @override
   void onClose() {
-    passwordController.dispose();
-    confirmPasswordController.dispose();
     super.onClose();
   }
 }

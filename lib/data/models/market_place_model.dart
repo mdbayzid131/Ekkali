@@ -1,162 +1,72 @@
-// class MarketplaceItem {
-//   final String id;
-//   final String name;
-//   final String price;
-//   final double rating;
-//   final String imagePath;
-//   final String condition;
-//   final String status;
-//   final String location;
-//   final String description;
-//   final List<String> photos;
-//   final CreatedBy createdBy;
-//   final DateTime createdAt;
-//   final DateTime updatedAt;
+class CursorPagination {
+  String? nextCursor;
+  bool? hasMore;
+  int? limit;
 
-//   MarketplaceItem({
-//     required this.id,
-//     required this.name,
-//     required this.price,
-//     required this.rating,
-//     required this.imagePath,
-//     required this.condition,
-//     required this.status,
-//     required this.location,
-//     required this.description,
-//     required this.photos,
-//     required this.createdBy,
-//     required this.createdAt,
-//     required this.updatedAt,
-//   });
+  CursorPagination({this.nextCursor, this.hasMore, this.limit});
 
-//   factory MarketplaceItem.fromJson(Map<String, dynamic> json) {
-//     List<String> photosList = (json['photos'] as List?)?.map((e) => e.toString()).toList() ?? [];
-//     String firstPhoto = photosList.isNotEmpty ? photosList[0] : '';
-    
-//     return MarketplaceItem(
-//       id: json['_id']?.toString() ?? '',
-//       name: json['title']?.toString() ?? '',
-//       price: json['price']?.toString() ?? '0',
-//       rating: 5.0, 
-//       imagePath: firstPhoto,
-//       condition: json['condition']?.toString() ?? '',
-//       status: json['status']?.toString() ?? '',
-//       location: json['location']?.toString() ?? '',
-//       description: json['description'] ?? '',
-//       photos: photosList,
-//       createdBy: CreatedBy.fromJson(json['createdBy'] ?? {}),
-//       createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : DateTime.now(),
-//       updatedAt: json['updatedAt'] != null ? DateTime.parse(json['updatedAt']) : DateTime.now(),
-//     );
-//   }
+  CursorPagination.fromJson(Map<String, dynamic> json) {
+    nextCursor = json['nextCursor']?.toString();
+    hasMore = json['hasMore'] is bool ? json['hasMore'] : false;
+    limit = json['limit'] is int
+        ? json['limit']
+        : int.tryParse(json['limit']?.toString() ?? '');
+  }
 
-//   Map<String, dynamic> toJson() {
-//     return {
-//       '_id': id,
-//       'title': name,
-//       'price': price,
-//       'condition': condition,
-//       'status': status,
-//       'location': location,
-//       'description': description,
-//       'photos': photos,
-//       'createdBy': createdBy.toJson(),
-//       'createdAt': createdAt.toIso8601String(),
-//       'updatedAt': updatedAt.toIso8601String(),
-//     };
-//   }
-// }
-
-// class CreatedBy {
-//   final String id;
-//   final String name;
-//   final String email;
-//   final String profilePicture;
-
-//   CreatedBy({
-//     required this.id,
-//     required this.name,
-//     required this.email,
-//     required this.profilePicture,
-//   });
-
-//   factory CreatedBy.fromJson(Map<String, dynamic> json) {
-//     return CreatedBy(
-//       id: json['_id']?.toString() ?? '',
-//       name: json['name']?.toString() ?? '',
-//       email: json['email']?.toString() ?? '',
-//       profilePicture: json['profilePicture']?.toString() ?? '',
-//     );
-//   }
-
-//   Map<String, dynamic> toJson() {
-//     return {
-//       '_id': id,
-//       'name': name,
-//       'email': email,
-//       'profilePicture': profilePicture,
-//     };
-//   }
-// }
-
-
-
-
-
-
-
-
-
-
-
-
-
+  Map<String, dynamic> toJson() {
+    return {
+      'nextCursor': nextCursor,
+      'hasMore': hasMore,
+      'limit': limit,
+    };
+  }
+}
 
 class MarketplaceModel {
   bool? success;
   String? message;
-  Pagination? pagination;
+  CursorPagination? cursor;
   List<ItemData>? data;
- 
-  MarketplaceModel({this.success, this.message, this.pagination, this.data});
- 
+
+  MarketplaceModel({
+    this.success,
+    this.message,
+    this.cursor,
+    this.data,
+  });
+
   MarketplaceModel.fromJson(Map<String, dynamic> json) {
     success = json['success'];
     message = json['message'];
- 
-    pagination = json['pagination'] != null
-        ? Pagination.fromJson(json['pagination'])
+
+    cursor = json['cursor'] != null
+        ? CursorPagination.fromJson(json['cursor'])
         : null;
- 
-    if (json['data'] != null) {
+
+    if (json['data'] != null && json['data'] is List) {
       data = <ItemData>[];
       json['data'].forEach((v) {
-        data!.add(ItemData.fromJson(v));
+        if (v is Map<String, dynamic>) {
+          data!.add(ItemData.fromJson(v));
+        }
       });
     }
   }
-}
- 
-class Pagination {
-  int? total;
-  int? limit;
-  int? page;
-  int? totalPage;
- 
-  Pagination({this.total, this.limit, this.page, this.totalPage});
- 
-  Pagination.fromJson(Map<String, dynamic> json) {
-    total = json['total'];
-    limit = json['limit'];
-    page = json['page'];
-    totalPage = json['totalPage'];
+
+  Map<String, dynamic> toJson() {
+    return {
+      'success': success,
+      'message': message,
+      'cursor': cursor?.toJson(),
+      'data': data?.map((v) => v.toJson()).toList(),
+    };
   }
 }
- 
+
 class ItemData {
   String? id;
   String? title;
-  int? price;
+  num? price;
   String? condition;
   String? status;
   String? location;
@@ -165,7 +75,7 @@ class ItemData {
   User? createdBy;
   String? createdAt;
   String? updatedAt;
- 
+
   ItemData({
     this.id,
     this.title,
@@ -179,37 +89,71 @@ class ItemData {
     this.createdAt,
     this.updatedAt,
   });
- 
+
   ItemData.fromJson(Map<String, dynamic> json) {
-    id = json['_id'];
-    title = json['title'];
-    price = json['price'];
-    condition = json['condition'];
-    status = json['status'];
-    location = json['location'];
-    description = json['description'];
-    photos = json['photos'] != null ? List<String>.from(json['photos']) : [];
- 
-    createdBy =
-        json['createdBy'] != null ? User.fromJson(json['createdBy']) : null;
- 
-    createdAt = json['createdAt'];
-    updatedAt = json['updatedAt'];
+    id = json['_id']?.toString() ?? json['id']?.toString();
+    title = json['title']?.toString();
+    if (json['price'] != null) {
+      price = num.tryParse(json['price'].toString());
+    }
+    condition = json['condition']?.toString();
+    status = json['status']?.toString() ?? 'AVAILABLE';
+    location = json['location']?.toString();
+    description = json['description']?.toString();
+    photos = json['photos'] != null
+        ? (json['photos'] as List).map((e) => e.toString()).toList()
+        : [];
+
+    if (json['createdBy'] != null) {
+      if (json['createdBy'] is Map<String, dynamic>) {
+        createdBy = User.fromJson(json['createdBy']);
+      } else if (json['createdBy'] is String) {
+        createdBy = User(id: json['createdBy'].toString());
+      }
+    }
+
+    createdAt = json['createdAt']?.toString();
+    updatedAt = json['updatedAt']?.toString();
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      '_id': id,
+      'title': title,
+      'price': price,
+      'condition': condition,
+      'status': status,
+      'location': location,
+      'description': description,
+      'photos': photos,
+      'createdBy': createdBy?.toJson(),
+      'createdAt': createdAt,
+      'updatedAt': updatedAt,
+    };
   }
 }
- 
+
 class User {
   String? id;
   String? name;
   String? email;
   String? profilePicture;
- 
+
   User({this.id, this.name, this.email, this.profilePicture});
- 
+
   User.fromJson(Map<String, dynamic> json) {
-    id = json['_id'];
-    name = json['name'];
-    email = json['email'];
-    profilePicture = json['profilePicture'];
+    id = json['_id']?.toString() ?? json['id']?.toString();
+    name = json['name']?.toString();
+    email = json['email']?.toString();
+    profilePicture = json['profilePicture']?.toString();
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      '_id': id,
+      'name': name,
+      'email': email,
+      'profilePicture': profilePicture,
+    };
   }
 }

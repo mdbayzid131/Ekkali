@@ -1,21 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import 'package:moeb_26/Data/models/finish_rides_model.dart';
-import 'package:moeb_26/Data/models/my_rides_model.dart';
-import 'package:moeb_26/Data/models/upcoming_rides_model.dart';
-import 'package:moeb_26/config/constants/icon_paths.dart';
+import 'package:moeb_26/data/models/my_rides_model.dart';
 import 'package:moeb_26/config/constants/image_paths.dart';
 import 'package:moeb_26/config/routes/app_pages.dart';
 import 'package:moeb_26/config/themes/app_theme.dart';
+import 'package:moeb_26/core/utils/helpers.dart';
 import 'package:moeb_26/data/repositories/socket_repository.dart';
 import 'package:moeb_26/core/widgets/CustomButton.dart';
-import 'package:moeb_26/core/widgets/CustomText.dart';
 import 'package:moeb_26/core/widgets/Custom_InfoBox.dart';
 import 'package:moeb_26/core/widgets/custom_swipe_button.dart';
+import 'package:moeb_26/modules/preferred_drivers/controllers/preferred_drivers_controller.dart';
 import '../../../core/widgets/Custom_Card_Ditails.dart';
 import '../controllers/my_ride_progress_details_controller.dart';
 
@@ -28,63 +25,32 @@ class MyRideProgressDetailsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Get the ride data passed from the previous screen (could be Ride, UpcomingRideData, or FinishRideData)
-    final dynamic ride = Get.arguments;
+    // Get the ride data passed from the previous screen (could be Ride, UpcomingRideData, FinishRideData, Map, or String ID)
+    final dynamic initialRide = Get.arguments;
 
-    if (ride == null) {
-      return Scaffold(
-        backgroundColor: Colors.black,
-        appBar: PreferredSize(
-          preferredSize: Size.fromHeight(60.h),
-          child: Container(
-            decoration: const BoxDecoration(
-              border: Border(
-                bottom: BorderSide(color: Color(0xFF1E1E1E), width: 1.5),
-              ),
-            ),
-            child: AppBar(
-              backgroundColor: Colors.black,
-              elevation: 0,
-              leading: IconButton(
-                icon: Icon(
-                  Icons.arrow_back_ios_new,
-                  color: Colors.white,
-                  size: 20.sp,
-                ),
-                onPressed: () => Get.back(),
-              ),
-              title: Text(
-                'Ride Details',
-                style: GoogleFonts.inter(
-                  color: Colors.white,
-                  fontSize: 18.sp,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              centerTitle: true,
-            ),
-          ),
-        ),
-        body: const Center(
-          child: Text(
-            "No ride details found",
-            style: TextStyle(color: Colors.white),
-          ),
-        ),
-      );
+    String rideId = "";
+    if (initialRide is RideData) {
+      rideId = initialRide.id;
+    } else if (initialRide is Map) {
+      rideId = initialRide['_id']?.toString() ??
+          initialRide['id']?.toString() ??
+          initialRide['bookingNo']?.toString() ??
+          '';
+    } else if (initialRide is String) {
+      rideId = initialRide;
     }
 
-    // Extract all ride properties cleanly using helper class
-    final data = _RideDetailsData.fromRide(ride);
-
-    // Set initial status to controller (with ID to prevent stale overwrites)
-    String initialRideStatus = "PENDING";
-    if (ride is UpcomingRideData || ride is FinishRideData) {
-      initialRideStatus = ride.rideStatus ?? "PENDING";
-    } else if (ride is Ride) {
-      initialRideStatus = ride.rideStatus ?? "PENDING";
+    if (rideId.isNotEmpty) {
+      // Set initial status to controller to prevent stale state
+      String initialRideStatus = "PENDING";
+      if (initialRide is RideData) {
+        initialRideStatus = initialRide.rideStatus ?? initialRide.status ?? "PENDING";
+      } else if (initialRide is Map) {
+        initialRideStatus = initialRide['rideStatus'] ?? initialRide['status'] ?? "PENDING";
+      }
+      controller.setInitialStatus(rideId, initialRideStatus);
+      controller.fetchJobDetails(rideId);
     }
-    controller.setInitialStatus(data.id, initialRideStatus);
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -122,34 +88,63 @@ class MyRideProgressDetailsView extends StatelessWidget {
       body: SafeArea(
         top: false,
         bottom: true,
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              SizedBox(height: 10.h),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildRideProgressTracker(),
-                  SizedBox(height: 6.h),
-                  _buildDriverSection(data),
-                  SizedBox(height: 12.h),
-                  _buildJobDetailsSection(data),
-                  SizedBox(height: 12.h),
-                  _buildSpecialInstructionsSection(data),
-                  SizedBox(height: 12.h),
-                  _buildActionButtonsSection(data, ride),
-                  SizedBox(height: 20.h),
-                ],
+        child: Obx(() {
+          if (controller.isLoading.value || controller.rideDetails.value == null) {
+            return Center(
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 120.h),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const CircularProgressIndicator(color: AppColors.primaryColor),
+                    SizedBox(height: 16.h),
+                    Text(
+                      "Loading ride details...",
+                      style: GoogleFonts.inter(
+                        color: const Color(0xFFA1A1A1),
+                        fontSize: 14.sp,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ],
-          ),
-        ),
+            );
+          }
+
+          final RideData rideObj = controller.rideDetails.value!;
+          final data = _RideDetailsData.fromRide(rideObj);
+
+          return SingleChildScrollView(
+            child: Column(
+              children: [
+                SizedBox(height: 10.h),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildRideProgressTracker(),
+                    SizedBox(height: 6.h),
+                    _buildDriverSection(data),
+                    SizedBox(height: 12.h),
+                    _buildJobDetailsSection(data),
+                    SizedBox(height: 12.h),
+                    _buildSpecialInstructionsSection(data),
+                    SizedBox(height: 12.h),
+                    _buildActionButtonsSection(data, rideObj),
+                    SizedBox(height: 20.h),
+                  ],
+                ),
+              ],
+            ),
+          );
+        }),
       ),
     );
   }
 
   Widget _buildDriverSection(_RideDetailsData data) {
+    final bool canOpenProfile = data.participantId.isNotEmpty;
+
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 14.w),
       padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
@@ -160,57 +155,85 @@ class MyRideProgressDetailsView extends StatelessWidget {
       ),
       child: Row(
         children: [
-          CircleAvatar(
-            radius: 20.r,
-            backgroundImage: data.posterImage.startsWith('http')
-                ? NetworkImage(data.posterImage)
-                : AssetImage(data.posterImage) as ImageProvider,
+          GestureDetector(
+            onTap: canOpenProfile
+                ? () {
+                    final preferredController =
+                        Get.isRegistered<PreferredDriversController>()
+                            ? Get.find<PreferredDriversController>()
+                            : Get.put(PreferredDriversController());
+
+                    preferredController.openChauffeurProfile(
+                      userId: data.participantId,
+                      name: data.posterName,
+                      imageUrl: data.posterImage,
+                    );
+                  }
+                : null,
+            child: CircleAvatar(
+              radius: 20.r,
+              backgroundImage: data.posterImage.startsWith('http')
+                  ? NetworkImage(data.posterImage)
+                  : AssetImage(data.posterImage) as ImageProvider,
+            ),
           ),
           SizedBox(width: 12.w),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  data.posterName,
-                  style: GoogleFonts.inter(
-                    fontSize: 15.sp,
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
+            child: GestureDetector(
+              onTap: canOpenProfile
+                  ? () {
+                      final preferredController =
+                          Get.isRegistered<PreferredDriversController>()
+                              ? Get.find<PreferredDriversController>()
+                              : Get.put(PreferredDriversController());
+
+                      preferredController.openChauffeurProfile(
+                        userId: data.participantId,
+                        name: data.posterName,
+                        imageUrl: data.posterImage,
+                      );
+                    }
+                  : null,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    data.posterName,
+                    style: GoogleFonts.inter(
+                      fontSize: 15.sp,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                SizedBox(height: 2.h),
-                Text(
-                  "Job Poster",
-                  style: GoogleFonts.inter(
-                    fontSize: 12.sp,
-                    color: const Color(0xFFA1A1A1),
+                  SizedBox(height: 2.h),
+                  Text(
+                    "Job Poster",
+                    style: GoogleFonts.inter(
+                      fontSize: 12.sp,
+                      color: const Color(0xFFA1A1A1),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
           IconButton(
             onPressed: () async {
-              if (data.participantId.isNotEmpty && data.id.isNotEmpty) {
+              if (data.participantId.isNotEmpty) {
                 try {
                   final chat = await Get.find<SocketRepository>().createChat(
                     data.participantId,
-                    data.id,
                   );
                   if (chat != null) {
                     Get.toNamed(Routes.chatDetailView, arguments: chat);
                   }
                 } catch (e) {
-                  Get.snackbar(
-                    "Error",
+                  Helpers.showCustomSnackBar(
                     "Failed to open chat",
-                    snackPosition: SnackPosition.BOTTOM,
-                    backgroundColor: const Color(0xFFEF4444),
-                    colorText: Colors.white,
+                    isError: true,
                   );
                 }
               }
@@ -218,13 +241,13 @@ class MyRideProgressDetailsView extends StatelessWidget {
             icon: Container(
               padding: EdgeInsets.all(8.w),
               decoration: BoxDecoration(
-                color: AppColors.orange100.withValues(alpha: 0.15),
+                color: AppColors.primaryColor.withValues(alpha: 0.15),
                 shape: BoxShape.circle,
-                border: Border.all(color: AppColors.orange100),
+                border: Border.all(color: AppColors.primaryColor),
               ),
               child: const Icon(
                 Icons.chat_bubble_outline,
-                color: AppColors.orange100,
+                color: AppColors.primaryColor,
                 size: 18,
               ),
             ),
@@ -306,11 +329,11 @@ class MyRideProgressDetailsView extends StatelessWidget {
         padding: EdgeInsets.symmetric(horizontal: 14.w),
         child: controller.isLoading.value
             ? const Center(
-                child: CircularProgressIndicator(color: AppColors.orange100),
+                child: CircularProgressIndicator(color: AppColors.primaryColor),
               )
             : CustomButton(
                 text: buttonText,
-                backgroundColor: AppColors.orange100,
+                backgroundColor: AppColors.primaryColor,
                 textColor: Colors.black,
                 onPressed: () => controller.updateStatus(data.id, nextStatus),
               ),
@@ -373,12 +396,12 @@ class MyRideProgressDetailsView extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: isFinished
                         ? const Color(0xFF10B981).withValues(alpha: 0.15)
-                        : AppColors.orange100.withValues(alpha: 0.15),
+                        : AppColors.primaryColor.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(20.r),
                     border: Border.all(
                       color: isFinished
                           ? const Color(0xFF10B981)
-                          : AppColors.orange100,
+                          : AppColors.primaryColor,
                     ),
                   ),
                   child: Text(
@@ -386,7 +409,7 @@ class MyRideProgressDetailsView extends StatelessWidget {
                     style: GoogleFonts.inter(
                       color: isFinished
                           ? const Color(0xFF10B981)
-                          : AppColors.orange100,
+                          : AppColors.primaryColor,
                       fontSize: 11.sp,
                       fontWeight: FontWeight.bold,
                     ),
@@ -404,7 +427,7 @@ class MyRideProgressDetailsView extends StatelessWidget {
                 final Color color = isCompletedStep
                     ? const Color(0xFF10B981)
                     : (isCurrentStep
-                          ? AppColors.orange100
+                          ? AppColors.primaryColor
                           : const Color(0xFF52525B));
 
                 return Expanded(
@@ -423,7 +446,7 @@ class MyRideProgressDetailsView extends StatelessWidget {
                                         0xFF10B981,
                                       ).withValues(alpha: 0.15)
                                     : (isCurrentStep
-                                          ? AppColors.orange100.withValues(
+                                          ? AppColors.primaryColor.withValues(
                                               alpha: 0.15,
                                             )
                                           : Colors.white.withValues(
@@ -527,7 +550,7 @@ class _RideDetailsData {
     String pickupLocation = "N/A";
     String dropoffLocation = "N/A";
     String vehicleType = "N/A";
-    String paymentType = "N/A";
+    String paymentType = "Credit Card on File";
     String amount = "N/A";
     String rating = "0.0";
     String posterName = "Unknown";
@@ -541,83 +564,99 @@ class _RideDetailsData {
     String dateRaw = "";
     String timeRaw = "";
 
-    if (ride is UpcomingRideData || ride is FinishRideData) {
-      final dynamic r = ride;
-      id = r.id ?? "";
-      pickupLocation = r.pickupLocation ?? "N/A";
-      dropoffLocation = r.dropoffLocation ?? "N/A";
-      vehicleType = r.vehicleType ?? "N/A";
-      paymentType =
-          (r.paymentType == 'NO_COLLECT' || r.paymentType == 'NO COLLECT')
-          ? 'Credit Card on File'
-          : (r.paymentType == 'COLLECT'
-                ? 'Collect Payment'
-                : r.paymentType?.replaceAll('_', ' ') ?? 'N/A');
-      amount = r.paymentAmount != null ? "\$${r.paymentAmount}" : "N/A";
-      flightNumber = r.flightNumber ?? "N/A";
-
-      final driver = r.createdBy;
-      posterName = (driver?.nickname != null && driver!.nickname!.isNotEmpty)
-          ? driver.nickname!
-          : (driver?.name ?? "Unknown");
-      posterCompany = driver?.company ?? "Unknown";
-      participantId = driver?.id ?? "";
-      posterImage = driver?.profilePicture ?? AppImages.profile_image;
-      rating = driver?.averageRating?.toString() ?? "0.0";
-
-      if (driver?.vehicles != null && driver!.vehicles!.isNotEmpty) {
-        final v = driver.vehicles!.first;
-        vehicleInfo = "${v.make} ${v.model}, ${v.colorOutside}";
-        vehicleNumber = v.licensePlate ?? "N/A";
-      } else {
-        vehicleInfo = vehicleType;
+    String formatPayment(dynamic pType) {
+      if (pType == null) return 'Credit Card on File';
+      final str = pType.toString().trim().toUpperCase().replaceAll('_', ' ');
+      if (str.isEmpty || str == 'NO COLLECT') {
+        return 'Credit Card on File';
       }
+      if (str == 'COLLECT') {
+        return 'Collect Payment';
+      }
+      return pType.toString().replaceAll('_', ' ');
+    }
 
-      dateRaw = r.date ?? "";
-      timeRaw = r.time ?? "";
-    } else if (ride is Ride) {
+    if (ride is RideData) {
       final r = ride;
       id = r.id;
       pickupLocation = r.pickupLocation;
       dropoffLocation = r.dropoffLocation;
       vehicleType = r.vehicleType;
-      paymentType =
-          (r.paymentType == 'NO_COLLECT' || r.paymentType == 'NO COLLECT')
-          ? 'Credit Card on File'
-          : (r.paymentType == 'COLLECT'
-                ? 'Collect Payment'
-                : r.paymentType.replaceAll('_', ' '));
-      amount = "\$${r.paymentAmount}";
+      paymentType = formatPayment(r.paymentType);
+      amount = r.paymentAmount != null ? "\$${r.paymentAmount}" : "N/A";
+      flightNumber = r.flightNumber ?? "N/A";
+      instruction = r.instruction ?? "N/A";
 
       final driver = r.createdBy ?? r.assignedTo ?? r.applicant?.driver;
-      posterName = (driver?.nickname != null && driver!.nickname!.isNotEmpty)
-          ? driver.nickname!
-          : (driver?.name ?? "Unknown");
-      participantId = driver?.id ?? "";
-      posterImage =
-          (driver?.profilePicture != null && driver!.profilePicture.isNotEmpty)
-          ? driver.profilePicture
-          : AppImages.profile_image;
+      final rawName = (r.name != null && r.name!.trim().isNotEmpty)
+          ? r.name!.trim()
+          : (driver?.name != null && driver!.name.trim().isNotEmpty
+              ? driver.name.trim()
+              : "");
+      final rawNick = (r.nickname != null && r.nickname!.trim().isNotEmpty)
+          ? r.nickname!.trim()
+          : (driver?.nickname != null && driver!.nickname!.trim().isNotEmpty
+              ? driver.nickname!.trim()
+              : "");
 
-      vehicleInfo = vehicleType;
+      if (rawName.isNotEmpty && rawNick.isNotEmpty && rawName.toLowerCase() != rawNick.toLowerCase()) {
+        posterName = "$rawName ($rawNick)";
+      } else if (rawName.isNotEmpty) {
+        posterName = rawName;
+      } else if (rawNick.isNotEmpty) {
+        posterName = rawNick;
+      } else {
+        posterName = r.companyName ?? driver?.company ?? "Unknown";
+      }
+
+      posterCompany = r.company ?? driver?.company ?? r.companyName ?? "Unknown";
+      participantId = driver?.id ?? "";
+      posterImage = (r.profilePicture != null && r.profilePicture!.isNotEmpty)
+          ? r.profilePicture!
+          : ((driver?.profilePicture != null && driver!.profilePicture.isNotEmpty)
+              ? driver.profilePicture
+              : AppImages.profile_image);
+      rating = driver?.averageRating?.toString() ?? "0.0";
+
+      if (driver?.vehicles != null && driver!.vehicles!.isNotEmpty) {
+        final v = driver.vehicles!.first;
+        vehicleInfo = "${v.make} ${v.model}, ${v.colorOutside}";
+        vehicleNumber = v.licensePlate.isNotEmpty ? v.licensePlate : "N/A";
+      } else {
+        vehicleInfo = vehicleType;
+      }
+
       dateRaw = r.date?.toString() ?? "";
-      timeRaw = r.time;
+      timeRaw = r.time ?? "";
     } else if (ride is Map<String, dynamic>) {
       id = ride['bookingNo']?.toString() ?? ride['id']?.toString() ?? '';
       pickupLocation = ride['pickup'] ?? ride['pickupLocation'] ?? 'N/A';
       dropoffLocation = ride['dropoff'] ?? ride['dropoffLocation'] ?? 'N/A';
       vehicleType = ride['type'] ?? ride['vehicleType'] ?? 'N/A';
-      paymentType =
-          ride['payment'] ?? ride['paymentType'] ?? 'Credit Card on File';
+      paymentType = formatPayment(ride['payment'] ?? ride['paymentType']);
       amount = ride['price'] != null ? "\$${ride['price']}" : "N/A";
       flightNumber = ride['flight'] ?? ride['flightNumber'] ?? 'N/A';
       instruction =
           ride['instructions'] ?? ride['specialInstructions'] ?? 'N/A';
-      posterName =
-          ride['jobPoster'] ??
-          ride['passenger'] ??
-          ride['driver'] ??
-          'Mohamed El Bakkali';
+      final rawName = (ride['name'] ??
+              ride['jobPoster'] ??
+              ride['passenger'] ??
+              ride['driver'] ??
+              '')
+          .toString()
+          .trim();
+      final rawNick = (ride['nickname'] ?? '').toString().trim();
+      if (rawName.isNotEmpty &&
+          rawNick.isNotEmpty &&
+          rawName.toLowerCase() != rawNick.toLowerCase()) {
+        posterName = "$rawName ($rawNick)";
+      } else if (rawName.isNotEmpty) {
+        posterName = rawName;
+      } else if (rawNick.isNotEmpty) {
+        posterName = rawNick;
+      } else {
+        posterName = 'Mohamed El Bakkali';
+      }
       vehicleInfo = ride['vehicle'] ?? vehicleType;
       vehicleNumber = ride['vehicle'] ?? 'N/A';
       dateRaw = ride['dateHeader'] ?? ride['date'] ?? '';
@@ -628,14 +667,26 @@ class _RideDetailsData {
     String displayDateTime = "N/A";
 
     bool isAsap = false;
-    if (ride is UpcomingRideData || ride is FinishRideData) {
+    if (ride is RideData) {
       isAsap = ride.asap == true;
-    } else if (ride is Ride) {
-      isAsap = ride.asap == true;
+    } else if (ride is Map) {
+      isAsap = ride['asap'] == true;
     }
 
     if (isAsap) {
-      displayDateTime = "ASAP";
+      String datePart = "Today";
+      if (ride is RideData && ride.createdAt != null && ride.createdAt!.isNotEmpty) {
+        try {
+          final parsedDate = DateTime.parse(ride.createdAt!).toLocal();
+          datePart = "Today, ${DateFormat('MMM dd').format(parsedDate)}";
+        } catch (_) {}
+      } else if (ride is Map && ride['createdAt'] != null) {
+        try {
+          final parsedDate = DateTime.parse(ride['createdAt'].toString()).toLocal();
+          datePart = "Today, ${DateFormat('MMM dd').format(parsedDate)}";
+        } catch (_) {}
+      }
+      displayDateTime = "$datePart • ASAP";
     } else {
       String dateStr = "";
       if (dateRaw.isNotEmpty) {

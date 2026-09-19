@@ -1,147 +1,136 @@
-// class ServiceAreaModel {
-//   final String id;
-//   final String areaName;
-//   final String city;
-//   final String status;
-//   final DateTime createdAt;
-//   final DateTime updatedAt;
-//   bool isExpanded;
-
-//   ServiceAreaModel({
-//     required this.id,
-//     required this.areaName,
-//     required this.city,
-//     required this.status,
-//     required this.createdAt,
-//     required this.updatedAt,
-//     this.isExpanded = false,
-//   });
-
-//   factory ServiceAreaModel.fromJson(Map<String, dynamic> json) {
-//     return ServiceAreaModel(
-//       id: json['_id']?.toString() ?? '',
-//       areaName: json['areaName']?.toString() ?? '',
-//       city: json['city']?.toString() ?? '',
-//       status: json['status']?.toString() ?? '',
-//       createdAt: json['createdAt'] != null
-//           ? DateTime.parse(json['createdAt'])
-//           : DateTime.now(),
-//       updatedAt: json['updatedAt'] != null
-//           ? DateTime.parse(json['updatedAt'])
-//           : DateTime.now(),
-//       isExpanded: false,
-//     );
-//   }
-
-//   Map<String, dynamic> toJson() {
-//     return {
-//       '_id': id,
-//       'areaName': areaName,
-//       'city': city,
-//       'status': status,
-//       'createdAt': createdAt.toIso8601String(),
-//       'updatedAt': updatedAt.toIso8601String(),
-//     };
-//   }
-// }
-
 class ServiceAreaResponseModel {
   final bool success;
   final String message;
-  final PaginationModel pagination;
+  final CursorModel? cursor;
   final List<ServiceAreaModel> data;
 
   ServiceAreaResponseModel({
     required this.success,
     required this.message,
-    required this.pagination,
+    this.cursor,
     required this.data,
   });
 
   factory ServiceAreaResponseModel.fromJson(Map<String, dynamic> json) {
-    // Check if the data is wrapped in 'data' or 'service_areas' or similar
-    var dataList =
-        json['data'] ?? json['service_areas'] ?? json['results'] ?? [];
-
-    // Check for pagination in various locations
-    var paginationData = json['pagination'] ?? json['meta'] ?? json;
+    final rawData = json['data'] ?? json['service_areas'] ?? [];
+    final List list = rawData is List ? rawData : [];
 
     return ServiceAreaResponseModel(
-      success: json['success'] ?? true,
-      message: json['message'] ?? '',
-      pagination: PaginationModel.fromJson(
-        Map<String, dynamic>.from(paginationData),
-      ),
-      data: (dataList as List)
-          .map((e) => ServiceAreaModel.fromJson(Map<String, dynamic>.from(e)))
+      success: json['success'] == true,
+      message: json['message']?.toString() ?? '',
+      cursor: json['cursor'] != null && json['cursor'] is Map
+          ? CursorModel.fromJson(Map<String, dynamic>.from(json['cursor']))
+          : null,
+      data: list
+          .map((e) => ServiceAreaModel.fromJson(
+                e is Map
+                    ? Map<String, dynamic>.from(e)
+                    : {'areaName': e.toString()},
+              ))
           .toList(),
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'success': success,
+      'message': message,
+      if (cursor != null) 'cursor': cursor!.toJson(),
+      'data': data.map((e) => e.toJson()).toList(),
+    };
+  }
 }
 
-class PaginationModel {
-  final int total;
+class CursorModel {
+  final String? nextCursor;
+  final bool hasMore;
   final int limit;
-  final int page;
-  final int totalPage;
 
-  PaginationModel({
-    required this.total,
-    required this.limit,
-    required this.page,
-    required this.totalPage,
+  CursorModel({
+    this.nextCursor,
+    this.hasMore = false,
+    this.limit = 10,
   });
 
-  factory PaginationModel.fromJson(Map<String, dynamic>? json) {
-    if (json == null) {
-      return PaginationModel(total: 0, limit: 0, page: 0, totalPage: 0);
-    }
-    return PaginationModel(
-      total: json['total'] ?? json['total_items'] ?? 0,
-      limit: json['limit'] ?? 0,
-      page: json['page'] ?? json['current_page'] ?? 0,
-      totalPage:
-          json['totalPage'] ?? json['total_pages'] ?? json['total_page'] ?? 0,
+  factory CursorModel.fromJson(Map<String, dynamic> json) {
+    return CursorModel(
+      nextCursor: json['nextCursor']?.toString(),
+      hasMore: json['hasMore'] == true,
+      limit: json['limit'] is int
+          ? json['limit'] as int
+          : (int.tryParse(json['limit']?.toString() ?? '10') ?? 10),
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'nextCursor': nextCursor,
+      'hasMore': hasMore,
+      'limit': limit,
+    };
   }
 }
 
 class ServiceAreaModel {
   final String id;
   final String areaName;
-  final String city;
+  final List<String> cities;
   final String status;
-  final DateTime createdAt;
-  final DateTime updatedAt;
+  final int? chauffeurCount;
+  final String? createdAt;
+  final String? updatedAt;
   bool isExpanded;
 
   ServiceAreaModel({
     required this.id,
     required this.areaName,
-    required this.city,
-    required this.status,
-    required this.createdAt,
-    required this.updatedAt,
+    this.cities = const [],
+    this.status = 'ACTIVE',
+    this.chauffeurCount,
+    this.createdAt,
+    this.updatedAt,
     this.isExpanded = false,
   });
 
+  String get city => cities.isNotEmpty ? cities.join(', ') : areaName;
+
   factory ServiceAreaModel.fromJson(Map<String, dynamic> json) {
+    final String areaName =
+        json['areaName']?.toString() ?? json['name']?.toString() ?? '';
+
+    List<String> parsedCities = [];
+    if (json['cities'] is List) {
+      parsedCities = (json['cities'] as List)
+          .map((e) => e?.toString() ?? '')
+          .where((s) => s.isNotEmpty)
+          .toList();
+    } else if (json['city'] != null && json['city'].toString().isNotEmpty) {
+      parsedCities = [json['city'].toString()];
+    }
+
     return ServiceAreaModel(
       id: json['_id']?.toString() ?? json['id']?.toString() ?? '',
-      areaName: json['areaName']?.toString() ?? json['name']?.toString() ?? '',
-      city: json['city']?.toString() ?? '',
-      status: json['status']?.toString() ?? '',
-      createdAt: json['createdAt'] != null
-          ? DateTime.parse(json['createdAt'])
-          : json['created_at'] != null
-          ? DateTime.parse(json['created_at'])
-          : DateTime.now(),
-      updatedAt: json['updatedAt'] != null
-          ? DateTime.parse(json['updatedAt'])
-          : json['updated_at'] != null
-          ? DateTime.parse(json['updated_at'])
-          : DateTime.now(),
+      areaName: areaName,
+      cities: parsedCities,
+      status: json['status']?.toString() ?? 'ACTIVE',
+      chauffeurCount: json['chauffeurCount'] is int
+          ? json['chauffeurCount'] as int
+          : int.tryParse(json['chauffeurCount']?.toString() ?? ''),
+      createdAt: json['createdAt']?.toString(),
+      updatedAt: json['updatedAt']?.toString(),
       isExpanded: false,
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      '_id': id,
+      'areaName': areaName,
+      'cities': cities,
+      if (status.isNotEmpty) 'status': status,
+      if (chauffeurCount != null) 'chauffeurCount': chauffeurCount,
+      if (createdAt != null) 'createdAt': createdAt,
+      if (updatedAt != null) 'updatedAt': updatedAt,
+    };
   }
 }

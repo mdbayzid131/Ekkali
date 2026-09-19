@@ -16,15 +16,19 @@ class MarketplaceService extends GetxService {
   Future<Response> getAllItems({
     String? searchTerm,
     String? condition,
-    int page = 1,
+    num? minPrice,
+    num? maxPrice,
     int limit = 10,
+    String? cursor,
   }) async {
     try {
       return await _marketplaceRepo.getAllItems(
         searchTerm: searchTerm,
         condition: condition,
-        page: page,
+        minPrice: minPrice,
+        maxPrice: maxPrice,
         limit: limit,
+        cursor: cursor,
       );
     } catch (e) {
       rethrow;
@@ -33,17 +37,29 @@ class MarketplaceService extends GetxService {
 
   Future<Response> getMyItems({
     String? searchTerm,
-    int page = 1,
+    String? condition,
+    num? minPrice,
+    num? maxPrice,
     int limit = 10,
-    String? sort = '-createdAt',
+    String? cursor,
   }) async {
     try {
       return await _marketplaceRepo.getMyItems(
         searchTerm: searchTerm,
-        page: page,
+        condition: condition,
+        minPrice: minPrice,
+        maxPrice: maxPrice,
         limit: limit,
-        sort: sort,
+        cursor: cursor,
       );
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<Response> getItemById(String itemId) async {
+    try {
+      return await _marketplaceRepo.getItemById(itemId);
     } catch (e) {
       rethrow;
     }
@@ -92,6 +108,14 @@ class MarketplaceService extends GetxService {
         photos: photos,
         status: status,
       );
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<Response> markItemAsSold(String itemId) async {
+    try {
+      return await _marketplaceRepo.markItemAsSold(itemId);
     } catch (e) {
       rethrow;
     }

@@ -6,6 +6,7 @@ import 'package:moeb_26/config/constants/api_constants.dart';
 import 'package:moeb_26/config/constants/storage_constants.dart';
 import 'package:moeb_26/config/routes/app_pages.dart';
 import 'package:moeb_26/core/services/storege_service.dart';
+import 'package:moeb_26/core/services/subscription_service.dart';
 import 'package:moeb_26/core/utils/helpers.dart';
 import 'package:moeb_26/core/utils/logger.dart';
 
@@ -19,7 +20,6 @@ import 'package:moeb_26/core/utils/logger.dart';
 
 class ApiClient extends GetxService {
   static late Dio _dio;
-  static final String _bearerToken = '';
   static Future<bool>? _refreshFuture;
 
   static const String _fallbackMessage =
@@ -104,9 +104,18 @@ class ApiClient extends GetxService {
         !e.requestOptions.path.contains(ApiConstants.login) &&
         !e.requestOptions.path.contains(ApiConstants.signup) &&
         !e.requestOptions.path.contains(ApiConstants.verifyEmail)) {
+      final bearerToken = await StorageService.getString(
+        StorageConstants.bearerToken,
+      );
       final refreshToken = await StorageService.getString(
         StorageConstants.refreshToken,
       );
+
+      // If user is guest/not logged in, don't trigger force logout or session expired
+      if (bearerToken.isEmpty && refreshToken.isEmpty) {
+        return handler.next(e);
+      }
+
       if (refreshToken.isEmpty) {
         _forceLogout();
         return handler.next(e);
@@ -456,8 +465,18 @@ class ApiClient extends GetxService {
   /// Force logout when refresh fails
   void _forceLogout() {
     StorageService.clearAll();
-    Get.offAllNamed(Routes.signinView);
-    Helpers.showError('Please login again.', title: 'Session Expired');
+    try {
+      if (Get.isRegistered<SubscriptionService>()) {
+        Get.find<SubscriptionService>().clearSubscriptionData();
+      }
+    } catch (_) {}
+    final currentRoute = Get.currentRoute;
+    if (currentRoute != Routes.signinView &&
+        currentRoute != Routes.authSelectionView &&
+        currentRoute != Routes.splashView) {
+      Get.offAllNamed(Routes.signinView);
+      Helpers.showError('Please login again.', title: 'Session Expired');
+    }
   }
 }
 

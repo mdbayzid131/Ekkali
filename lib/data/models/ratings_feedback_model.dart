@@ -30,6 +30,7 @@ class ReviewSummary {
 
 class Review {
   final String id;
+  final String reviewerId;
   final int rating;
   final String comment;
   final String reviewerName;
@@ -39,6 +40,7 @@ class Review {
 
   Review({
     required this.id,
+    required this.reviewerId,
     required this.rating,
     required this.comment,
     required this.reviewerName,
@@ -49,15 +51,20 @@ class Review {
 
   factory Review.fromJson(Map<String, dynamic> json) {
     return Review(
-      id: json['_id'] ?? json['jobId'] ?? '',
-      rating: json['rating'] ?? 0,
-      comment: json['comment'] ?? '',
-      reviewerName: json['reviewer']?['name'] ?? 'User',
-      reviewerImage: json['reviewer']?['profilePicture'] ?? '',
+      id: json['_id']?.toString() ?? json['jobId']?.toString() ?? '',
+      reviewerId: json['reviewer']?['_id']?.toString() ??
+          json['reviewer']?['id']?.toString() ??
+          '',
+      rating: (json['rating'] is num)
+          ? (json['rating'] as num).toInt()
+          : int.tryParse(json['rating']?.toString() ?? '5') ?? 5,
+      comment: json['comment']?.toString() ?? '',
+      reviewerName: json['reviewer']?['name']?.toString() ?? 'User',
+      reviewerImage: json['reviewer']?['profilePicture']?.toString() ?? '',
       createdAt: json['reviewedAt'] != null
-          ? DateTime.parse(json['reviewedAt'])
+          ? DateTime.tryParse(json['reviewedAt'].toString()) ?? DateTime.now()
           : DateTime.now(),
-      jobId: json['jobId'],
+      jobId: json['jobId']?.toString(),
     );
   }
 }

@@ -4,6 +4,10 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:moeb_26/config/constants/icon_paths.dart';
+import 'package:moeb_26/config/themes/app_theme.dart';
+import 'package:moeb_26/core/utils/helpers.dart';
+import 'package:moeb_26/core/utils/validators.dart';
+import 'package:moeb_26/core/widgets/CustomButton.dart';
 import '../controllers/invoice_controller.dart';
 
 class SavedClientsView extends GetView<InvoiceController> {
@@ -45,15 +49,13 @@ class SavedClientsView extends GetView<InvoiceController> {
         ),
       ),
       body: RefreshIndicator(
-        color: const Color(0xFFD08700),
+        color: AppColors.primaryColor,
         backgroundColor: Colors.black,
         onRefresh: () => controller.fetchClientsFromApi(),
         child: Obx(() {
           if (controller.isLoading.value && controller.savedClients.isEmpty) {
             return const Center(
-              child: CircularProgressIndicator(
-                color: Color(0xFFD08700),
-              ),
+              child: CircularProgressIndicator(color: AppColors.primaryColor),
             );
           }
 
@@ -108,11 +110,20 @@ class SavedClientsView extends GetView<InvoiceController> {
           );
         }),
       ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: const Color(0xFFD08700),
+      floatingActionButton: FloatingActionButton.extended(
+        backgroundColor: AppColors.primaryColor,
         foregroundColor: Colors.black,
+        elevation: 6,
         onPressed: () => _showAddOrEditClientBottomSheet(context),
-        child: const Icon(Icons.add),
+        icon: const Icon(Icons.add, color: Colors.black),
+        label: Text(
+          'New Client',
+          style: GoogleFonts.inter(
+            color: Colors.black,
+            fontWeight: FontWeight.w600,
+            fontSize: 14.sp,
+          ),
+        ),
       ),
     );
   }
@@ -261,9 +272,41 @@ class SavedClientsView extends GetView<InvoiceController> {
     final zipController = TextEditingController(text: client?.zip ?? '');
     String selectedCountry = client?.country ?? 'United States';
 
+    // Reactive error state variables for inline validation (no snackbar)
+    final nameError = ''.obs;
+    final emailError = ''.obs;
+    final phoneError = ''.obs;
+    final streetError = ''.obs;
+    final cityError = ''.obs;
+    final stateError = ''.obs;
+    final zipError = ''.obs;
+
+    // Auto-clear error when user types
+    nameController.addListener(() {
+      if (nameError.value.isNotEmpty) nameError.value = '';
+    });
+    emailController.addListener(() {
+      if (emailError.value.isNotEmpty) emailError.value = '';
+    });
+    phoneController.addListener(() {
+      if (phoneError.value.isNotEmpty) phoneError.value = '';
+    });
+    streetController.addListener(() {
+      if (streetError.value.isNotEmpty) streetError.value = '';
+    });
+    cityController.addListener(() {
+      if (cityError.value.isNotEmpty) cityError.value = '';
+    });
+    stateController.addListener(() {
+      if (stateError.value.isNotEmpty) stateError.value = '';
+    });
+    zipController.addListener(() {
+      if (zipError.value.isNotEmpty) zipError.value = '';
+    });
+
     Get.bottomSheet(
       Container(
-        constraints: BoxConstraints(maxHeight: 580.h),
+        constraints: BoxConstraints(maxHeight: 600.h),
         padding: EdgeInsets.all(20.r),
         decoration: BoxDecoration(
           color: const Color(0xFF161616),
@@ -285,7 +328,7 @@ class SavedClientsView extends GetView<InvoiceController> {
                 ),
                 IconButton(
                   icon: const Icon(Icons.close, color: Colors.white70),
-                  onPressed: () => Get.back(),
+                  onPressed: () => Navigator.pop(context),
                 ),
               ],
             ),
@@ -297,10 +340,14 @@ class SavedClientsView extends GetView<InvoiceController> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildModalFieldLabel('Client Name*'),
-                    _buildModalInput(nameController, 'e.g. Johnathan Smith'),
+                    _buildModalInput(
+                      nameController,
+                      'e.g. Johnathan Smith',
+                      errorText: nameError,
+                    ),
                     SizedBox(height: 12.h),
 
-                    _buildModalFieldLabel('Business Name'),
+                    _buildModalFieldLabel('Business Name (Optional)'),
                     _buildModalInput(
                       businessController,
                       'e.g. Smith & Associates',
@@ -312,34 +359,39 @@ class SavedClientsView extends GetView<InvoiceController> {
                       emailController,
                       'client@example.com',
                       keyboardType: TextInputType.emailAddress,
+                      errorText: emailError,
                     ),
                     SizedBox(height: 12.h),
 
-                    _buildModalFieldLabel('Phone Number'),
+                    _buildModalFieldLabel('Phone Number (Optional)'),
                     _buildModalInput(
                       phoneController,
                       'e.g. 555-000-0000',
                       keyboardType: TextInputType.phone,
+                      errorText: phoneError,
                     ),
                     SizedBox(height: 12.h),
 
-                    _buildModalFieldLabel('Street Address'),
+                    _buildModalFieldLabel('Street Address*'),
                     _buildModalInput(
                       streetController,
                       'e.g. 123 Luxury Avenue',
+                      errorText: streetError,
                     ),
                     SizedBox(height: 12.h),
 
                     Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _buildModalFieldLabel('City'),
+                              _buildModalFieldLabel('City*'),
                               _buildModalInput(
                                 cityController,
                                 'e.g. Beverly Hills',
+                                errorText: cityError,
                               ),
                             ],
                           ),
@@ -349,8 +401,12 @@ class SavedClientsView extends GetView<InvoiceController> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _buildModalFieldLabel('State'),
-                              _buildModalInput(stateController, 'e.g. CA'),
+                              _buildModalFieldLabel('State*'),
+                              _buildModalInput(
+                                stateController,
+                                'e.g. CA',
+                                errorText: stateError,
+                              ),
                             ],
                           ),
                         ),
@@ -359,15 +415,17 @@ class SavedClientsView extends GetView<InvoiceController> {
                     SizedBox(height: 12.h),
 
                     Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _buildModalFieldLabel('ZIP/Postal Code'),
+                              _buildModalFieldLabel('ZIP/Postal Code*'),
                               _buildModalInput(
                                 zipController,
                                 'e.g. 90210',
+                                errorText: zipError,
                               ),
                             ],
                           ),
@@ -380,19 +438,31 @@ class SavedClientsView extends GetView<InvoiceController> {
                               _buildModalFieldLabel('Country'),
                               TextField(
                                 enabled: false,
-                                controller: TextEditingController(text: 'United States'),
-                                style: GoogleFonts.inter(color: Colors.white38, fontSize: 14.sp),
+                                controller: TextEditingController(
+                                  text: 'United States',
+                                ),
+                                style: GoogleFonts.inter(
+                                  color: Colors.white38,
+                                  fontSize: 14.sp,
+                                ),
                                 decoration: InputDecoration(
                                   filled: true,
                                   fillColor: const Color(0xFF1E1E1E),
-                                  contentPadding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+                                  contentPadding: EdgeInsets.symmetric(
+                                    horizontal: 14.w,
+                                    vertical: 12.h,
+                                  ),
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(10.r),
-                                    borderSide: const BorderSide(color: Color(0xFF2C2C2C)),
+                                    borderSide: const BorderSide(
+                                      color: Color(0xFF2C2C2C),
+                                    ),
                                   ),
                                   disabledBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(10.r),
-                                    borderSide: const BorderSide(color: Color(0xFF2C2C2C)),
+                                    borderSide: const BorderSide(
+                                      color: Color(0xFF2C2C2C),
+                                    ),
                                   ),
                                 ),
                               ),
@@ -407,28 +477,68 @@ class SavedClientsView extends GetView<InvoiceController> {
               ),
             ),
             SizedBox(height: 12.h),
-            SizedBox(
-              width: double.infinity,
-              height: 48.h,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFD08700),
-                  foregroundColor: Colors.black,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12.r),
-                  ),
-                ),
+            Obx(
+              () => CustomButton(
+                text: isEditing ? 'Save Changes' : 'Add Client',
+                loading: controller.isLoading.value,
                 onPressed: () async {
-                  if (nameController.text.trim().isEmpty) {
-                    Get.snackbar(
-                      'Required',
-                      'Client name is required',
-                      snackPosition: SnackPosition.BOTTOM,
-                      backgroundColor: Colors.redAccent,
-                      colorText: Colors.white,
+                  bool isValid = true;
+
+                  final nErr = Validators.name(
+                    nameController.text,
+                    message: 'Client name is required',
+                    minLength: 2,
+                  );
+                  nameError.value = nErr ?? '';
+                  if (nErr != null) isValid = false;
+
+                  final eErr = Validators.email(
+                    emailController.text,
+                    message: 'Enter a valid email address',
+                  );
+                  emailError.value = eErr ?? '';
+                  if (eErr != null) isValid = false;
+
+                  if (phoneController.text.trim().isNotEmpty) {
+                    final pErr = Validators.phone(
+                      phoneController.text,
+                      message: 'Enter a valid phone number',
                     );
-                    return;
+                    phoneError.value = pErr ?? '';
+                    if (pErr != null) isValid = false;
+                  } else {
+                    phoneError.value = '';
                   }
+
+                  final stErr = Validators.required(
+                    streetController.text,
+                    message: 'Street address is required',
+                  );
+                  streetError.value = stErr ?? '';
+                  if (stErr != null) isValid = false;
+
+                  final cErr = Validators.required(
+                    cityController.text,
+                    message: 'City is required',
+                  );
+                  cityError.value = cErr ?? '';
+                  if (cErr != null) isValid = false;
+
+                  final sErr = Validators.required(
+                    stateController.text,
+                    message: 'State is required',
+                  );
+                  stateError.value = sErr ?? '';
+                  if (sErr != null) isValid = false;
+
+                  final zErr = Validators.required(
+                    zipController.text,
+                    message: 'ZIP/Postal code is required',
+                  );
+                  zipError.value = zErr ?? '';
+                  if (zErr != null) isValid = false;
+
+                  if (!isValid) return;
 
                   final newClient = SavedClient(
                     id: isEditing ? client.id : '',
@@ -443,31 +553,16 @@ class SavedClientsView extends GetView<InvoiceController> {
                     country: selectedCountry,
                   );
 
-                  final success =
-                      await controller.addOrUpdateSavedClient(newClient);
+                  final success = await controller.addOrUpdateSavedClient(
+                    newClient,
+                  );
                   if (success) {
-                    Get.back();
+                    if (context.mounted) {
+                      Navigator.pop(context);
+                    }
                   }
                 },
-                child: Obx(() {
-                  if (controller.isLoading.value) {
-                    return SizedBox(
-                      width: 20.w,
-                      height: 20.w,
-                      child: const CircularProgressIndicator(
-                        strokeWidth: 2.5,
-                        color: Colors.black,
-                      ),
-                    );
-                  }
-                  return Text(
-                    isEditing ? 'Save Changes' : 'Add Client',
-                    style: GoogleFonts.inter(
-                      fontSize: 15.sp,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  );
-                }),
+                padding: EdgeInsets.symmetric(vertical: 12.h),
               ),
             ),
           ],
@@ -496,39 +591,64 @@ class SavedClientsView extends GetView<InvoiceController> {
     TextEditingController ctrl,
     String hint, {
     TextInputType? keyboardType,
+    RxString? errorText,
   }) {
-    return TextField(
-      controller: ctrl,
-      keyboardType: keyboardType,
-      style: GoogleFonts.inter(color: Colors.white, fontSize: 14.sp),
-      decoration: InputDecoration(
-        hintText: hint,
-        hintStyle: GoogleFonts.inter(
-          color: const Color(0xFF52525B),
-          fontSize: 13.sp,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        TextField(
+          controller: ctrl,
+          keyboardType: keyboardType,
+          style: GoogleFonts.inter(color: Colors.white, fontSize: 14.sp),
+          decoration: InputDecoration(
+            hintText: hint,
+            hintStyle: GoogleFonts.inter(
+              color: const Color(0xFF52525B),
+              fontSize: 13.sp,
+            ),
+            filled: true,
+            fillColor: const Color(0xFF1E1E1E),
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: 14.w,
+              vertical: 12.h,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10.r),
+              borderSide: const BorderSide(color: Color(0xFF2C2C2C)),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10.r),
+              borderSide: const BorderSide(color: Color(0xFF2C2C2C)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10.r),
+              borderSide: const BorderSide(color: Color(0xFFFEDB9B)),
+            ),
+          ),
         ),
-        filled: true,
-        fillColor: const Color(0xFF1E1E1E),
-        contentPadding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10.r),
-          borderSide: const BorderSide(color: Color(0xFF2C2C2C)),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10.r),
-          borderSide: const BorderSide(color: Color(0xFF2C2C2C)),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10.r),
-          borderSide: const BorderSide(color: Color(0xFF2C2C2C)),
-        ),
-      ),
+        if (errorText != null)
+          Obx(() {
+            if (errorText.value.isEmpty) return const SizedBox.shrink();
+            return Padding(
+              padding: EdgeInsets.only(top: 4.h, left: 4.w),
+              child: Text(
+                errorText.value,
+                style: GoogleFonts.inter(
+                  color: const Color(0xFFEF4444),
+                  fontSize: 11.sp,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+            );
+          }),
+      ],
     );
   }
 
   void _showDeleteConfirmDialog(BuildContext context, SavedClient client) {
-    Get.dialog(
-      Dialog(
+    showDialog(
+      context: context,
+      builder: (dialogContext) => Dialog(
         backgroundColor: const Color(0xFF18181B),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16.r),
@@ -573,52 +693,31 @@ class SavedClientsView extends GetView<InvoiceController> {
               Row(
                 children: [
                   Expanded(
-                    child: OutlinedButton(
-                      style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: Color(0xFF3F3F46)),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10.r),
-                        ),
-                        padding: EdgeInsets.symmetric(vertical: 12.h),
-                      ),
-                      onPressed: () => Get.back(),
-                      child: Text(
-                        'Cancel',
-                        style: GoogleFonts.inter(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
+                    child: CustomButton(
+                      text: 'Cancel',
+                      backgroundColor: Colors.transparent,
+                      textColor: Colors.white,
+                      borderColor: const Color(0xFF3F3F46),
+                      onPressed: () => Navigator.pop(dialogContext),
+                      padding: EdgeInsets.symmetric(vertical: 12.h),
                     ),
                   ),
                   SizedBox(width: 12.w),
                   Expanded(
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFEF4444),
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10.r),
-                        ),
-                        padding: EdgeInsets.symmetric(vertical: 12.h),
-                      ),
+                    child: CustomButton(
+                      text: 'Delete',
+                      backgroundColor: const Color(0xFFEF4444),
+                      textColor: Colors.white,
                       onPressed: () async {
-                        Get.back();
+                        Navigator.pop(dialogContext);
                         await controller.deleteSavedClient(client.id);
-                        Get.snackbar(
-                          'Deleted',
+                        Helpers.showCustomSnackBar(
                           'Client removed successfully',
-                          snackPosition: SnackPosition.BOTTOM,
-                          backgroundColor: Colors.redAccent,
-                          colorText: Colors.white,
+                          title: 'Deleted',
+                          isError: false,
                         );
                       },
-                      child: Text(
-                        'Delete',
-                        style: GoogleFonts.inter(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                      padding: EdgeInsets.symmetric(vertical: 12.h),
                     ),
                   ),
                 ],

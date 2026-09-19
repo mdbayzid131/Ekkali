@@ -3,6 +3,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:moeb_26/config/themes/app_theme.dart';
+import 'package:moeb_26/core/widgets/CustomButton.dart';
 import 'package:intl/intl.dart';
 import 'package:moeb_26/config/constants/icon_paths.dart';
 import 'package:moeb_26/data/models/deals_model.dart';
@@ -52,11 +54,11 @@ class DealsView extends StatelessWidget {
       ),
       body: RefreshIndicator(
         onRefresh: () => controller.fetchDeals(),
-        color: const Color(0xffF1A107),
+        color: AppColors.primaryColor,
         child: Obx(() {
           if (controller.isLoading.value && controller.dealsList.isEmpty) {
             return const Center(
-              child: CircularProgressIndicator(color: Color(0xffF1A107)),
+              child: CircularProgressIndicator(color: AppColors.primaryColor),
             );
           }
 
@@ -113,7 +115,7 @@ class DealsView extends StatelessWidget {
                                 padding: EdgeInsets.symmetric(vertical: 20.h),
                                 child: const Center(
                                   child: CircularProgressIndicator(
-                                    color: Color(0xFFF1A107),
+                                    color: AppColors.primaryColor,
                                   ),
                                 ),
                               )
@@ -128,7 +130,7 @@ class DealsView extends StatelessWidget {
               // Overlay loader when fetching fresh data but not the first time
               if (controller.isLoading.value && controller.dealsList.isNotEmpty)
                 const Center(
-                  child: CircularProgressIndicator(color: Color(0xffF1A107)),
+                  child: CircularProgressIndicator(color: AppColors.primaryColor),
                 ),
             ],
           );
@@ -228,7 +230,7 @@ class DealsCard extends StatelessWidget {
                     Text(
                       deal.promoCode,
                       style: GoogleFonts.inter(
-                        color: const Color(0xffF1A107), // Gold color
+                        color: AppColors.primaryColor, // Gold color
                         fontSize: 11.sp,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 1.2,
@@ -284,39 +286,22 @@ class DealsCard extends StatelessWidget {
                 ],
               ),
               // Use QR Button
-              GestureDetector(
-                onTap: () {
+              CustomButton(
+                text: "Use QR",
+                onPressed: () {
                   Get.dialog(QrPopup(qrCodeData: deal.qrCode));
                 },
-                child: Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 16.w,
-                    vertical: 10.h,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xffF1A107),
-                    borderRadius: BorderRadius.circular(12.r),
-                  ),
-                  child: Row(
-                    children: [
-                      Text(
-                        "Use QR",
-                        style: GoogleFonts.inter(
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14.sp,
-                        ),
-                      ),
-                      SizedBox(width: 8.w),
-                      SvgPicture.asset(
-                        AppIcons.qr_icon,
-                        height: 16.sp,
-                        colorFilter: const ColorFilter.mode(
-                          Colors.black,
-                          BlendMode.srcIn,
-                        ),
-                      ),
-                    ],
+                width: null,
+                padding: EdgeInsets.symmetric(
+                  horizontal: 16.w,
+                  vertical: 10.h,
+                ),
+                icon: SvgPicture.asset(
+                  AppIcons.qr_icon,
+                  height: 16.sp,
+                  colorFilter: const ColorFilter.mode(
+                    Colors.black,
+                    BlendMode.srcIn,
                   ),
                 ),
               ),

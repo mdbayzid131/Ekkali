@@ -1,31 +1,43 @@
 import 'package:dio/dio.dart';
-import 'package:get/get.dart';
 import 'package:flutter/material.dart';
-import 'package:moeb_26/Data/models/finish_rides_model.dart';
-import 'package:moeb_26/Data/models/upcoming_rides_model.dart';
+import 'package:get/get.dart';
+import 'package:moeb_26/core/services/socket_service.dart';
 import 'package:moeb_26/core/utils/helpers.dart';
+import 'package:moeb_26/data/models/my_rides_model.dart';
 import 'package:moeb_26/data/repositories/job_repository.dart';
 
 class RidesController extends GetxController {
   final JobRepo _jobRepo = Get.find<JobRepo>();
+  SocketService? _socketService;
+
   RxBool isLoadingList = false.obs;
   RxBool isLoadMore = false.obs;
 
-  var selectedTab = 0.obs; // Default to Upcoming
+  var selectedTab = 0.obs; // 0 = Upcoming, 1 = Past
 
-  // Pagination states
-  int upcomingPage = 1;
-  int upcomingTotalPage = 1;
-  int pastPage = 1;
-  int pastTotalPage = 1;
+  // Cursor pagination states
+  String? upcomingNextCursor;
+  bool upcomingHasMore = false;
+
+  String? pastNextCursor;
+  bool pastHasMore = false;
 
   final ScrollController scrollController = ScrollController();
+
+  RxList<RideData> upcomingRides = <RideData>[].obs;
+  RxList<RideData> pastRides = <RideData>[].obs;
+
+  final List<Worker> _socketWorkers = [];
 
   @override
   void onInit() {
     super.onInit();
     if (Get.arguments is Map && Get.arguments.containsKey('ridesTab')) {
       selectedTab.value = Get.arguments['ridesTab'];
+    }
+    if (Get.isRegistered<SocketService>()) {
+      _socketService = Get.find<SocketService>();
+      _setupSocketListeners();
     }
     if (selectedTab.value == 0) {
       fetchUpcomingJobs();
@@ -35,8 +47,99 @@ class RidesController extends GetxController {
     scrollController.addListener(_onScroll);
   }
 
+  void _setupSocketListeners() {
+    if (_socketService == null) return;
+
+    // 1. Listen for new assigned jobs (JOB_ASSIGNED)
+    _socketWorkers.add(
+      ever(_socketService!.lastJobAssigned, (data) {
+        if (data == null) return;
+        try {
+          Map<String, dynamic>? jobMap;
+          if (data is Map<String, dynamic>) {
+            if (data.containsKey('job') && data['job'] is Map<String, dynamic>) {
+              jobMap = data['job'];
+            } else if (data.containsKey('data') && data['data'] is Map<String, dynamic>) {
+              jobMap = data['data'];
+            } else {
+              jobMap = data;
+            }
+          }
+
+          if (jobMap != null) {
+            final newRide = RideData.fromJson(jobMap);
+            if (newRide.id.isNotEmpty && !upcomingRides.any((r) => r.id == newRide.id)) {
+              upcomingRides.insert(0, newRide);
+              Helpers.showCustomSnackBar(
+                "You have been assigned to a new ride!",
+                isError: false,
+              );
+              debugPrint("✨ RidesController: Real-time JOB_ASSIGNED added [${newRide.id}]");
+            }
+          }
+        } catch (e) {
+          debugPrint("❌ RidesController: Error handling JOB_ASSIGNED: $e");
+        }
+      }),
+    );
+
+    // 2. Listen for Ride Status Updates (RIDE_STATUS_UPDATED)
+    _socketWorkers.add(
+      ever(_socketService!.lastRideStatusUpdated, (data) {
+        if (data == null) return;
+        try {
+          String? targetJobId;
+          String? newStatus;
+          if (data is Map) {
+            targetJobId = data['jobId']?.toString() ??
+                data['id']?.toString() ??
+                data['_id']?.toString();
+            newStatus = data['rideStatus']?.toString() ?? data['status']?.toString();
+          }
+
+          if (targetJobId != null && targetJobId.isNotEmpty) {
+            if (newStatus == "FINISHED" || newStatus == "COMPLETED") {
+              // Refresh lists to properly move to past rides
+              refreshCurrentTab();
+            }
+          }
+        } catch (e) {
+          debugPrint("❌ RidesController: Error handling RIDE_STATUS_UPDATED: $e");
+        }
+      }),
+    );
+
+    // 3. Listen for Job Cancellations (JOB_CANCELLED)
+    _socketWorkers.add(
+      ever(_socketService!.lastJobCancelled, (data) {
+        if (data == null) return;
+        try {
+          String? targetJobId;
+          if (data is Map) {
+            targetJobId = data['jobId']?.toString() ??
+                data['id']?.toString() ??
+                data['_id']?.toString();
+          } else if (data is String) {
+            targetJobId = data;
+          }
+
+          if (targetJobId != null && targetJobId.isNotEmpty) {
+            upcomingRides.removeWhere((r) => r.id == targetJobId);
+            debugPrint("🗑️ RidesController: Real-time cancelled ride removed [$targetJobId]");
+          }
+        } catch (e) {
+          debugPrint("❌ RidesController: Error handling JOB_CANCELLED: $e");
+        }
+      }),
+    );
+  }
+
   @override
   void onClose() {
+    for (var worker in _socketWorkers) {
+      worker.dispose();
+    }
+    _socketWorkers.clear();
     scrollController.dispose();
     super.onClose();
   }
@@ -51,28 +154,28 @@ class RidesController extends GetxController {
         !isLoadingList.value &&
         !isLoadMore.value) {
       if (selectedTab.value == 0) {
-        if (upcomingPage < upcomingTotalPage) {
+        if (upcomingHasMore && upcomingNextCursor != null) {
           loadMoreUpcomingJobs();
         }
-      } else if (selectedTab.value == 1 && pastPage < pastTotalPage) {
-        loadMorePastJobs();
+      } else if (selectedTab.value == 1) {
+        if (pastHasMore && pastNextCursor != null) {
+          loadMorePastJobs();
+        }
       }
     }
   }
 
-  RxList<UpcomingRideData> upcomingRides = <UpcomingRideData>[].obs;
-  RxList<FinishRideData> pastRides = <FinishRideData>[].obs;
-
   Future<void> fetchUpcomingJobs() async {
     try {
       isLoadingList.value = true;
-      upcomingPage = 1;
-      final response = await _jobRepo.getUpcomingJobs(page: upcomingPage);
+      upcomingNextCursor = null;
+      final response = await _jobRepo.getUpcomingJobs(cursor: null);
       if (response.statusCode == 200 || response.statusCode == 201) {
-        if (response.data != null && response.data['data'] != null) {
-          final jobResponse = UpcomingRidesModel.fromJson(response.data);
-          upcomingRides.assignAll(jobResponse.data ?? []);
-          upcomingTotalPage = jobResponse.pagination?.totalPage ?? 1;
+        if (response.data != null && response.data is Map<String, dynamic>) {
+          final ridesResponse = MyRidesModel.fromJson(response.data);
+          upcomingRides.assignAll(ridesResponse.data);
+          upcomingNextCursor = ridesResponse.cursor?.nextCursor;
+          upcomingHasMore = ridesResponse.cursor?.hasMore ?? false;
         }
       } else {
         final message = response.data is Map
@@ -93,19 +196,23 @@ class RidesController extends GetxController {
   }
 
   Future<void> loadMoreUpcomingJobs() async {
+    if (!upcomingHasMore || upcomingNextCursor == null || isLoadMore.value) {
+      return;
+    }
+
     try {
       isLoadMore.value = true;
-      upcomingPage++;
-      final response = await _jobRepo.getUpcomingJobs(page: upcomingPage);
+      final response = await _jobRepo.getUpcomingJobs(cursor: upcomingNextCursor);
       if (response.statusCode == 200 || response.statusCode == 201) {
-        if (response.data != null && response.data['data'] != null) {
-          final jobResponse = UpcomingRidesModel.fromJson(response.data);
-          upcomingRides.addAll(jobResponse.data ?? []);
+        if (response.data != null && response.data is Map<String, dynamic>) {
+          final ridesResponse = MyRidesModel.fromJson(response.data);
+          upcomingRides.addAll(ridesResponse.data);
+          upcomingNextCursor = ridesResponse.cursor?.nextCursor;
+          upcomingHasMore = ridesResponse.cursor?.hasMore ?? false;
         }
       }
     } catch (e) {
       print("Error loading more upcoming jobs: $e");
-      upcomingPage--;
     } finally {
       isLoadMore.value = false;
     }
@@ -114,13 +221,14 @@ class RidesController extends GetxController {
   Future<void> fetchPastJobs() async {
     try {
       isLoadingList.value = true;
-      pastPage = 1;
-      final response = await _jobRepo.getPastJobs(page: pastPage);
+      pastNextCursor = null;
+      final response = await _jobRepo.getPastJobs(cursor: null);
       if (response.statusCode == 200 || response.statusCode == 201) {
-        if (response.data != null && response.data['data'] != null) {
-          final jobResponse = FinishRidesModel.fromJson(response.data);
-          pastRides.assignAll(jobResponse.data ?? []);
-          pastTotalPage = jobResponse.pagination?.totalPage ?? 1;
+        if (response.data != null && response.data is Map<String, dynamic>) {
+          final ridesResponse = MyRidesModel.fromJson(response.data);
+          pastRides.assignAll(ridesResponse.data);
+          pastNextCursor = ridesResponse.cursor?.nextCursor;
+          pastHasMore = ridesResponse.cursor?.hasMore ?? false;
         }
       } else {
         final message = response.data is Map
@@ -141,19 +249,23 @@ class RidesController extends GetxController {
   }
 
   Future<void> loadMorePastJobs() async {
+    if (!pastHasMore || pastNextCursor == null || isLoadMore.value) {
+      return;
+    }
+
     try {
       isLoadMore.value = true;
-      pastPage++;
-      final response = await _jobRepo.getPastJobs(page: pastPage);
+      final response = await _jobRepo.getPastJobs(cursor: pastNextCursor);
       if (response.statusCode == 200 || response.statusCode == 201) {
-        if (response.data != null && response.data['data'] != null) {
-          final jobResponse = FinishRidesModel.fromJson(response.data);
-          pastRides.addAll(jobResponse.data ?? []);
+        if (response.data != null && response.data is Map<String, dynamic>) {
+          final ridesResponse = MyRidesModel.fromJson(response.data);
+          pastRides.addAll(ridesResponse.data);
+          pastNextCursor = ridesResponse.cursor?.nextCursor;
+          pastHasMore = ridesResponse.cursor?.hasMore ?? false;
         }
       }
     } catch (e) {
       print("Error loading more past jobs: $e");
-      pastPage--;
     } finally {
       isLoadMore.value = false;
     }

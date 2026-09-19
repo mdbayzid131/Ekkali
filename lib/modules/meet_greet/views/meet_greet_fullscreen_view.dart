@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:moeb_26/config/constants/image_paths.dart';
+import 'package:moeb_26/core/widgets/CustomButton.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import '../controllers/meet_greet_controller.dart';
 
@@ -135,13 +135,8 @@ class _MeetGreetFullscreenViewState extends State<MeetGreetFullscreenView> {
                 style: GoogleFonts.inter(color: Colors.grey),
               ),
             ),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFD5C4AB),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8.r),
-                ),
-              ),
+            CustomButton(
+              text: 'Update Name',
               onPressed: () {
                 if (nameEditingController.text.trim().isNotEmpty) {
                   controller.passengerName.value = nameEditingController.text
@@ -151,13 +146,8 @@ class _MeetGreetFullscreenViewState extends State<MeetGreetFullscreenView> {
                     .trim();
                 Navigator.pop(context);
               },
-              child: Text(
-                'Update Name',
-                style: GoogleFonts.inter(
-                  color: Colors.black,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              width: null,
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
             ),
           ],
         );

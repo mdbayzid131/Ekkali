@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:moeb_26/core/services/dealsItems_service.dart';
+import 'package:moeb_26/core/utils/helpers.dart';
 import 'package:moeb_26/data/models/deals_model.dart';
 
 class DealsController extends GetxController {
@@ -57,13 +58,7 @@ class DealsController extends GetxController {
       }
     } catch (e) {
       print("Error fetching deals: $e");
-      Get.snackbar(
-        "Error",
-        "Failed to fetch deals",
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      Helpers.showCustomSnackBar("Failed to fetch deals", isError: true);
     } finally {
       isLoading.value = false;
     }
@@ -91,13 +86,10 @@ class DealsController extends GetxController {
   // Copy promo code to clipboard
   void copyToClipboard(String code) {
     Clipboard.setData(ClipboardData(text: code));
-    Get.snackbar(
-      "Success",
+    Helpers.showCustomSnackBar(
       "Promo code $code copied to clipboard",
-      snackPosition: SnackPosition.BOTTOM,
+      isError: false,
       duration: const Duration(seconds: 2),
-      backgroundColor: const Color(0xff1A1A1A),
-      colorText: Colors.white,
     );
   }
 }

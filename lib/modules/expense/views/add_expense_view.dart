@@ -8,6 +8,7 @@ import 'package:moeb_26/config/themes/app_theme.dart';
 import 'package:moeb_26/core/widgets/CustomButton.dart';
 import '../controllers/expense_controller.dart';
 import '../models/expense_model.dart';
+import 'expense_detail_sheet.dart';
 
 class AddExpenseView extends StatelessWidget {
   static const Color cardColor = Color(0xFF111111);
@@ -27,7 +28,7 @@ class AddExpenseView extends StatelessWidget {
   Widget build(BuildContext context) {
     const backgroundColor = AppColors.black100;
     const borderColor = Color(0xFF1E1E1E);
-    const accentColor = AppColors.orange100;
+    const accentColor = AppColors.primaryColor;
 
     return Scaffold(
       backgroundColor: backgroundColor,
@@ -154,7 +155,7 @@ class AddExpenseView extends StatelessWidget {
                           ),
                           const Icon(
                             Icons.keyboard_arrow_down_rounded,
-                            color: const Color(0xFFFFDCA1),
+                            color: Color(0xFFFFDCA1),
                             size: 22,
                           ),
                         ],
@@ -259,86 +260,207 @@ class AddExpenseView extends StatelessWidget {
                     final networkUrl = controller.existingImageUrl.value;
 
                     if (file != null) {
-                      return Container(
-                        height: 150.h,
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(16.r),
-                          border: Border.all(color: borderColor),
-                          image: DecorationImage(
-                            image: FileImage(file),
-                            fit: BoxFit.cover,
-                          ),
+                      return GestureDetector(
+                        onTap: () => ExpenseDetailSheet.showFullScreenReceipt(
+                          context,
+                          file.path,
                         ),
-                        child: Align(
-                          alignment: Alignment.topRight,
-                          child: GestureDetector(
-                            onTap: () =>
-                                controller.selectedImage.value = null,
-                            child: Container(
-                              margin: EdgeInsets.all(8.r),
-                              padding: EdgeInsets.all(4.r),
-                              decoration: const BoxDecoration(
-                                color: Colors.black54,
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(
-                                Icons.delete_outline,
-                                color: Colors.redAccent,
-                                size: 20.sp,
-                              ),
+                        child: Container(
+                          height: 150.h,
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(16.r),
+                            border: Border.all(color: borderColor),
+                            image: DecorationImage(
+                              image: FileImage(file),
+                              fit: BoxFit.cover,
                             ),
                           ),
-                        ),
-                      );
-                    } else if (networkUrl != null && networkUrl.isNotEmpty) {
-                      return Container(
-                        height: 150.h,
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(16.r),
-                          border: Border.all(color: borderColor),
-                        ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(16.r),
                           child: Stack(
                             children: [
-                              Positioned.fill(
-                                child: Image.network(
-                                  networkUrl,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return Center(
-                                      child: Icon(
-                                        Icons.broken_image_outlined,
-                                        color: Colors.grey,
-                                        size: 40.sp,
+                              Center(
+                                child: Container(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 14.w,
+                                    vertical: 6.h,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.black54,
+                                    borderRadius: BorderRadius.circular(30.r),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.zoom_in,
+                                        color: Colors.white,
+                                        size: 18.sp,
                                       ),
-                                    );
-                                  },
+                                      SizedBox(width: 6.w),
+                                      Text(
+                                        "Tap to view",
+                                        style: GoogleFonts.inter(
+                                          color: Colors.white,
+                                          fontSize: 12.sp,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                               Align(
                                 alignment: Alignment.topRight,
-                                child: GestureDetector(
-                                  onTap: () =>
-                                      controller.existingImageUrl.value = null,
-                                  child: Container(
-                                    margin: EdgeInsets.all(8.r),
-                                    padding: EdgeInsets.all(4.r),
-                                    decoration: const BoxDecoration(
-                                      color: Colors.black54,
-                                      shape: BoxShape.circle,
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    GestureDetector(
+                                      onTap: () => controller.downloadReceiptImage(file.path),
+                                      child: Container(
+                                        margin: EdgeInsets.only(top: 8.r, bottom: 8.r, right: 4.r),
+                                        padding: EdgeInsets.all(6.r),
+                                        decoration: const BoxDecoration(
+                                          color: Colors.black54,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Icon(
+                                          Icons.file_download_outlined,
+                                          color: AppColors.primaryColor,
+                                          size: 18.sp,
+                                        ),
+                                      ),
                                     ),
-                                    child: Icon(
-                                      Icons.delete_outline,
-                                      color: Colors.redAccent,
-                                      size: 20.sp,
+                                    GestureDetector(
+                                      onTap: () =>
+                                          controller.selectedImage.value = null,
+                                      child: Container(
+                                        margin: EdgeInsets.all(8.r),
+                                        padding: EdgeInsets.all(6.r),
+                                        decoration: const BoxDecoration(
+                                          color: Colors.black54,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Icon(
+                                          Icons.delete_outline,
+                                          color: Colors.redAccent,
+                                          size: 18.sp,
+                                        ),
+                                      ),
                                     ),
-                                  ),
+                                  ],
                                 ),
                               ),
                             ],
+                          ),
+                        ),
+                      );
+                    } else if (networkUrl != null && networkUrl.isNotEmpty) {
+                      return GestureDetector(
+                        onTap: () => ExpenseDetailSheet.showFullScreenReceipt(
+                          context,
+                          networkUrl,
+                        ),
+                        child: Container(
+                          height: 150.h,
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(16.r),
+                            border: Border.all(color: borderColor),
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(16.r),
+                            child: Stack(
+                              children: [
+                                Positioned.fill(
+                                  child: Image.network(
+                                    networkUrl,
+                                    fit: BoxFit.cover,
+                                    errorBuilder:
+                                        (context, error, stackTrace) {
+                                      return Center(
+                                        child: Icon(
+                                          Icons.broken_image_outlined,
+                                          color: Colors.grey,
+                                          size: 40.sp,
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                                Center(
+                                  child: Container(
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 14.w,
+                                      vertical: 6.h,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.black54,
+                                      borderRadius: BorderRadius.circular(30.r),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          Icons.zoom_in,
+                                          color: Colors.white,
+                                          size: 18.sp,
+                                        ),
+                                        SizedBox(width: 6.w),
+                                        Text(
+                                          "Tap to view",
+                                          style: GoogleFonts.inter(
+                                            color: Colors.white,
+                                            fontSize: 12.sp,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                Align(
+                                  alignment: Alignment.topRight,
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      GestureDetector(
+                                        onTap: () => controller.downloadReceiptImage(networkUrl),
+                                        child: Container(
+                                          margin: EdgeInsets.only(top: 8.r, bottom: 8.r, right: 4.r),
+                                          padding: EdgeInsets.all(6.r),
+                                          decoration: const BoxDecoration(
+                                            color: Colors.black54,
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: Icon(
+                                            Icons.file_download_outlined,
+                                            color: AppColors.primaryColor,
+                                            size: 18.sp,
+                                          ),
+                                        ),
+                                      ),
+                                      GestureDetector(
+                                        onTap: () =>
+                                            controller.existingImageUrl.value = null,
+                                        child: Container(
+                                          margin: EdgeInsets.all(8.r),
+                                          padding: EdgeInsets.all(6.r),
+                                          decoration: const BoxDecoration(
+                                            color: Colors.black54,
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: Icon(
+                                            Icons.delete_outline,
+                                            color: Colors.redAccent,
+                                            size: 18.sp,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       );

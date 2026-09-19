@@ -1,8 +1,9 @@
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
+import 'package:moeb_26/config/constants/storage_constants.dart';
 import 'package:moeb_26/core/services/serviceAreas_service.dart';
-import 'package:moeb_26/core/services/user_service.dart';
-import 'package:moeb_26/core/utils/helpers.dart';
+import 'package:moeb_26/core/services/storege_service.dart';
+import 'package:moeb_26/core/services/user_profile_service.dart';
 import 'package:moeb_26/data/models/service_area_model.dart';
 
 class ServiceAreaController extends GetxController {
@@ -11,77 +12,77 @@ class ServiceAreaController extends GetxController {
   RxList<ServiceAreaModel> serviceAreas = <ServiceAreaModel>[].obs;
   var isLoading = false.obs;
   var isMoreLoading = false.obs;
-  var currentPage = 1.obs;
-  var totalPages = 1.obs;
-  var limit = 10;
+  var nextCursor = RxnString();
+  var hasMore = false.obs;
 
   final ScrollController scrollController = ScrollController();
 
-  // Selected service area name
-  var selectedAreaName = "".obs;
-  var isUpdating = false.obs;
+  // Selected service area names list for multi-selection
+  var selectedAreaNames = <String>[].obs;
+  var expandedCitiesAreas = <String>{}.obs;
+
+  void toggleShowAllCities(String areaName) {
+    if (expandedCitiesAreas.contains(areaName)) {
+      expandedCitiesAreas.remove(areaName);
+    } else {
+      expandedCitiesAreas.add(areaName);
+    }
+  }
 
   @override
   void onInit() {
     super.onInit();
     _initCurrentServiceArea();
-    // Default load (initial fetch)
     fetchServiceAreas();
     scrollController.addListener(_onScroll);
   }
 
-  void _initCurrentServiceArea() {
-    // If the UserService has the profile data, we could pre-select it
-    // For now, it will be updated when the user selects one
+  Future<void> _initCurrentServiceArea() async {
+    try {
+      final token = await StorageService.getString(StorageConstants.bearerToken);
+      if (token.isEmpty) return;
+
+      final isApproved = await StorageService.getBool(StorageConstants.isApproved);
+      if (isApproved != true) return;
+
+      if (Get.isRegistered<UserProfileService>()) {
+        final profileService = Get.find<UserProfileService>();
+        profileService.getUserProfile().then((response) {
+          if (response.statusCode == 200 &&
+              response.data != null &&
+              response.data['data'] != null) {
+            final rawArea = response.data['data']['serviceArea'] ??
+                response.data['data']['serviceAreas'];
+            if (rawArea is List) {
+              selectedAreaNames.assignAll(
+                rawArea.map((e) => e.toString()).toList(),
+              );
+            } else if (rawArea is String && rawArea.isNotEmpty) {
+              selectedAreaNames.assignAll([rawArea]);
+            }
+          }
+        }).catchError((e) {
+          debugPrint("Error initializing current service area: $e");
+        });
+      }
+    } catch (e) {
+      debugPrint("UserProfileService not available: $e");
+    }
   }
 
   void selectServiceArea(String areaName) {
-    selectedAreaName.value = areaName;
+    toggleServiceArea(areaName);
   }
 
-  Future<void> updateServiceArea() async {
-    if (selectedAreaName.value.isEmpty) {
-      Helpers.showCustomSnackBar(
-        "Please select a service area first",
-        isError: true,
-      );
-      return;
-    }
-
-    try {
-      isUpdating.value = true;
-      final response = await _serviceAreasService.updateServiceArea(
-        selectedAreaName.value,
-      );
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        Get.back(); // Go back immediately after success for snappy UX
-        Helpers.showCustomSnackBar(
-          "Service area updated successfully",
-          isError: false,
-        );
-
-        try {
-          Get.find<UserService>().fetchUserId();
-        } catch (e) {
-          debugPrint("Safe to ignore: User profile refresh failed $e");
-        }
-      } else {
-        Helpers.showCustomSnackBar(
-          response.data['message'] ?? "Failed to update service area",
-          isError: true,
-        );
-      }
-    } catch (e) {
-      debugPrint("Error updating service area: $e");
-      Helpers.showCustomSnackBar(
-        "Something went wrong while updating",
-        isError: true,
-      );
-    } finally {
-      isUpdating.value = false;
+  void toggleServiceArea(String areaName) {
+    if (selectedAreaNames.contains(areaName)) {
+      selectedAreaNames.remove(areaName);
+    } else {
+      selectedAreaNames.add(areaName);
     }
   }
+
+
 
   @override
   void onClose() {
@@ -98,35 +99,31 @@ class ServiceAreaController extends GetxController {
             scrollController.position.maxScrollExtent - 200 &&
         !isLoading.value &&
         !isMoreLoading.value &&
-        currentPage.value < totalPages.value) {
+        hasMore.value &&
+        nextCursor.value != null) {
       loadMoreServiceAreas();
     }
     return Future.value();
   }
 
   Future<void> fetchServiceAreas({bool isRefresh = false}) async {
-    // If already loading, don't trigger again
     if (isLoading.value || isMoreLoading.value) return;
 
     if (isRefresh) {
-      currentPage.value = 1;
+      nextCursor.value = null;
     }
 
     try {
-      if (currentPage.value == 1) {
+      if (nextCursor.value == null) {
         isLoading.value = true;
       } else {
         isMoreLoading.value = true;
       }
 
-      debugPrint("Service Areas Request: Page ${currentPage.value}, Limit $limit");
-
       final response = await _serviceAreasService.getAllServiceAreas(
-        page: currentPage.value,
-        limit: limit,
+        limit: 50,
+        cursor: isRefresh ? null : nextCursor.value,
       );
-
-      debugPrint("Service Areas API Response Code: ${response.statusCode}");
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         ServiceAreaResponseModel data;
@@ -139,16 +136,11 @@ class ServiceAreaController extends GetxController {
           data = ServiceAreaResponseModel(
             success: true,
             message: '',
-            pagination: PaginationModel(
-              total: (response.data as List).length,
-              limit: limit,
-              page: 1,
-              totalPage: 1,
-            ),
             data: (response.data as List)
                 .map(
-                  (e) =>
-                      ServiceAreaModel.fromJson(Map<String, dynamic>.from(e)),
+                  (e) => ServiceAreaModel.fromJson(
+                    e is Map ? Map<String, dynamic>.from(e) : {'areaName': e.toString()},
+                  ),
                 )
                 .toList(),
           );
@@ -157,19 +149,18 @@ class ServiceAreaController extends GetxController {
           return;
         }
 
-        totalPages.value = data.pagination.totalPage;
+        hasMore.value = data.cursor?.hasMore ?? false;
+        final newCursor = data.cursor?.nextCursor;
 
-        if (currentPage.value == 1) {
+        if (isRefresh || nextCursor.value == null) {
           serviceAreas.assignAll(data.data);
-          if (serviceAreas.isEmpty) {
-            debugPrint("Service Areas API: Response successful but data list is empty");
-          }
         } else {
           serviceAreas.addAll(data.data);
         }
-        debugPrint("Service Areas loaded: ${serviceAreas.length} items (Page ${currentPage.value}/${totalPages.value})");
+        nextCursor.value = newCursor;
+        debugPrint("Service Areas loaded: ${serviceAreas.length} items");
       } else {
-        debugPrint("Service Areas API Error: ${response.statusCode} - ${response.statusMessage}");
+        debugPrint("Service Areas API Error: ${response.statusCode}");
       }
     } catch (e) {
       debugPrint("Error fetching service areas: $e");
@@ -182,17 +173,16 @@ class ServiceAreaController extends GetxController {
   void loadMoreServiceAreas() {
     if (!isLoading.value &&
         !isMoreLoading.value &&
-        currentPage.value < totalPages.value) {
-      currentPage.value++;
+        hasMore.value &&
+        nextCursor.value != null) {
       fetchServiceAreas();
     }
   }
 
-  // Function to toggle the expanded state of a service area
   void toggleExpansion(int index) {
     if (index >= 0 && index < serviceAreas.length) {
       serviceAreas[index].isExpanded = !serviceAreas[index].isExpanded;
-      serviceAreas.refresh(); // Notify Rx listeners
+      serviceAreas.refresh();
     }
   }
 }

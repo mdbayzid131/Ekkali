@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:moeb_26/core/services/subscription_service.dart';
+import 'package:moeb_26/core/widgets/premium_lock_widget.dart';
+import 'package:moeb_26/config/themes/app_theme.dart';
 import 'package:moeb_26/core/widgets/Custom_AppBar.dart';
 import '../controllers/preferred_drivers_controller.dart';
 
@@ -22,63 +25,76 @@ class PreferredDriversView extends StatelessWidget {
           title: 'Favorite Chauffeurs',
           notificationCount: 3,
         ),
-        body: Column(
-          children: [
-            SizedBox(height: 12.h),
+        body: Obx(() {
+          final isPrem = Get.isRegistered<SubscriptionService>()
+              ? Get.find<SubscriptionService>().isPremium.value
+              : false;
 
-            // ── Tab Bar ──────────────────────────────────────────────
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20.w),
-              child: Container(
-                height: 46.h,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF1A1A1A),
-                  borderRadius: BorderRadius.circular(12.r),
-                  border: Border.all(color: const Color(0xFF2C2C2C)),
-                ),
-                child: TabBar(
-                  labelColor: Colors.black,
-                  unselectedLabelColor: Colors.grey,
-                  indicator: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFFD08700), Color(0xFFF1A800)],
+          if (!isPrem) {
+            return const PremiumLockWidget(
+              icon: Icons.favorite_border_rounded,
+              title: "Unlock Preferred Chauffeurs",
+              description:
+                  "Subscribe to Ekkali Premium to discover top-rated luxury chauffeurs, build your private driver network, and dispatch rides directly.",
+            );
+          }
+
+          return Column(
+            children: [
+              SizedBox(height: 12.h),
+
+              // ── Tab Bar ──────────────────────────────────────────────
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20.w),
+                child: Container(
+                  height: 46.h,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1A1A1A),
+                    borderRadius: BorderRadius.circular(12.r),
+                    border: Border.all(color: const Color(0xFF2C2C2C)),
+                  ),
+                  child: TabBar(
+                    labelColor: Colors.black,
+                    unselectedLabelColor: Colors.grey,
+                    indicator: BoxDecoration(
+                      color: AppColors.primaryColor,
+                      borderRadius: BorderRadius.circular(10.r),
                     ),
-                    borderRadius: BorderRadius.circular(10.r),
+                    indicatorSize: TabBarIndicatorSize.tab,
+                    dividerColor: Colors.transparent,
+                    labelStyle: GoogleFonts.inter(
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    unselectedLabelStyle: GoogleFonts.inter(
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    tabs: const [
+                      Tab(text: 'My Favorites'),
+                      Tab(text: 'Find Chauffeurs'),
+                    ],
                   ),
-                  indicatorSize: TabBarIndicatorSize.tab,
-                  dividerColor: Colors.transparent,
-                  labelStyle: GoogleFonts.inter(
-                    fontSize: 13.sp,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  unselectedLabelStyle: GoogleFonts.inter(
-                    fontSize: 13.sp,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  tabs: const [
-                    Tab(text: '⭐  My Favorites'),
-                    Tab(text: '🔍  Find Chauffeurs'),
+                ),
+              ),
+
+              SizedBox(height: 12.h),
+
+              // ── Tab Content ──────────────────────────────────────────
+              Expanded(
+                child: TabBarView(
+                  children: [
+                    // ── Tab 1: My Favorites ──────────────────────────
+                    _MyFavoritesTab(controller: controller),
+
+                    // ── Tab 2: Find Drivers ──────────────────────────
+                    _FindDriversTab(controller: controller),
                   ],
                 ),
               ),
-            ),
-
-            SizedBox(height: 12.h),
-
-            // ── Tab Content ──────────────────────────────────────────
-            Expanded(
-              child: TabBarView(
-                children: [
-                  // ── Tab 1: My Favorites ──────────────────────────
-                  _MyFavoritesTab(controller: controller),
-
-                  // ── Tab 2: Find Drivers ──────────────────────────
-                  _FindDriversTab(controller: controller),
-                ],
-              ),
-            ),
-          ],
-        ),
+            ],
+          );
+        }),
       ),
     );
   }
@@ -108,29 +124,72 @@ class _MyFavoritesTab extends StatelessWidget {
         // Favorites list
         Expanded(
           child: Obx(() {
-            final list = controller.filteredChauffeursList;
-            if (list.isEmpty) {
-              return _emptyState(
-                icon: Icons.favorite_border,
-                title: controller.searchQuery.isEmpty
-                    ? 'No favorites yet'
-                    : 'No matching chauffeur',
-                subtitle: controller.searchQuery.isEmpty
-                    ? 'Go to "Find Chauffeurs" tab to discover and add chauffeurs.'
-                    : 'Try a different name, phone or email.',
+            if (controller.isLoading.value) {
+              return Center(
+                child: CircularProgressIndicator(
+                  color: AppColors.primaryColor,
+                ),
               );
             }
-            return ListView.separated(
-              padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 4.h),
-              itemCount: list.length,
-              separatorBuilder: (_, _) => SizedBox(height: 14.h),
-              itemBuilder: (context, index) {
-                return _DriverCard(
-                  chauffeur: list[index],
-                  controller: controller,
-                  isFavorite: true,
-                );
-              },
+
+            final list = controller.filteredChauffeursList;
+            if (list.isEmpty) {
+              return RefreshIndicator(
+                color: AppColors.primaryColor,
+                backgroundColor: const Color(0xFF1E1E1E),
+                onRefresh: () => controller.fetchFavorites(isRefresh: true),
+                child: ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  children: [
+                    SizedBox(height: 100.h),
+                    _emptyState(
+                      icon: Icons.favorite_border,
+                      title: controller.searchQuery.isEmpty
+                          ? 'No favorites yet'
+                          : 'No matching chauffeur',
+                      subtitle: controller.searchQuery.isEmpty
+                          ? 'Go to "Find Chauffeurs" tab to discover and add chauffeurs.'
+                          : 'Try a different name, phone or company.',
+                    ),
+                  ],
+                ),
+              );
+            }
+
+            return RefreshIndicator(
+              color: AppColors.primaryColor,
+              backgroundColor: const Color(0xFF1E1E1E),
+              onRefresh: () => controller.fetchFavorites(isRefresh: true),
+              child: ListView.separated(
+                controller: controller.scrollController,
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 4.h),
+                itemCount:
+                    list.length + (controller.isMoreLoading.value ? 1 : 0),
+                separatorBuilder: (_, _) => SizedBox(height: 14.h),
+                itemBuilder: (context, index) {
+                  if (index == list.length) {
+                    return Padding(
+                      padding: EdgeInsets.symmetric(vertical: 12.h),
+                      child: Center(
+                        child: SizedBox(
+                          width: 24.w,
+                          height: 24.w,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: AppColors.primaryColor,
+                          ),
+                        ),
+                      ),
+                    );
+                  }
+                  return _DriverCard(
+                    chauffeur: list[index],
+                    controller: controller,
+                    isFavorite: true,
+                  );
+                },
+              ),
             );
           }),
         ),
@@ -163,37 +222,78 @@ class _FindDriversTab extends StatelessWidget {
         // Results
         Expanded(
           child: Obx(() {
-            final query = controller.globalSearchQuery.value.trim();
-            if (query.isEmpty) {
-              return _emptyState(
-                icon: Icons.person_search_outlined,
-                title: 'Find any chauffeur',
-                subtitle: 'Search by name or phone number.',
+            if (controller.isGlobalLoading.value) {
+              return Center(
+                child: CircularProgressIndicator(
+                  color: AppColors.primaryColor,
+                ),
               );
             }
+
             final results = controller.filteredGlobalResults;
             if (results.isEmpty) {
-              return _emptyState(
-                icon: Icons.search_off,
-                title: 'No results found',
-                subtitle: 'Try searching with a different name or area.',
+              return RefreshIndicator(
+                color: AppColors.primaryColor,
+                backgroundColor: const Color(0xFF1E1E1E),
+                onRefresh: () =>
+                    controller.fetchGlobalChauffeurs(isRefresh: true),
+                child: ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  children: [
+                    SizedBox(height: 100.h),
+                    _emptyState(
+                      icon: Icons.search_off,
+                      title: controller.globalSearchQuery.isEmpty
+                          ? 'No chauffeurs available'
+                          : 'No results found',
+                      subtitle: controller.globalSearchQuery.isEmpty
+                          ? 'No active platform chauffeurs found at this time.'
+                          : 'Try searching with a different name or area.',
+                    ),
+                  ],
+                ),
               );
             }
-            return ListView.separated(
-              padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 4.h),
-              itemCount: results.length,
-              separatorBuilder: (_, _) => SizedBox(height: 14.h),
-              itemBuilder: (context, index) {
-                final chauffeur = results[index];
-                return Obx(
-                  () => _DriverCard(
-                    chauffeur: chauffeur,
-                    controller: controller,
-                    isFavorite: controller.isInFavorites(chauffeur.id),
-                    showAddToFavorites: true,
-                  ),
-                );
-              },
+
+            return RefreshIndicator(
+              color: AppColors.primaryColor,
+              backgroundColor: const Color(0xFF1E1E1E),
+              onRefresh: () =>
+                  controller.fetchGlobalChauffeurs(isRefresh: true),
+              child: ListView.separated(
+                controller: controller.globalScrollController,
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 4.h),
+                itemCount: results.length +
+                    (controller.isGlobalMoreLoading.value ? 1 : 0),
+                separatorBuilder: (_, _) => SizedBox(height: 14.h),
+                itemBuilder: (context, index) {
+                  if (index == results.length) {
+                    return Padding(
+                      padding: EdgeInsets.symmetric(vertical: 12.h),
+                      child: Center(
+                        child: SizedBox(
+                          width: 24.w,
+                          height: 24.w,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: AppColors.primaryColor,
+                          ),
+                        ),
+                      ),
+                    );
+                  }
+                  final chauffeur = results[index];
+                  return Obx(
+                    () => _DriverCard(
+                      chauffeur: chauffeur,
+                      controller: controller,
+                      isFavorite: controller.isInFavorites(chauffeur.id),
+                      showAddToFavorites: true,
+                    ),
+                  );
+                },
+              ),
             );
           }),
         ),
@@ -236,16 +336,29 @@ class _DriverCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // Avatar
           Container(
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(color: const Color(0xFFD08700), width: 1.8.w),
+              border: Border.all(color: AppColors.primaryColor, width: 1.8.w),
             ),
             child: CircleAvatar(
               radius: 26.r,
-              backgroundImage: NetworkImage(chauffeur.imageUrl),
+              backgroundImage: chauffeur.imageUrl.isNotEmpty
+                  ? NetworkImage(chauffeur.imageUrl)
+                  : null,
               backgroundColor: const Color(0xFF27272A),
+              child: chauffeur.imageUrl.isEmpty
+                  ? Text(
+                      chauffeur.name.isNotEmpty
+                          ? chauffeur.name[0].toUpperCase()
+                          : 'C',
+                      style: GoogleFonts.inter(
+                        color: Colors.white,
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    )
+                  : null,
             ),
           ),
           SizedBox(width: 14.w),
@@ -279,7 +392,7 @@ class _DriverCard extends StatelessWidget {
                   children: [
                     Icon(
                       Icons.star,
-                      color: const Color(0xFFD08700),
+                      color: AppColors.primaryColor,
                       size: 14.sp,
                     ),
                     SizedBox(width: 3.w),
@@ -322,7 +435,7 @@ class _DriverCard extends StatelessWidget {
                   ),
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
-                      colors: [Color(0xFFD08700), Color(0xFFF1A800)],
+                      colors: [Color(0xFFFFDCA1), Color(0xFFFEDB9B)],
                     ),
                     borderRadius: BorderRadius.circular(8.r),
                   ),
@@ -337,13 +450,17 @@ class _DriverCard extends StatelessWidget {
                 ),
               ),
 
-              // Add / Already added button (Find tab only)
+              // Add / Remove from Favorites toggle (Find tab only)
               if (showAddToFavorites) ...[
                 SizedBox(height: 6.h),
                 GestureDetector(
-                  onTap: isFavorite
-                      ? null
-                      : () => controller.addToFavorites(chauffeur),
+                  onTap: () {
+                    if (isFavorite) {
+                      controller.removeFromFavorites(chauffeur);
+                    } else {
+                      controller.addToFavorites(chauffeur);
+                    }
+                  },
                   child: Container(
                     padding: EdgeInsets.symmetric(
                       horizontal: 12.w,
@@ -351,12 +468,12 @@ class _DriverCard extends StatelessWidget {
                     ),
                     decoration: BoxDecoration(
                       color: isFavorite
-                          ? const Color(0xFF1E2E1E)
+                          ? const Color(0xFF2A1C1C)
                           : const Color(0xFF1E1E1E),
                       borderRadius: BorderRadius.circular(8.r),
                       border: Border.all(
                         color: isFavorite
-                            ? Colors.green.withValues(alpha: 0.5)
+                            ? const Color(0xFFFEDB9B).withValues(alpha: 0.5)
                             : const Color(0xFF2C2C2C),
                       ),
                     ),
@@ -364,15 +481,21 @@ class _DriverCard extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
-                          isFavorite ? Icons.favorite : Icons.favorite_border,
+                          isFavorite
+                              ? Icons.favorite
+                              : Icons.favorite_border,
                           size: 12.sp,
-                          color: isFavorite ? Colors.green : Colors.grey,
+                          color: isFavorite
+                              ? const Color(0xFFFEDB9B)
+                              : Colors.grey,
                         ),
                         SizedBox(width: 4.w),
                         Text(
                           isFavorite ? 'Saved' : 'Add',
                           style: GoogleFonts.inter(
-                            color: isFavorite ? Colors.green : Colors.grey,
+                            color: isFavorite
+                                ? const Color(0xFFFEDB9B)
+                                : Colors.grey,
                             fontSize: 11.sp,
                             fontWeight: FontWeight.w600,
                           ),
@@ -409,7 +532,7 @@ InputDecoration _searchDecoration(String hint) {
     ),
     focusedBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(12.r),
-      borderSide: const BorderSide(color: Color(0xFFD08700), width: 1),
+      borderSide: const BorderSide(color: AppColors.primaryColor, width: 1),
     ),
     enabledBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(12.r),

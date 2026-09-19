@@ -9,6 +9,8 @@ import 'package:moeb_26/config/routes/app_pages.dart';
 import 'package:moeb_26/modules/notifications/controllers/notifications_controller.dart';
 import 'package:moeb_26/core/widgets/CustomText.dart';
 import 'package:moeb_26/core/widgets/CustomTextGary.dart';
+import 'package:moeb_26/core/services/subscription_service.dart';
+import 'package:moeb_26/core/widgets/premium_required_dialog.dart';
 import 'package:moeb_26/modules/market_place/views/market_place_view.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -134,7 +136,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                               width: 15.w,
                               height: 15.w,
                               decoration: const BoxDecoration(
-                                color: Colors.orange,
+                                color: Colors.yellow,
                                 shape: BoxShape.circle,
                               ),
                               child: Center(
@@ -143,7 +145,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                                       ? '99+'
                                       : '${_notificationController.unreadCount}',
                                   style: TextStyle(
-                                    color: Colors.white,
+                                    color: Colors.black,
                                     fontSize: 10.sp,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -165,6 +167,35 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   ),
                   onSelected: (item) => handleMenuItemSelection(item),
                   itemBuilder: (context) => [
+                    PopupMenuItem<int>(
+                      value: 7,
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.calendar_month_outlined,
+                            color: Colors.white,
+                            size: 24.sp,
+                          ),
+                          SizedBox(width: 12.w),
+                          Expanded(
+                            child: Text(
+                              'My Schedule',
+                              style: GoogleFonts.inter(
+                                color: Colors.white,
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w500,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          Icon(
+                            CupertinoIcons.chevron_forward,
+                            size: 20.sp,
+                            color: Colors.white,
+                          ),
+                        ],
+                      ),
+                    ),
                     PopupMenuItem<int>(
                       value: 3,
                       child: Row(
@@ -328,6 +359,19 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   void handleMenuItemSelection(int item) {
+    // Check if user is premium
+    bool isPrem = false;
+    try {
+      isPrem = Get.find<SubscriptionService>().isPremium.value;
+    } catch (_) {
+      isPrem = false;
+    }
+
+    if (!isPrem) {
+      PremiumRequiredDialog.show();
+      return;
+    }
+
     switch (item) {
       case 3:
         Get.toNamed(Routes.invoiceHistoryView);
@@ -337,6 +381,9 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         break;
       case 5:
         Get.toNamed(Routes.meetGreetView);
+        break;
+      case 7:
+        Get.toNamed(Routes.myScheduleView);
         break;
       case 4:
         Get.to(() => MarketPlaceView());

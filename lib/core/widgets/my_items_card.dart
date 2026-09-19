@@ -18,6 +18,7 @@ class MyItemsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final String location = item.location.split(',').first.trim();
+    final bool isSold = item.status.toUpperCase() == 'SOLD';
 
     return GestureDetector(
       onTap: () {
@@ -56,7 +57,10 @@ class MyItemsCard extends StatelessWidget {
                   child: _buildImage(),
                 ),
                 // Floating Condition Badge
-                if (item.condition.isNotEmpty)
+                if (item.condition.trim().isNotEmpty &&
+                    item.condition.trim().toLowerCase() != 'none' &&
+                    item.condition.trim().toLowerCase() != 'null' &&
+                    item.condition.trim().toLowerCase() != 'n/a')
                   Positioned(
                     top: 8.h,
                     left: 8.w,
@@ -152,9 +156,15 @@ class MyItemsCard extends StatelessWidget {
                             vertical: 4.h,
                           ),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF1E1E22),
+                            color: isSold
+                                ? const Color(0xFF2A1C1C)
+                                : const Color(0xFF1E1E22),
                             borderRadius: BorderRadius.circular(30.r),
-                            border: Border.all(color: const Color(0xFF2D2D33)),
+                            border: Border.all(
+                              color: isSold
+                                  ? const Color(0xFF4A2828)
+                                  : const Color(0xFF2D2D33),
+                            ),
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
@@ -164,14 +174,11 @@ class MyItemsCard extends StatelessWidget {
                                 height: 6.w,
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
-                                  color: item.status == 'Active'
-                                      ? Colors.green
-                                      : Colors.orange,
+                                  color: isSold ? Colors.red : Colors.green,
                                   boxShadow: [
                                     BoxShadow(
-                                      color: item.status == 'Active'
-                                          ? Colors.green.withValues(alpha: 0.5)
-                                          : Colors.orange.withValues(alpha: 0.5),
+                                      color: (isSold ? Colors.red : Colors.green)
+                                          .withValues(alpha: 0.5),
                                       blurRadius: 4,
                                       spreadRadius: 1,
                                     ),
@@ -180,9 +187,9 @@ class MyItemsCard extends StatelessWidget {
                               ),
                               SizedBox(width: 5.w),
                               Text(
-                                item.status,
+                                isSold ? "Sold" : "Available",
                                 style: GoogleFonts.inter(
-                                  color: Colors.white70,
+                                  color: isSold ? Colors.red.shade300 : Colors.white70,
                                   fontSize: 10.sp,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -213,22 +220,49 @@ class MyItemsCard extends StatelessWidget {
   }
 
   void _showOptionsDialog(BuildContext context) {
+    final bool isSold = item.status.toUpperCase() == 'SOLD';
+
     Get.dialog(
       AlertDialog(
         backgroundColor: const Color(0xFF1A1A1A),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12.r),
+          borderRadius: BorderRadius.circular(16.r),
         ),
-        contentPadding: EdgeInsets.symmetric(vertical: 24.h, horizontal: 60.w),
+        contentPadding: EdgeInsets.symmetric(vertical: 20.h, horizontal: 24.w),
         content: Column(
           mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Edit Button
-            SizedBox(
-              width: double.infinity,
-              child: TextButton(
+            if (!isSold) ...[
+              // Mark as Sold Button
+              TextButton(
+                onPressed: () {
+                  Get.back();
+                  final MyItemsController controller =
+                      Get.find<MyItemsController>();
+                  controller.markAsSold(item.id);
+                },
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.check_circle_outline,
+                      color: const Color(0xFF22C55E),
+                      size: 20.sp,
+                    ),
+                    SizedBox(width: 14.w),
+                    Text(
+                      "Mark as Sold",
+                      style: GoogleFonts.inter(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14.sp,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Divider(color: const Color(0xFF2E2E2E), height: 16.h),
+              // Edit Button
+              TextButton(
                 onPressed: () {
                   Get.back();
                   final MarketplaceController mpc;
@@ -251,66 +285,54 @@ class MyItemsCard extends StatelessWidget {
                     backgroundColor: Colors.transparent,
                   );
                 },
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        SizedBox(width: 30.w),
-                        SvgPicture.asset(
-                          AppIcons.edit_icon_myjob,
-                          height: 20.sp,
-                          width: 20.sp,
-                        ),
-                        SizedBox(width: 12.w),
-                        Text(
-                          "Edit",
-                          style: GoogleFonts.inter(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15.sp,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            SizedBox(height: 4.h),
-            // Delete Button
-            SizedBox(
-              width: double.infinity,
-              child: TextButton(
-                onPressed: () {
-                  Get.back();
-                  _showDeleteDialog(context);
-                },
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    SizedBox(width: 30.w),
                     SvgPicture.asset(
-                      AppIcons.deletemyjob_icon,
-                      height: 20.sp,
-                      width: 20.sp,
+                      AppIcons.edit_icon_myjob,
+                      height: 18.sp,
+                      width: 18.sp,
                     ),
-                    SizedBox(width: 12.w),
+                    SizedBox(width: 14.w),
                     Text(
-                      "Delete",
+                      "Edit",
                       style: GoogleFonts.inter(
                         color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 15.sp,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14.sp,
                       ),
                     ),
                   ],
                 ),
               ),
+              Divider(color: const Color(0xFF2E2E2E), height: 16.h),
+            ],
+            // Delete Button
+            TextButton(
+              onPressed: () {
+                Get.back();
+                _showDeleteDialog(context);
+              },
+              child: Row(
+                children: [
+                  SvgPicture.asset(
+                    AppIcons.deletemyjob_icon,
+                    height: 18.sp,
+                    width: 18.sp,
+                  ),
+                  SizedBox(width: 14.w),
+                  Text(
+                    "Delete",
+                    style: GoogleFonts.inter(
+                      color: Colors.red,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14.sp,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
-        actionsPadding: EdgeInsets.zero,
       ),
     );
   }
@@ -378,6 +400,7 @@ class MyItemsCard extends StatelessWidget {
               final MyItemsController controller =
                   Get.find<MyItemsController>();
               controller.deleteItem(item.id);
+              Get.back();
             },
             child: Text(
               "Delete",

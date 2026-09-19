@@ -1,17 +1,18 @@
-import 'package:moeb_26/config/routes/app_pages.dart';
-import 'package:moeb_26/config/themes/app_theme.dart';
-import 'package:moeb_26/core/utils/validators.dart';
-import 'package:moeb_26/modules/auth/authentication/controllers/signup_controller.dart';
-import 'package:moeb_26/core/widgets/Custom_dropdown.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import '../../../../core/widgets/CustomButton.dart';
-import '../../../../core/widgets/CustomText.dart';
-import '../../../../core/widgets/CustomTextField.dart';
-import '../../../../core/widgets/CustomTextGary.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:moeb_26/config/routes/app_pages.dart';
+import 'package:moeb_26/config/themes/app_theme.dart';
+import 'package:moeb_26/core/utils/validators.dart';
+import 'package:moeb_26/core/widgets/CustomButton.dart';
+import 'package:moeb_26/core/widgets/CustomText.dart';
+import 'package:moeb_26/core/widgets/CustomTextField.dart';
+import 'package:moeb_26/core/widgets/Custom_dropdown.dart';
+import 'package:moeb_26/core/widgets/custom_sub_appbar.dart';
+import 'package:moeb_26/modules/auth/authentication/controllers/signup_controller.dart';
 
 class CreateAccountView extends StatefulWidget {
   const CreateAccountView({super.key});
@@ -54,37 +55,33 @@ class _CreateAccountViewState extends State<CreateAccountView> {
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
-        body: Form(
-          key: _formKey,
-          child: Padding(
+        appBar: const CustomSubAppBar(title: "Account Create"),
+        body: Obx(
+          () => Form(
+            key: _formKey,
+            autovalidateMode: controller.showErrors.value
+                ? AutovalidateMode.always
+                : AutovalidateMode.disabled,
+            child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 20.w),
             child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
+              physics: const ClampingScrollPhysics(),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SizedBox(height: 50.h),
-                  IconButton(
-                    onPressed: () => Get.back(),
-                    icon: Icon(
-                      Icons.arrow_back_ios,
-                      color: Colors.white,
-                      size: 22.sp,
+                  SizedBox(height: 16.h),
+                  Center(
+                    child: Text(
+                      "Tell us about yourself to get started",
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.inter(
+                        color: const Color(0xFFD5C4AB),
+                        fontSize: 15.sp,
+                        fontWeight: FontWeight.w400,
+                      ),
                     ),
                   ),
-                  SizedBox(height: 20.h),
-                  CustomText(
-                    text: "Account Create",
-                    fontSize: 28.sp,
-                    fontWeight: FontWeight.w700,
-                  ),
-                  SizedBox(height: 8.h),
-                  CustomTextgray(
-                    text: "Tell us about yourself to get started",
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w400,
-                  ),
-                  SizedBox(height: 32.h),
+                  SizedBox(height: 24.h),
 
                   // ========== Full Name ==========
                   _buildInputField(
@@ -137,9 +134,9 @@ class _CreateAccountViewState extends State<CreateAccountView> {
                     child: Obx(
                       () => _buildDropdownField(
                         error: areaError.value,
-                        isLoading: controller.isCitiesLoading,
                         child: CustomDropdown(
                           hintText: 'Select service area',
+                          isLoading: controller.isCitiesLoading,
                           value: controller.selectedArea.value.isEmpty
                               ? null
                               : controller.selectedArea.value,
@@ -157,22 +154,6 @@ class _CreateAccountViewState extends State<CreateAccountView> {
                             }
                           },
                         ),
-                      ),
-                    ),
-                  ),
-
-                  // ========== Years of Experience ==========
-                  _buildInputField(
-                    label: "Years of Experience",
-                    isRequired: false,
-                    child: Customtextfield(
-                      controller: controller.yearController,
-                      hintText: "0",
-                      obscureText: false,
-                      textInputType: TextInputType.number,
-                      validator: (value) => Validators.required(
-                        value,
-                        message: "Enter your years of experience",
                       ),
                     ),
                   ),
@@ -217,70 +198,7 @@ class _CreateAccountViewState extends State<CreateAccountView> {
                     ),
                   ),
 
-                  // ========== Languages Speaking ==========
-                  _buildInputField(
-                    label: "Languages Speaking",
-                    isRequired: true,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Wrap(
-                          spacing: 8.w,
-                          runSpacing: 8.h,
-                          children: controller.availableLanguages.map((lang) {
-                            final isEnglish = lang == 'English';
-                            return Obx(() {
-                              final isSelected = controller.selectedLanguages
-                                  .contains(lang);
-                              return FilterChip(
-                                showCheckmark: false,
-                                label: Text(
-                                  lang,
-                                  style: GoogleFonts.inter(
-                                    color: isSelected
-                                        ? Colors.black
-                                        : Colors.white,
-                                    fontWeight: isSelected
-                                        ? FontWeight.bold
-                                        : FontWeight.w500,
-                                    fontSize: 13.sp,
-                                  ),
-                                ),
-                                selected: isSelected,
-                                onSelected: isEnglish
-                                    ? null
-                                    : (selected) {
-                                        if (selected) {
-                                          controller.selectedLanguages.add(
-                                            lang,
-                                          );
-                                        } else {
-                                          controller.selectedLanguages.remove(
-                                            lang,
-                                          );
-                                        }
-                                      },
-                                selectedColor: AppColors.orange100,
-                                backgroundColor: const Color(0xFF1E1E1E),
-                                disabledColor: AppColors.orange100.withValues(
-                                  alpha: 0.6,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8.r),
-                                  side: BorderSide(
-                                    color: isSelected
-                                        ? AppColors.orange100
-                                        : const Color(0xFF2C2C2C),
-                                    width: 1.w,
-                                  ),
-                                ),
-                              );
-                            });
-                          }).toList(),
-                        ),
-                      ],
-                    ),
-                  ),
+
 
                   // ========== Password ==========
                   _buildInputField(
@@ -349,6 +267,7 @@ class _CreateAccountViewState extends State<CreateAccountView> {
           ),
         ),
       ),
+      ),
     );
   }
 
@@ -372,7 +291,7 @@ class _CreateAccountViewState extends State<CreateAccountView> {
             if (isRequired)
               Text(
                 " *",
-                style: TextStyle(color: Colors.red, fontSize: 14.sp),
+                style: TextStyle(color: AppColors.orange100, fontSize: 14.sp),
               ),
           ],
         ),
@@ -383,23 +302,11 @@ class _CreateAccountViewState extends State<CreateAccountView> {
     );
   }
 
-  Widget _buildDropdownField({
-    required Widget child,
-    String? error,
-    bool isLoading = false,
-  }) {
+  Widget _buildDropdownField({required Widget child, String? error}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (isLoading)
-          const Center(
-            child: Padding(
-              padding: EdgeInsets.all(8.0),
-              child: CircularProgressIndicator(color: AppColors.orange100),
-            ),
-          )
-        else
-          child,
+        child,
         if (error != null && error.isNotEmpty)
           Padding(
             padding: EdgeInsets.only(left: 12.w, top: 6.h),
@@ -412,24 +319,33 @@ class _CreateAccountViewState extends State<CreateAccountView> {
     );
   }
 
+
+
   // --- Logic ---
 
   void _handleSubmit() {
     FocusScope.of(context).unfocus();
-    final isFormValid = _formKey.currentState!.validate();
+    controller.showErrors.value = true;
 
-    bool dropdownsValid = true;
+    final bool isFormValid = _formKey.currentState?.validate() ?? false;
+
+    bool isCustomValid = true;
     if (controller.selectedArea.value.isEmpty) {
-      areaError.value = 'Select a service area';
-      dropdownsValid = false;
-    }
-    if (controller.selectedRole.value.isEmpty) {
-      roleError.value = 'Select a company role';
-      dropdownsValid = false;
+      areaError.value = 'Select service area';
+      isCustomValid = false;
+    } else {
+      areaError.value = '';
     }
 
-    if (isFormValid && dropdownsValid) {
-      Get.toNamed(Routes.vehicleinformationView);
+    if (controller.selectedRole.value.isEmpty) {
+      roleError.value = 'Select company role';
+      isCustomValid = false;
+    } else {
+      roleError.value = '';
+    }
+
+    if (isFormValid && isCustomValid) {
+      Get.toNamed(Routes.privacyPolicySignUpView);
     }
   }
 }

@@ -3,7 +3,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:moeb_26/config/themes/app_theme.dart';
 import 'package:moeb_26/modules/invoice/views/invoice_settings_view.dart';
+import 'package:moeb_26/core/widgets/custom_sub_appbar.dart';
+import 'package:moeb_26/core/widgets/CustomButton.dart';
 import '../../../config/routes/app_pages.dart';
 import '../controllers/invoice_controller.dart';
 import 'invoice_detail_view.dart';
@@ -15,46 +18,18 @@ class InvoiceHistoryView extends GetView<InvoiceController> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      appBar: PreferredSize(
-        preferredSize: Size.fromHeight(60.h),
-        child: Container(
-          decoration: const BoxDecoration(
-            border: Border(
-              bottom: BorderSide(color: Color(0xFF1E1E1E), width: 1.5),
+      appBar: CustomSubAppBar(
+        title: 'Invoice',
+        actions: [
+          IconButton(
+            icon: Icon(
+              Icons.settings_outlined,
+              color: Colors.white,
+              size: 22.sp,
             ),
+            onPressed: () => Get.to(() => const InvoiceSettingsView()),
           ),
-          child: AppBar(
-            backgroundColor: Colors.black,
-            elevation: 0,
-            leading: IconButton(
-              icon: Icon(
-                Icons.arrow_back_ios_new,
-                color: Colors.white,
-                size: 20.sp,
-              ),
-              onPressed: () => Get.back(),
-            ),
-            title: Text(
-              'Invoice',
-              style: GoogleFonts.inter(
-                color: Colors.white,
-                fontSize: 18.sp,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            centerTitle: true,
-            actions: [
-              IconButton(
-                icon: Icon(
-                  Icons.settings_outlined,
-                  color: Colors.white,
-                  size: 22.sp,
-                ),
-                onPressed: () => Get.to(() => const InvoiceSettingsView()),
-              ),
-            ],
-          ),
-        ),
+        ],
       ),
       body: Column(
         children: [
@@ -64,7 +39,7 @@ class InvoiceHistoryView extends GetView<InvoiceController> {
           // List Content
           Expanded(
             child: RefreshIndicator(
-              color: const Color(0xFFD08700),
+              color: AppColors.primaryColor,
               backgroundColor: Colors.black,
               onRefresh: () => controller.fetchInvoicesFromApi(),
               child: Obx(() {
@@ -72,7 +47,7 @@ class InvoiceHistoryView extends GetView<InvoiceController> {
                     controller.invoiceHistory.isEmpty) {
                   return const Center(
                     child: CircularProgressIndicator(
-                      color: Color(0xFFD08700),
+                      color: AppColors.primaryColor,
                     ),
                   );
                 }
@@ -124,8 +99,10 @@ class InvoiceHistoryView extends GetView<InvoiceController> {
 
                 return ListView.separated(
                   physics: const AlwaysScrollableScrollPhysics(),
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 20.w,
+                    vertical: 10.h,
+                  ),
                   itemCount: filteredList.length,
                   separatorBuilder: (context, index) => SizedBox(height: 12.h),
                   itemBuilder: (context, index) {
@@ -145,33 +122,13 @@ class InvoiceHistoryView extends GetView<InvoiceController> {
             color: Colors.black,
             border: Border(top: BorderSide(color: Color(0xFF1E1E1E), width: 1)),
           ),
-          child: GestureDetector(
-            onTap: () {
+          child: CustomButton(
+            text: 'Create Invoice',
+            onPressed: () {
               controller.prepareNewInvoice();
               Get.toNamed(Routes.createInvoiceView);
             },
-            child: Container(
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: const Color(0xFFD08700), // Bright orange-yellow
-                borderRadius: BorderRadius.circular(12.r),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFFD08700).withValues(alpha: 0.15),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Text(
-                'Create Invoice',
-                style: GoogleFonts.inter(
-                  color: Colors.black,
-                  fontSize: 15.sp,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
+            padding: EdgeInsets.symmetric(vertical: 12.h),
           ),
         ),
       ),
@@ -256,6 +213,9 @@ class InvoiceHistoryView extends GetView<InvoiceController> {
       onTap: () {
         final trueIndex = controller.invoiceHistory.indexOf(record);
         if (trueIndex != -1) {
+          if (record.id != null && record.id!.isNotEmpty) {
+            controller.fetchInvoiceDetails(record.id!);
+          }
           Get.to(() => InvoiceDetailView(index: trueIndex));
         }
       },
@@ -351,13 +311,13 @@ class InvoiceHistoryView extends GetView<InvoiceController> {
                     ),
                   ),
                 ),
-                SizedBox(height: 22.h),
-                // Amount (Paid is highlighted in peach-yellow, Unpaid is white)
+                SizedBox(height: 16.h),
+                // Amount
                 Text(
                   'USD ${record.totalAmount.toStringAsFixed(2)}',
                   style: GoogleFonts.inter(
-                    color: isPaid ? const Color(0xFFFEDB9B) : Colors.white,
-                    fontSize: 14.sp, // Sleeker bold font size
+                    color: isPaid ? const Color(0xFF10B981) : Colors.white,
+                    fontSize: 14.sp,
                     fontWeight: FontWeight.bold,
                   ),
                 ),

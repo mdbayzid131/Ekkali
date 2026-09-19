@@ -7,6 +7,9 @@ import 'package:intl/intl.dart';
 import 'package:moeb_26/data/models/invoice_model.dart';
 import 'package:moeb_26/data/repositories/invoice_repository.dart';
 import 'package:moeb_26/modules/invoice/views/invoice_preview_view.dart';
+import 'package:moeb_26/core/utils/validators.dart';
+import 'package:moeb_26/core/utils/helpers.dart';
+import 'package:moeb_26/core/widgets/CustomButton.dart';
 
 class InvoiceHistoryRecord {
   final String? id;
@@ -153,15 +156,19 @@ class SavedClient {
       email: json['emailAddress'] as String? ?? json['email'] as String? ?? '',
       phone: json['phoneNumber'] as String? ?? json['phone'] as String? ?? '',
       streetAddress:
-          billing?['streetAddress'] as String? ??
           json['streetAddress'] as String? ??
+          billing?['streetAddress'] as String? ??
           '',
-      city: billing?['city'] as String? ?? json['city'] as String? ?? '',
-      state: billing?['state'] as String? ?? json['state'] as String? ?? '',
-      zip: billing?['zipCode'] as String? ?? json['zip'] as String? ?? '',
+      city: json['city'] as String? ?? billing?['city'] as String? ?? '',
+      state: json['state'] as String? ?? billing?['state'] as String? ?? '',
+      zip:
+          json['zipCode'] as String? ??
+          billing?['zipCode'] as String? ??
+          json['zip'] as String? ??
+          '',
       country:
-          billing?['country'] as String? ??
           json['country'] as String? ??
+          billing?['country'] as String? ??
           'United States',
     );
   }
@@ -172,13 +179,11 @@ class SavedClient {
       'businessName': businessName,
       'emailAddress': email,
       'phoneNumber': phone,
-      'billingAddress': {
-        'streetAddress': streetAddress,
-        'city': city,
-        'state': state,
-        'zipCode': zip,
-        'country': country,
-      },
+      'streetAddress': streetAddress,
+      'city': city,
+      'state': state,
+      'zipCode': zip,
+      'country': country,
     };
   }
 }
@@ -198,6 +203,12 @@ class InvoiceController extends GetxController {
   var selectedDueDateOption = 'On Receipt'.obs;
   var customDueDate = Rxn<DateTime>();
   var selectedCurrency = 'USD - US Dollar'.obs;
+  var invoiceStatus = 'Unpaid'.obs;
+
+  // Step 1 Validation Errors
+  var invoiceNumberError = ''.obs;
+  var invoiceAmountError = ''.obs;
+  var customDueDateError = ''.obs;
 
   // Step 2: Client Details
   late TextEditingController clientNameController;
@@ -211,6 +222,15 @@ class InvoiceController extends GetxController {
   late TextEditingController clientStateController;
   late TextEditingController clientZipController;
   var clientCountry = 'United States'.obs;
+
+  // Step 2 Validation Errors
+  var clientNameError = ''.obs;
+  var clientEmailError = ''.obs;
+  var clientPhoneError = ''.obs;
+  var clientStreetAddressError = ''.obs;
+  var clientCityError = ''.obs;
+  var clientStateError = ''.obs;
+  var clientZipError = ''.obs;
 
   // Step 3: Message to Client
   late TextEditingController invoiceDescriptionController;
@@ -289,8 +309,57 @@ class InvoiceController extends GetxController {
     businessWebsiteController = TextEditingController();
     businessAddressController = TextEditingController();
 
-    // Fetch invoices from backend API
+    // Auto-clear error messages on text change
+    invoiceNumberController.addListener(() {
+      if (invoiceNumberError.value.isNotEmpty) invoiceNumberError.value = '';
+    });
+    invoiceAmountController.addListener(() {
+      if (invoiceAmountError.value.isNotEmpty) invoiceAmountError.value = '';
+    });
+    clientNameController.addListener(() {
+      if (clientNameError.value.isNotEmpty) clientNameError.value = '';
+    });
+    clientEmailController.addListener(() {
+      if (clientEmailError.value.isNotEmpty) clientEmailError.value = '';
+    });
+    clientPhoneController.addListener(() {
+      if (clientPhoneError.value.isNotEmpty) clientPhoneError.value = '';
+    });
+    clientStreetAddressController.addListener(() {
+      if (clientStreetAddressError.value.isNotEmpty) {
+        clientStreetAddressError.value = '';
+      }
+    });
+    clientCityController.addListener(() {
+      if (clientCityError.value.isNotEmpty) clientCityError.value = '';
+    });
+    clientStateController.addListener(() {
+      if (clientStateError.value.isNotEmpty) clientStateError.value = '';
+    });
+    clientZipController.addListener(() {
+      if (clientZipError.value.isNotEmpty) clientZipError.value = '';
+    });
+
+    // Fetch data from backend API
     fetchInvoicesFromApi();
+    fetchClientsFromApi();
+    fetchInvoiceProfileFromApi();
+
+    // Ensure all validation errors start empty
+    clearValidationErrors();
+  }
+
+  void clearValidationErrors() {
+    invoiceNumberError.value = '';
+    invoiceAmountError.value = '';
+    customDueDateError.value = '';
+    clientNameError.value = '';
+    clientEmailError.value = '';
+    clientPhoneError.value = '';
+    clientStreetAddressError.value = '';
+    clientCityError.value = '';
+    clientStateError.value = '';
+    clientZipError.value = '';
   }
 
   // --- SAVED CLIENTS ACTIONS ---
@@ -307,41 +376,10 @@ class InvoiceController extends GetxController {
     if (countryOptions.contains(client.country)) {
       clientCountry.value = client.country;
     }
-    Get.snackbar(
-      'Client Selected',
+    Helpers.showCustomSnackBar(
       'Loaded details for ${client.name}',
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: const Color(0xFFD08700),
-      colorText: Colors.black,
-      duration: const Duration(seconds: 2),
+      isError: false,
     );
-  }
-
-  void autoSaveClientFromControllers() {
-    final name = clientNameController.text.trim();
-    final email = clientEmailController.text.trim();
-    if (name.isEmpty) return;
-
-    final existingIndex = savedClients.indexWhere(
-      (c) =>
-          c.name.toLowerCase() == name.toLowerCase() ||
-          (email.isNotEmpty && c.email.toLowerCase() == email.toLowerCase()),
-    );
-
-    final client = SavedClient(
-      id: existingIndex != -1 ? savedClients[existingIndex].id : '',
-      name: name,
-      businessName: clientBusinessNameController.text.trim(),
-      email: email,
-      phone: clientPhoneController.text.trim(),
-      streetAddress: clientStreetAddressController.text.trim(),
-      city: clientCityController.text.trim(),
-      state: clientStateController.text.trim(),
-      zip: clientZipController.text.trim(),
-      country: clientCountry.value,
-    );
-
-    addOrUpdateSavedClient(client);
   }
 
   Future<void> fetchClientsFromApi() async {
@@ -365,6 +403,43 @@ class InvoiceController extends GetxController {
     }
   }
 
+  String _extractErrorMessage(dynamic error, {String defaultMsg = 'Something went wrong.'}) {
+    if (error is dio.DioException) {
+      if (error.response?.data != null) {
+        final data = error.response!.data;
+        if (data is Map) {
+          if (data['message'] != null &&
+              data['message'].toString().trim().isNotEmpty) {
+            return data['message'].toString();
+          }
+          if (data['errorMessages'] is List &&
+              (data['errorMessages'] as List).isNotEmpty) {
+            final first = (data['errorMessages'] as List)[0];
+            if (first is Map && first['message'] != null) {
+              return first['message'].toString();
+            }
+          }
+        }
+      }
+      if (error.message != null && error.message!.isNotEmpty) {
+        return error.message!;
+      }
+    } else if (error is Map) {
+      if (error['message'] != null &&
+          error['message'].toString().trim().isNotEmpty) {
+        return error['message'].toString();
+      }
+      if (error['errorMessages'] is List &&
+          (error['errorMessages'] as List).isNotEmpty) {
+        final first = (error['errorMessages'] as List)[0];
+        if (first is Map && first['message'] != null) {
+          return first['message'].toString();
+        }
+      }
+    }
+    return error?.toString() ?? defaultMsg;
+  }
+
   Future<bool> addOrUpdateSavedClient(SavedClient client) async {
     // Only genuine 24-character MongoDB hex ObjectIDs represent existing backend clients
     final isEditing =
@@ -374,73 +449,56 @@ class InvoiceController extends GetxController {
 
     try {
       isLoading.value = true;
+      final dio.Response response;
       if (isEditing) {
-        final response = await _invoiceRepo.updateClient(
+        response = await _invoiceRepo.updateClient(
           client.id,
           client.toJson(),
         );
-        if (response.statusCode == 200 || response.statusCode == 201) {
-          if (response.data != null && response.data['data'] != null) {
-            final updated = SavedClient.fromJson(response.data['data']);
-            final idx = savedClients.indexWhere((c) => c.id == client.id);
-            if (idx != -1) savedClients[idx] = updated;
-          }
-          Get.snackbar(
-            'Success',
-            'Client updated successfully',
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: const Color(0xFFD08700),
-            colorText: Colors.black,
-            duration: const Duration(seconds: 2),
-          );
-          return true;
-        }
       } else {
         // Send POST /api/v1/invoices/client to create new client on backend
-        final response = await _invoiceRepo.createClient(client.toJson());
-        if (response.statusCode == 200 || response.statusCode == 201) {
-          if (response.data != null && response.data['data'] != null) {
-            final created = SavedClient.fromJson(response.data['data']);
+        response = await _invoiceRepo.createClient(client.toJson());
+      }
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        if (response.data != null && response.data['data'] != null) {
+          final saved = SavedClient.fromJson(response.data['data']);
+          if (isEditing) {
+            final idx = savedClients.indexWhere((c) => c.id == client.id);
+            if (idx != -1) savedClients[idx] = saved;
+          } else {
             final existingIndex = savedClients.indexWhere(
               (c) =>
-                  c.id == created.id ||
-                  (c.name.toLowerCase() == created.name.toLowerCase() &&
-                      created.name.isNotEmpty),
+                  c.id == saved.id ||
+                  (c.name.toLowerCase() == saved.name.toLowerCase() &&
+                      saved.name.isNotEmpty),
             );
             if (existingIndex != -1) {
-              savedClients[existingIndex] = created;
+              savedClients[existingIndex] = saved;
             } else {
-              savedClients.add(created);
+              savedClients.add(saved);
             }
           }
-          Get.snackbar(
-            'Success',
-            'New client added successfully',
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: const Color(0xFFD08700),
-            colorText: Colors.black,
-            duration: const Duration(seconds: 2),
-          );
-          return true;
         }
+        Helpers.showCustomSnackBar(
+          isEditing
+              ? 'Client updated successfully'
+              : 'New client added successfully',
+          isError: false,
+        );
+        return true;
+      } else {
+        final errorMsg = _extractErrorMessage(
+          response.data,
+          defaultMsg: 'Failed to save client.',
+        );
+        Helpers.showCustomSnackBar(errorMsg, isError: true);
+        return false;
       }
-      Get.snackbar(
-        'Error',
-        'Failed to save client.',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
-      return false;
     } catch (e) {
       debugPrint('Error saving client to API: $e');
-      Get.snackbar(
-        'Error',
-        'Failed to save client.',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      final errorMsg = _extractErrorMessage(e, defaultMsg: 'Failed to save client.');
+      Helpers.showCustomSnackBar(errorMsg, isError: true);
       return false;
     } finally {
       isLoading.value = false;
@@ -579,13 +637,111 @@ class InvoiceController extends GetxController {
     }
   }
 
+  bool validateStep1() {
+    bool isValid = true;
+
+    final amountErr = Validators.amount(
+      invoiceAmountController.text,
+      message: 'Enter a valid amount (> 0)',
+      min: 0.01,
+    );
+    invoiceAmountError.value = amountErr ?? '';
+    if (amountErr != null) isValid = false;
+
+    if (selectedDueDateOption.value == 'Custom Due Date' &&
+        customDueDate.value == null) {
+      customDueDateError.value = 'Please select a custom due date';
+      isValid = false;
+    } else {
+      customDueDateError.value = '';
+    }
+
+    return isValid;
+  }
+
+  bool validateStep2() {
+    bool isValid = true;
+
+    final nameErr = Validators.name(
+      clientNameController.text,
+      message: 'Client name is required',
+      minLength: 2,
+    );
+    clientNameError.value = nameErr ?? '';
+    if (nameErr != null) isValid = false;
+
+    final emailErr = Validators.email(
+      clientEmailController.text,
+      message: 'Enter a valid email address',
+    );
+    clientEmailError.value = emailErr ?? '';
+    if (emailErr != null) isValid = false;
+
+    if (clientPhoneController.text.trim().isNotEmpty) {
+      final phoneErr = Validators.phone(
+        clientPhoneController.text,
+        message: 'Enter a valid phone number',
+      );
+      clientPhoneError.value = phoneErr ?? '';
+      if (phoneErr != null) isValid = false;
+    } else {
+      clientPhoneError.value = '';
+    }
+
+    final streetErr = Validators.required(
+      clientStreetAddressController.text,
+      message: 'Street address is required',
+    );
+    clientStreetAddressError.value = streetErr ?? '';
+    if (streetErr != null) isValid = false;
+
+    final cityErr = Validators.required(
+      clientCityController.text,
+      message: 'City is required',
+    );
+    clientCityError.value = cityErr ?? '';
+    if (cityErr != null) isValid = false;
+
+    final stateErr = Validators.required(
+      clientStateController.text,
+      message: 'State/Province is required',
+    );
+    clientStateError.value = stateErr ?? '';
+    if (stateErr != null) isValid = false;
+
+    final zipErr = Validators.required(
+      clientZipController.text,
+      message: 'ZIP/Postal code is required',
+    );
+    clientZipError.value = zipErr ?? '';
+    if (zipErr != null) isValid = false;
+
+    return isValid;
+  }
+
+  bool validateAll() {
+    final v1 = validateStep1();
+    final v2 = validateStep2();
+    if (!v1) {
+      currentStep.value = 1;
+      return false;
+    }
+    if (!v2) {
+      currentStep.value = 2;
+      return false;
+    }
+    return true;
+  }
+
   void nextStep() {
     if (currentStep.value == 1) {
+      if (!validateStep1()) return;
       currentStep.value = 2;
     } else if (currentStep.value == 2) {
+      if (!validateStep2()) return;
       currentStep.value = 3;
     } else if (currentStep.value == 3) {
-      // submitInvoice();
+      if (!validateAll()) return;
       Get.to(() => const InvoicePreviewView());
     }
   }
@@ -607,13 +763,7 @@ class InvoiceController extends GetxController {
         businessLogoPath.value = image.path;
       }
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Could not access gallery: $e',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      Helpers.showCustomSnackBar('Could not access gallery: $e', isError: true);
     }
   }
 
@@ -655,13 +805,7 @@ class InvoiceController extends GetxController {
 
   Future<void> saveProfileSettings() async {
     if (businessNameController.text.trim().isEmpty) {
-      Get.snackbar(
-        'Required',
-        'Business name is required.',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      Helpers.showCustomSnackBar('Business name is required.', isError: true);
       return;
     }
 
@@ -708,51 +852,27 @@ class InvoiceController extends GetxController {
 
         Get.back(); // Return to settings page
 
-        Get.snackbar(
-          'Success',
+        Helpers.showCustomSnackBar(
           'Profile settings saved successfully.',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: const Color(0xFFFEDB9B), // Soft peach-yellow
-          colorText: Colors.black,
-          duration: const Duration(seconds: 2),
+          isError: false,
         );
       } else {
-        String errorMsg =
-            'Failed to save profile. Code: ${response.statusCode}';
-        if (response.data != null && response.data is Map) {
-          final body = response.data as Map<String, dynamic>;
-          if (body['errorMessages'] is List &&
-              (body['errorMessages'] as List).isNotEmpty) {
-            final firstErr = (body['errorMessages'] as List)[0];
-            if (firstErr is Map && firstErr['message'] != null) {
-              errorMsg = "${firstErr['path']}: ${firstErr['message']}";
-            }
-          } else if (body['message'] != null) {
-            errorMsg = body['message'].toString();
-          }
-        }
-        Get.snackbar(
-          'Validation Error',
-          errorMsg,
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
+        final errorMsg = _extractErrorMessage(
+          response.data,
+          defaultMsg: 'Failed to save profile. Code: ${response.statusCode}',
         );
+        Helpers.showCustomSnackBar(errorMsg, isError: true);
       }
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Profile update failed: $e',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      final errorMsg = _extractErrorMessage(e, defaultMsg: 'Profile update failed.');
+      Helpers.showCustomSnackBar(errorMsg, isError: true);
     } finally {
       isLoading.value = false;
     }
   }
 
   void populateFromRecord(InvoiceHistoryRecord record) {
+    clearValidationErrors();
     invoiceNumberController.text = record.invoiceNumber;
     invoiceAmountController.text = record.totalAmount.toStringAsFixed(2);
     clientNameController.text = record.clientName;
@@ -781,10 +901,13 @@ class InvoiceController extends GetxController {
     businessWebsiteController.text = record.businessWebsite;
     businessAddressController.text = record.businessAddress;
     businessLogoPath.value = record.businessLogoPath;
+    invoiceStatus.value = record.status;
   }
 
   void prepareNewInvoice() {
+    clearValidationErrors();
     editingRecordIndex.value = -1;
+    invoiceStatus.value = 'Unpaid';
     invoiceAmountController.clear();
     clientNameController.clear();
     clientBusinessNameController.clear();
@@ -830,6 +953,9 @@ class InvoiceController extends GetxController {
       // Immediate UI feedback
       final updated = record.copyWith(status: newStatus);
       invoiceHistory[index] = updated;
+      if (editingRecordIndex.value == index) {
+        invoiceStatus.value = newStatus;
+      }
 
       if (record.id != null && record.id!.isNotEmpty) {
         try {
@@ -838,39 +964,27 @@ class InvoiceController extends GetxController {
             'status': isPaid ? 'paid' : 'unpaid',
           });
           if (response.statusCode == 200 || response.statusCode == 201) {
-            Get.snackbar(
-              'Status Updated',
+            Helpers.showCustomSnackBar(
               'Invoice marked as $newStatus.',
-              snackPosition: SnackPosition.BOTTOM,
-              backgroundColor: isPaid
-                  ? const Color(0xFF10B981)
-                  : const Color(0xFFEF4444),
-              colorText: Colors.white,
-              duration: const Duration(seconds: 2),
+              isError: false,
             );
           } else {
             final reverted = record.copyWith(
               status: isPaid ? 'Unpaid' : 'Paid',
             );
             invoiceHistory[index] = reverted;
-            Get.snackbar(
-              'Error',
+            Helpers.showCustomSnackBar(
               'Failed to update status. Code: ${response.statusCode}',
-              snackPosition: SnackPosition.BOTTOM,
-              backgroundColor: Colors.red,
-              colorText: Colors.white,
+              isError: true,
             );
           }
         } catch (e) {
           final reverted = record.copyWith(status: isPaid ? 'Unpaid' : 'Paid');
           invoiceHistory[index] = reverted;
           debugPrint('Error updating invoice status on backend: $e');
-          Get.snackbar(
-            'Error',
+          Helpers.showCustomSnackBar(
             'Failed to update invoice status.',
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Colors.red,
-            colorText: Colors.white,
+            isError: true,
           );
         }
       }
@@ -906,13 +1020,7 @@ class InvoiceController extends GetxController {
     if (wasEditing) {
       Get.back(); // close details view screen
     }
-    Get.snackbar(
-      'Deleted',
-      'Invoice has been deleted.',
-      backgroundColor: Colors.redAccent,
-      colorText: Colors.white,
-      snackPosition: SnackPosition.BOTTOM,
-    );
+    Helpers.showCustomSnackBar('Invoice has been deleted.', isError: false);
   }
 
   Future<void> fetchInvoicesFromApi() async {
@@ -935,6 +1043,28 @@ class InvoiceController extends GetxController {
       debugPrint('Error fetching invoices from API: $e');
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  Future<void> fetchInvoiceDetails(String invoiceId) async {
+    if (invoiceId.isEmpty) return;
+    try {
+      final response = await _invoiceRepo.fetchInvoiceById(invoiceId);
+      if (response.statusCode == 200 && response.data != null) {
+        final body = response.data;
+        if (body['success'] == true && body['data'] != null) {
+          final model = InvoiceModel.fromJson(
+            body['data'] as Map<String, dynamic>,
+          );
+          final updatedRecord = _mapInvoiceModelToRecord(model);
+          final idx = invoiceHistory.indexWhere((r) => r.id == invoiceId);
+          if (idx != -1) {
+            invoiceHistory[idx] = updatedRecord;
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('Error fetching single invoice details: $e');
     }
   }
 
@@ -989,11 +1119,10 @@ class InvoiceController extends GetxController {
   }
 
   Future<void> submitInvoice() async {
+    if (!validateAll()) return;
+
     final wasEditing = editingRecordIndex.value != -1;
     final double amount = double.tryParse(invoiceAmountController.text) ?? 0.0;
-
-    // Auto save client details for future invoices
-    autoSaveClientFromControllers();
 
     final String dueDateTypeStr = selectedDueDateOption.value == 'On Receipt'
         ? 'on_receipt'
@@ -1093,39 +1222,31 @@ class InvoiceController extends GetxController {
         currentStep.value = 1;
         editingRecordIndex.value = -1;
 
+        // Refresh client directory from backend
+        fetchClientsFromApi();
+
         Get.back(); // close preview screen
         Get.back(); // close create screen
         if (wasEditing) {
           Get.back(); // close detail screen
         }
 
-        Get.snackbar(
-          'Success',
+        Helpers.showCustomSnackBar(
           wasEditing
               ? 'Invoice updated successfully.'
               : 'Invoice created successfully.',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: const Color(0xFFFEDB9B),
-          colorText: Colors.black,
-          duration: const Duration(seconds: 2),
+          isError: false,
         );
       } else {
-        Get.snackbar(
-          'Error',
-          'Failed to create invoice. Code: ${response.statusCode}',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
+        final errorMsg = _extractErrorMessage(
+          response.data,
+          defaultMsg: 'Failed to create invoice. Code: ${response.statusCode}',
         );
+        Helpers.showCustomSnackBar(errorMsg, isError: true);
       }
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Invoice submission failed: $e',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      final errorMsg = _extractErrorMessage(e, defaultMsg: 'Invoice submission failed.');
+      Helpers.showCustomSnackBar(errorMsg, isError: true);
     } finally {
       isLoading.value = false;
     }
@@ -1180,7 +1301,10 @@ class InvoiceController extends GetxController {
               Row(
                 children: [
                   Expanded(
-                    child: ElevatedButton(
+                    child: CustomButton(
+                      text: 'Delete',
+                      backgroundColor: const Color(0xFF2C2C2C),
+                      textColor: Colors.white,
                       onPressed: () {
                         // Cancel/Delete without calling API
                         invoiceAmountController.clear();
@@ -1206,52 +1330,22 @@ class InvoiceController extends GetxController {
                           Get.back(); // close detail screen
                         }
                       },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF2C2C2C),
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                      ),
-                      child: const Text(
-                        'Delete',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
                     ),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
-                    child: ElevatedButton(
-                      onPressed: () async {
-                        Get.back(); // close dialog first
-                        await submitInvoice(); // NOW call API!
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFD08700),
-                        foregroundColor: Colors.black,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
+                    child: Obx(() {
+                      return CustomButton(
+                        text: 'Save',
+                        loading: isLoading.value,
+                        onPressed: () async {
+                          Get.back(); // close dialog first
+                          await submitInvoice(); // NOW call API!
+                        },
                         padding: const EdgeInsets.symmetric(vertical: 14),
-                      ),
-                      child: Obx(() {
-                        if (isLoading.value) {
-                          return const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2.5,
-                              color: Colors.black,
-                            ),
-                          );
-                        }
-                        return const Text(
-                          'Save',
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        );
-                      }),
-                    ),
+                      );
+                    }),
                   ),
                 ],
               ),

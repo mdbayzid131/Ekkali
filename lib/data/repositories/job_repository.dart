@@ -8,66 +8,97 @@ class JobRepo {
 
   Future<Response> createJob({
     required String jobType,
-    required String pickupLocation,
-    String? dropoffLocation,
-    String? flightNumber,
-    String? duration,
-    String? date,
-    String? time,
-    bool? asap,
+    required String pickup,
+    required String dropoff,
     required String vehicleType,
     required double paymentAmount,
     required String paymentType,
+    required String dispatchType,
+    bool asap = false,
+    String? date,
+    String? time,
+    String? flightNumber,
     String? instruction,
-    String? driverSelection,
+    String? paymentStatus,
+    String? passengerName,
+    String? passengerPhone,
+    List<String>? targetedChauffeurs,
+    String? serviceAreaId,
+    List<String>? serviceAreaIds,
   }) async {
     final Map<String, dynamic> body = {
       "jobType": jobType,
-      "pickupLocation": pickupLocation,
+      "pickup": pickup,
+      "dropoff": dropoff,
       "vehicleType": vehicleType,
       "paymentAmount": paymentAmount,
       "paymentType": paymentType,
+      "dispatchType": dispatchType,
+      "asap": asap,
     };
 
-    if (dropoffLocation != null && dropoffLocation.isNotEmpty) {
-      body["dropoffLocation"] = dropoffLocation;
+    if (!asap) {
+      if (date != null && date.isNotEmpty) {
+        body["date"] = date;
+      }
+      if (time != null && time.isNotEmpty) {
+        body["time"] = time;
+      }
     }
-    if (duration != null && duration.isNotEmpty) {
-      body["duration"] = duration;
-    }
-    if (date != null && date.isNotEmpty) {
-      body["date"] = date;
-    }
-    if (time != null && time.isNotEmpty) {
-      body["time"] = time;
-    }
-    if (asap != null) {
-      body["asap"] = asap;
-    }
+
     if (flightNumber != null && flightNumber.isNotEmpty) {
       body["flightNumber"] = flightNumber;
     }
     if (instruction != null && instruction.isNotEmpty) {
       body["instruction"] = instruction;
     }
-    if (driverSelection != null && driverSelection.isNotEmpty) {
-      body["driverSelection"] = driverSelection;
+    if (paymentStatus != null && paymentStatus.isNotEmpty) {
+      body["paymentStatus"] = paymentStatus;
+    }
+    if (passengerName != null && passengerName.isNotEmpty) {
+      body["passengerName"] = passengerName;
+    }
+    if (passengerPhone != null && passengerPhone.isNotEmpty) {
+      body["passengerPhone"] = passengerPhone;
+    }
+    if (dispatchType == "TARGETED CHAUFFEURS" && targetedChauffeurs != null) {
+      body["targetedChauffeurs"] = targetedChauffeurs;
+    } else {
+      body["targetedChauffeurs"] = [];
+    }
+    if (dispatchType == "ALL CHAUFFEURS") {
+      if (serviceAreaIds != null && serviceAreaIds.isNotEmpty) {
+        body["serviceAreaIds"] = serviceAreaIds;
+      } else if (serviceAreaId != null && serviceAreaId.isNotEmpty) {
+        body["serviceAreaIds"] = [serviceAreaId];
+      }
     }
 
     return await apiClient.postData(ApiConstants.createJob, body);
   }
 
-  Future<Response> getJobs({int page = 1, int limit = 10}) async {
-    return await apiClient.getData(
-      ApiConstants.myJobs,
-      query: {'page': page, 'limit': limit},
-    ); // Same endpoint /jobs
+  Future<Response> getCalendarJobs({required int month, required int year}) async {
+    final Map<String, dynamic> query = {
+      'month': month,
+      'year': year,
+    };
+    return await apiClient.getData(ApiConstants.calendarJobs, query: query);
   }
 
-  Future<Response> getAllJobOffers({int page = 1, int limit = 10}) async {
+  Future<Response> getJobs({String? cursor, int limit = 10}) async {
+    final Map<String, dynamic> query = {'limit': limit};
+    if (cursor != null && cursor.isNotEmpty) {
+      query['cursor'] = cursor;
+    }
+    return await apiClient.getData(
+      ApiConstants.myJobs,
+      query: query,
+    );
+  }
+
+  Future<Response> getAllJobOffers() async {
     return await apiClient.getData(
       ApiConstants.getAllJobOffers,
-      query: {'page': page, 'limit': limit},
     );
   }
 
@@ -78,38 +109,39 @@ class JobRepo {
     );
   }
 
-  Future<Response> getPendingJobs({int page = 1, int limit = 10}) async {
+  Future<Response> getUpcomingJobs({String? cursor, int limit = 10}) async {
+    final query = <String, dynamic>{'type': 'upcoming', 'limit': limit};
+    if (cursor != null && cursor.isNotEmpty) {
+      query['cursor'] = cursor;
+    }
     return await apiClient.getData(
       ApiConstants.myRides,
-      query: {'type': 'pending', 'page': page, 'limit': limit},
+      query: query,
     );
   }
 
-  Future<Response> getUpcomingJobs({int page = 1, int limit = 10}) async {
+  Future<Response> getPastJobs({String? cursor, int limit = 10}) async {
+    final query = <String, dynamic>{'type': 'past', 'limit': limit};
+    if (cursor != null && cursor.isNotEmpty) {
+      query['cursor'] = cursor;
+    }
     return await apiClient.getData(
       ApiConstants.myRides,
-      query: {'type': 'upcoming', 'page': page, 'limit': limit},
-    );
-  }
-
-  Future<Response> getPastJobs({int page = 1, int limit = 10}) async {
-    return await apiClient.getData(
-      ApiConstants.myRides,
-      query: {'type': 'past', 'page': page, 'limit': limit},
+      query: query,
     );
   }
 
   Future<Response> rejectApplicant({required String jobId}) async {
     return await apiClient.patchData(
       ApiConstants.rejectApplicant.replaceAll('{jobId}', jobId),
-      null,
+      {},
     );
   }
 
   Future<Response> approveApplicant({required String jobId}) async {
     return await apiClient.patchData(
       ApiConstants.approveApplicant.replaceAll('{jobId}', jobId),
-      null,
+      {},
     );
   }
 
@@ -122,28 +154,77 @@ class JobRepo {
 
   Future<Response> updateJob({
     required String jobId,
-    required String pickupLocation,
-    required double paymentAmount,
-    required String instruction,
-    required String dropoffLocation,
-    required String date,
-    required String time,
-    required String vehicleType,
-    required String paymentType,
-    required String jobType,
+    String? pickupLocation,
+    double? paymentAmount,
+    String? instruction,
+    String? dropoffLocation,
+    String? date,
+    String? time,
+    String? vehicleType,
+    String? paymentType,
+    String? jobType,
+    String? flightNumber,
+    String? paymentStatus,
+    String? passengerName,
+    String? passengerPhone,
+    String? dispatchType,
+    String? serviceAreaId,
+    List<String>? serviceAreaIds,
+    List<String>? targetedChauffeurs,
+    bool asap = false,
   }) async {
-    return await apiClient
-        .patchData(ApiConstants.updateJob.replaceAll('{jobId}', jobId), {
-          "pickupLocation": pickupLocation,
-          "paymentAmount": paymentAmount,
-          "instruction": instruction,
-          "dropoffLocation": dropoffLocation,
-          "date": date,
-          "time": time,
-          "vehicleType": vehicleType,
-          "paymentType": paymentType,
-          "jobType": jobType,
-        });
+    final Map<String, dynamic> body = {};
+
+    if (pickupLocation != null) body["pickup"] = pickupLocation;
+    if (dropoffLocation != null) body["dropoff"] = dropoffLocation;
+    if (paymentAmount != null) body["paymentAmount"] = paymentAmount;
+    if (instruction != null) body["instruction"] = instruction;
+    if (vehicleType != null) body["vehicleType"] = vehicleType;
+    if (paymentType != null) body["paymentType"] = paymentType;
+    if (jobType != null) body["jobType"] = jobType;
+
+    if (!asap) {
+      if (date != null && date.isNotEmpty) {
+        body["date"] = date;
+      }
+      if (time != null && time.isNotEmpty) {
+        body["time"] = time;
+      }
+    }
+
+    if (flightNumber != null && flightNumber.isNotEmpty) {
+      body["flightNumber"] = flightNumber;
+    }
+    if (paymentStatus != null && paymentStatus.isNotEmpty) {
+      body["paymentStatus"] = paymentStatus;
+    }
+    if (passengerName != null && passengerName.isNotEmpty) {
+      body["passengerName"] = passengerName;
+    }
+    if (passengerPhone != null && passengerPhone.isNotEmpty) {
+      body["passengerPhone"] = passengerPhone;
+    }
+
+    if (dispatchType != null && dispatchType.isNotEmpty) {
+      body["dispatchType"] = dispatchType;
+      if (dispatchType == "ALL CHAUFFEURS") {
+        if (serviceAreaIds != null && serviceAreaIds.isNotEmpty) {
+          body["serviceAreaIds"] = serviceAreaIds;
+          body["serviceAreaId"] = serviceAreaIds.first;
+        } else if (serviceAreaId != null && serviceAreaId.isNotEmpty) {
+          body["serviceAreaIds"] = [serviceAreaId];
+          body["serviceAreaId"] = serviceAreaId;
+        }
+      } else if (dispatchType == "TARGETED CHAUFFEURS" &&
+          targetedChauffeurs != null) {
+        body["targetedChauffeurs"] = targetedChauffeurs;
+      }
+    }
+
+    return await apiClient.patchData(
+      ApiConstants.updateJob.replaceAll('{jobId}', jobId),
+      body,
+    );
   }
 
   Future<Response> deleteJob({required String jobId}) async {

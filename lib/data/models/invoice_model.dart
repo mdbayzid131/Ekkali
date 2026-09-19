@@ -118,6 +118,43 @@ class InvoiceModel {
   });
 
   factory InvoiceModel.fromJson(Map<String, dynamic> json) {
+    final clientMap = json['clientDetails'] as Map<String, dynamic>?;
+    final billingMap = json['billingAddress'] as Map<String, dynamic>?;
+
+    final clientNameVal = clientMap?['clientName']?.toString() ??
+        json['clientName']?.toString() ??
+        '';
+    final businessNameVal = clientMap?['businessName']?.toString() ??
+        json['businessName']?.toString() ??
+        '';
+    final emailAddressVal = clientMap?['emailAddress']?.toString() ??
+        json['emailAddress']?.toString() ??
+        '';
+    final phoneNumberVal = clientMap?['phoneNumber']?.toString() ??
+        json['phoneNumber']?.toString() ??
+        '';
+
+    final streetAddressVal = clientMap?['streetAddress']?.toString() ??
+        billingMap?['streetAddress']?.toString() ??
+        json['streetAddress']?.toString() ??
+        '';
+    final cityVal = clientMap?['city']?.toString() ??
+        billingMap?['city']?.toString() ??
+        json['city']?.toString() ??
+        '';
+    final stateVal = clientMap?['state']?.toString() ??
+        billingMap?['state']?.toString() ??
+        json['state']?.toString() ??
+        '';
+    final zipCodeVal = clientMap?['zipCode']?.toString() ??
+        billingMap?['zipCode']?.toString() ??
+        json['zipCode']?.toString() ??
+        '';
+    final countryVal = clientMap?['country']?.toString() ??
+        billingMap?['country']?.toString() ??
+        json['country']?.toString() ??
+        'United States';
+
     return InvoiceModel(
       id: json['id'] as String? ?? json['_id'] as String?,
       invoiceNumber: json['invoiceNumber'] as String?,
@@ -131,16 +168,18 @@ class InvoiceModel {
       customDueDate: json['customDueDate'] != null
           ? DateTime.tryParse(json['customDueDate'].toString())
           : null,
-      currency: json['currency'] as String?,
-      clientName: json['clientName'] as String?,
-      businessName: json['businessName'] as String?,
-      emailAddress: json['emailAddress'] as String?,
-      phoneNumber: json['phoneNumber'] as String?,
-      billingAddress: json['billingAddress'] != null
-          ? BillingAddressModel.fromJson(
-              json['billingAddress'] as Map<String, dynamic>,
-            )
-          : null,
+      currency: json['currency'] as String? ?? 'USD',
+      clientName: clientNameVal,
+      businessName: businessNameVal,
+      emailAddress: emailAddressVal,
+      phoneNumber: phoneNumberVal,
+      billingAddress: BillingAddressModel(
+        streetAddress: streetAddressVal,
+        city: cityVal,
+        state: stateVal,
+        zipCode: zipCodeVal,
+        country: countryVal,
+      ),
       description: json['description'] as String?,
       messageToClient: json['messageToClient'] as String?,
       status: json['status'] as String?,
@@ -165,16 +204,23 @@ class InvoiceModel {
       'issueDate': issueDate?.toUtc().toIso8601String() ??
           DateTime.now().toUtc().toIso8601String(),
       'dueDateType': dueDateType ?? 'on_receipt',
-      'clientName': clientName ?? '',
-      'businessName': businessName ?? '',
-      'emailAddress': emailAddress ?? '',
-      'phoneNumber': phoneNumber ?? '',
-      'billingAddress':
-          billingAddress?.toJson() ?? BillingAddressModel().toJson(),
+      'currency': currency ?? 'USD',
+      'clientDetails': {
+        'clientName': clientName ?? '',
+        'businessName': businessName ?? '',
+        'emailAddress': emailAddress ?? '',
+        'phoneNumber': phoneNumber ?? '',
+        'streetAddress': billingAddress?.streetAddress ?? '',
+        'city': billingAddress?.city ?? '',
+        'state': billingAddress?.state ?? '',
+        'zipCode': billingAddress?.zipCode ?? '',
+        'country': billingAddress?.country ?? 'United States',
+      },
       'description': description ?? '',
       'messageToClient': messageToClient ?? '',
+      'status': status ?? 'unpaid',
     };
-    if (customDueDate != null) {
+    if (dueDateType == 'custom' && customDueDate != null) {
       data['customDueDate'] = customDueDate!.toUtc().toIso8601String();
     }
     return data;

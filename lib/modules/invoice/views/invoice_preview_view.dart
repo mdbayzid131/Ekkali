@@ -1,15 +1,20 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
+import 'package:moeb_26/config/themes/app_theme.dart';
+import 'package:moeb_26/core/widgets/CustomButton.dart';
 import '../controllers/invoice_controller.dart';
 
 class InvoicePreviewView extends GetView<InvoiceController> {
-  const InvoicePreviewView({super.key});
+  final bool isFromDetail;
+
+  const InvoicePreviewView({super.key, this.isFromDetail = false});
 
   @override
   Widget build(BuildContext context) {
@@ -58,98 +63,140 @@ class InvoicePreviewView extends GetView<InvoiceController> {
                 final templateIndex = controller.selectedTemplateIndex.value;
                 final colorIndex = controller.selectedColorIndex.value;
 
-                return Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8.r),
-                    border: Border.all(
-                      color: const Color(0xFF27272A),
-                      width: 1,
-                    ),
-                  ),
-                  clipBehavior: Clip.antiAlias,
-                  child: PdfPreview(
-                    build: (format) async {
-                      final doc = pw.Document();
+                final isPaid =
+                    controller.invoiceStatus.value.toLowerCase() == 'paid';
 
-                      // Prepare logo image if available
-                      pw.ImageProvider? logoImage;
-                      final logoPath = controller.businessLogoPath.value;
-                      if (logoPath != null && logoPath.isNotEmpty) {
-                        try {
-                          if (logoPath.startsWith('http://') ||
-                              logoPath.startsWith('https://')) {
-                            logoImage = await networkImage(logoPath).timeout(
-                              const Duration(seconds: 3),
-                            );
-                          } else if (File(logoPath).existsSync()) {
-                            logoImage = pw.MemoryImage(
-                              File(logoPath).readAsBytesSync(),
-                            );
-                          }
-                        } catch (e) {
-                          debugPrint('Error loading logo: $e');
-                        }
-                      }
-
-                      final selectedColor =
-                          controller.templateColors[colorIndex];
-                      final pdfAccentColor = PdfColor.fromInt(
-                        selectedColor.value,
-                      );
-
-                      doc.addPage(
-                        pw.Page(
-                          pageFormat: PdfPageFormat.a4,
-                          margin: const pw.EdgeInsets.all(40),
-                          build: (pw.Context context) {
-                            if (templateIndex == 0) {
-                              return _buildDeltaPdfLayout(
-                                logoImage,
-                                pdfAccentColor,
-                              );
-                            } else if (templateIndex == 1) {
-                              return _buildModernPdfLayout(
-                                logoImage,
-                                pdfAccentColor,
-                              );
-                            } else if (templateIndex == 2) {
-                              return _buildSplitPdfLayout(
-                                logoImage,
-                                pdfAccentColor,
-                              );
-                            } else if (templateIndex == 3) {
-                              return _buildMinimalPdfLayout(
-                                logoImage,
-                                pdfAccentColor,
-                              );
-                            } else if (templateIndex == 4) {
-                              return _buildCorporatePdfLayout(
-                                logoImage,
-                                pdfAccentColor,
-                              );
-                            } else {
-                              return _buildDeltaPdfLayout(
-                                logoImage,
-                                pdfAccentColor,
-                              );
-                            }
-                          },
+                return Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8.r),
+                        border: Border.all(
+                          color: const Color(0xFF27272A),
+                          width: 1,
                         ),
-                      );
-                      return doc.save();
-                    },
-                    useActions: false,
-                    allowPrinting: false,
-                    allowSharing: false,
-                    canChangePageFormat: false,
-                    canChangeOrientation: false,
-                    canDebug: false,
-                    loadingWidget: const Center(
-                      child: CircularProgressIndicator(
-                        color: Color(0xFFD08700),
+                      ),
+                      clipBehavior: Clip.antiAlias,
+                      child: PdfPreview(
+                        build: (format) async {
+                          final doc = pw.Document();
+
+                          // Prepare logo image if available
+                          pw.ImageProvider? logoImage;
+                          final logoPath = controller.businessLogoPath.value;
+                          if (logoPath != null && logoPath.isNotEmpty) {
+                            try {
+                              if (logoPath.startsWith('http://') ||
+                                  logoPath.startsWith('https://')) {
+                                logoImage = await networkImage(
+                                  logoPath,
+                                ).timeout(const Duration(seconds: 3));
+                              } else if (File(logoPath).existsSync()) {
+                                logoImage = pw.MemoryImage(
+                                  File(logoPath).readAsBytesSync(),
+                                );
+                              }
+                            } catch (e) {
+                              debugPrint('Error loading logo: $e');
+                            }
+                          }
+
+                          // Prepare paid stamp image if invoice is paid
+                          pw.ImageProvider? paidStampImage;
+                          if (isPaid) {
+                            try {
+                              final bytes = await rootBundle.load(
+                                'assets/images/paid_stamp.png',
+                              );
+                              paidStampImage = pw.MemoryImage(
+                                bytes.buffer.asUint8List(),
+                              );
+                            } catch (e) {
+                              debugPrint('Error loading paid stamp image: $e');
+                            }
+                          }
+
+                          final selectedColor =
+                              controller.templateColors[colorIndex];
+                          final pdfAccentColor = PdfColor.fromInt(
+                            selectedColor.value,
+                          );
+
+                          doc.addPage(
+                            pw.Page(
+                              pageFormat: PdfPageFormat.a4,
+                              margin: const pw.EdgeInsets.all(40),
+                              build: (pw.Context context) {
+                                pw.Widget pdfLayout;
+                                if (templateIndex == 0) {
+                                  pdfLayout = _buildDeltaPdfLayout(
+                                    logoImage,
+                                    pdfAccentColor,
+                                  );
+                                } else if (templateIndex == 1) {
+                                  pdfLayout = _buildModernPdfLayout(
+                                    logoImage,
+                                    pdfAccentColor,
+                                  );
+                                } else if (templateIndex == 2) {
+                                  pdfLayout = _buildSplitPdfLayout(
+                                    logoImage,
+                                    pdfAccentColor,
+                                  );
+                                } else if (templateIndex == 3) {
+                                  pdfLayout = _buildMinimalPdfLayout(
+                                    logoImage,
+                                    pdfAccentColor,
+                                  );
+                                } else if (templateIndex == 4) {
+                                  pdfLayout = _buildCorporatePdfLayout(
+                                    logoImage,
+                                    pdfAccentColor,
+                                  );
+                                } else {
+                                  pdfLayout = _buildDeltaPdfLayout(
+                                    logoImage,
+                                    pdfAccentColor,
+                                  );
+                                }
+
+                                if (paidStampImage != null) {
+                                  return pw.Stack(
+                                    children: [
+                                      pdfLayout,
+                                      pw.Positioned(
+                                        bottom: 75,
+                                        right: 150,
+                                        child: pw.Image(
+                                          paidStampImage,
+                                          height: 130,
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                }
+
+                                return pdfLayout;
+                              },
+                            ),
+                          );
+                          return doc.save();
+                        },
+                        useActions: false,
+                        allowPrinting: false,
+                        allowSharing: false,
+                        canChangePageFormat: false,
+                        canChangeOrientation: false,
+                        canDebug: false,
+                        loadingWidget: const Center(
+                          child: CircularProgressIndicator(
+                            color: AppColors.primaryColor,
+                          ),
+                        ),
                       ),
                     ),
-                  ),
+                  ],
                 );
               }),
             ),
@@ -181,41 +228,12 @@ class InvoicePreviewView extends GetView<InvoiceController> {
             color: Colors.black,
             border: Border(top: BorderSide(color: Color(0xFF1E1E1E), width: 1)),
           ),
-          child: GestureDetector(
-            onTap: () => _downloadPdf(context),
-            child: Container(
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: const Color(0xFFD08700), // Bright orange-yellow
-                borderRadius: BorderRadius.circular(12.r),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFFD08700).withValues(alpha: 0.15),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Obx(() {
-                if (controller.isLoading.value) {
-                  return SizedBox(
-                    width: 20.w,
-                    height: 20.w,
-                    child: const CircularProgressIndicator(
-                      strokeWidth: 2.5,
-                      color: Colors.black,
-                    ),
-                  );
-                }
-                return Text(
-                  'Send Invoice',
-                  style: GoogleFonts.inter(
-                    color: Colors.black,
-                    fontSize: 15.sp,
-                    fontWeight: FontWeight.bold,
-                  ),
-                );
-              }),
+          child: Obx(
+            () => CustomButton(
+              text: 'Send Invoice',
+              loading: controller.isLoading.value,
+              onPressed: () => _downloadPdf(context),
+              padding: EdgeInsets.symmetric(vertical: 12.h),
             ),
           ),
         ),
@@ -260,7 +278,7 @@ class InvoicePreviewView extends GetView<InvoiceController> {
                   borderRadius: BorderRadius.circular(12.r),
                   border: Border.all(
                     color: isSelected
-                        ? const Color(0xFFD08700) // Bright orange-yellow
+                        ? AppColors.primaryColor
                         : const Color(0xFF27272A),
                     width: isSelected ? 1.w : .5.w,
                   ),
@@ -459,21 +477,33 @@ class InvoicePreviewView extends GetView<InvoiceController> {
   void _downloadPdf(BuildContext context) async {
     final doc = pw.Document();
 
+    final isPaid = controller.invoiceStatus.value.toLowerCase() == 'paid';
+
     // Prepare logo image if available
     pw.ImageProvider? logoImage;
     final logoPath = controller.businessLogoPath.value;
     if (logoPath != null && logoPath.isNotEmpty) {
       try {
-        if (logoPath.startsWith('http://') ||
-            logoPath.startsWith('https://')) {
-          logoImage = await networkImage(logoPath).timeout(
-                              const Duration(seconds: 3),
-                            );
+        if (logoPath.startsWith('http://') || logoPath.startsWith('https://')) {
+          logoImage = await networkImage(
+            logoPath,
+          ).timeout(const Duration(seconds: 3));
         } else if (File(logoPath).existsSync()) {
           logoImage = pw.MemoryImage(File(logoPath).readAsBytesSync());
         }
       } catch (e) {
         debugPrint('Error loading logo: $e');
+      }
+    }
+
+    // Prepare paid stamp image if invoice is paid
+    pw.ImageProvider? paidStampImage;
+    if (isPaid) {
+      try {
+        final bytes = await rootBundle.load('assets/images/paid_stamp.png');
+        paidStampImage = pw.MemoryImage(bytes.buffer.asUint8List());
+      } catch (e) {
+        debugPrint('Error loading paid stamp image: $e');
       }
     }
 
@@ -487,19 +517,35 @@ class InvoicePreviewView extends GetView<InvoiceController> {
         pageFormat: PdfPageFormat.a4,
         margin: const pw.EdgeInsets.all(40),
         build: (pw.Context context) {
+          pw.Widget pdfLayout;
           if (templateIndex == 0) {
-            return _buildDeltaPdfLayout(logoImage, pdfAccentColor);
+            pdfLayout = _buildDeltaPdfLayout(logoImage, pdfAccentColor);
           } else if (templateIndex == 1) {
-            return _buildModernPdfLayout(logoImage, pdfAccentColor);
+            pdfLayout = _buildModernPdfLayout(logoImage, pdfAccentColor);
           } else if (templateIndex == 2) {
-            return _buildSplitPdfLayout(logoImage, pdfAccentColor);
+            pdfLayout = _buildSplitPdfLayout(logoImage, pdfAccentColor);
           } else if (templateIndex == 3) {
-            return _buildMinimalPdfLayout(logoImage, pdfAccentColor);
+            pdfLayout = _buildMinimalPdfLayout(logoImage, pdfAccentColor);
           } else if (templateIndex == 4) {
-            return _buildCorporatePdfLayout(logoImage, pdfAccentColor);
+            pdfLayout = _buildCorporatePdfLayout(logoImage, pdfAccentColor);
           } else {
-            return _buildDeltaPdfLayout(logoImage, pdfAccentColor);
+            pdfLayout = _buildDeltaPdfLayout(logoImage, pdfAccentColor);
           }
+
+          if (paidStampImage != null) {
+            return pw.Stack(
+              children: [
+                pdfLayout,
+                pw.Positioned(
+                  bottom: 75,
+                  right: 80,
+                  child: pw.Image(paidStampImage, height: 130),
+                ),
+              ],
+            );
+          }
+
+          return pdfLayout;
         },
       ),
     );
@@ -513,8 +559,11 @@ class InvoicePreviewView extends GetView<InvoiceController> {
           'invoice_${controller.invoiceNumberController.text.isNotEmpty ? controller.invoiceNumberController.text.replaceAll(RegExp(r'\s+'), '_') : "999"}.pdf',
     );
 
-    // Show confirm dialog to user FIRST
-    controller.showSaveConfirmDialog();
+    // If opened from Create/Edit flow: show Save/Delete confirmation popup
+    // If opened from InvoiceDetailView (view only): DO NOT show popup dialog
+    if (!isFromDetail) {
+      controller.showSaveConfirmDialog();
+    }
   }
 
   // PDF LAYOUT 0: Delta (Classic)

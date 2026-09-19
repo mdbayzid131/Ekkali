@@ -17,17 +17,19 @@ class ExpenseService extends GetxService {
     return this;
   }
 
-  /// Fetch list of expenses with optional date range filters
+  /// Fetch list of expenses with optional date range filters and cursor pagination
   Future<Response> fetchExpenses({
     DateTime? startDate,
     DateTime? endDate,
-    int page = 1,
+    String? cursor,
     int limit = 1000,
   }) async {
     final Map<String, dynamic> query = {
-      'page': page,
       'limit': limit,
     };
+    if (cursor != null && cursor.isNotEmpty) {
+      query['cursor'] = cursor;
+    }
     if (startDate != null) {
       query['startDate'] = startDate.toUtc().toIso8601String();
     }

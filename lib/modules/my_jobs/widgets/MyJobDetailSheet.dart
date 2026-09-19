@@ -1,9 +1,14 @@
+// ignore: file_names
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:moeb_26/config/constants/icon_paths.dart';
+import 'package:moeb_26/config/routes/app_pages.dart';
+import 'package:moeb_26/config/themes/app_theme.dart';
+import 'package:moeb_26/core/widgets/CustomButton.dart';
+import 'package:moeb_26/modules/preferred_drivers/controllers/preferred_drivers_controller.dart';
 
 class MyJobDetailSheet extends StatelessWidget {
   final String title;
@@ -15,6 +20,9 @@ class MyJobDetailSheet extends StatelessWidget {
   final String? dropoffNotes;
   final String passengerName;
   final String driverName;
+  final String? driverId;
+  final String? driverImage;
+  final double? driverRating;
   final String vehicleInfo;
   final String vehicleType;
   final String? paymentType;
@@ -22,6 +30,8 @@ class MyJobDetailSheet extends StatelessWidget {
   final String? flightNumber;
   final String? specialInstructions;
   final String status;
+  final bool isReviewedByCreator;
+  final bool hasApplicant;
   final String? actionButtonText;
   final VoidCallback? onActionButtonPressed;
   final VoidCallback? onAcceptPressed;
@@ -30,6 +40,7 @@ class MyJobDetailSheet extends StatelessWidget {
   final VoidCallback? onReviewPressed;
   final VoidCallback? onEditPressed;
   final VoidCallback? onDeletePressed;
+  final VoidCallback? onDriverPressed;
 
   const MyJobDetailSheet({
     super.key,
@@ -42,6 +53,9 @@ class MyJobDetailSheet extends StatelessWidget {
     this.dropoffNotes,
     required this.passengerName,
     required this.driverName,
+    this.driverId,
+    this.driverImage,
+    this.driverRating,
     required this.vehicleInfo,
     required this.vehicleType,
     this.paymentType,
@@ -49,6 +63,8 @@ class MyJobDetailSheet extends StatelessWidget {
     this.flightNumber,
     this.specialInstructions,
     required this.status,
+    this.isReviewedByCreator = false,
+    this.hasApplicant = false,
     this.actionButtonText,
     this.onActionButtonPressed,
     this.onAcceptPressed,
@@ -57,6 +73,7 @@ class MyJobDetailSheet extends StatelessWidget {
     this.onReviewPressed,
     this.onEditPressed,
     this.onDeletePressed,
+    this.onDriverPressed,
   });
 
   @override
@@ -98,18 +115,27 @@ class MyJobDetailSheet extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  title,
-                  style: GoogleFonts.outfit(
-                    color: Colors.white,
-                    fontSize: 20.sp,
-                    fontWeight: FontWeight.bold,
+                Expanded(
+                  child: Text(
+                    title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.outfit(
+                      color: Colors.white,
+                      fontSize: 20.sp,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
+                SizedBox(width: 8.w),
                 Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     if (canEdit) ...[
                       IconButton(
+                        visualDensity: VisualDensity.compact,
+                        padding: EdgeInsets.all(6.r),
+                        constraints: const BoxConstraints(),
                         onPressed: onEditPressed,
                         icon: SvgPicture.asset(
                           AppIcons.edit_icon_myjob,
@@ -121,9 +147,13 @@ class MyJobDetailSheet extends StatelessWidget {
                           ),
                         ),
                       ),
+                      SizedBox(width: 4.w),
                     ],
                     if (canDelete) ...[
                       IconButton(
+                        visualDensity: VisualDensity.compact,
+                        padding: EdgeInsets.all(6.r),
+                        constraints: const BoxConstraints(),
                         onPressed: onDeletePressed,
                         icon: SvgPicture.asset(
                           AppIcons.deletemyjob_icon,
@@ -135,8 +165,12 @@ class MyJobDetailSheet extends StatelessWidget {
                           ),
                         ),
                       ),
+                      SizedBox(width: 4.w),
                     ],
                     IconButton(
+                      visualDensity: VisualDensity.compact,
+                      padding: EdgeInsets.all(6.r),
+                      constraints: const BoxConstraints(),
                       onPressed: () => Get.back(),
                       icon: Icon(
                         Icons.close_rounded,
@@ -298,77 +332,142 @@ class MyJobDetailSheet extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
-                        children: [
-                          Container(
-                            padding: EdgeInsets.all(8.r),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF1C1C1F),
-                              borderRadius: BorderRadius.circular(8.r),
-                              border: Border.all(
-                                color: const Color(0xFF2A2A32),
-                                width: 1,
-                              ),
-                            ),
-                            child: Icon(
-                              status == 'PENDING'
-                                  ? Icons.person_outline
-                                  : Icons.directions_car_outlined,
-                              color: const Color(0xFFFEDB9B),
-                              size: 20.sp,
-                            ),
-                          ),
-                          SizedBox(width: 12.w),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                      Expanded(
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: () {
+                            if (onDriverPressed != null) {
+                              onDriverPressed!();
+                            } else if (driverId != null &&
+                                driverId!.isNotEmpty) {
+                              final preferredController =
+                                  Get.isRegistered<PreferredDriversController>()
+                                      ? Get.find<PreferredDriversController>()
+                                      : Get.put(PreferredDriversController());
+
+                              preferredController.openChauffeurProfile(
+                                userId: driverId!,
+                                name: driverName,
+                                imageUrl: driverImage ?? '',
+                              );
+                            }
+                          },
+                          child: Row(
                             children: [
-                              Text(
-                                "CHAUFFEUR",
-                                style: GoogleFonts.inter(
-                                  color: const Color(0xFF94A3B8),
-                                  fontSize: 9.sp,
-                                  fontWeight: FontWeight.bold,
-                                  letterSpacing: 1.0,
+                              Container(
+                                width: 40.r,
+                                height: 40.r,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: const Color(0xFF1C1C1F),
+                                  border: Border.all(
+                                    color: const Color(0xFF2A2A32),
+                                    width: 1,
+                                  ),
+                                ),
+                                child: ClipOval(
+                                  child: (driverImage != null &&
+                                          driverImage!.trim().isNotEmpty)
+                                      ? (driverImage!.startsWith('http')
+                                          ? Image.network(
+                                              driverImage!,
+                                              fit: BoxFit.cover,
+                                              errorBuilder: (_, __, ___) => Icon(
+                                                Icons.person_outline,
+                                                color: const Color(0xFFFEDB9B),
+                                                size: 20.sp,
+                                              ),
+                                            )
+                                          : Image.asset(
+                                              driverImage!,
+                                              fit: BoxFit.cover,
+                                              errorBuilder: (_, __, ___) => Icon(
+                                                Icons.person_outline,
+                                                color: const Color(0xFFFEDB9B),
+                                                size: 20.sp,
+                                              ),
+                                            ))
+                                      : Icon(
+                                          status == 'PENDING'
+                                              ? Icons.person_outline
+                                              : Icons.directions_car_outlined,
+                                          color: const Color(0xFFFEDB9B),
+                                          size: 20.sp,
+                                        ),
                                 ),
                               ),
-                              SizedBox(height: 2.h),
-                              Text(
-                                (driverName.isNotEmpty &&
-                                        driverName != '1 Applicant Available')
-                                    ? driverName
-                                    : "Mohamed El Bakkali",
-                                style: GoogleFonts.inter(
-                                  color: Colors.white,
-                                  fontSize: 14.sp,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              if (status == 'PENDING' ||
-                                  status == 'ASSIGNED') ...[
-                                SizedBox(height: 2.h),
-                                Row(
+                              SizedBox(width: 12.w),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Icon(
-                                      Icons.star,
-                                      color: const Color(0xFFFEDB9B),
-                                      size: 12.sp,
+                                    Row(
+                                      children: [
+                                        Text(
+                                          "CHAUFFEUR",
+                                          style: GoogleFonts.inter(
+                                            color: const Color(0xFF94A3B8),
+                                            fontSize: 9.sp,
+                                            fontWeight: FontWeight.bold,
+                                            letterSpacing: 1.0,
+                                          ),
+                                        ),
+                                        if ((driverId != null &&
+                                                driverId!.isNotEmpty) ||
+                                            onDriverPressed != null) ...[
+                                          SizedBox(width: 4.w),
+                                          Icon(
+                                            Icons.arrow_forward_ios_rounded,
+                                            color: const Color(0xFF94A3B8),
+                                            size: 8.sp,
+                                          ),
+                                        ],
+                                      ],
                                     ),
-                                    SizedBox(width: 4.w),
+                                    SizedBox(height: 2.h),
                                     Text(
-                                      "4.9",
+                                      driverName.isNotEmpty
+                                          ? driverName
+                                          : "Not Assigned",
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                       style: GoogleFonts.inter(
-                                        color: Colors.white70,
-                                        fontSize: 11.sp,
+                                        color: Colors.white,
+                                        fontSize: 14.sp,
+                                        fontWeight: FontWeight.w600,
                                       ),
                                     ),
+                                    if (driverRating != null &&
+                                        driverRating! > 0) ...[
+                                      SizedBox(height: 2.h),
+                                      Row(
+                                        children: [
+                                          Icon(
+                                            Icons.star,
+                                            color: const Color(0xFFFEDB9B),
+                                            size: 12.sp,
+                                          ),
+                                          SizedBox(width: 4.w),
+                                          Text(
+                                            driverRating!.toStringAsFixed(1),
+                                            style: GoogleFonts.inter(
+                                              color: Colors.white70,
+                                              fontSize: 11.sp,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
                                   ],
                                 ),
-                              ],
+                              ),
                             ],
                           ),
-                        ],
+                        ),
                       ),
-                      if (onChatPressed != null) ...[
+                      if (onChatPressed != null &&
+                          (currentStatus != 'PENDING' || hasApplicant)) ...[
+                        SizedBox(width: 8.w),
                         InkWell(
                           onTap: () {
                             Get.back();
@@ -431,14 +530,19 @@ class MyJobDetailSheet extends StatelessWidget {
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                      Text(
-                        (paymentType != null && paymentType!.isNotEmpty)
-                            ? paymentType!
-                            : "Credit Card on File",
-                        style: GoogleFonts.inter(
-                          color: Colors.white,
-                          fontSize: 13.sp,
-                          fontWeight: FontWeight.bold,
+                      SizedBox(width: 8.w),
+                      Flexible(
+                        child: Text(
+                          (paymentType != null && paymentType!.isNotEmpty)
+                              ? paymentType!
+                              : "Credit Card on File",
+                          textAlign: TextAlign.end,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.inter(
+                            color: Colors.white,
+                            fontSize: 13.sp,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ],
@@ -455,14 +559,19 @@ class MyJobDetailSheet extends StatelessWidget {
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                      Text(
-                        (flightNumber != null && flightNumber!.isNotEmpty)
-                            ? flightNumber!
-                            : "N/A",
-                        style: GoogleFonts.inter(
-                          color: Colors.white,
-                          fontSize: 13.sp,
-                          fontWeight: FontWeight.bold,
+                      SizedBox(width: 8.w),
+                      Flexible(
+                        child: Text(
+                          (flightNumber != null && flightNumber!.isNotEmpty)
+                              ? flightNumber!
+                              : "N/A",
+                          textAlign: TextAlign.end,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.inter(
+                            color: Colors.white,
+                            fontSize: 13.sp,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ],
@@ -502,190 +611,166 @@ class MyJobDetailSheet extends StatelessWidget {
               ),
             ),
 
-            // Section 4: Action Buttons (Accept/Reject for PENDING, Ride Progress for ASSIGNED, Review for COMPLETED)
+            // Section 4: Action Buttons (Accept/Reject for PENDING with Applicant, Ride Progress for ASSIGNED, Review for COMPLETED)
             if (status == 'PENDING') ...[
-              SizedBox(height: 20.h),
-              Row(
-                children: [
-                  Expanded(
-                    child: SizedBox(
-                      height: 50.h,
-                      child: OutlinedButton(
-                        style: OutlinedButton.styleFrom(
-                          side: const BorderSide(
-                            color: Colors.redAccent,
-                            width: 1.5,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14.r),
-                          ),
-                        ),
-                        onPressed: () {
-                          Get.back();
-                          onRejectPressed?.call();
-                        },
-                        child: Text(
-                          "Decline",
-                          style: GoogleFonts.inter(
-                            color: Colors.redAccent,
-                            fontSize: 14.sp,
-                            fontWeight: FontWeight.bold,
-                          ),
+              if (hasApplicant && onAcceptPressed != null) ...[
+                SizedBox(height: 20.h),
+                Row(
+                  children: [
+                    if (onRejectPressed != null) ...[
+                      Expanded(
+                        child: CustomButton(
+                          text: "Decline",
+                          backgroundColor: Colors.transparent,
+                          textColor: Colors.redAccent,
+                          borderColor: Colors.redAccent,
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.bold,
+                          onPressed: () {
+                            Get.back();
+                            onRejectPressed?.call();
+                          },
+                          padding: EdgeInsets.symmetric(vertical: 14.h),
                         ),
                       ),
-                    ),
-                  ),
-                  SizedBox(width: 12.w),
-                  Expanded(
-                    flex: 2,
-                    child: SizedBox(
-                      height: 50.h,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFD08700),
-                          foregroundColor: Colors.black,
-                          elevation: 2,
-                          shadowColor: const Color(
-                            0xFFD08700,
-                          ).withValues(alpha: 0.3),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14.r),
-                          ),
+                      SizedBox(width: 12.w),
+                    ],
+                    Expanded(
+                      flex: 2,
+                      child: CustomButton(
+                        text: "Accept",
+                        icon: Icon(
+                          Icons.check_circle_outline,
+                          size: 18.sp,
+                          color: Colors.black,
                         ),
                         onPressed: () {
                           Get.back();
                           onAcceptPressed?.call();
                         },
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.check_circle_outline,
-                              size: 18.sp,
-                              color: Colors.black,
-                            ),
-                            SizedBox(width: 6.w),
-                            Text(
-                              "Accept",
-                              style: GoogleFonts.inter(
-                                fontSize: 13.sp,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
                       ),
                     ),
+                  ],
+                ),
+              ] else ...[
+                SizedBox(height: 16.h),
+                Container(
+                  width: double.infinity,
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF141416),
+                    borderRadius: BorderRadius.circular(12.r),
+                    border: Border.all(color: const Color(0xFF24242A)),
                   ),
-                ],
-              ),
-            ] else if (status == 'ASSIGNED') ...[
-              SizedBox(height: 20.h),
-              SizedBox(
-                width: double.infinity,
-                height: 52.h,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFD08700),
-                    foregroundColor: Colors.black,
-                    elevation: 2,
-                    shadowColor: const Color(0xFFD08700).withValues(alpha: 0.3),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16.r),
-                    ),
-                  ),
-                  onPressed: () {
-                    Get.back();
-                    onActionButtonPressed?.call();
-                  },
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(
-                        Icons.navigation_outlined,
+                        Icons.hourglass_empty_rounded,
+                        color: const Color(0xFFFEDB9B),
                         size: 18.sp,
-                        color: Colors.black,
                       ),
-                      SizedBox(width: 8.w),
-                      Text(
-                        "View Ride Progress",
-                        style: GoogleFonts.inter(
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.bold,
+                      SizedBox(width: 10.w),
+                      Expanded(
+                        child: Text(
+                          "Awaiting Chauffeur Application — You will be able to review and approve drivers once they apply.",
+                          style: GoogleFonts.inter(
+                            color: const Color(0xFF94A3B8),
+                            fontSize: 12.sp,
+                            height: 1.35,
+                          ),
                         ),
                       ),
                     ],
                   ),
                 ),
-              ),
-            ] else if (status == 'COMPLETED') ...[
+              ],
+            ] else if (status == 'ASSIGNED') ...[
               SizedBox(height: 20.h),
-              SizedBox(
-                width: double.infinity,
-                height: 52.h,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF22C55E),
-                    foregroundColor: Colors.white,
-                    elevation: 2,
-                    shadowColor: const Color(0xFF22C55E).withValues(alpha: 0.3),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16.r),
-                    ),
+              CustomButton(
+                text: "View Ride Progress",
+                // backgroundColor: const Color(0xFFD08700),
+                // textColor: Colors.black,
+                // fontSize: 14.sp,
+                // fontWeight: FontWeight.bold,
+                icon: Icon(
+                  Icons.navigation_outlined,
+                  size: 18.sp,
+                  color: Colors.black,
+                ),
+                onPressed: () {
+                  Get.back();
+                  onActionButtonPressed?.call();
+                },
+                padding: EdgeInsets.symmetric(vertical: 16.h),
+              ),
+            ] else if (currentStatus == 'COMPLETED' || currentStatus == 'FINISHED') ...[
+              if (!isReviewedByCreator) ...[
+                SizedBox(height: 20.h),
+                CustomButton(
+                  text: "Rate & Review",
+                  backgroundColor: AppColors.primaryColor,
+                  textColor: Colors.black,
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.bold,
+                  icon: Icon(
+                    Icons.star_outline_rounded,
+                    size: 18.sp,
+                    color: Colors.black,
                   ),
                   onPressed: () {
                     Get.back();
                     onReviewPressed?.call();
                   },
+                  padding: EdgeInsets.symmetric(vertical: 16.h),
+                ),
+              ] else ...[
+                SizedBox(height: 20.h),
+                Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.symmetric(vertical: 14.h, horizontal: 16.w),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF10B981).withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(14.r),
+                    border: Border.all(
+                      color: const Color(0xFF10B981).withValues(alpha: 0.3),
+                    ),
+                  ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(
-                        Icons.star_outline_rounded,
-                        size: 18.sp,
-                        color: Colors.white,
+                      const Icon(
+                        Icons.star_rounded,
+                        color: Color(0xFF10B981),
+                        size: 20,
                       ),
                       SizedBox(width: 8.w),
                       Text(
-                        "Rate & Review Driver",
+                        "Review Submitted",
                         style: GoogleFonts.inter(
+                          color: const Color(0xFF10B981),
                           fontSize: 14.sp,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ],
                   ),
                 ),
-              ),
+              ],
             ] else if (actionButtonText != null &&
                 onActionButtonPressed != null) ...[
               SizedBox(height: 20.h),
-              SizedBox(
-                width: double.infinity,
-                height: 52.h,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFD08700),
-                    foregroundColor: Colors.black,
-                    elevation: 2,
-                    shadowColor: const Color(0xFFD08700).withValues(alpha: 0.3),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16.r),
-                    ),
-                  ),
-                  onPressed: () {
-                    Get.back();
-                    onActionButtonPressed!();
-                  },
-                  child: Text(
-                    actionButtonText!,
-                    style: GoogleFonts.inter(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                ),
+              CustomButton(
+                text: actionButtonText!,
+                backgroundColor: const Color(0xFFD08700),
+                textColor: Colors.black,
+                fontSize: 14.sp,
+                fontWeight: FontWeight.bold,
+                onPressed: () {
+                  Get.back();
+                  onActionButtonPressed!();
+                },
+                padding: EdgeInsets.symmetric(vertical: 16.h),
               ),
             ],
           ],

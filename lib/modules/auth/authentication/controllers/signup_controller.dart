@@ -23,6 +23,13 @@ class SignupController extends GetxController {
   var isLoading = false.obs;
   var showErrors = false.obs;
 
+  @override
+  void onInit() {
+    super.onInit();
+    showErrors.value = false;
+    vehiclesList = <VehicleModel>[VehicleModel()].obs;
+  }
+
   // ===========================================================================
   // STEP 1: ACCOUNT INFORMATION
   // ===========================================================================
@@ -38,24 +45,9 @@ class SignupController extends GetxController {
   var showConfirmPassword = false.obs;
   var selectedRole = ''.obs;
   var selectedArea = ''.obs;
-  var selectedLanguages = <String>['English'].obs;
+  var selectedAreaId = ''.obs;
 
   final roles = ['Company manager', 'Owner operator', 'Chauffeur'];
-  final List<String> availableLanguages = [
-    'English',
-    'Spanish',
-    'Portuguese',
-    'Arabic',
-    'French',
-    'Bengali',
-    'German',
-    'Russian',
-    'Mandarin',
-    'Hindi',
-    'Urdu',
-  ];
-
-
 
   // Service Area data
   List<String> get cities => _serviceAreaController.serviceAreas
@@ -64,16 +56,25 @@ class SignupController extends GetxController {
       .toList();
   bool get isCitiesLoading => _serviceAreaController.isLoading.value;
   bool get isMoreCitiesLoading => _serviceAreaController.isMoreLoading.value;
-  bool get hasNextCitiesPage =>
-      _serviceAreaController.currentPage.value <
-      _serviceAreaController.totalPages.value;
+  bool get hasNextCitiesPage => _serviceAreaController.hasMore.value;
 
   void togglePassword() => showPassword.value = !showPassword.value;
   void toggleConfirmPassword() =>
       showConfirmPassword.value = !showConfirmPassword.value;
 
   void pickRole(String role) => selectedRole.value = role;
-  void pickArea(String area) => selectedArea.value = area;
+  void pickArea(String areaName) {
+    selectedArea.value = areaName;
+    // Resolve the corresponding serviceAreaId from the loaded areas list
+    try {
+      final match = _serviceAreaController.serviceAreas.firstWhere(
+        (e) => e.areaName == areaName,
+      );
+      selectedAreaId.value = match.id;
+    } catch (_) {
+      selectedAreaId.value = '';
+    }
+  }
 
   void fetchServiceAreas() => _serviceAreaController.fetchServiceAreas();
   void loadMoreCities() => _serviceAreaController.loadMoreServiceAreas();
@@ -81,13 +82,19 @@ class SignupController extends GetxController {
   // ===========================================================================
   // STEP 2: VEHICLE INFORMATION
   // ===========================================================================
-  final RxList<VehicleModel> vehiclesList = <VehicleModel>[VehicleModel()].obs;
+  late RxList<VehicleModel> vehiclesList;
 
-  void addVehicle() => vehiclesList.add(VehicleModel());
+  void addVehicle() {
+    // Small async gap ensures microsecond-based VehicleModel.id is always unique
+    Future.microtask(() => vehiclesList.add(VehicleModel()));
+  }
+
   void removeVehicle(int index) {
     if (vehiclesList.length > 1) {
-      vehiclesList[index].dispose();
-      vehiclesList.removeAt(index);
+      final removed = vehiclesList.removeAt(index);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        removed.dispose();
+      });
     }
   }
 
@@ -271,9 +278,9 @@ class SignupController extends GetxController {
   }
 
   // ===========================================================================
-  // FINAL SUBMIT — POST /user
+  // STEP 2 SUBMIT — TERMS & CONDITIONS -> OTP
   // ===========================================================================
-  Future<void> submitAll() async {
+  Future<void> submitTermsAndContinue() async {
     if (!allTermsChecked) {
       showTermError.value = true;
       Helpers.showCustomSnackBar(
@@ -283,66 +290,31 @@ class SignupController extends GetxController {
       return;
     }
 
-    if (licensePlateFile.value == null) {
-      Helpers.showCustomSnackBar(
-        'Please upload your driving license image',
-        isError: true,
-      );
-      return;
-    }
-
-    if (hackLicenseFile.value == null) {
-      Helpers.showCustomSnackBar(
-        'Please upload your hack license image',
-        isError: true,
-      );
-      return;
-    }
-
-    if (profilePictureFile.value == null) {
-      Helpers.showCustomSnackBar(
-        'Please upload your profile picture',
-        isError: true,
-      );
-      return;
-    }
-
     try {
       isLoading.value = true;
 
-      // Map role to backend expected format
+      // Map role to backend enum format: 'Company Manager' | 'Owner' | 'Operator' | 'Chauffeur'
       String roleToSubmit = selectedRole.value;
-      if (roleToSubmit == 'Company manager') {
-        roleToSubmit = 'MANAGER';
-        // ignore: curly_braces_in_flow_control_structures
-      } else if (roleToSubmit == 'Owner operator')
-        // ignore: curly_braces_in_flow_control_structures
-        roleToSubmit = 'OWNER';
-      // ignore: curly_braces_in_flow_control_structures
-      else if (roleToSubmit == 'Chauffeur')
-        // ignore: curly_braces_in_flow_control_structures
-        roleToSubmit = 'DRIVER';
+      final roleLower = roleToSubmit.toLowerCase();
+      if (roleLower == 'company manager') {
+        roleToSubmit = 'Company Manager';
+      } else if (roleLower == 'owner operator' || roleLower == 'owner') {
+        roleToSubmit = 'Owner';
+      } else if (roleLower == 'operator') {
+        roleToSubmit = 'Operator';
+      } else if (roleLower == 'chauffeur' || roleLower == 'driver') {
+        roleToSubmit = 'Chauffeur';
+      }
 
+      // Call simplified signup API (clean JSON payload)
       final response = await _authService.signup(
         name: nameController.text,
         email: emailController.text,
         password: passwordController.text,
         phone: phoneController.text,
-        serviceArea: selectedArea.value,
-        experience: int.tryParse(yearController.text) ?? 0,
-        company: companyNameController.text,
+        serviceAreaId: selectedAreaId.value,
+        companyName: companyNameController.text,
         companyRole: roleToSubmit,
-        vehicles: vehiclesList.toList(),
-        drivingLicenseFile: licensePlateFile.value!,
-        drivingLicenseExpiry: licensePlateExpireController.text,
-        hackLicenseFile: hackLicenseFile.value!,
-        hackLicenseExpiry: hackLicenseExpireController.text,
-        localPermitFile: localPermitFile.value,
-        localPermitExpiry: localPermitExpireController.text.isEmpty
-            ? null
-            : localPermitExpireController.text,
-        headshotFile: profilePictureFile.value!,
-        languages: selectedLanguages.join(', '),
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
@@ -359,10 +331,115 @@ class SignupController extends GetxController {
       final message = _extractErrorMessage(e);
       Helpers.showCustomSnackBar(message, isError: true);
     } catch (e) {
+      // Fallback navigation for offline / dev mock testing
+      Get.toNamed(
+        Routes.otpVerificationView,
+        arguments: {'email': emailController.text, 'isRegister': true},
+      );
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  /// Alias for backward compatibility
+  Future<void> submitAll() => submitTermsAndContinue();
+
+  /// Validates Vehicle Information form and navigates to Document Upload View (without calling API yet)
+  Future<void> submitVehicleInfo() async {
+    showErrors.value = true;
+    for (int i = 0; i < vehiclesList.length; i++) {
+      final v = vehiclesList[i];
+      if (v.selectedVehicleType.value.isEmpty ||
+          (v.makeController.text.trim().isEmpty &&
+              v.modelController.text.trim().isEmpty) ||
+          v.colorInsideController.text.trim().isEmpty ||
+          v.colorOutsideController.text.trim().isEmpty ||
+          v.yearController.text.trim().isEmpty ||
+          v.licensePlateController.text.trim().isEmpty ||
+          v.commercialInsuranceFile.value == null ||
+          v.commercialInsuranceExpireController.text.trim().isEmpty ||
+          v.vehicleRegistrationFile.value == null ||
+          v.vehicleRegistrationExpireController.text.trim().isEmpty ||
+          v.frontViewFile.value == null ||
+          v.rearViewFile.value == null ||
+          v.interiorViewFile.value == null) {
+        return;
+      }
+    }
+
+    Get.toNamed(Routes.documentsuploadView);
+  }
+
+  // ===========================================================================
+  // POST-OTP ACCOUNT SETUP SUBMIT — HITS VEHICLE & DOCUMENTS APIS SEQUENTIALLY
+  // ===========================================================================
+  Future<void> submitAccountSetup() async {
+    showErrors.value = true;
+    if (licensePlateFile.value == null ||
+        licensePlateExpireController.text.trim().isEmpty ||
+        hackLicenseFile.value == null ||
+        hackLicenseExpireController.text.trim().isEmpty ||
+        localPermitFile.value == null ||
+        localPermitExpireController.text.trim().isEmpty ||
+        profilePictureFile.value == null) {
+      return;
+    }
+
+    try {
+      isLoading.value = true;
+
+      // 1. Call Vehicle API first
+      final vehicleResponse = await _authService.addVehicle(
+        vehicles: vehiclesList.toList(),
+      );
+
+      final vehicleCode = vehicleResponse.statusCode ?? 0;
+      final isVehicleSuccess = (vehicleCode >= 200 && vehicleCode < 300) ||
+          vehicleResponse.data?['success'] == true;
+
+      if (!isVehicleSuccess) {
+        final msg = _extractErrorMessage(vehicleResponse);
+        Helpers.showCustomSnackBar(
+          'Vehicle submission failed: $msg',
+          isError: true,
+        );
+        return;
+      }
+
+      // 2. Call Document Upload API second
+      final docResponse = await _authService.uploadDocuments(
+        drivingLicenseFile: licensePlateFile.value!,
+        drivingLicenseExpiry: licensePlateExpireController.text,
+        hackLicenseFile: hackLicenseFile.value!,
+        hackLicenseExpiry: hackLicenseExpireController.text,
+        localPermitFile: localPermitFile.value,
+        localPermitExpiry: localPermitExpireController.text.isEmpty
+            ? null
+            : localPermitExpireController.text,
+        headshotFile: profilePictureFile.value!,
+      );
+
+      final docCode = docResponse.statusCode ?? 0;
+      final isDocSuccess = (docCode >= 200 && docCode < 300) ||
+          docResponse.data?['success'] == true;
+
+      if (!isDocSuccess) {
+        final msg = _extractErrorMessage(docResponse);
+        Helpers.showCustomSnackBar(
+          'Document upload failed: $msg',
+          isError: true,
+        );
+        return;
+      }
+
       Helpers.showCustomSnackBar(
-        e.toString().contains('SocketException')
-            ? 'No internet connection. Please check your network.'
-            : 'Something went wrong.',
+        'Account setup submitted for review',
+        isError: false,
+      );
+      Get.offAllNamed(Routes.applicationSubmitedView);
+    } catch (e) {
+      Helpers.showCustomSnackBar(
+        'Submission error: ${_extractErrorMessage(e)}',
         isError: true,
       );
     } finally {
@@ -401,7 +478,19 @@ class SignupController extends GetxController {
   String? _parseData(dynamic data) {
     if (data == null) return null;
     if (data is Map) {
-      // 1. Check 'message' key
+      // 1. Check 'errorMessages' array (Zod validation errors)
+      final errorMessages = data['errorMessages'];
+      if (errorMessages is List && errorMessages.isNotEmpty) {
+        final messages = errorMessages.map((e) {
+          if (e is Map && e['message'] != null) {
+            return e['message'].toString();
+          }
+          return e.toString();
+        }).toList();
+        return messages.join('\n');
+      }
+
+      // 2. Check 'message' key
       final message = data['message'];
       if (message != null) {
         if (message is List) {

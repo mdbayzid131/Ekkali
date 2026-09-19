@@ -3,41 +3,41 @@ import 'market_place_model.dart';
 class MyItemsResponse {
   bool? success;
   String? message;
-  Pagination? pagination;
+  CursorPagination? cursor;
   List<MyItemsModel>? data;
 
-  MyItemsResponse({this.success, this.message, this.pagination, this.data});
+  MyItemsResponse({
+    this.success,
+    this.message,
+    this.cursor,
+    this.data,
+  });
 
   MyItemsResponse.fromJson(Map<String, dynamic> json) {
     success = json['success'];
     message = json['message'];
 
-    pagination = json['pagination'] != null
-        ? Pagination.fromJson(json['pagination'])
+    cursor = json['cursor'] != null
+        ? CursorPagination.fromJson(json['cursor'])
         : null;
 
-    if (json['data'] != null) {
+    if (json['data'] != null && json['data'] is List) {
       data = <MyItemsModel>[];
       json['data'].forEach((v) {
-        data!.add(MyItemsModel.fromJson(v));
+        if (v is Map<String, dynamic>) {
+          data!.add(MyItemsModel.fromJson(v));
+        }
       });
     }
   }
-}
 
-class Pagination {
-  int? total;
-  int? limit;
-  int? page;
-  int? totalPage;
-
-  Pagination({this.total, this.limit, this.page, this.totalPage});
-
-  Pagination.fromJson(Map<String, dynamic> json) {
-    total = json['total'];
-    limit = json['limit'];
-    page = json['page'];
-    totalPage = json['totalPage'];
+  Map<String, dynamic> toJson() {
+    return {
+      'success': success,
+      'message': message,
+      'cursor': cursor?.toJson(),
+      'data': data?.map((v) => v.toJson()).toList(),
+    };
   }
 }
 
@@ -74,18 +74,18 @@ class MyItemsModel {
     String firstPhoto = photosList.isNotEmpty ? photosList[0] : '';
 
     return MyItemsModel(
-      id: json['_id']?.toString() ?? '',
+      id: json['_id']?.toString() ?? json['id']?.toString() ?? '',
       name: json['title']?.toString() ?? '',
       price: json['price']?.toString() ?? '0',
       rating: 5.0,
       imagePath: firstPhoto,
       condition: json['condition']?.toString() ?? '',
-      status: json['status']?.toString() ?? '',
+      status: json['status']?.toString() ?? 'AVAILABLE',
       location: json['location']?.toString() ?? '',
-      description: json['description'] ?? '',
+      description: json['description']?.toString() ?? '',
       photos: photosList,
       createdAt: json['createdAt'] != null
-          ? DateTime.parse(json['createdAt'])
+          ? DateTime.tryParse(json['createdAt']) ?? DateTime.now()
           : DateTime.now(),
     );
   }
@@ -108,7 +108,7 @@ class MyItemsModel {
     return ItemData(
       id: id,
       title: name,
-      price: int.tryParse(price) ?? 0,
+      price: num.tryParse(price) ?? 0,
       condition: condition,
       status: status,
       location: location,

@@ -3,11 +3,16 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:moeb_26/config/routes/app_pages.dart';
-import 'package:moeb_26/data/models/chat_model.dart';
+import 'package:moeb_26/core/services/api_client.dart';
+import 'package:moeb_26/core/utils/helpers.dart';
+import 'package:moeb_26/data/models/my_jobs_model.dart';
+import 'package:moeb_26/data/repositories/socket_repository.dart';
 import 'package:moeb_26/modules/my_jobs/widgets/MyJobCard.dart';
 import 'package:moeb_26/modules/my_jobs/widgets/MyJobDetailSheet.dart';
-import 'package:moeb_26/modules/my_job_progress_details/views/my_job_progress_details_view.dart';
+import 'package:moeb_26/core/widgets/CustomButton.dart';
 import '../controllers/my_jobs_controller.dart';
+
+import 'package:intl/intl.dart';
 
 class MyJobsView extends StatefulWidget {
   const MyJobsView({super.key});
@@ -18,72 +23,74 @@ class MyJobsView extends StatefulWidget {
 
 class _MyJobsViewState extends State<MyJobsView> {
   final BookingController controller = Get.find<BookingController>();
+  final ScrollController _scrollController = ScrollController();
 
-  // Static Demo Created Jobs Dataset
-  final List<Map<String, dynamic>> _demoMyJobs = [
-    {
-      'dateHeader': 'Thu, Jul 09',
-      'jobs': [
-        {
-          'id': 'JOB-884210',
-          'time': '3:30 PM',
-          'pickup': 'The Ritz-Carlton Bal Harbour',
-          'pickupNotes': 'Main Lobby Valet Stand',
-          'dropoff': 'PortMiami Cruise Terminal 4',
-          'dropoffNotes': 'Terminal 4 VIP Dropoff Area',
-          'company': 'Moeb Chauffeur Services',
-          'vehicle': 'BAL-MIA',
-          'type': 'SUV',
-          'price': '195.00',
-          'payment': 'Credit Card on File',
-          'status': 'PENDING',
-          'flight': 'CR-8821',
-          'instructions':
-              'Provide child booster seat in back row. Assistance with 4 large suitcases.',
-          'assignedDriver': '1 Applicant Available',
-        },
-        {
-          'id': 'JOB-884211',
-          'time': '8:00 PM',
-          'pickup': 'St. Regis Bal Harbour Resort',
-          'pickupNotes': 'Ocean Drive Gate Entry',
-          'dropoff': 'Hard Rock Stadium VIP Entrance',
-          'dropoffNotes': 'Gate 2 VIP Parking Lot',
-          'company': 'Moeb Chauffeur Services',
-          'vehicle': 'ST-MIA',
-          'type': 'SPRINTER',
-          'price': '260.00',
-          'payment': 'Credit Card on File',
-          'status': 'ASSIGNED',
-          'flight': 'VIP-EVENT',
-          'instructions': 'Event pass required at front gate.',
-          'assignedDriver': 'Mohamed El Bakkali',
-        },
-      ],
-    },
-    {
-      'dateHeader': 'Tue, Jun 30',
-      'jobs': [
-        {
-          'id': 'JOB-884200',
-          'time': '8:00 AM',
-          'pickup': 'Palm Beach Yacht Club',
-          'pickupNotes': 'Dockside Pick-up Area',
-          'dropoff': 'PBI Private Aviation Terminal',
-          'dropoffNotes': 'Atlantic Aviation FBO Ramp',
-          'company': 'Moeb Chauffeur Services',
-          'vehicle': 'PB-YACHT',
-          'type': 'SEDAN',
-          'price': '140.00',
-          'payment': 'Credit Card on File',
-          'status': 'COMPLETED',
-          'flight': 'N920AP',
-          'instructions': 'Passenger carrying golf equipment.',
-          'assignedDriver': 'Mohamed El Bakkali',
-        },
-      ],
-    },
-  ];
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.fetchJobs(isRefresh: true);
+    });
+
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels >=
+          _scrollController.position.maxScrollExtent - 200) {
+        controller.loadMoreMyJobs();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  String _formatDateHeader(String? dateStr, String? createdAtStr) {
+    DateTime? dt;
+    if (dateStr != null && dateStr.isNotEmpty) {
+      dt = DateTime.tryParse(dateStr);
+    }
+    if (dt == null && createdAtStr != null && createdAtStr.isNotEmpty) {
+      dt = DateTime.tryParse(createdAtStr);
+    }
+    if (dt == null) return "Recent Jobs";
+
+    final localDt = dt.toLocal();
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final jobDay = DateTime(localDt.year, localDt.month, localDt.day);
+
+    if (jobDay == today) return "Today, ${DateFormat('MMM dd').format(localDt)}";
+    if (jobDay == today.add(const Duration(days: 1))) {
+      return "Tomorrow, ${DateFormat('MMM dd').format(localDt)}";
+    }
+
+    return DateFormat('EEE, MMM dd').format(localDt);
+  }
+
+  String _formatTime(String? timeStr) {
+    if (timeStr == null || timeStr.isEmpty) return '';
+    try {
+      final parts = timeStr.split(':');
+      if (parts.length >= 2) {
+        final hour = int.parse(parts[0]);
+        final minute = int.parse(parts[1]);
+        final dt = DateTime(2026, 1, 1, hour, minute);
+        return DateFormat('h:mm a').format(dt);
+      }
+    } catch (_) {}
+    return timeStr;
+  }
+
+  Map<String, List<JobData>> _groupJobsByDate(List<JobData> jobs) {
+    final Map<String, List<JobData>> groups = {};
+    for (final job in jobs) {
+      final header = _formatDateHeader(job.date, job.createdAt);
+      groups.putIfAbsent(header, () => []).add(job);
+    }
+    return groups;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -123,140 +130,235 @@ class _MyJobsViewState extends State<MyJobsView> {
           ),
         ),
       ),
-      body: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 20.w),
-        child: ListView.builder(
-          physics: const BouncingScrollPhysics(),
-          itemCount: _demoMyJobs.length,
-          padding: EdgeInsets.only(bottom: 20.h),
-          itemBuilder: (context, groupIndex) {
-            final group = _demoMyJobs[groupIndex];
-            final String dateHeader = group['dateHeader'];
-            final List jobs = group['jobs'];
+      body: Obx(() {
+        if (controller.isJobsLoading.value && controller.myJobsList.isEmpty) {
+          return const Center(
+            child: CircularProgressIndicator(color: Color(0xFFFEDB9B)),
+          );
+        }
 
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+        if (controller.myJobsList.isEmpty) {
+          return RefreshIndicator(
+            color: const Color(0xFFFEDB9B),
+            onRefresh: () => controller.fetchJobs(isRefresh: true),
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
               children: [
-                // Date Header
-                Padding(
-                  padding: EdgeInsets.only(top: 15.h, bottom: 10.h, left: 4.w),
-                  child: Text(
-                    dateHeader,
-                    style: GoogleFonts.outfit(
-                      color: Colors.white,
-                      fontSize: 18.sp,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 0.5,
-                    ),
+                SizedBox(height: 150.h),
+                Center(
+                  child: Column(
+                    children: [
+                      Icon(
+                        Icons.work_outline_rounded,
+                        size: 60.sp,
+                        color: Colors.grey.shade600,
+                      ),
+                      SizedBox(height: 16.h),
+                      Text(
+                        'No created jobs found',
+                        style: GoogleFonts.inter(
+                          color: Colors.grey.shade400,
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      SizedBox(height: 8.h),
+                      Text(
+                        'Jobs you create will appear here.',
+                        style: GoogleFonts.inter(
+                          color: Colors.grey.shade600,
+                          fontSize: 13.sp,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                ...jobs.map((job) {
-                  return MyJobCard(
-                    time: job['time'],
-                    pickupLocation: job['pickup'],
-                    dropoffLocation: job['dropoff'],
-                    companyName: job['company'],
-                    assignedDriver: job['assignedDriver'],
-                    vehicleType: job['type'],
-                    price: job['price'],
-                    status: job['status'],
-                    onTap: () => _openJobDetails(job, dateHeader),
-                  );
-                }),
               ],
-            );
-          },
-        ),
-      ),
+            ),
+          );
+        }
+
+        final groupedJobs = _groupJobsByDate(controller.myJobsList);
+        final groupHeaders = groupedJobs.keys.toList();
+
+        return RefreshIndicator(
+          color: const Color(0xFFFEDB9B),
+          onRefresh: () => controller.fetchJobs(isRefresh: true),
+          child: ListView.builder(
+            controller: _scrollController,
+            physics: const AlwaysScrollableScrollPhysics(
+              parent: BouncingScrollPhysics(),
+            ),
+            padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
+            itemCount: groupHeaders.length + (controller.isMyJobsLoadMore.value ? 1 : 0),
+            itemBuilder: (context, groupIndex) {
+              if (groupIndex == groupHeaders.length) {
+                return Padding(
+                  padding: EdgeInsets.symmetric(vertical: 16.h),
+                  child: const Center(
+                    child: CircularProgressIndicator(color: Color(0xFFFEDB9B)),
+                  ),
+                );
+              }
+
+              final String dateHeader = groupHeaders[groupIndex];
+              final List<JobData> jobs = groupedJobs[dateHeader]!;
+
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Date Header
+                  Padding(
+                    padding: EdgeInsets.only(top: 15.h, bottom: 10.h, left: 4.w),
+                    child: Text(
+                      dateHeader,
+                      style: GoogleFonts.outfit(
+                        color: Colors.white,
+                        fontSize: 18.sp,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ),
+                  ...jobs.map((job) {
+                    final isAsapJob = job.asap == true || (job.time == null || job.time!.isEmpty);
+                    final displayTime = isAsapJob ? "ASAP" : _formatTime(job.time);
+                    final String displayDriver = (job.status?.toUpperCase() == 'PENDING')
+                        ? ((job.applicantCount ?? 0) > 0
+                            ? "${job.applicantCount} Applicant Available"
+                            : (job.applicant?.driver?.name != null
+                                ? "1 Applicant Available"
+                                : "Awaiting Chauffeur"))
+                        : (job.assignedTo?.name ?? 'Assigned Chauffeur');
+
+                    return MyJobCard(
+                      time: displayTime,
+                      pickupLocation: job.pickupLocation ?? 'Pickup',
+                      dropoffLocation: job.dropoffLocation ?? 'Dropoff',
+                      companyName: job.companyName ?? 'My Job',
+                      assignedDriver: displayDriver,
+                      vehicleType: job.vehicleType ?? 'Sedan',
+                      price: job.paymentAmount?.toString(),
+                      status: job.status ?? 'PENDING',
+                      onTap: () => _openJobDetails(job, dateHeader),
+                    );
+                  }),
+                ],
+              );
+            },
+          ),
+        );
+      }),
     );
   }
 
-  void _openJobDetails(Map<String, dynamic> job, String dateHeader) {
-    final String status = job['status'] ?? '';
+  void _openJobDetails(JobData job, String dateHeader) {
+    final String status = job.status ?? 'PENDING';
     final String upperStatus = status.toUpperCase();
     final bool canEdit = upperStatus == 'PENDING';
-    final bool canDelete = upperStatus == 'PENDING' || upperStatus == 'CANCELLED';
+    final bool canDelete =
+        upperStatus == 'PENDING' || upperStatus == 'CANCELLED';
+
+    final isAsapJob = job.asap == true || (job.time == null || job.time!.isEmpty);
+    final displayTime = isAsapJob ? "ASAP" : _formatTime(job.time);
+    final String driverName = (job.assignedTo?.name?.isNotEmpty == true)
+        ? job.assignedTo!.name!
+        : (job.applicant?.driver?.name?.isNotEmpty == true
+            ? job.applicant!.driver!.name!
+            : (upperStatus == 'PENDING'
+                ? ((job.applicantCount ?? 0) > 0
+                    ? "${job.applicantCount} Applicant Available"
+                    : "Awaiting Chauffeur")
+                : "Not Assigned"));
+
+    final double? driverRating =
+        job.assignedTo?.averageRating ?? job.applicant?.driver?.averageRating;
+    final String? driverId = job.assignedTo?.id ?? job.applicant?.driver?.id;
+    final String? driverImage =
+        job.assignedTo?.profilePicture ?? job.applicant?.driver?.profilePicture;
+
+    final bool hasApplicant = (job.applicant != null && job.applicant?.driver != null) ||
+        ((job.applicantCount ?? 0) > 0);
 
     Get.bottomSheet(
       MyJobDetailSheet(
         title: "Created Job Details",
-        bookingNo: job['id'],
-        dateTimeStr: "$dateHeader • ${job['time']}",
-        pickupLocation: job['pickup'],
-        pickupNotes: job['pickupNotes'],
-        dropoffLocation: job['dropoff'],
-        dropoffNotes: job['dropoffNotes'],
-        passengerName: job['company'],
-        driverName: job['assignedDriver'],
-        vehicleInfo: job['vehicle'],
-        vehicleType: job['type'],
-        paymentType: job['payment'],
-        amount: job['price'],
-        flightNumber: job['flight'],
-        specialInstructions: job['instructions'],
+        bookingNo: job.id ?? '',
+        dateTimeStr: "$dateHeader • $displayTime",
+        pickupLocation: job.pickupLocation ?? '',
+        dropoffLocation: job.dropoffLocation ?? '',
+        passengerName: job.companyName ?? 'Fleet Operator',
+        driverName: driverName,
+        driverId: driverId,
+        driverImage: driverImage,
+        driverRating: driverRating,
+        vehicleInfo: job.vehicleType ?? 'Vehicle',
+        vehicleType: job.vehicleType ?? 'Sedan',
+        paymentType: job.paymentType ?? 'Credit Card on File',
+        amount: job.paymentAmount != null ? job.paymentAmount.toString() : '',
+        flightNumber: job.flightNumber,
+        specialInstructions: job.instruction,
         status: status,
-        onAcceptPressed: () {
-          setState(() {
-            job['status'] = 'ASSIGNED';
-            job['assignedDriver'] = 'Mohamed El Bakkali';
-          });
-          Get.snackbar(
-            "Driver Assigned",
-            "Accepted applicant for Job #${job['id']}. Driver assigned!",
-            backgroundColor: const Color(0xFF22C55E),
-            colorText: Colors.white,
+        isReviewedByCreator: job.isReviewedByCreator ?? false,
+        hasApplicant: hasApplicant,
+        onAcceptPressed: (hasApplicant && job.id != null)
+            ? () {
+                controller.approveApplicant(jobId: job.id!);
+              }
+            : null,
+        onRejectPressed: (hasApplicant && job.id != null)
+            ? () {
+                controller.rejectApplicant(jobId: job.id!);
+              }
+            : null,
+        onChatPressed: () async {
+          final String? participantId = driverId;
+          if (participantId != null && participantId.isNotEmpty) {
+            try {
+              final socketRepo = Get.isRegistered<SocketRepository>()
+                  ? Get.find<SocketRepository>()
+                  : Get.put(SocketRepository(apiClient: Get.find<ApiClient>()));
+
+              final chat = await socketRepo.createChat(participantId);
+              if (chat != null) {
+                Get.toNamed(Routes.chatDetailView, arguments: chat);
+                return;
+              }
+            } catch (e) {
+              debugPrint("Error opening chat: $e");
+              Helpers.showCustomSnackBar(
+                "Could not create chat session. Please try again.",
+                isError: true,
+              );
+              return;
+            }
+          }
+
+          Helpers.showCustomSnackBar(
+            "Chauffeur is not available to chat right now.",
+            isError: true,
           );
-        },
-        onRejectPressed: () {
-          setState(() {
-            job['assignedDriver'] = 'Awaiting Driver';
-          });
-          Get.snackbar(
-            "Applicant Declined",
-            "Applicant declined for Job #${job['id']}. Job is open again.",
-            backgroundColor: Colors.redAccent,
-            colorText: Colors.white,
-          );
-        },
-        onChatPressed: () {
-          final driverName = (job['assignedDriver'] != null &&
-                  job['assignedDriver'] != '1 Applicant Available')
-              ? job['assignedDriver']
-              : "Mohamed El Bakkali";
-          final chat = ChatPreview(
-            id: "demo_chat_${job['id']}",
-            participants: [
-              ChatParticipant(id: "driver_1", name: driverName),
-            ],
-            lastMessage: "Hello, I am ready for this job assignment.",
-            lastMessageAt: DateTime.now().toIso8601String(),
-            createdBy: "current_user",
-            createdAt: DateTime.now().toIso8601String(),
-            updatedAt: DateTime.now().toIso8601String(),
-          );
-          Get.toNamed(Routes.chatDetailView, arguments: chat);
         },
         onActionButtonPressed: () {
-          if (job['status'] == 'ASSIGNED') {
-            Get.to(() => const MyJobProgressDetailsView());
+          if (upperStatus == 'ASSIGNED' || upperStatus == 'IN PROGRESS') {
+            Get.toNamed(
+              Routes.myJobProgressDetailsView,
+              arguments: job,
+            );
           }
         },
         onReviewPressed: () {
-          Get.toNamed(Routes.ratingsFeedbackView);
+          Get.toNamed(Routes.rideCompletedView, arguments: job);
         },
-        onEditPressed: canEdit
+        onEditPressed: canEdit && job.id != null
             ? () {
-                Get.snackbar(
-                  "Edit Job",
-                  "Opening Job Editor for #${job['id']}",
-                  backgroundColor: const Color(0xFFD08700),
-                  colorText: Colors.white,
-                );
+                Get.back();
+                Get.toNamed(Routes.jobEditView, arguments: job);
               }
             : null,
-        onDeletePressed: canDelete
+        onDeletePressed: canDelete && job.id != null
             ? () {
-                _showDeleteDialog(jobId: job['id']);
+                _showDeleteDialog(jobId: job.id!);
               }
             : null,
       ),
@@ -289,7 +391,7 @@ class _MyJobsViewState extends State<MyJobsView> {
               ),
               SizedBox(height: 10.h),
               Text(
-                "Are you sure you want to delete job #$jobId?",
+                "Are you sure you want to delete this job?",
                 textAlign: TextAlign.center,
                 style: GoogleFonts.inter(color: Colors.grey, fontSize: 13.sp),
               ),
@@ -297,42 +399,31 @@ class _MyJobsViewState extends State<MyJobsView> {
               Row(
                 children: [
                   Expanded(
-                    child: OutlinedButton(
-                      style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: Colors.grey),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12.r),
-                        ),
-                      ),
+                    child: CustomButton(
+                      text: "Cancel",
+                      backgroundColor: Colors.transparent,
+                      textColor: Colors.white,
+                      borderColor: Colors.grey,
+                      fontSize: 14.sp,
                       onPressed: () => Get.back(),
-                      child: Text(
-                        "Cancel",
-                        style: GoogleFonts.inter(color: Colors.white),
-                      ),
+                      padding: EdgeInsets.symmetric(vertical: 12.h),
                     ),
                   ),
                   SizedBox(width: 10.w),
                   Expanded(
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.redAccent,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12.r),
-                        ),
-                      ),
+                    child: CustomButton(
+                      text: "Delete",
+                      backgroundColor: Colors.redAccent,
+                      textColor: Colors.black,
+                      fontSize: 14.sp,
                       onPressed: () {
-                        Get.back();
-                        Get.snackbar(
-                          "Job Deleted",
-                          "Job #$jobId has been deleted",
-                          backgroundColor: Colors.redAccent,
-                          colorText: Colors.white,
-                        );
+                        Get.back(); // Close confirmation dialog
+                        if (Get.isBottomSheetOpen == true) {
+                          Get.back(); // Close bottom sheet
+                        }
+                        controller.deleteJob(jobId: jobId);
                       },
-                      child: Text(
-                        "Delete",
-                        style: GoogleFonts.inter(color: Colors.white),
-                      ),
+                      padding: EdgeInsets.symmetric(vertical: 12.h),
                     ),
                   ),
                 ],

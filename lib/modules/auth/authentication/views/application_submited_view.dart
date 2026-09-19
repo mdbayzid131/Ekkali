@@ -2,42 +2,41 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:moeb_26/config/routes/app_pages.dart';
+import 'package:moeb_26/core/services/auth_service.dart';
 import 'package:moeb_26/core/widgets/CustomText.dart';
 import 'package:moeb_26/core/widgets/CustomTextGary.dart';
 
 /// Review Status Screen
 /// Shows application submission status with animated steps
-class ApplicationSubmitedView extends StatefulWidget {
+class ApplicationSubmitedView extends StatelessWidget {
   const ApplicationSubmitedView({super.key});
-
-  @override
-  State<ApplicationSubmitedView> createState() =>
-      _ApplicationSubmitedViewState();
-}
-
-class _ApplicationSubmitedViewState extends State<ApplicationSubmitedView> {
-  @override
-  void initState() {
-    super.initState();
-    // Navigate to Createscreens after 10 seconds
-    Future.delayed(const Duration(seconds: 10), () {
-      if (mounted) {
-        Get.offAllNamed(Routes.authSelectionView);
-      }
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        elevation: 0,
+        automaticallyImplyLeading: false,
+        actions: [
+          IconButton(
+            onPressed: () {
+              Get.find<AuthService>().clearLocalAuth();
+              Get.offAllNamed(Routes.signinView);
+            },
+            icon: const Icon(Icons.close, color: Colors.white),
+          ),
+          SizedBox(width: 8.w),
+        ],
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 20.w),
             child: Column(
               children: [
-                SizedBox(height: 80.h),
+                SizedBox(height: 40.h),
 
                 // Clock Icon with pulse animation
                 _buildClockIcon(),

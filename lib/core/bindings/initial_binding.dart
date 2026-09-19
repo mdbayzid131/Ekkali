@@ -20,44 +20,52 @@ import 'package:moeb_26/core/services/user_service.dart';
 import 'package:moeb_26/core/services/support_service.dart';
 import 'package:moeb_26/core/services/community_service.dart';
 import 'package:moeb_26/core/services/notifications_service.dart';
+import 'package:moeb_26/core/services/vehicle_config_service.dart';
+import 'package:moeb_26/data/repositories/compliance_document_repository.dart';
 import 'package:moeb_26/data/repositories/invoice_repository.dart';
 import 'package:moeb_26/core/services/invoice_service.dart';
+import 'package:moeb_26/data/repositories/subscription_repository.dart';
+import 'package:moeb_26/core/services/subscription_service.dart';
 
 class InitialBinding extends Bindings {
   @override
   void dependencies() {
+    // Core Infrastructure & Auth (Loaded immediately at startup)
     Get.put(InternetController(), permanent: true);
     Get.put(ApiClient(), permanent: true);
     Get.put(StorageService(), permanent: true);
 
-    // Repos আগে
     Get.put(AuthRepo(apiClient: Get.find()), permanent: true);
-    Get.put(UserRepo(apiClient: Get.find()), permanent: true); // 👈 যোগ করো
-    Get.put(UserProfileRepo(apiClient: Get.find()), permanent: true);
-    Get.put(JobRepo(apiClient: Get.find()), permanent: true);
-    Get.put(RatingsFeedbackRepo(apiClient: Get.find()), permanent: true);
+    Get.put(UserRepo(apiClient: Get.find()), permanent: true);
+    Get.put(UserService(), permanent: true);
     Get.put(SocketRepository(apiClient: Get.find()), permanent: true);
-    Get.put(SupportRepo(apiClient: Get.find()), permanent: true);
-    Get.put(CommunityRepo(apiClient: Get.find()), permanent: true);
-
-    // services পরে
-    Get.put(UserService(), permanent: true); // 👈 AuthService এর আগে দাও
     Get.put(SocketService(), permanent: true);
     Get.put(AuthService(), permanent: true);
-    Get.put(SupportService(), permanent: true);
-    Get.put(CommunityService(), permanent: true);
-    Get.put(UserProfileService(userProfileRepo: Get.find()), permanent: true);
-    Get.put(JobService(), permanent: true);
-    Get.put(NotificationsService(), permanent: true);
-    Get.put(ExpenseService(), permanent: true);
-    Get.put(InvoiceService(), permanent: true);
-    Get.put(
-      InvoiceRepository(invoiceService: Get.find()),
-      permanent: true,
-    );
-    Get.put(
-      RatingsFeedbackService(ratingsFeedbackRepo: Get.find()),
-      permanent: true,
-    );
+    Get.put(VehicleConfigService(), permanent: true);
+    Get.put(SubscriptionRepo(apiClient: Get.find()), permanent: true);
+    Get.put(SubscriptionService(), permanent: true);
+
+    // Feature Repositories & Services (Lazy loaded on-demand when accessed)
+    Get.lazyPut(() => ComplianceDocumentRepository(apiClient: Get.find()), fenix: true);
+    Get.lazyPut(() => UserProfileRepo(apiClient: Get.find()), fenix: true);
+    Get.lazyPut(() => UserProfileService(userProfileRepo: Get.find()), fenix: true);
+
+    Get.lazyPut(() => JobRepo(apiClient: Get.find()), fenix: true);
+    Get.lazyPut(() => JobService(), fenix: true);
+
+    Get.lazyPut(() => SupportRepo(apiClient: Get.find()), fenix: true);
+    Get.lazyPut(() => SupportService(), fenix: true);
+
+    Get.lazyPut(() => CommunityRepo(apiClient: Get.find()), fenix: true);
+    Get.lazyPut(() => CommunityService(), fenix: true);
+
+    Get.lazyPut(() => NotificationsService(), fenix: true);
+    Get.lazyPut(() => ExpenseService(), fenix: true);
+
+    Get.lazyPut(() => InvoiceService(), fenix: true);
+    Get.lazyPut(() => InvoiceRepository(invoiceService: Get.find()), fenix: true);
+
+    Get.lazyPut(() => RatingsFeedbackRepo(apiClient: Get.find()), fenix: true);
+    Get.lazyPut(() => RatingsFeedbackService(ratingsFeedbackRepo: Get.find()), fenix: true);
   }
 }

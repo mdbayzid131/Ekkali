@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:moeb_26/config/themes/app_theme.dart';
 import 'package:moeb_26/core/controllers/internet_controller.dart';
+import 'package:moeb_26/core/widgets/CustomButton.dart';
 
 class NoInternetScreen extends StatelessWidget {
   const NoInternetScreen({super.key});
@@ -31,18 +32,12 @@ class NoInternetScreen extends StatelessWidget {
               ),
               SizedBox(height: 24.h),
 
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  minimumSize: Size(100.w, 40.h),
-                  backgroundColor: AppColors.primaryColor,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30.r),
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 10,
-                  ),
+              CustomButton(
+                text: 'Retry',
+                width: 100.w,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 10,
                 ),
                 onPressed: () {
                   // if (internet.hasInternet.value) {
@@ -50,7 +45,6 @@ class NoInternetScreen extends StatelessWidget {
                   //   Get.offAllNamed(AppRoutes.BOTTOM_NAV_BAR);
                   // }
                 },
-                child: Text('Retry', style: TextStyle(fontSize: 16.sp)),
               ),
             ],
           ),

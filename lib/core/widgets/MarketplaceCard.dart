@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:moeb_26/config/themes/app_theme.dart';
 import 'package:moeb_26/config/constants/icon_paths.dart';
 import '../../data/models/market_place_model.dart';
 import '../../modules/market_place/views/market_place_detail_view.dart';
@@ -54,7 +55,11 @@ class MarketplaceCard extends StatelessWidget {
                   child: _buildImage(imagePath),
                 ),
                 // Floating Condition Badge
-                if (condition != null && condition.isNotEmpty)
+                if (condition != null &&
+                    condition.trim().isNotEmpty &&
+                    condition.trim().toLowerCase() != 'none' &&
+                    condition.trim().toLowerCase() != 'null' &&
+                    condition.trim().toLowerCase() != 'n/a')
                   Positioned(
                     top: 8.h,
                     left: 8.w,
@@ -151,8 +156,8 @@ class MarketplaceCard extends StatelessWidget {
                         },
                         child: Container(
                           decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              colors: [Color(0xFFF1A107), Color(0xFFFF9800)],
+                            gradient: LinearGradient(
+                              colors: [AppColors.primaryColor, const Color(0xFFFF9800)],
                             ),
                             borderRadius: BorderRadius.circular(20.r),
                           ),
@@ -168,7 +173,7 @@ class MarketplaceCard extends StatelessWidget {
                                 height: 12.sp,
                                 width: 12.sp,
                                 colorFilter: const ColorFilter.mode(
-                                  Colors.white,
+                                  Colors.black,
                                   BlendMode.srcIn,
                                 ),
                               ),
@@ -176,7 +181,7 @@ class MarketplaceCard extends StatelessWidget {
                               Text(
                                 "Contact",
                                 style: GoogleFonts.inter(
-                                  color: Colors.white,
+                                  color: Colors.black,
                                   fontSize: 11.sp,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -217,7 +222,7 @@ class MarketplaceCard extends StatelessWidget {
             color: Colors.grey[900],
             child: const Center(
               child: CircularProgressIndicator(
-                color: Color(0xFFF1A107),
+                color: AppColors.primaryColor,
                 strokeWidth: 2,
               ),
             ),

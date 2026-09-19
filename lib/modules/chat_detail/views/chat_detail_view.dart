@@ -4,7 +4,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:moeb_26/config/constants/icon_paths.dart';
-import 'package:moeb_26/config/routes/app_pages.dart';
 import 'package:moeb_26/modules/preferred_drivers/controllers/preferred_drivers_controller.dart';
 import '../controllers/chat_detail_controller.dart';
 import '../../../data/models/chat_message_model.dart';
@@ -28,14 +27,31 @@ class ChatDetailView extends StatelessWidget {
             Expanded(
               child: Obx(() {
                 return ListView.builder(
+                  controller: controller.scrollController,
                   padding: EdgeInsets.symmetric(
                     horizontal: 10.w,
                     vertical: 10.h,
                   ),
-                  itemCount: controller.messages.length,
+                  itemCount: controller.messages.length +
+                      (controller.isLoadingMore.value ? 1 : 0),
                   reverse: true, // চ্যাটের জন্য লিস্টটি উল্টো দিক থেকে শুরু হবে
                   physics: const BouncingScrollPhysics(),
                   itemBuilder: (context, index) {
+                    if (index == controller.messages.length) {
+                      return Padding(
+                        padding: EdgeInsets.symmetric(vertical: 12.h),
+                        child: const Center(
+                          child: SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Color(0xFFFEDB9B),
+                            ),
+                          ),
+                        ),
+                      );
+                    }
                     final message = controller.messages[index];
                     return _buildMessageBubble(message);
                   },
@@ -92,15 +108,11 @@ class ChatDetailView extends StatelessWidget {
                         ? Get.find<PreferredDriversController>()
                         : Get.put(PreferredDriversController());
 
-                    final namePart =
-                        other?.name.split(' ').first.toLowerCase() ?? '';
-                    final chauffeur =
-                        preferredController.chauffeursList.firstWhere(
-                      (c) => c.name.toLowerCase().startsWith(namePart),
-                      orElse: () => preferredController.chauffeursList.first,
+                    preferredController.openChauffeurProfile(
+                      userId: other?.id ?? '',
+                      name: other?.name ?? 'Chauffeur',
+                      imageUrl: other?.profilePicture ?? '',
                     );
-                    preferredController.selectedChauffeur.value = chauffeur;
-                    Get.toNamed(Routes.preferredDriverProfileView);
                   },
             behavior: HitTestBehavior.opaque,
             child: Row(
@@ -115,6 +127,18 @@ class ChatDetailView extends StatelessWidget {
                   ),
                   child: ClipOval(
                     child: () {
+                      final isSupport = other != null &&
+                          (other.name.toLowerCase().contains('support') ||
+                              other.email?.toLowerCase().contains('support') == true);
+                      if (isSupport) {
+                        return Transform.scale(
+                          scale: 1.3,
+                          child: Image.asset(
+                            'assets/images/ekkali support.png',
+                            fit: BoxFit.contain,
+                          ),
+                        );
+                      }
                       final pic = other?.profilePicture;
                       final hasImage = pic != null && pic.isNotEmpty;
                       final isNetwork = hasImage && pic.startsWith('http');
@@ -183,37 +207,84 @@ class ChatDetailView extends StatelessWidget {
       final bool isMe = message.isSentBy(currentUserId);
       final other = controller.chat.getOtherParticipant(currentUserId);
 
-      final avatar = Container(
-        margin: EdgeInsets.only(right: 8.w, bottom: 4.h),
-        width: 32.r,
-        height: 32.r,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(color: Colors.grey[850]!, width: 1),
-        ),
-        child: ClipOval(
-          child:
-              other?.profilePicture != null && other!.profilePicture!.isNotEmpty
-              ? (other.profilePicture!.startsWith('http')
-                    ? Image.network(other.profilePicture!, fit: BoxFit.cover)
-                    : Image.asset(other.profilePicture!, fit: BoxFit.cover))
-              : Container(
-                  color: Colors.grey[800],
-                  child: Center(
-                    child: Text(
-                      other?.initials ?? '?',
-                      style: GoogleFonts.inter(
-                        color: Colors.white,
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.bold,
+      final avatar = GestureDetector(
+        onTap: (other?.name.toLowerCase() == 'support team' ||
+                other?.name.toLowerCase().contains('support') == true)
+            ? null
+            : () {
+                final preferredController =
+                    Get.isRegistered<PreferredDriversController>()
+                    ? Get.find<PreferredDriversController>()
+                    : Get.put(PreferredDriversController());
+
+                final targetId =
+                    message.sender?.id ?? message.senderId ?? other?.id ?? '';
+                final targetName =
+                    message.sender?.name ?? other?.name ?? 'Chauffeur';
+                final targetPic =
+                    message.sender?.profilePicture ?? other?.profilePicture ?? '';
+
+                preferredController.openChauffeurProfile(
+                  userId: targetId,
+                  name: targetName,
+                  imageUrl: targetPic,
+                );
+              },
+        child: Container(
+          margin: EdgeInsets.only(right: 8.w, bottom: 4.h),
+          width: 32.r,
+          height: 32.r,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(color: Colors.grey[850]!, width: 1),
+          ),
+          child: ClipOval(
+            child:
+                other?.profilePicture != null && other!.profilePicture!.isNotEmpty
+                ? (other.profilePicture!.startsWith('http')
+                      ? Image.network(other.profilePicture!, fit: BoxFit.cover)
+                      : Image.asset(other.profilePicture!, fit: BoxFit.cover))
+                : Container(
+                    color: Colors.grey[800],
+                    child: Center(
+                      child: Text(
+                        other?.initials ?? '?',
+                        style: GoogleFonts.inter(
+                          color: Colors.white,
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
-                ),
+          ),
         ),
       );
 
       final parsed = ReplyParsedMessage.parse(message.text);
+      String? replyUser = parsed.replyToUser;
+      String? replyText = parsed.replyToText;
+
+      if (replyUser == null && message.replyToMessage != null) {
+        final rMsg = message.replyToMessage!;
+        replyUser = rMsg.isSentBy(currentUserId)
+            ? 'You'
+            : (rMsg.sender?.name ?? 'Someone');
+        replyText = rMsg.text;
+      } else if (replyUser == null && message.replyTo != null) {
+        final original =
+            controller.messages.firstWhereOrNull((m) => m.id == message.replyTo);
+        if (original != null) {
+          replyUser = original.isSentBy(currentUserId)
+              ? 'You'
+              : (original.sender?.name ?? 'Someone');
+          replyText = original.text;
+        }
+      }
+
+      if (replyText != null && replyText.startsWith('[REPLY:')) {
+        replyText = replyText.split(']').skip(1).join(']');
+      }
 
       return Padding(
         padding: EdgeInsets.symmetric(vertical: 4.h),
@@ -276,7 +347,7 @@ class ChatDetailView extends StatelessWidget {
                                     )
                                     .toList(),
                               ),
-                            if (parsed.replyToUser != null && parsed.replyToText != null)
+                            if (replyUser != null && replyText != null)
                               Container(
                                 margin: EdgeInsets.only(bottom: 6.h),
                                 padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
@@ -294,7 +365,7 @@ class ChatDetailView extends StatelessWidget {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      parsed.replyToUser!,
+                                      replyUser,
                                       style: GoogleFonts.inter(
                                         color: const Color(0xFFD08700),
                                         fontSize: 11.sp,
@@ -305,7 +376,7 @@ class ChatDetailView extends StatelessWidget {
                                     ),
                                     SizedBox(height: 2.h),
                                     Text(
-                                      parsed.replyToText!,
+                                      replyText,
                                       style: GoogleFonts.inter(
                                         color: Colors.white70,
                                         fontSize: 12.sp,

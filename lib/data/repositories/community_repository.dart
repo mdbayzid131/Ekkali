@@ -7,28 +7,48 @@ class CommunityRepo {
   final ApiClient apiClient;
   CommunityRepo({required this.apiClient});
 
-  Future<Response> getCommunityRoom() async {
-    return await apiClient.getData(ApiConstants.communityRoom);
+  Future<Response> getCommunityRoom({String? serviceArea}) async {
+    final query = <String, dynamic>{};
+    if (serviceArea != null && serviceArea.isNotEmpty) {
+      query['serviceArea'] = serviceArea;
+    }
+    return await apiClient.getData(
+      ApiConstants.communityRoom,
+      query: query.isNotEmpty ? query : null,
+    );
   }
 
   Future<Response> getCommunityMessages({
-    int page = 1,
-    int limit = 10,
+    int? page,
+    int limit = 40,
     String? serviceArea,
+    String? cursor,
   }) async {
-    String url = "${ApiConstants.communityMessages}?page=$page&limit=$limit";
+    final query = <String, dynamic>{'limit': limit};
+    if (page != null) query['page'] = page;
+    if (cursor != null && cursor.isNotEmpty) query['cursor'] = cursor;
     if (serviceArea != null && serviceArea.isNotEmpty) {
-      url += "&serviceArea=$serviceArea";
+      query['serviceArea'] = serviceArea;
     }
-    return await apiClient.getData(url);
+    return await apiClient.getData(ApiConstants.communityMessages, query: query);
   }
 
   Future<Response> sendCommunityMessage({
     required String text,
     List<File>? attachments,
+    String? replyTo,
+    String? serviceArea,
   }) async {
     final formData = FormData();
-    formData.fields.add(MapEntry('text', text));
+    if (text.isNotEmpty) {
+      formData.fields.add(MapEntry('text', text));
+    }
+    if (serviceArea != null && serviceArea.isNotEmpty) {
+      formData.fields.add(MapEntry('serviceArea', serviceArea));
+    }
+    if (replyTo != null && replyTo.isNotEmpty) {
+      formData.fields.add(MapEntry('replyTo', replyTo));
+    }
 
     if (attachments != null && attachments.isNotEmpty) {
       for (var file in attachments) {

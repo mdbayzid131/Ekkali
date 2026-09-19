@@ -7,6 +7,8 @@ class ChatMessage {
   final String? senderId; // fallback when sender is just an ID string
   final String text;
   final List<String> attachments;
+  final String? replyTo;
+  final ChatMessage? replyToMessage;
   final String createdAt;
   final String updatedAt;
 
@@ -17,6 +19,8 @@ class ChatMessage {
     this.senderId,
     required this.text,
     this.attachments = const [],
+    this.replyTo,
+    this.replyToMessage,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -55,6 +59,16 @@ class ChatMessage {
     final String createdAt = json['createdAt']?.toString() ?? '';
     final String updatedAt = json['updatedAt']?.toString() ?? '';
 
+    String? replyToId;
+    ChatMessage? populatedReplyTo;
+    final dynamic replyToData = json['replyTo'];
+    if (replyToData is Map<String, dynamic>) {
+      populatedReplyTo = ChatMessage.fromJson(replyToData);
+      replyToId = populatedReplyTo.id;
+    } else if (replyToData is String) {
+      replyToId = replyToData;
+    }
+
     return ChatMessage(
       id: id,
       chatId: chatId,
@@ -62,6 +76,8 @@ class ChatMessage {
       senderId: senderIdStr ?? senderObj?.id,
       text: text,
       attachments: attachments,
+      replyTo: replyToId,
+      replyToMessage: populatedReplyTo,
       createdAt: createdAt,
       updatedAt: updatedAt,
     );

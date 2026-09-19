@@ -3,6 +3,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:moeb_26/core/utils/helpers.dart';
+import 'package:moeb_26/core/widgets/CustomButton.dart';
 import '../controllers/invoice_controller.dart';
 import 'invoice_preview_view.dart';
 import 'create_invoice_view.dart';
@@ -89,77 +91,83 @@ class InvoiceDetailView extends GetView<InvoiceController> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // --- HEADER DETAILS CARD (COMPACT) ---
-              Container(
-                width: double.infinity,
-                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF111111),
-                  borderRadius: BorderRadius.circular(16.r),
-                  border: Border.all(
-                    color: const Color(0xFF1E1E1E),
-                    width: 1.5,
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            record.clientName,
-                            style: GoogleFonts.inter(
-                              color: Colors.white,
-                              fontSize: 15.sp,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          if (record.clientBusinessName.isNotEmpty) ...[
-                            SizedBox(height: 2.h),
-                            Text(
-                              record.clientBusinessName,
-                              style: GoogleFonts.inter(
-                                color: const Color(0xFFD5C4AB),
-                                fontSize: 12.sp,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ],
+              // --- HEADER DETAILS CARD (WITH PAID STAMP OVERLAY) ---
+              Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF111111),
+                      borderRadius: BorderRadius.circular(16.r),
+                      border: Border.all(
+                        color: isPaid
+                            ? const Color(0xFF10B981).withValues(alpha: 0.4)
+                            : const Color(0xFF1E1E1E),
+                        width: 1.5,
                       ),
                     ),
-                    SizedBox(width: 8.w),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
+                    child: Row(
                       children: [
-                        Text(
-                          'TOTAL AMOUNT',
-                          style: GoogleFonts.inter(
-                            color: const Color(0xFFD5C4AB),
-                            fontSize: 10.sp,
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: 0.5,
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                record.clientName,
+                                style: GoogleFonts.inter(
+                                  color: Colors.white,
+                                  fontSize: 15.sp,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              if (record.clientBusinessName.isNotEmpty) ...[
+                                SizedBox(height: 2.h),
+                                Text(
+                                  record.clientBusinessName,
+                                  style: GoogleFonts.inter(
+                                    color: const Color(0xFFD5C4AB),
+                                    fontSize: 12.sp,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ],
                           ),
                         ),
-                        SizedBox(height: 2.h),
-                        Text(
-                          'USD ${record.totalAmount.toStringAsFixed(2)}',
-                          style: GoogleFonts.inter(
-                            color: isPaid
-                                ? const Color(0xFFFEDB9B)
-                                : Colors.white,
-                            fontSize: 17.sp,
-                            fontWeight: FontWeight.bold,
-                          ),
+                        SizedBox(width: 8.w),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              'TOTAL AMOUNT',
+                              style: GoogleFonts.inter(
+                                color: const Color(0xFFD5C4AB),
+                                fontSize: 10.sp,
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                            SizedBox(height: 2.h),
+                            Text(
+                              'USD ${record.totalAmount.toStringAsFixed(2)}',
+                              style: GoogleFonts.inter(
+                                color: isPaid
+                                    ? const Color(0xFF10B981)
+                                    : Colors.white,
+                                fontSize: 17.sp,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
-                    ),
-                  ],
-                ),
+                  ),)
+                ],
               ),
               SizedBox(height: 20.h),
 
@@ -337,24 +345,22 @@ class InvoiceDetailView extends GetView<InvoiceController> {
                 subtitle: 'View, share or print the generated PDF',
                 onTap: () {
                   controller.populateFromRecord(record);
-                  controller.fetchInvoiceProfileFromApi();
-                  Get.to(() => const InvoicePreviewView());
+                  Get.to(() => const InvoicePreviewView(isFromDetail: true));
                 },
               ),
-              SizedBox(height: 12.h),
-
-              _buildActionButton(
-                icon: Icons.edit_outlined,
-                title: 'Edit / Customize',
-                subtitle: 'Modify document entries or templates',
-                onTap: () {
-                  controller.populateFromRecord(record);
-                  controller.fetchInvoiceProfileFromApi();
-                  controller.fetchClientsFromApi();
-                  controller.editingRecordIndex.value = index;
-                  Get.to(() => const CreateInvoiceView());
-                },
-              ),
+              if (!isPaid) ...[
+                SizedBox(height: 12.h),
+                _buildActionButton(
+                  icon: Icons.edit_outlined,
+                  title: 'Edit / Customize',
+                  subtitle: 'Modify document entries or templates',
+                  onTap: () {
+                    controller.populateFromRecord(record);
+                    controller.editingRecordIndex.value = index;
+                    Get.to(() => const CreateInvoiceView());
+                  },
+                ),
+              ],
               SizedBox(height: 12.h),
 
               _buildActionButton(
@@ -492,49 +498,31 @@ class InvoiceDetailView extends GetView<InvoiceController> {
               Row(
                 children: [
                   Expanded(
-                    child: OutlinedButton(
+                    child: CustomButton(
+                      text: 'Cancel',
+                      backgroundColor: Colors.transparent,
+                      textColor: Colors.white,
+                      borderColor:  Color(0xFF2C2C2C),
                       onPressed: () => Get.back(),
-                      style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: Color(0xFF2C2C2C)),
-                        foregroundColor: Colors.white,
-                        padding: EdgeInsets.symmetric(vertical: 14.h),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12.r),
-                        ),
-                      ),
-                      child: Text(
-                        'Cancel',
-                        style: GoogleFonts.inter(fontWeight: FontWeight.w600),
-                      ),
+                      padding: EdgeInsets.symmetric(vertical: 14.h),
                     ),
                   ),
                   SizedBox(width: 12.w),
                   Expanded(
-                    child: ElevatedButton(
+                    child: CustomButton(
+                      text: 'Delete',
+                      backgroundColor: const Color(0xFFEF4444),
+                      textColor: Colors.white,
                       onPressed: () async {
                         await controller.deleteInvoiceAtIndex(index);
                         Get.back(); // close dialog
                         Get.back(); // close details page (returns to history view)
-                        Get.snackbar(
-                          'Deleted',
+                        Helpers.showCustomSnackBar(
                           'Invoice has been deleted.',
-                          backgroundColor: Colors.redAccent,
-                          colorText: Colors.white,
-                          snackPosition: SnackPosition.BOTTOM,
+                          isError: false,
                         );
                       },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFEF4444),
-                        foregroundColor: Colors.white,
-                        padding: EdgeInsets.symmetric(vertical: 14.h),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12.r),
-                        ),
-                      ),
-                      child: Text(
-                        'Delete',
-                        style: GoogleFonts.inter(fontWeight: FontWeight.bold),
-                      ),
+                      padding: EdgeInsets.symmetric(vertical: 14.h),
                     ),
                   ),
                 ],

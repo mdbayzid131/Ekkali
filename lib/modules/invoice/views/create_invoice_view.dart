@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:moeb_26/config/themes/app_theme.dart';
+import 'package:moeb_26/core/widgets/CustomButton.dart';
 import '../controllers/invoice_controller.dart';
+
+import 'package:moeb_26/core/widgets/custom_sub_appbar.dart';
 
 class CreateInvoiceView extends GetView<InvoiceController> {
   const CreateInvoiceView({super.key});
@@ -11,36 +15,9 @@ class CreateInvoiceView extends GetView<InvoiceController> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      appBar: PreferredSize(
-        preferredSize: Size.fromHeight(60.h),
-        child: Container(
-          decoration: const BoxDecoration(
-            border: Border(
-              bottom: BorderSide(color: Color(0xFF1E1E1E), width: 1.5),
-            ),
-          ),
-          child: AppBar(
-            backgroundColor: Colors.black,
-            elevation: 0,
-            leading: IconButton(
-              icon: Icon(
-                Icons.arrow_back_ios_new,
-                color: Colors.white,
-                size: 20.sp,
-              ),
-              onPressed: () => controller.previousStep(),
-            ),
-            title: Text(
-              'Create Invoice',
-              style: GoogleFonts.inter(
-                color: Colors.white,
-                fontSize: 18.sp,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            centerTitle: true,
-          ),
-        ),
+      appBar: CustomSubAppBar(
+        title: 'Create Invoice',
+        onBackPressed: () => controller.previousStep(),
       ),
       body: Obx(() {
         return Column(
@@ -122,7 +99,7 @@ class CreateInvoiceView extends GetView<InvoiceController> {
                 child: Container(
                   height: 4.h,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFD08700), // Bright orange-yellow
+                    color: AppColors.primaryColor,
                     borderRadius: BorderRadius.circular(2.r),
                   ),
                 ),
@@ -153,25 +130,13 @@ class CreateInvoiceView extends GetView<InvoiceController> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Invoice Number
-        _buildFieldLabel('Invoice number*'),
-        _buildInputField(
-          controller: controller.invoiceNumberController,
-          hint: 'e.g. Invoice 001',
-          suffixIcon: Icon(
-            Icons.notes,
-            color: const Color(0xFFD5C4AB),
-            size: 20.sp,
-          ),
-        ),
-        SizedBox(height: 20.h),
-
         // Invoice Amount
         _buildFieldLabel('Invoice amount*'),
         _buildInputField(
           controller: controller.invoiceAmountController,
           hint: '0.00',
           prefixText: 'USD ',
+          errorText: controller.invoiceAmountError.value,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
         ),
         SizedBox(height: 20.h),
@@ -234,7 +199,7 @@ class CreateInvoiceView extends GetView<InvoiceController> {
                 child: Text(
                   'Select Saved Client',
                   style: GoogleFonts.inter(
-                    color: const Color(0xFFD08700),
+                    color: AppColors.primaryColor,
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w600,
                   ),
@@ -259,7 +224,7 @@ class CreateInvoiceView extends GetView<InvoiceController> {
                     color: const Color(0xFF161410),
                     borderRadius: BorderRadius.circular(12.r),
                     border: Border.all(
-                      color: const Color(0xFFD08700).withValues(alpha: 0.5),
+                      color: AppColors.primaryColor.withValues(alpha: 0.5),
                       width: 1,
                     ),
                   ),
@@ -268,7 +233,7 @@ class CreateInvoiceView extends GetView<InvoiceController> {
                       Container(
                         padding: EdgeInsets.all(6.r),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFD08700).withValues(alpha: 0.15),
+                          color: AppColors.primaryColor.withValues(alpha: 0.15),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
@@ -314,6 +279,7 @@ class CreateInvoiceView extends GetView<InvoiceController> {
         _buildInputField(
           controller: controller.clientNameController,
           hint: 'e.g. Johnathan Smith',
+          errorText: controller.clientNameError.value,
         ),
         SizedBox(height: 16.h),
 
@@ -330,6 +296,7 @@ class CreateInvoiceView extends GetView<InvoiceController> {
         _buildInputField(
           controller: controller.clientEmailController,
           hint: 'client@example.com',
+          errorText: controller.clientEmailError.value,
           keyboardType: TextInputType.emailAddress,
         ),
         SizedBox(height: 16.h),
@@ -339,6 +306,7 @@ class CreateInvoiceView extends GetView<InvoiceController> {
         _buildInputField(
           controller: controller.clientPhoneController,
           hint: 'e.g. 555-000-0000',
+          errorText: controller.clientPhoneError.value,
           keyboardType: TextInputType.phone,
         ),
         SizedBox(height: 24.h),
@@ -366,10 +334,11 @@ class CreateInvoiceView extends GetView<InvoiceController> {
         SizedBox(height: 16.h),
 
         // Street Address
-        _buildFieldLabel('Street Address'),
+        _buildFieldLabel('Street Address*'),
         _buildInputField(
           controller: controller.clientStreetAddressController,
           hint: '123 Luxury Avenue',
+          errorText: controller.clientStreetAddressError.value,
         ),
         SizedBox(height: 16.h),
 
@@ -380,10 +349,11 @@ class CreateInvoiceView extends GetView<InvoiceController> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildFieldLabel('City'),
+                  _buildFieldLabel('City*'),
                   _buildInputField(
                     controller: controller.clientCityController,
                     hint: 'Beverly Hills',
+                    errorText: controller.clientCityError.value,
                   ),
                 ],
               ),
@@ -393,10 +363,11 @@ class CreateInvoiceView extends GetView<InvoiceController> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildFieldLabel('State/Province'),
+                  _buildFieldLabel('State/Province*'),
                   _buildInputField(
                     controller: controller.clientStateController,
                     hint: 'CA',
+                    errorText: controller.clientStateError.value,
                   ),
                 ],
               ),
@@ -412,10 +383,11 @@ class CreateInvoiceView extends GetView<InvoiceController> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildFieldLabel('ZIP/Postal Code'),
+                  _buildFieldLabel('ZIP/Postal Code*'),
                   _buildInputField(
                     controller: controller.clientZipController,
                     hint: '90210',
+                    errorText: controller.clientZipError.value,
                   ),
                 ],
               ),
@@ -593,84 +565,124 @@ class CreateInvoiceView extends GetView<InvoiceController> {
     String? prefixText,
     TextInputType keyboardType = TextInputType.text,
     int maxLines = 1,
+    String? errorText,
   }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFF111111), // Dark container background
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: const Color(0xFF1E1E1E), width: 1.5),
-      ),
-      child: TextField(
-        controller: controller,
-        keyboardType: keyboardType,
-        maxLines: maxLines,
-        style: GoogleFonts.inter(
-          color: Colors.white,
-          fontSize: 15.sp,
-          fontWeight: FontWeight.w500,
+    final bool hasError = errorText != null && errorText.trim().isNotEmpty;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFF111111), // Dark container background
+            borderRadius: BorderRadius.circular(12.r),
+            border: Border.all(
+              color: const Color(0xFF1E1E1E),
+              width: 1.5,
+            ),
+          ),
+          child: TextField(
+            controller: controller,
+            keyboardType: keyboardType,
+            maxLines: maxLines,
+            style: GoogleFonts.inter(
+              color: Colors.white,
+              fontSize: 15.sp,
+              fontWeight: FontWeight.w500,
+            ),
+            decoration: InputDecoration(
+              prefixText: prefixText,
+              prefixStyle: GoogleFonts.inter(
+                color: const Color(0xFFD5C4AB),
+                fontSize: 15.sp,
+                fontWeight: FontWeight.w500,
+              ),
+              hintText: hint,
+              hintStyle: GoogleFonts.inter(
+                color: const Color(0xFF4B5563),
+                fontSize: 15.sp,
+              ),
+              contentPadding: EdgeInsets.symmetric(
+                horizontal: 16.w,
+                vertical: maxLines > 1 ? 12.h : 16.h,
+              ),
+              border: InputBorder.none,
+              suffixIcon: suffixIcon,
+            ),
+          ),
         ),
-        decoration: InputDecoration(
-          prefixText: prefixText,
-          prefixStyle: GoogleFonts.inter(
-            color: const Color(0xFFD5C4AB),
-            fontSize: 15.sp,
-            fontWeight: FontWeight.w500,
+        if (hasError)
+          Padding(
+            padding: EdgeInsets.only(top: 6.h, left: 4.w),
+            child: Text(
+              errorText,
+              style: GoogleFonts.inter(
+                color: const Color(0xFFEF4444),
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
           ),
-          hintText: hint,
-          hintStyle: GoogleFonts.inter(
-            color: const Color(0xFF4B5563),
-            fontSize: 15.sp,
-          ),
-          contentPadding: EdgeInsets.symmetric(
-            horizontal: 16.w,
-            vertical: maxLines > 1 ? 12.h : 16.h,
-          ),
-          border: InputBorder.none,
-          suffixIcon: suffixIcon,
-        ),
-      ),
+      ],
     );
   }
 
   Widget _buildDueDateSection(BuildContext context) {
-    return Wrap(
-      spacing: 10.w,
-      runSpacing: 10.h,
-      children: controller.dueDateOptions.map((option) {
-        final isSelected = controller.selectedDueDateOption.value == option;
+    final hasDueDateError = controller.customDueDateError.value.isNotEmpty;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Wrap(
+          spacing: 10.w,
+          runSpacing: 10.h,
+          children: controller.dueDateOptions.map((option) {
+            final isSelected = controller.selectedDueDateOption.value == option;
 
-        // Label logic for Custom Due Date representation
-        String displayLabel = option;
-        if (option == 'Custom Due Date' &&
-            controller.customDueDate.value != null) {
-          displayLabel = controller.formattedDueDate;
-        }
+            // Label logic for Custom Due Date representation
+            String displayLabel = option;
+            if (option == 'Custom Due Date' &&
+                controller.customDueDate.value != null) {
+              displayLabel = controller.formattedDueDate;
+            }
 
-        return GestureDetector(
-          onTap: () => controller.selectDueDateOption(option, context),
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
-            decoration: BoxDecoration(
-              color: isSelected ? const Color(0xFFFEDB9B) : Colors.transparent,
-              borderRadius: BorderRadius.circular(20.r),
-              border: Border.all(
-                color: isSelected
-                    ? const Color(0xFFFEDB9B)
-                    : const Color(0xFF1E1E1E),
-                width: 1.5,
+            return GestureDetector(
+              onTap: () => controller.selectDueDateOption(option, context),
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
+                decoration: BoxDecoration(
+                  color: isSelected ? const Color(0xFFFEDB9B) : Colors.transparent,
+                  borderRadius: BorderRadius.circular(20.r),
+                  border: Border.all(
+                    color: isSelected
+                        ? const Color(0xFFFEDB9B)
+                        : const Color(0xFF1E1E1E),
+                    width: 1.5,
+                  ),
+                ),
+                child: Text(
+                  displayLabel,
+                  style: GoogleFonts.inter(
+                    color: isSelected ? Colors.black : Colors.white,
+                    fontSize: 13.sp,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                  ),
+                ),
               ),
-            ),
+            );
+          }).toList(),
+        ),
+        if (hasDueDateError)
+          Padding(
+            padding: EdgeInsets.only(top: 6.h, left: 4.w),
             child: Text(
-              displayLabel,
+              controller.customDueDateError.value,
               style: GoogleFonts.inter(
-                color: isSelected ? Colors.black : Colors.white,
-                fontSize: 13.sp,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                color: const Color(0xFFEF4444),
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w400,
               ),
             ),
           ),
-        );
-      }).toList(),
+      ],
     );
   }
 
@@ -716,9 +728,6 @@ class CreateInvoiceView extends GetView<InvoiceController> {
 
   // --- BOTTOM BUTTONS ---
   Widget _buildBottomButtons(BuildContext context) {
-    final bool isLastStep = controller.currentStep.value == 3;
-    final String nextButtonText = isLastStep ? 'Preview' : 'Next';
-
     return Container(
       padding: EdgeInsets.fromLTRB(20.w, 10.h, 20.w, 30.h),
       decoration: const BoxDecoration(
@@ -728,70 +737,25 @@ class CreateInvoiceView extends GetView<InvoiceController> {
         children: [
           // Back Button
           Expanded(
-            child: GestureDetector(
-              onTap: () => controller.previousStep(),
-              child: Container(
-                alignment: Alignment.center,
-                padding: EdgeInsets.symmetric(vertical: 16.h),
-                decoration: BoxDecoration(
-                  color: Colors.transparent,
-                  borderRadius: BorderRadius.circular(12.r),
-                  border: Border.all(
-                    color: const Color(0xFF1E1E1E),
-                    width: 1.5,
-                  ),
-                ),
-                child: Text(
-                  'Back',
-                  style: GoogleFonts.inter(
-                    color: Colors.white,
-                    fontSize: 15.sp,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
+            child: CustomButton(
+              text: 'Back',
+              backgroundColor: Colors.transparent,
+              textColor: Colors.white,
+              borderColor: const Color(0xFF1E1E1E),
+              onPressed: () => controller.previousStep(),
+              padding: EdgeInsets.symmetric(vertical: 12.h),
             ),
           ),
           SizedBox(width: 15.w),
 
           // Next/Create Button
           Expanded(
-            child: GestureDetector(
-              onTap: () => controller.nextStep(),
-              child: Container(
-                alignment: Alignment.center,
-                padding: EdgeInsets.symmetric(vertical: 16.h),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFD08700), // Bright orange-yellow
-                  borderRadius: BorderRadius.circular(12.r),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFFD08700).withValues(alpha: 0.15),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Obx(() {
-                  if (controller.isLoading.value) {
-                    return SizedBox(
-                      width: 20.w,
-                      height: 20.w,
-                      child: const CircularProgressIndicator(
-                        strokeWidth: 2.5,
-                        color: Colors.black,
-                      ),
-                    );
-                  }
-                  return Text(
-                    nextButtonText,
-                    style: GoogleFonts.inter(
-                      color: Colors.black,
-                      fontSize: 15.sp,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  );
-                }),
+            child: Obx(
+              () => CustomButton(
+                text: controller.currentStep.value == 3 ? 'Preview' : 'Next',
+                loading: controller.isLoading.value,
+                onPressed: () => controller.nextStep(),
+                padding: EdgeInsets.symmetric(vertical: 12.h),
               ),
             ),
           ),
@@ -868,7 +832,7 @@ class CreateInvoiceView extends GetView<InvoiceController> {
                           borderRadius: BorderRadius.circular(14.r),
                           border: Border.all(
                             color: isSelected
-                                ? const Color(0xFFD08700)
+                                ? AppColors.primaryColor
                                 : const Color(0xFF2C2C2C),
                             width: isSelected ? 1.5 : 1,
                           ),
@@ -878,7 +842,7 @@ class CreateInvoiceView extends GetView<InvoiceController> {
                             Container(
                               padding: EdgeInsets.all(10.r),
                               decoration: BoxDecoration(
-                                color: const Color(0xFFD08700)
+                                color: AppColors.primaryColor
                                     .withValues(alpha: 0.15),
                                 shape: BoxShape.circle,
                               ),
@@ -928,7 +892,7 @@ class CreateInvoiceView extends GetView<InvoiceController> {
                             if (isSelected)
                               Icon(
                                 Icons.check_circle,
-                                color: const Color(0xFFD08700),
+                                color: AppColors.primaryColor,
                                 size: 22.sp,
                               ),
                           ],

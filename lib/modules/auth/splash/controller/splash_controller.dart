@@ -6,6 +6,8 @@ import 'package:moeb_26/core/services/firebase_notification_service.dart';
 import 'package:moeb_26/config/constants/app_constants.dart';
 import 'package:moeb_26/config/constants/storage_constants.dart';
 import 'package:moeb_26/config/routes/app_pages.dart';
+import 'package:moeb_26/core/services/subscription_service.dart';
+import 'package:moeb_26/core/services/auth_service.dart';
 import 'package:moeb_26/modules/auth/authentication/views/auth_selection_view.dart';
 import 'package:moeb_26/core/services/storege_service.dart';
 
@@ -31,8 +33,7 @@ class SplashScreenController extends GetxController {
     try {
       // Initialize Firebase asynchronously after the first frame has rendered
       if (Firebase.apps.isEmpty) {
-        await Firebase.
-        initializeApp(
+        await Firebase.initializeApp(
           options: DefaultFirebaseOptions.currentPlatform,
         );
       }
@@ -69,9 +70,30 @@ class SplashScreenController extends GetxController {
     final accessToken = await StorageService.getString(
       StorageConstants.bearerToken,
     );
-    if (accessToken.isNotEmpty) {
+    final bool? isApproved = await StorageService.getBool(
+      StorageConstants.isApproved,
+    );
+
+    // Only auto-login directly to home if the user is already approved
+    if (accessToken.isNotEmpty && isApproved == true) {
+      try {
+        if (Get.isRegistered<SubscriptionService>()) {
+          Get.find<SubscriptionService>().syncStatusWithBackend();
+        }
+      } catch (_) {}
       Get.offAllNamed(Routes.bottomNabbarView);
     } else {
+      // Incomplete onboarding, unapproved, or logged out:
+      // Clear incomplete local session so user logs in and gets fresh server status
+      try {
+        if (Get.isRegistered<AuthService>()) {
+          await Get.find<AuthService>().clearLocalAuth();
+        }
+        if (Get.isRegistered<SubscriptionService>()) {
+          Get.find<SubscriptionService>().clearSubscriptionData();
+        }
+      } catch (_) {}
+
       Get.offAll(() => const AuthSelectionView());
     }
   }

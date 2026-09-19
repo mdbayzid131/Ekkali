@@ -12,6 +12,7 @@ class UserProfileModel {
   final String profilePicture;
   final String status;
   final bool verified;
+  final List<String> badges;
   final List<String> deviceTokens;
   final List<Vehicle> vehicles;
   final DateTime createdAt;
@@ -35,6 +36,7 @@ class UserProfileModel {
     required this.profilePicture,
     required this.status,
     required this.verified,
+    this.badges = const [],
     required this.deviceTokens,
     required this.vehicles,
     required this.createdAt,
@@ -46,6 +48,17 @@ class UserProfileModel {
   });
 
   factory UserProfileModel.fromJson(Map<String, dynamic> json) {
+    final List<String> badgesList = [];
+    if (json['badges'] is List) {
+      for (var b in json['badges']) {
+        if (b != null && b.toString().isNotEmpty) {
+          badgesList.add(b.toString());
+        }
+      }
+    } else if (json['badge'] != null && json['badge'].toString().isNotEmpty) {
+      badgesList.add(json['badge'].toString());
+    }
+
     return UserProfileModel(
       id: json['_id']?.toString() ?? '',
       name: json['name']?.toString() ?? '',
@@ -53,13 +66,18 @@ class UserProfileModel {
       email: json['email']?.toString() ?? '',
       phone: json['phone']?.toString() ?? '',
       home: json['home']?.toString() ?? '',
-      serviceArea: json['serviceArea']?.toString() ?? '',
+      serviceArea: json['serviceArea'] is Map
+          ? (json['serviceArea']['areaName']?.toString() ??
+              json['serviceArea']['name']?.toString() ??
+              '')
+          : (json['serviceArea']?.toString() ?? ''),
       experience: json['experience'] is int ? json['experience'] : 0,
       company: json['company']?.toString() ?? '',
       companyRole: json['companyRole']?.toString() ?? '',
       profilePicture: json['profilePicture']?.toString() ?? '',
       status: json['status']?.toString() ?? '',
       verified: json['verified'] ?? false,
+      badges: badgesList,
       deviceTokens:
           (json['deviceTokens'] as List?)?.map((e) => e.toString()).toList() ??
           [],
@@ -75,7 +93,10 @@ class UserProfileModel {
           ? DateTime.parse(json['updatedAt'])
           : DateTime.now(),
       averageRating: (json['averageRating'] ?? 0.0).toDouble(),
-      selectedVehicle: json['selectedVehicle']?.toString(),
+      selectedVehicle: json['selectedVehicle'] is Map
+          ? (json['selectedVehicle']['id']?.toString() ??
+              json['selectedVehicle']['_id']?.toString())
+          : json['selectedVehicle']?.toString(),
       nickname: json['nickname']?.toString(),
       uid: json['uid']?.toString(),
     );
@@ -96,6 +117,7 @@ class UserProfileModel {
       'profilePicture': profilePicture,
       'status': status,
       'verified': verified,
+      'badges': badges,
       'deviceTokens': deviceTokens,
       'vehicles': vehicles.map((e) => e.toJson()).toList(),
       'createdAt': createdAt.toIso8601String(),
@@ -113,10 +135,13 @@ class Vehicle {
   final String carType;
   final String make;
   final String model;
+  final String makeAndModel;
   final String colorInside;
   final String colorOutside;
   final int year;
   final String licensePlate;
+  final String status;
+  final String? rejectionReason;
   final String? vehicleRegistrationImage;
   final String? vehicleRegistrationExpiryDate;
   final String? commercialInsuranceImage;
@@ -130,10 +155,13 @@ class Vehicle {
     required this.carType,
     required this.make,
     required this.model,
+    required this.makeAndModel,
     required this.colorInside,
     required this.colorOutside,
     required this.year,
     required this.licensePlate,
+    this.status = 'PENDING_REVIEW',
+    this.rejectionReason,
     this.vehicleRegistrationImage,
     this.vehicleRegistrationExpiryDate,
     this.commercialInsuranceImage,
@@ -144,42 +172,76 @@ class Vehicle {
   });
 
   factory Vehicle.fromJson(Map<String, dynamic> json) {
+    final rawMakeAndModel = json['makeAndModel']?.toString() ??
+        '${json['make'] ?? ''} ${json['model'] ?? ''}'.trim();
+    
+    String parsedMake = json['make']?.toString() ?? '';
+    String parsedModel = json['model']?.toString() ?? '';
+
+    if (parsedMake.isEmpty && rawMakeAndModel.isNotEmpty) {
+      final parts = rawMakeAndModel.split(' ');
+      parsedMake = parts.first;
+      parsedModel = parts.skip(1).join(' ');
+    }
+
+    final rawType = json['type']?.toString() ?? json['carType']?.toString() ?? 'Sedan';
+
     return Vehicle(
-      id: json['_id']?.toString() ?? '',
-      carType: json['carType']?.toString() ?? '',
-      make: json['make']?.toString() ?? '',
-      model: json['model']?.toString() ?? '',
+      id: json['_id']?.toString() ?? json['id']?.toString() ?? '',
+      carType: rawType,
+      make: parsedMake,
+      model: parsedModel,
+      makeAndModel: rawMakeAndModel.isNotEmpty ? rawMakeAndModel : "$parsedMake $parsedModel".trim(),
       colorInside: json['colorInside']?.toString() ?? '',
       colorOutside: json['colorOutside']?.toString() ?? '',
-      year: json['year'] is int ? json['year'] : 0,
-      licensePlate: json['licensePlate']?.toString() ?? '',
+      year: json['year'] is int
+          ? json['year']
+          : (int.tryParse(json['year']?.toString() ?? '') ?? 0),
+      licensePlate: json['licensePlate']?.toString() ?? json['licensePlateRaw']?.toString() ?? '',
+      status: json['status']?.toString() ?? 'PENDING_REVIEW',
+      rejectionReason: json['rejectionReason']?.toString(),
       // Nested: vehicleRegistration.image / .expiryDate
-      vehicleRegistrationImage: json['vehicleRegistration']?['image']
-          ?.toString(),
-      vehicleRegistrationExpiryDate: json['vehicleRegistration']?['expiryDate']
-          ?.toString(),
+      vehicleRegistrationImage: json['vehicleRegistration'] is Map
+          ? json['vehicleRegistration']['image']?.toString()
+          : json['vehicleRegistrationImage']?.toString(),
+      vehicleRegistrationExpiryDate: json['vehicleRegistration'] is Map
+          ? json['vehicleRegistration']['expiryDate']?.toString()
+          : json['vehicleRegistrationExpiryDate']?.toString(),
       // Nested: commercialInsurance.image / .expiryDate
-      commercialInsuranceImage: json['commercialInsurance']?['image']
-          ?.toString(),
-      commercialInsuranceExpiryDate: json['commercialInsurance']?['expiryDate']
-          ?.toString(),
+      commercialInsuranceImage: json['commercialInsurance'] is Map
+          ? json['commercialInsurance']['image']?.toString()
+          : json['commercialInsuranceImage']?.toString(),
+      commercialInsuranceExpiryDate: json['commercialInsurance'] is Map
+          ? json['commercialInsurance']['expiryDate']?.toString()
+          : json['commercialInsuranceExpiryDate']?.toString(),
       // Nested: photos.frontView / .rearView / .interiorView
-      vehiclePhotoFront: json['photos']?['frontView']?.toString(),
-      vehiclePhotoRear: json['photos']?['rearView']?.toString(),
-      vehiclePhotoInterior: json['photos']?['interiorView']?.toString(),
+      vehiclePhotoFront: json['photos'] is Map
+          ? json['photos']['frontView']?.toString()
+          : json['vehiclePhotoFront']?.toString(),
+      vehiclePhotoRear: json['photos'] is Map
+          ? json['photos']['rearView']?.toString()
+          : json['vehiclePhotoRear']?.toString(),
+      vehiclePhotoInterior: json['photos'] is Map
+          ? json['photos']['interiorView']?.toString()
+          : json['vehiclePhotoInterior']?.toString(),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       '_id': id,
+      'id': id,
+      'type': carType,
       'carType': carType,
       'make': make,
       'model': model,
+      'makeAndModel': makeAndModel,
       'colorInside': colorInside,
       'colorOutside': colorOutside,
       'year': year,
       'licensePlate': licensePlate,
+      'status': status,
+      'rejectionReason': rejectionReason,
       'vehicleRegistrationImage': vehicleRegistrationImage,
       'vehicleRegistrationExpiryDate': vehicleRegistrationExpiryDate,
       'commercialInsuranceImage': commercialInsuranceImage,

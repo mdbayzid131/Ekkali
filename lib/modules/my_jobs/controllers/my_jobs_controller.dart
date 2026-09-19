@@ -7,11 +7,13 @@ import 'package:moeb_26/data/models/my_jobs_model.dart';
 import 'package:moeb_26/data/repositories/job_repository.dart';
 import 'package:moeb_26/core/services/api_cheker.dart';
 import 'package:moeb_26/core/services/job_service.dart';
+import 'package:moeb_26/core/services/socket_service.dart';
 import 'package:moeb_26/core/utils/helpers.dart';
 
 class BookingController extends GetxController {
   final JobService _jobService = Get.find<JobService>();
   final JobRepo _jobRepo = Get.find<JobRepo>();
+  SocketService? _socketService;
 
   var isDeleted = false.obs;
   var isJobAcceptanceView = false.obs;
@@ -25,9 +27,9 @@ class BookingController extends GetxController {
   var page = 1;
   var hasNextPage = true.obs;
 
-  // My Jobs Pagination
+  // My Jobs Cursor & Pagination
   var isMyJobsLoadMore = false.obs;
-  var myJobsPage = 1;
+  String? myJobsNextCursor;
   var hasNextMyJobsPage = true.obs;
 
   RxList<JobData> myJobsList = <JobData>[].obs;
@@ -39,53 +41,188 @@ class BookingController extends GetxController {
   final rejectLoading = <String, bool>{}.obs;
   final viewLoading = <String, bool>{}.obs;
 
+  final List<Worker> _socketWorkers = [];
+
   @override
   void onInit() {
     super.onInit();
+    if (Get.isRegistered<SocketService>()) {
+      _socketService = Get.find<SocketService>();
+      _setupSocketListeners();
+    }
     fetchJobs();
     fetchJobOffers();
   }
 
+  void _setupSocketListeners() {
+    if (_socketService == null) return;
+
+    // 1. Listen for Driver Applications (JOB_APPLICATION_RECEIVED)
+    _socketWorkers.add(
+      ever(_socketService!.lastJobApplication, (data) {
+        if (data == null) return;
+        try {
+          String? targetJobId;
+          dynamic applicantData;
+
+          if (data is Map) {
+            targetJobId = data['jobId']?.toString() ??
+                data['id']?.toString() ??
+                data['_id']?.toString();
+            applicantData = data['applicant'] ?? data['data'];
+          }
+
+          if (targetJobId != null && targetJobId.isNotEmpty) {
+            final index = myJobsList.indexWhere((j) => j.id == targetJobId);
+            if (index != -1) {
+              final currentJob = myJobsList[index];
+              currentJob.applicantCount = (currentJob.applicantCount ?? 0) + 1;
+              if (applicantData is Map<String, dynamic>) {
+                currentJob.applicant = Applicant.fromJson(applicantData);
+              }
+              myJobsList[index] = currentJob;
+              myJobsList.refresh();
+            }
+
+            if (myJobView.value?.id == targetJobId) {
+              fetchJobDetails(jobId: targetJobId);
+            }
+
+            String applicantName = "A driver";
+            if (applicantData is Map && applicantData['name'] != null) {
+              applicantName = applicantData['name'].toString();
+            }
+            Helpers.showCustomSnackBar(
+              "$applicantName applied to your job!",
+              isError: false,
+            );
+            debugPrint("✨ BookingController: Real-time application received for [$targetJobId]");
+          }
+        } catch (e) {
+          debugPrint("❌ BookingController: Error handling JOB_APPLICATION_RECEIVED: $e");
+        }
+      }),
+    );
+
+    // 2. Listen for Ride Status Updates (RIDE_STATUS_UPDATED)
+    _socketWorkers.add(
+      ever(_socketService!.lastRideStatusUpdated, (data) {
+        if (data == null) return;
+        try {
+          String? targetJobId;
+          String? newRideStatus;
+
+          if (data is Map) {
+            targetJobId = data['jobId']?.toString() ??
+                data['id']?.toString() ??
+                data['_id']?.toString();
+            newRideStatus = data['rideStatus']?.toString() ?? data['status']?.toString();
+          }
+
+          if (targetJobId != null && targetJobId.isNotEmpty && newRideStatus != null) {
+            final index = myJobsList.indexWhere((j) => j.id == targetJobId);
+            if (index != -1) {
+              final currentJob = myJobsList[index];
+              currentJob.rideStatus = newRideStatus;
+              myJobsList[index] = currentJob;
+              myJobsList.refresh();
+            }
+
+            if (myJobView.value?.id == targetJobId) {
+              myJobView.value!.rideStatus = newRideStatus;
+              myJobView.refresh();
+            }
+            debugPrint("✨ BookingController: Real-time ride status updated [$targetJobId -> $newRideStatus]");
+          }
+        } catch (e) {
+          debugPrint("❌ BookingController: Error handling RIDE_STATUS_UPDATED: $e");
+        }
+      }),
+    );
+
+    // 3. Listen for Job Cancellations (JOB_CANCELLED)
+    _socketWorkers.add(
+      ever(_socketService!.lastJobCancelled, (data) {
+        if (data == null) return;
+        try {
+          String? targetJobId;
+          if (data is Map) {
+            targetJobId = data['jobId']?.toString() ??
+                data['id']?.toString() ??
+                data['_id']?.toString();
+          } else if (data is String) {
+            targetJobId = data;
+          }
+
+          if (targetJobId != null && targetJobId.isNotEmpty) {
+            final index = myJobsList.indexWhere((j) => j.id == targetJobId);
+            if (index != -1) {
+              final currentJob = myJobsList[index];
+              currentJob.status = "CANCELLED";
+              currentJob.rideStatus = "CANCELLED";
+              myJobsList[index] = currentJob;
+              myJobsList.refresh();
+            }
+
+            if (myJobView.value?.id == targetJobId) {
+              myJobView.value!.status = "CANCELLED";
+              myJobView.value!.rideStatus = "CANCELLED";
+              myJobView.refresh();
+            }
+            debugPrint("✨ BookingController: Real-time job cancelled [$targetJobId]");
+          }
+        } catch (e) {
+          debugPrint("❌ BookingController: Error handling JOB_CANCELLED: $e");
+        }
+      }),
+    );
+  }
+
+  @override
+  void onClose() {
+    for (var worker in _socketWorkers) {
+      worker.dispose();
+    }
+    _socketWorkers.clear();
+    super.onClose();
+  }
+
   Future<void> fetchJobs({bool isRefresh = false}) async {
     if (isRefresh) {
-      myJobsPage = 1;
+      myJobsNextCursor = null;
       hasNextMyJobsPage.value = true;
     }
 
     if (!hasNextMyJobsPage.value) return;
 
     try {
-      if (myJobsPage == 1) {
+      if (myJobsNextCursor == null) {
         isJobsLoading.value = true;
       } else {
         isMyJobsLoadMore.value = true;
       }
 
-      final response = await _jobService.getJobs(page: myJobsPage, limit: 10);
+      final response = await _jobService.getJobs(
+        cursor: myJobsNextCursor,
+        limit: 10,
+      );
       if (response.statusCode == 200 || response.statusCode == 201) {
         if (response.data != null && response.data['data'] != null) {
           final jobResponse = MyJobsModel.fromJson(response.data);
           final newJobs = jobResponse.data ?? [];
 
-          if (myJobsPage == 1) {
+          if (myJobsNextCursor == null || isRefresh) {
             myJobsList.assignAll(newJobs);
           } else {
             myJobsList.addAll(newJobs);
           }
 
-          if (jobResponse.pagination != null) {
-            if (myJobsPage >= (jobResponse.pagination!.totalPage ?? 1)) {
-              hasNextMyJobsPage.value = false;
-            } else {
-              myJobsPage++;
-            }
+          if (jobResponse.cursor != null) {
+            myJobsNextCursor = jobResponse.cursor!.nextCursor;
+            hasNextMyJobsPage.value =
+                jobResponse.cursor!.hasMore ?? (myJobsNextCursor != null);
           } else {
-            // Fallback if pagination is null
-            if (newJobs.isEmpty || newJobs.length < 10) {
-              hasNextMyJobsPage.value = false;
-            } else {
-              myJobsPage++;
-            }
+            hasNextMyJobsPage.value = false;
           }
         }
       } else {
@@ -129,7 +266,7 @@ class BookingController extends GetxController {
         isLoadMore.value = true;
       }
 
-      final response = await _jobService.getAllJobOffers(page: page);
+      final response = await _jobService.getAllJobOffers();
       if (response.statusCode == 200 || response.statusCode == 201) {
         if (response.data != null && response.data['data'] != null) {
           final jobResponse = JobResponse.fromJson(response.data);
@@ -221,17 +358,18 @@ class BookingController extends GetxController {
         await fetchJobs(isRefresh: true);
 
         Helpers.showCustomSnackBar(
-          'Job rejected successfully.',
+          response.data?['message'] ?? 'Applicant rejected successfully.',
           isError: false,
         );
       } else {
         final message = response.data is Map
-            ? (response.data['message'] ?? 'Failed to reject job.')
-            : 'Failed to reject job.';
+            ? (response.data['message'] ?? 'Failed to reject applicant.')
+            : 'Failed to reject applicant.';
         Helpers.showCustomSnackBar(message, isError: true);
       }
     } on DioException catch (e) {
-      final message = e.response?.data['message'] ?? 'Failed to reject job.';
+      final message =
+          e.response?.data['message'] ?? 'Failed to reject applicant.';
       Helpers.showCustomSnackBar(message, isError: true);
     } catch (e) {
       debugPrint("Error rejecting job: $e");
@@ -252,13 +390,14 @@ class BookingController extends GetxController {
         await fetchJobs(isRefresh: true);
 
         Helpers.showCustomSnackBar(
-          'Job approved successfully.',
+          response.data?['message'] ??
+              'Applicant approved and job assigned successfully.',
           isError: false,
         );
       } else {
         final message = response.data is Map
-            ? (response.data['message'] ?? 'Failed to approve job.')
-            : 'Failed to approve job.';
+            ? (response.data['message'] ?? 'Failed to approve applicant.')
+            : 'Failed to approve applicant.';
         Helpers.showCustomSnackBar(message, isError: true);
       }
     } on DioException catch (e) {
@@ -347,29 +486,29 @@ class BookingController extends GetxController {
   //   }
   // }
 
-  Future<void> cancelJobOffer({required String jobId}) async {
+  Future<bool> cancelJobOffer({required String jobId}) async {
     try {
       isActionLoading.value = true;
       final response = await _jobRepo.cancelJobOffer(jobId: jobId);
       if (response.statusCode == 200 || response.statusCode == 201) {
         // Refresh the list after cancellation
         await fetchJobs(isRefresh: true);
-        Helpers.showCustomSnackBar(
-          'Job cancelled successfully.',
-          isError: false,
-        );
+        return true;
       } else {
         final message = response.data is Map
             ? (response.data['message'] ?? 'Failed to cancel job.')
             : 'Failed to cancel job.';
         Helpers.showCustomSnackBar(message, isError: true);
+        return false;
       }
     } on DioException catch (e) {
       final message = e.response?.data['message'] ?? 'Failed to cancel job.';
       Helpers.showCustomSnackBar(message, isError: true);
+      return false;
     } catch (e) {
       debugPrint("Error canceling job: $e");
       Helpers.showCustomSnackBar('Something went wrong.', isError: true);
+      return false;
     } finally {
       isActionLoading.value = false;
     }

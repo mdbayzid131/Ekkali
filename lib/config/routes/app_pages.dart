@@ -5,6 +5,7 @@ import 'package:moeb_26/modules/auth/Term_and_policy/bindings/term_and_policy_bi
 import 'package:moeb_26/modules/auth/Term_and_policy/views/privacy_policy_signup_view.dart';
 import 'package:moeb_26/modules/auth/Term_and_policy/views/term_policy_view.dart';
 import 'package:moeb_26/modules/auth/authentication/bindings/auth_binding.dart';
+import 'package:moeb_26/modules/auth/authentication/bindings/personal_document_binding.dart';
 import 'package:moeb_26/modules/auth/vehicle/views/add_new_vehicle_view.dart';
 import 'package:moeb_26/modules/bottom_nab_bar/bindings/bottom_nabbar_binding.dart';
 import 'package:moeb_26/modules/chat/bindings/chat_bindings.dart';
@@ -16,8 +17,7 @@ import 'package:moeb_26/modules/my_jobs/bindings/my_jobs_binding.dart';
 import 'package:moeb_26/modules/my_items/bindings/my_items_binding.dart';
 import 'package:moeb_26/modules/ride_completed/bindings/ride_completed_binding.dart';
 import 'package:moeb_26/modules/my_ride_progress_details/bindings/my_ride_progress_details_binding.dart';
-import 'package:moeb_26/modules/service_Area/views/Service_Area_view.dart';
-import 'package:moeb_26/modules/service_area/bindings/service_area_binding.dart';
+
 import 'package:moeb_26/modules/auth/authentication/views/all_vehicle_view.dart';
 import 'package:moeb_26/modules/auth/authentication/views/application_not_Approved_view.dart';
 import 'package:moeb_26/modules/auth/authentication/views/application_submited_view.dart';
@@ -27,6 +27,7 @@ import 'package:moeb_26/modules/auth/authentication/views/create_account_view.da
 import 'package:moeb_26/modules/auth/authentication/views/documents_upload_view.dart';
 import 'package:moeb_26/modules/auth/authentication/views/otp_verifications_view.dart';
 import 'package:moeb_26/modules/auth/authentication/views/personal_document_view.dart';
+import 'package:moeb_26/modules/auth/authentication/views/personal_document_detail_view.dart';
 import 'package:moeb_26/modules/auth/profile/views/profile_view.dart';
 import 'package:moeb_26/modules/auth/profile/views/settings_view.dart';
 import 'package:moeb_26/modules/auth/authentication/views/reset_password_view.dart';
@@ -36,13 +37,13 @@ import 'package:moeb_26/modules/auth/authentication/views/signin_view.dart';
 import 'package:moeb_26/modules/auth/splash/binding/splash_binding.dart';
 import 'package:moeb_26/modules/auth/splash/views/splash_view.dart';
 import 'package:moeb_26/modules/auth/vehicle/views/vehicle_Information_view.dart';
+import 'package:moeb_26/modules/auth/vehicle/views/vehicle_details_view.dart';
 import 'package:moeb_26/modules/auth/authentication/views/auth_selection_view.dart';
 import 'package:moeb_26/modules/bottom_nab_bar/views/bottom_nabbar_view.dart';
 import 'package:moeb_26/modules/chat_detail/views/chat_detail_view.dart';
 import 'package:moeb_26/modules/chat/views/chat_view.dart';
 import 'package:moeb_26/modules/chat_community/views/chat_community_detail_view.dart';
 import 'package:moeb_26/modules/chat_support_detail/views/chat_support_detail_view.dart';
-import 'package:moeb_26/modules/jobs_approve/views/job_approve_view.dart';
 import 'package:moeb_26/modules/job_edit/views/job_edit_view.dart';
 import 'package:moeb_26/modules/ratings_feedback/views/ratings_feedback_view.dart';
 import 'package:moeb_26/modules/my_job_progress_details/views/my_job_progress_details_view.dart';
@@ -70,6 +71,8 @@ import 'package:moeb_26/modules/meet_greet/views/meet_greet_view.dart';
 import 'package:moeb_26/modules/meet_greet/views/meet_greet_fullscreen_view.dart';
 import 'package:moeb_26/modules/subscription/bindings/subscription_binding.dart';
 import 'package:moeb_26/modules/subscription/views/subscription_view.dart';
+import 'package:moeb_26/modules/my_schedule/bindings/my_schedule_binding.dart';
+import 'package:moeb_26/modules/my_schedule/views/my_schedule_view.dart';
 
 class Routes {
   static const String splashView = "/SplashView";
@@ -97,7 +100,6 @@ class Routes {
   static const String chatCommunityDetailView = "/ChatCommunityDetailView";
   static const String rideDetailsView = "/RideDetailsView";
   static const String rideCompletedView = "/RideCompletedView";
-  static const String jobApproveView = "/JobApproveView";
   static const String rideProgressWay = "/RideProgressWay";
   static const String rideProgressWayLocationView =
       "/RideProgressWayLocationView";
@@ -108,7 +110,7 @@ class Routes {
   static const String profileView = "/ProfileView";
   static const String settingsView = "/SettingsView";
   static const String ratingsFeedbackView = "/RatingsFeedbackView";
-  static const String serviceAreaView = "/ServiceAreaView";
+
   static const String noInternetScreen = "/NoInternetScreen";
   static const String otpVerificationView = "/OtpVerificationView";
   static const String forgetotpVerificationView = "/ForgetotpVerificationView";
@@ -118,7 +120,9 @@ class Routes {
   static const String privacyPolicySignUpView = "/PrivacyPolicySignUpView";
   static const String allVehicleView = "/AllVehicleView";
   static const String addNewVehicleView = "/AddNewVehicleView";
+  static const String vehicleDetailsView = "/VehicleDetailsView";
   static const String personalDocumentView = "/PersonalDocumentView";
+  static const String personalDocumentDetailView = "/PersonalDocumentDetailView";
   static const String dealsView = "/DealsView";
   static const String createInvoiceView = "/CreateInvoiceView";
   static const String invoiceHistoryView = "/InvoiceHistoryView";
@@ -129,6 +133,7 @@ class Routes {
   static const String meetGreetFullscreenView = "/MeetGreetFullscreenView";
   static const String expenseListView = "/ExpenseListView";
   static const String subscriptionView = "/SubscriptionView";
+  static const String myScheduleView = "/MyScheduleView";
 
   static List<GetPage> routes = [
     GetPage(
@@ -194,7 +199,7 @@ class Routes {
       name: termPolicyView,
       page: () => TermPolicyView(),
       transition: Transition.noTransition,
-      binding: AuthBinding(),
+      binding: TermPolicyBinding(),
     ),
     GetPage(
       name: applicationSubmitedView,
@@ -273,11 +278,6 @@ class Routes {
       binding: RideCompletedBinding(),
     ),
     GetPage(
-      name: jobApproveView,
-      page: () => JobApproveView(),
-      transition: Transition.noTransition,
-    ),
-    GetPage(
       name: rideProgressWayLocationView,
       page: () => const MyJobProgressDetailsView(),
       transition: Transition.noTransition,
@@ -301,12 +301,7 @@ class Routes {
       page: () => RatingsFeedbackView(),
       transition: Transition.noTransition,
     ),
-    GetPage(
-      name: serviceAreaView,
-      page: () => ServiceAreaView(),
-      transition: Transition.noTransition,
-      binding: ServiceAreaBinding(),
-    ),
+
     GetPage(
       name: noInternetScreen,
       page: () => NoInternetScreen(),
@@ -349,14 +344,25 @@ class Routes {
     ),
     GetPage(
       name: addNewVehicleView,
-      page: () => AddNewVehicleView(),
+      page: () => const AddNewVehicleView(),
+      transition: Transition.noTransition,
+    ),
+    GetPage(
+      name: vehicleDetailsView,
+      page: () => const VehicleDetailsView(),
       transition: Transition.noTransition,
     ),
     GetPage(
       name: personalDocumentView,
       page: () => PersonalDocumentView(),
       transition: Transition.noTransition,
-      binding: AuthBinding(),
+      binding: PersonalDocumentBinding(),
+    ),
+    GetPage(
+      name: personalDocumentDetailView,
+      page: () => const PersonalDocumentDetailView(),
+      transition: Transition.noTransition,
+      binding: PersonalDocumentBinding(),
     ),
     GetPage(
       name: dealsView,
@@ -423,6 +429,12 @@ class Routes {
       page: () => SubscriptionView(),
       transition: Transition.noTransition,
       binding: SubscriptionBinding(),
+    ),
+    GetPage(
+      name: myScheduleView,
+      page: () => const MyScheduleView(),
+      transition: Transition.noTransition,
+      binding: MyScheduleBinding(),
     ),
   ];
 }

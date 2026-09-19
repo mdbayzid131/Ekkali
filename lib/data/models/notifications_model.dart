@@ -20,26 +20,48 @@ class NotificationItem {
   });
 
   factory NotificationItem.fromJson(Map<String, dynamic> json) {
-    String type = json['type']?.toString() ?? 'GENERAL';
-    String iconPath = AppIcons.job_icon; // Default
+    String type = json['type']?.toString() ??
+        json['notificationType']?.toString() ??
+        'GENERAL';
+    String iconPath = AppIcons.job_icon;
 
-    if (type == 'GENERAL' || type == 'MESSAGE') {
+    if (type.toUpperCase().contains('JOB') ||
+        type.toUpperCase().contains('RIDE') ||
+        type.toUpperCase().contains('TASK')) {
       iconPath = AppIcons.job_icon;
-    } else if (type == 'REMINDER') {
-      iconPath = AppIcons.item_icon;
-    } else if (type == 'TASK') {
+    } else if (type.toUpperCase().contains('MESSAGE') ||
+        type.toUpperCase().contains('CHAT')) {
       iconPath = AppIcons.message_icon;
+    } else if (type.toUpperCase().contains('REMINDER') ||
+        type.toUpperCase().contains('OFFER') ||
+        type.toUpperCase().contains('DEAL')) {
+      iconPath = AppIcons.deals_icon;
+    } else {
+      iconPath = AppIcons.job_icon;
+    }
+
+    DateTime parsedDate = DateTime.now();
+    if (json['createdAt'] != null) {
+      try {
+        parsedDate = DateTime.parse(json['createdAt'].toString());
+      } catch (_) {}
     }
 
     return NotificationItem(
-      id: json['_id']?.toString() ?? '',
-      title: json['title']?.toString() ?? '',
-      subtitle: json['text']?.toString() ?? '',
+      id: json['_id']?.toString() ?? json['id']?.toString() ?? '',
+      title: json['title']?.toString() ??
+          json['heading']?.toString() ??
+          'Notification',
+      subtitle: json['message']?.toString() ??
+          json['text']?.toString() ??
+          json['body']?.toString() ??
+          json['subtitle']?.toString() ??
+          '',
       type: type,
-      isRead: json['isRead'] ?? json['read'] ?? false,
-      createdAt: json['createdAt'] != null
-          ? DateTime.parse(json['createdAt'])
-          : DateTime.now(),
+      isRead: json['isRead'] == true ||
+          json['read'] == true ||
+          json['status']?.toString().toUpperCase() == 'READ',
+      createdAt: parsedDate,
       icon: iconPath,
     );
   }

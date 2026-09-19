@@ -5,6 +5,9 @@ import 'package:moeb_26/config/routes/app_pages.dart';
 import 'package:moeb_26/core/utils/helpers.dart';
 import 'package:moeb_26/data/repositories/job_repository.dart';
 
+import 'package:moeb_26/modules/my_jobs/controllers/my_jobs_controller.dart';
+import 'package:moeb_26/modules/rides/controllers/rides_controller.dart';
+
 class RideCompletedController extends GetxController {
   final JobRepo _jobRepo = Get.find<JobRepo>();
 
@@ -19,7 +22,9 @@ class RideCompletedController extends GetxController {
 
   Future<void> submitReview() async {
     final dynamic ride = Get.arguments;
-    final String jobId = ride is Map ? ride['id'] : (ride?.id ?? "");
+    final String jobId = ride is Map
+        ? (ride['id']?.toString() ?? ride['_id']?.toString() ?? "")
+        : (ride?.id ?? "");
 
     if (jobId.isEmpty) {
       Helpers.showCustomSnackBar("Job ID not found", isError: true);
@@ -44,8 +49,7 @@ class RideCompletedController extends GetxController {
           "Review submitted successfully",
           isError: false,
         );
-        // Navigate back to BottomNabbarView with index 1 (Rides tab)
-        Get.offAllNamed(Routes.bottomNabbarView, arguments: 1);
+        _navigateBack();
       } else {
         Helpers.showCustomSnackBar(
           response.data['message'] ?? "Failed to submit review",
@@ -65,7 +69,29 @@ class RideCompletedController extends GetxController {
   }
 
   void skipReview() {
-    Get.offAllNamed(Routes.bottomNabbarView, arguments: 1);
+    _navigateBack();
+  }
+
+  void _navigateBack() {
+    // Refresh parent controllers
+    try {
+      if (Get.isRegistered<BookingController>()) {
+        Get.find<BookingController>().fetchJobs(isRefresh: true);
+      }
+    } catch (_) {}
+
+    try {
+      if (Get.isRegistered<RidesController>()) {
+        Get.find<RidesController>().refreshCurrentTab();
+      }
+    } catch (_) {}
+
+    // Pop back to the caller screen (e.g. MyJobsView or RidesView)
+    if (Get.key.currentState?.canPop() == true) {
+      Get.back();
+    } else {
+      Get.offAllNamed(Routes.bottomNabbarView, arguments: 1);
+    }
   }
 
   @override

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:moeb_26/core/utils/helpers.dart';
 import 'package:moeb_26/data/models/ratings_feedback_model.dart';
 import 'package:moeb_26/core/services/ratings_feedback_service.dart';
 
@@ -30,13 +31,7 @@ class RatingsFeedbackController extends GetxController {
         totalReviews.value = model.reviewSummary.totalReviews;
         reviews.value = model.reviews;
       } else {
-        Get.snackbar(
-          "Error",
-          "Failed to load reviews",
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-        );
+        Helpers.showCustomSnackBar("Failed to load reviews", isError: true);
       }
     } catch (e) {
       debugPrint("Error fetching reviews: $e");

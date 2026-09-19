@@ -325,7 +325,7 @@ class ByTheHour extends StatelessWidget {
       children: [
         Row(
           children: [
-            if (icon != null) icon,
+            ?icon,
             SizedBox(width: 8.w),
             Text(
               label + (isRequired ? ' *' : ''),
@@ -364,7 +364,7 @@ class ByTheHour extends StatelessWidget {
       children: [
         Row(
           children: [
-            if (icon != null) icon,
+            ?icon,
             SizedBox(width: 8.w),
             Text(
               '$label *',

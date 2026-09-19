@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:moeb_26/config/constants/icon_paths.dart';
 import 'package:moeb_26/core/services/notifications_service.dart';
 import 'package:moeb_26/data/models/Notifications_Model.dart';
 
@@ -69,119 +68,38 @@ class NotificationController extends GetxController {
   int get unreadCount =>
       notifications.where((n) => !n.isRead && !isMuted(n.id)).length;
 
-  List<NotificationItem> _getDemoNotifications() {
-    final list = [
-      NotificationItem(
-        id: "demo_1",
-        title: "Ride Request Accepted",
-        subtitle:
-            "Your chauffeur request for trip #TX-8921 has been accepted by John Doe.",
-        type: "TASK",
-        isRead: false,
-        createdAt: DateTime.now().subtract(const Duration(minutes: 5)),
-        icon: AppIcons.job_icon,
-      ),
-      NotificationItem(
-        id: "demo_2",
-        title: "Chauffeur on the Way",
-        subtitle: "Driver is heading to your pick-up location at 450 Ocean Dr.",
-        type: "TASK",
-        isRead: false,
-        createdAt: DateTime.now().subtract(const Duration(minutes: 25)),
-        icon: AppIcons.job_icon,
-      ),
-      NotificationItem(
-        id: "demo_3",
-        title: "New Message from Driver",
-        subtitle:
-            "Hello! I have arrived at the lobby. Let me know when you are ready.",
-        type: "MESSAGE",
-        isRead: false,
-        createdAt: DateTime.now().subtract(const Duration(hours: 1)),
-        icon: AppIcons.message_icon,
-      ),
-      NotificationItem(
-        id: "demo_4",
-        title: "Support Ticket Resolved",
-        subtitle:
-            "Support ticket #ST-3490 regarding payment query has been resolved.",
-        type: "MESSAGE",
-        isRead: true,
-        createdAt: DateTime.now().subtract(const Duration(hours: 4)),
-        icon: AppIcons.message_icon,
-      ),
-      NotificationItem(
-        id: "demo_5",
-        title: "Upcoming Ride Reminder",
-        subtitle:
-            "Your scheduled ride to Miami International Airport starts in 2 hours.",
-        type: "REMINDER",
-        isRead: false,
-        createdAt: DateTime.now().subtract(const Duration(hours: 6)),
-        icon: AppIcons.deals_icon,
-      ),
-      NotificationItem(
-        id: "demo_6",
-        title: "Weekend Discount Offer",
-        subtitle:
-            "Book any premium SUV this weekend and get a flat 15% off. Use code: WEEKEND15",
-        type: "REMINDER",
-        isRead: true,
-        createdAt: DateTime.now().subtract(const Duration(days: 1)),
-        icon: AppIcons.deals_icon,
-      ),
-      NotificationItem(
-        id: "demo_7",
-        title: "New Invoice Available",
-        subtitle: "Invoice #INV-8729 for your recent ride has been generated.",
-        type: "GENERAL",
-        isRead: true,
-        createdAt: DateTime.now().subtract(const Duration(days: 2)),
-        icon: AppIcons.job_icon,
-      ),
-      NotificationItem(
-        id: "demo_8",
-        title: "Profile Verified Successfully",
-        subtitle:
-            "Your profile documents have been verified. You can now request trips.",
-        type: "GENERAL",
-        isRead: true,
-        createdAt: DateTime.now().subtract(const Duration(days: 3)),
-        icon: AppIcons.job_icon,
-      ),
-    ];
-    // Filter out deleted ones
-    return list.where((n) => !deletedIds.contains(n.id)).toList();
-  }
-
   Future<void> fetchNotifications() async {
     try {
       isLoading.value = true;
       final response = await _notificationsService.getMyNotifications();
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        final List<dynamic>? data = response.data['data'];
-        if (data != null) {
-          final items = data
+        final dynamic resData = response.data?['data'];
+        List<dynamic>? dataList;
+        if (resData is List) {
+          dataList = resData;
+        } else if (resData is Map && resData['notifications'] is List) {
+          dataList = resData['notifications'];
+        }
+
+        if (dataList != null) {
+          final items = dataList
+              .whereType<Map<String, dynamic>>()
               .map((json) => NotificationItem.fromJson(json))
               .where((n) => !deletedIds.contains(n.id))
               .toList();
           notifications.assignAll(items);
+        } else {
+          notifications.clear();
         }
+      } else {
+        notifications.clear();
       }
     } catch (e) {
       debugPrint("Error fetching notifications: $e");
+      notifications.clear();
     } finally {
       isLoading.value = false;
-      // Always add manually defined demo notifications if they are not deleted
-      final demoList = _getDemoNotifications();
-      final currentList = notifications.toList();
-      for (var demo in demoList) {
-        if (!currentList.any((n) => n.id == demo.id)) {
-          currentList.add(demo);
-        }
-      }
-      notifications.assignAll(currentList);
     }
   }
 

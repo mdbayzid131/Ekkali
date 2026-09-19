@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:moeb_26/config/themes/app_theme.dart';
 import 'package:moeb_26/core/widgets/Custom_AppBar.dart';
+import 'package:moeb_26/core/widgets/CustomButton.dart';
 import 'package:moeb_26/modules/auth/profile/controllers/profile_controller.dart';
 
 class PaymentInformationView extends StatelessWidget {
@@ -133,13 +135,13 @@ class PaymentInformationView extends StatelessWidget {
                           decoration: BoxDecoration(
                             border: Border.all(
                               color: controller.cardPaymentAccepted.value
-                                  ? const Color(0xFFD08700)
+                                  ? AppColors.primaryColor
                                   : const Color(0xFF71717A),
                               width: 2,
                             ),
                             borderRadius: BorderRadius.circular(6.r),
                             color: controller.cardPaymentAccepted.value
-                                ? const Color(0xFFD08700)
+                                ? AppColors.primaryColor
                                 : Colors.transparent,
                           ),
                           child: controller.cardPaymentAccepted.value
@@ -169,40 +171,15 @@ class PaymentInformationView extends StatelessWidget {
               top: BorderSide(color: Color(0xFF1E1E1E), width: 1),
             ),
           ),
-          child: SizedBox(
-            height: 50.h,
-            child: Obx(
-              () => ElevatedButton.icon(
-                onPressed: controller.isUpdating.value
-                    ? null
-                    : () => controller.savePaymentDetails(),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFD08700),
-                  foregroundColor: Colors.black,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14.r),
-                  ),
-                ),
-                icon: controller.isUpdating.value
-                    ? SizedBox(
-                        width: 18.w,
-                        height: 18.w,
-                        child: const CircularProgressIndicator(
-                          color: Colors.black,
-                          strokeWidth: 2,
-                        ),
-                      )
-                    : const Icon(Icons.check_circle_outline, color: Colors.black),
-                label: Text(
-                  controller.isUpdating.value
-                      ? "Saving..."
-                      : "Save Payment Details",
-                  style: GoogleFonts.inter(
-                    fontSize: 15.sp,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
+          child: Obx(
+            () => CustomButton(
+              text: controller.isUpdating.value ? "Saving..." : "Save Payment details",
+              onPressed: () => controller.savePaymentDetails(),
+              icon: controller.isUpdating.value
+                  ? null
+                  : const Icon(Icons.check_circle_outline, color: Colors.black),
+              loading: controller.isUpdating.value,
+              padding: EdgeInsets.symmetric(vertical: 14.h),
             ),
           ),
         ),
@@ -213,11 +190,11 @@ class PaymentInformationView extends StatelessWidget {
   Widget _buildInputField({
     required String label,
     required TextEditingController controller,
-    required String hint,
+    String? hint,
     required IconData icon,
   }) {
     return Padding(
-      padding: EdgeInsets.only(bottom: 20.h),
+      padding: EdgeInsets.only(bottom: 18.h),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -244,7 +221,7 @@ class PaymentInformationView extends StatelessWidget {
                 color: const Color(0xFF71717A),
                 fontSize: 13.sp,
               ),
-              prefixIcon: Icon(icon, color: const Color(0xFFD5C4AB), size: 19.sp),
+              prefixIcon: Icon(icon, color: Colors.white70, size: 19.sp),
               contentPadding: EdgeInsets.symmetric(
                 horizontal: 16.w,
                 vertical: 14.h,
@@ -259,7 +236,7 @@ class PaymentInformationView extends StatelessWidget {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(14.r),
-                borderSide: const BorderSide(color: Color(0xFFD08700), width: 1.5),
+                borderSide: const BorderSide(color: AppColors.primaryColor, width: 1.5),
               ),
             ),
           ),

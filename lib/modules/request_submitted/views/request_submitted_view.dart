@@ -3,8 +3,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import 'package:moeb_26/config/constants/icon_paths.dart';
 import 'package:moeb_26/config/routes/app_pages.dart';
+import 'package:moeb_26/core/widgets/CustomButton.dart';
 
 class RequestSubmittedView extends StatelessWidget {
   const RequestSubmittedView({super.key});
@@ -74,7 +76,10 @@ class RequestSubmittedView extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: const Color(0xFF1C1810),
                   borderRadius: BorderRadius.circular(20.r),
-                  border: Border.all(color: const Color(0xFFD08700).withValues(alpha: 0.6), width: 1),
+                  border: Border.all(
+                    color: const Color(0xFFD08700).withValues(alpha: 0.6),
+                    width: 1,
+                  ),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -143,54 +148,22 @@ class RequestSubmittedView extends StatelessWidget {
               SizedBox(height: 28.h),
 
               // Bottom Action Buttons
-              SizedBox(
-                width: double.infinity,
-                height: 50.h,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFD08700),
-                    foregroundColor: Colors.black,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14.r),
-                    ),
-                  ),
-                  onPressed: () {
-                    Get.offAllNamed(Routes.bottomNabbarView);
-                  },
-                  child: Text(
-                    "Go to My Jobs",
-                    style: GoogleFonts.inter(
-                      fontSize: 15.sp,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
+              CustomButton(
+                text: "Go to My Jobs",
+                onPressed: () {
+                  Get.offAllNamed(Routes.bottomNabbarView);
+                },
               ),
 
               SizedBox(height: 10.h),
 
-              SizedBox(
-                width: double.infinity,
-                height: 48.h,
-                child: OutlinedButton(
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    side: const BorderSide(color: Color(0xFF262626), width: 1),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14.r),
-                    ),
-                  ),
-                  onPressed: () => Get.back(),
-                  child: Text(
-                    "Browse More Jobs",
-                    style: GoogleFonts.inter(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w600,
-                      color: const Color(0xFFA1A1AA),
-                    ),
-                  ),
-                ),
+              CustomButton(
+                text: "Browse More Jobs",
+                backgroundColor: Colors.transparent,
+                textColor: const Color(0xFFA1A1AA),
+                borderColor: const Color(0xFF262626),
+   
+                onPressed: () => Get.back(),
               ),
 
               SizedBox(height: 24.h),
@@ -220,11 +193,7 @@ class RequestSubmittedView extends StatelessWidget {
           shape: BoxShape.circle,
           color: Color(0xFFD08700),
         ),
-        child: Icon(
-          Icons.task_alt_rounded,
-          color: Colors.black,
-          size: 38.sp,
-        ),
+        child: Icon(Icons.task_alt_rounded, color: Colors.black, size: 38.sp),
       ),
     );
   }
@@ -328,9 +297,13 @@ class RequestSubmittedView extends StatelessWidget {
               Text(
                 title,
                 style: GoogleFonts.inter(
-                  color: isDone || isActive ? Colors.white : const Color(0xFF71717A),
+                  color: isDone || isActive
+                      ? Colors.white
+                      : const Color(0xFF71717A),
                   fontSize: 13.sp,
-                  fontWeight: isDone || isActive ? FontWeight.w600 : FontWeight.w400,
+                  fontWeight: isDone || isActive
+                      ? FontWeight.w600
+                      : FontWeight.w400,
                 ),
               ),
               SizedBox(height: 2.h),
@@ -391,13 +364,21 @@ class RequestSubmittedView extends StatelessWidget {
             children: [
               Column(
                 children: [
-                  Icon(Icons.circle, color: const Color(0xFFD08700), size: 10.sp),
+                  Icon(
+                    Icons.circle,
+                    color: const Color(0xFFD08700),
+                    size: 10.sp,
+                  ),
                   Container(
                     width: 2.w,
                     height: 22.h,
                     color: const Color(0xFF262626),
                   ),
-                  Icon(Icons.location_on, color: const Color(0xFFD08700), size: 12.sp),
+                  Icon(
+                    Icons.location_on,
+                    color: const Color(0xFFD08700),
+                    size: 12.sp,
+                  ),
                 ],
               ),
               SizedBox(width: 10.w),
@@ -496,48 +477,148 @@ class _JobSubmittedData {
     required this.paymentType,
   });
 
+  static String _formatDateTime(dynamic dateVal, dynamic timeVal) {
+    String datePart = '';
+    String timePart = '';
+
+    if (dateVal != null) {
+      final str = dateVal.toString().trim();
+      final dt = DateTime.tryParse(str)?.toLocal();
+      if (dt != null) {
+        final now = DateTime.now();
+        final today = DateTime(now.year, now.month, now.day);
+        final jobDay = DateTime(dt.year, dt.month, dt.day);
+
+        if (jobDay == today) {
+          datePart = "Today, ${DateFormat('MMM dd').format(dt)}";
+        } else if (jobDay == today.add(const Duration(days: 1))) {
+          datePart = "Tomorrow, ${DateFormat('MMM dd').format(dt)}";
+        } else if (jobDay == today.subtract(const Duration(days: 1))) {
+          datePart = "Yesterday, ${DateFormat('MMM dd').format(dt)}";
+        } else {
+          datePart = DateFormat('EEE, MMM dd').format(dt);
+        }
+      } else if (str.isNotEmpty && str != 'null') {
+        datePart = str;
+      }
+    }
+
+    if (timeVal != null) {
+      final str = timeVal.toString().trim();
+      final timeDt = DateTime.tryParse(str)?.toLocal();
+      if (timeDt != null && (str.contains('T') || str.contains('-'))) {
+        timePart = DateFormat('hh:mm a').format(timeDt);
+      } else if (str.isNotEmpty && str != 'null') {
+        try {
+          final parsed = DateFormat("HH:mm").parse(str);
+          timePart = DateFormat("hh:mm a").format(parsed);
+        } catch (_) {
+          try {
+            final parsed = DateFormat("HH:mm:ss").parse(str);
+            timePart = DateFormat("hh:mm a").format(parsed);
+          } catch (_) {
+            timePart = str;
+          }
+        }
+      }
+    }
+
+    if (datePart.isNotEmpty && timePart.isNotEmpty) {
+      return "$datePart • $timePart";
+    } else if (datePart.isNotEmpty) {
+      return datePart;
+    } else if (timePart.isNotEmpty) {
+      return timePart;
+    }
+    return "ASAP";
+  }
+
   factory _JobSubmittedData.from(dynamic job) {
     if (job == null) {
       return _JobSubmittedData(
-        bookingNo: "1094",
-        pickup: "123 Main Street, Beverly Hills",
-        dropoff: "LAX International Airport",
-        dateTime: "Today • 04:30 PM",
-        vehicleType: "Luxury Sedan",
-        amount: "\$185",
+        bookingNo: "",
+        pickup: "N/A",
+        dropoff: "N/A",
+        dateTime: "ASAP",
+        vehicleType: "Standard",
+        amount: "\$0.00",
         paymentType: "Credit Card",
       );
     }
     if (job is Map) {
+      final rawId = job['_id']?.toString() ?? job['id']?.toString() ?? '';
+      final rawBookingNo = job['bookingNo']?.toString() ??
+          (rawId.length >= 6
+              ? 'OFFER-${rawId.substring(rawId.length - 6).toUpperCase()}'
+              : (rawId.isNotEmpty ? 'OFFER-$rawId' : ''));
+
+      final isAsap = job['asap'] == true;
+      final rawAmount = job['paymentAmount'] ?? job['price'] ?? job['amount'];
+      final formattedAmount = rawAmount != null
+          ? (num.tryParse(rawAmount.toString()) != null
+              ? "\$${num.parse(rawAmount.toString()).toStringAsFixed(2)}"
+              : "\$$rawAmount")
+          : "\$0.00";
+
       return _JobSubmittedData(
-        bookingNo: job['bookingNo']?.toString() ?? "1094",
-        pickup: job['pickup']?.toString() ?? "Pickup Location",
-        dropoff: job['dropoff']?.toString() ?? "Dropoff Location",
-        dateTime: "${job['date'] ?? ''} • ${job['time'] ?? 'ASAP'}".trim(),
-        vehicleType: job['type']?.toString() ?? job['vehicleType']?.toString() ?? "Standard",
-        amount: job['price']?.toString() ?? job['amount']?.toString() ?? "\$150",
-        paymentType: job['payment']?.toString() ?? "Cash",
+        bookingNo: rawBookingNo,
+        pickup: job['pickup']?.toString() ??
+            job['pickupLocation']?.toString() ??
+            job['pickupAddress']?.toString() ??
+            "Pickup Location",
+        dropoff: job['dropoff']?.toString() ??
+            job['dropoffLocation']?.toString() ??
+            job['dropoffAddress']?.toString() ??
+            "Dropoff Location",
+        dateTime: isAsap
+            ? "ASAP"
+            : _formatDateTime(
+                job['date'] ?? job['pickupDate'] ?? job['pickupDateTime'],
+                job['time'] ?? job['pickupTime'],
+              ),
+        vehicleType: job['vehicleType']?.toString() ??
+            job['carType']?.toString() ??
+            job['type']?.toString() ??
+            "Standard",
+        amount: formattedAmount,
+        paymentType: job['paymentType']?.toString() ??
+            job['payment']?.toString() ??
+            "Credit Card",
       );
     }
     try {
+      final rawBookingNo = (job.bookingNo ?? job.id ?? "").toString();
+      final bool isAsap = (job.asap == true);
+      final rawAmount = job.paymentAmount ?? job.price ?? job.amount;
+      final formattedAmount = rawAmount != null
+          ? (num.tryParse(rawAmount.toString()) != null
+              ? "\$${num.parse(rawAmount.toString()).toStringAsFixed(2)}"
+              : "\$$rawAmount")
+          : "\$0.00";
+
       return _JobSubmittedData(
-        bookingNo: (job.id ?? job.bookingNo ?? "1094").toString(),
-        pickup: (job.pickupLocation ?? "Pickup Location").toString(),
-        dropoff: (job.dropoffLocation ?? "Dropoff Location").toString(),
-        dateTime: (job.time ?? "ASAP").toString(),
-        vehicleType: (job.vehicleType ?? "Standard").toString(),
-        amount: "\$${job.paymentAmount ?? job.price ?? 150}",
-        paymentType: (job.paymentType ?? "Cash").toString(),
+        bookingNo: rawBookingNo,
+        pickup: (job.pickupLocation ?? job.pickup ?? "Pickup Location").toString(),
+        dropoff: (job.dropoffLocation ?? job.dropoff ?? "Dropoff Location").toString(),
+        dateTime: isAsap
+            ? "ASAP"
+            : _formatDateTime(
+                job.date ?? job.pickupDate ?? job.pickupDateTime,
+                job.time ?? job.pickupTime,
+              ),
+        vehicleType: (job.vehicleType ?? job.carType ?? job.type ?? "Standard").toString(),
+        amount: formattedAmount,
+        paymentType: (job.paymentType ?? job.payment ?? "Credit Card").toString(),
       );
     } catch (_) {
       return _JobSubmittedData(
-        bookingNo: "1094",
+        bookingNo: "",
         pickup: "Pickup Location",
         dropoff: "Dropoff Location",
         dateTime: "ASAP",
         vehicleType: "Standard",
-        amount: "\$150",
-        paymentType: "Cash",
+        amount: "\$0.00",
+        paymentType: "Credit Card",
       );
     }
   }

@@ -29,9 +29,35 @@ class UserProfileRepo {
     );
   }
 
+  Future<Response> getVehicles() {
+    return apiClient.getData(ApiConstants.vehicles);
+  }
+
+  Future<Response> getVehicleById(String vehicleId) {
+    return apiClient.getData('${ApiConstants.vehicles}/$vehicleId');
+  }
+
+  Future<Response> addVehicle(dynamic body) {
+    return apiClient.postData(ApiConstants.vehicles, body);
+  }
+
+  Future<Response> updateVehicle(String vehicleId, dynamic body) {
+    return apiClient.patchData(
+      '${ApiConstants.vehicles}/$vehicleId',
+      body,
+    );
+  }
+
+  Future<Response> selectVehicle(String vehicleId) {
+    return apiClient.patchData(
+      '${ApiConstants.vehicles}/$vehicleId/select',
+      {},
+    );
+  }
+
   Future<Response> deleteVehicle(String vehicleId) {
     return apiClient.deleteData(
-      ApiConstants.deleteVehicle.replaceFirst('{{vehicleId}}', vehicleId),
+      '${ApiConstants.vehicles}/$vehicleId',
     );
   }
 

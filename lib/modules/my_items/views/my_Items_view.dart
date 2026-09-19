@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:moeb_26/config/themes/app_theme.dart';
 import '../controllers/my_items_controller.dart';
 import '../../../core/widgets/my_items_card.dart';
 
@@ -47,7 +48,7 @@ class MyItemsView extends StatelessWidget {
       ),
       body: RefreshIndicator(
         onRefresh: () => controller.fetchMyItems(),
-        color: const Color(0xFFF1A107),
+        color: AppColors.primaryColor,
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 20.w),
           child: Column(
@@ -59,7 +60,7 @@ class MyItemsView extends StatelessWidget {
                       controller.myItems.isEmpty) {
                     return const Center(
                       child: CircularProgressIndicator(
-                        color: Color(0xFFF1A107),
+                        color: AppColors.primaryColor,
                       ),
                     );
                   }
@@ -91,7 +92,7 @@ class MyItemsView extends StatelessWidget {
                                   padding: EdgeInsets.symmetric(vertical: 20.h),
                                   child: const Center(
                                     child: CircularProgressIndicator(
-                                      color: Color(0xFFF1A107),
+                                      color: AppColors.primaryColor,
                                     ),
                                   ),
                                 )

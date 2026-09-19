@@ -23,46 +23,47 @@ class UserService extends GetxService {
     checkTokenAndFetch();
   }
 
-  /// Check for token before fetching user data
+  /// Check for token and approval before fetching user data
   Future<void> checkTokenAndFetch() async {
+    // 1. Try to get userId from storage first
+    final String userData = await StorageService.getString(
+      StorageConstants.userData,
+    );
+    if (userData.isNotEmpty) {
+      try {
+        final Map<String, dynamic> user = json.decode(userData);
+        final id = user['_id'] ?? user['id'];
+        if (id != null) {
+          _userId.value = id.toString();
+          return;
+        }
+      } catch (_) {}
+    }
+
     final token = await StorageService.getString(StorageConstants.bearerToken);
-    if (token.isNotEmpty) {
+    final isApproved = await StorageService.getBool(StorageConstants.isApproved);
+
+    // Only call API if user is approved and token exists
+    if (token.isNotEmpty && isApproved == true) {
       await fetchUserId();
-    } else {
-      debugPrint("ℹ️ UserService: No token found, skipping profile API call.");
     }
   }
 
   /// Fetch user profile and store the ID if not already set
   Future<void> fetchUserId() async {
     try {
-      // 1. Try to get from storage first (fastest)
-      final String userData = await StorageService.getString(
-        StorageConstants.userData,
-      );
-      if (userData.isNotEmpty) {
-        final Map<String, dynamic> user = json.decode(userData);
-        final id = user['_id'] ?? user['id'];
-        if (id != null) {
-          _userId.value = id.toString();
-          debugPrint("✅ UserService: Set userId from Storage: $id");
-          // Continue to fetch from API anyway to keep it fresh
-        }
-      }
-
-      // Check token again before API call just to be safe
       final token = await StorageService.getString(
         StorageConstants.bearerToken,
       );
-      if (token.isEmpty) return;
+      final isApproved = await StorageService.getBool(StorageConstants.isApproved);
+      if (token.isEmpty || isApproved != true) return;
 
-      // 2. Fetch from API
       final profileService = Get.find<UserProfileService>();
       final response = await profileService.getUserProfile();
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 && response.data != null) {
         final id =
-            response.data['data']['_id']?.toString() ??
-            response.data['data']['id']?.toString();
+            response.data['data']?['_id']?.toString() ??
+            response.data['data']?['id']?.toString();
         if (id != null) {
           _userId.value = id;
           debugPrint("✅ UserService: Set userId from profile API: $id");

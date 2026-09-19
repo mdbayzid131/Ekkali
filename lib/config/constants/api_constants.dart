@@ -1,7 +1,7 @@
 class ApiConstants {
   // Base URL
-  // static const String baseUrl = 'https://nayem5001.binarybards.online/api/v1';
-  static const String baseUrl = 'https://api.ekkali.app/api/v1';
+  static const String baseUrl = 'https://nayem5001.binarybards.online/api/v1';
+  // static const String baseUrl = 'https://api.ekkali.app/api/v1';
   // static const String baseUrl = 'http://10.10.7.47:5003/api/v1';
 
   // Auth Endpoints
@@ -10,9 +10,13 @@ class ApiConstants {
   static const String refreshToken = '/auth/refresh-token';
 
   // Registration & Verification
-  static const String signup = '/user';
-  static const String resendVerifyEmail = '/auth/resend-verify-email';
-  static const String verifyEmail = '/auth/verify-email';
+  static const String signup = '/auth/register';
+  static const String resendOtp = '/auth/resend-otp';
+  static const String resendVerifyEmail = '/auth/resend-otp';
+  static const String verifyEmail = '/auth/verify-otp';
+  static const String vehicles = '/vehicles';
+  static const String vehicleConfigOptions = '/vehicle-configs/options';
+  static const String documents = '/documents';
 
   // Password Management
   static const String forgotPassword = '/auth/forget-password';
@@ -24,10 +28,12 @@ class ApiConstants {
   static const String userProfile = '/user/profile';
   // Marketplace Endpoints
   static const String items = '/items';
+  static const String feedItems = '/items/feed';
 
   // Create JobEndpoint
   static const String createJob = '/jobs';
   static const String myJobs = '/jobs/my-jobs';
+  static const String calendarJobs = '/jobs/calendar';
 
   static const String getAllJobOffers = '/jobs';
   static const String applytoJob = '/jobs/{jobId}/apply';
@@ -36,6 +42,7 @@ class ApiConstants {
   static const String approveApplicant = '/jobs/{jobId}/approve-applicant';
   static const String cancelJobOffer = '/jobs/{jobId}/cancel';
   static const String updateJob = '/jobs/{jobId}';
+  static const String getJobDetails = '/jobs/{jobId}';
   static const String updateRideStatus = '/jobs/{jobId}/ride-status';
   //Deals Endpoints
   static const String dealsItems = '/deals';
@@ -52,8 +59,9 @@ class ApiConstants {
   //Notifications
   static const String notifications = '/notifications';
   static const String notificationsReadAll = '/notifications/read-all';
+  static const String deviceToken = '/notifications/device-token';
   //Service Areas
-  static const String serviceAreas = '/service-areas';
+  static const String serviceAreas = '/service-areas/options';
 
   // Legal Endpoints
   static const String legals = '/legals';
@@ -67,8 +75,8 @@ class ApiConstants {
   static const String communityRoom = '/community-chats/room';
   static const String communityMessages = '/community-chats/messages';
 
-  // Driver Endpoints
-  static const String deleteVehicle = '/user/vehicles/{{vehicleId}}';
+  // Driver & Vehicle Endpoints
+  static const String deleteVehicle = '/vehicles/{{vehicleId}}';
   static const String deleteAccount = '/user/delete-account';
 
   // Expense Endpoints
@@ -79,6 +87,15 @@ class ApiConstants {
   static const String invoices = '/invoices';
   static const String invoiceProfile = '/invoices/profile';
   static const String invoiceClient = '/invoices/client';
+
+  // Favorites & Chauffeurs Endpoints
+  static const String favorites = '/users/favorites';
+  static const String chauffeurs = '/users/chauffeurs';
+  static const String users = '/users';
+
+  // Subscription Endpoints
+  static const String subscriptionVerifyApple = '/subscriptions/verify-apple';
+  static const String subscriptionVerifyGoogle = '/subscriptions/verify-google';
+  static const String subscriptionRestore = '/subscriptions/restore';
+  static const String subscriptionStatus = '/subscriptions/status';
 }
-
-

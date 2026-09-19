@@ -12,7 +12,6 @@ class JobOfferCard extends StatelessWidget {
   final String vehicleType;
   final String price;
   final String? paymentType;
-  final String? status;
   final VoidCallback? onTap;
 
   const JobOfferCard({
@@ -25,7 +24,6 @@ class JobOfferCard extends StatelessWidget {
     required this.vehicleType,
     required this.price,
     this.paymentType,
-    this.status,
     this.onTap,
   });
 
@@ -57,7 +55,7 @@ class JobOfferCard extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Left Column: Time, Price, Offer Badge
+                // Left Column: Time & Price
                 SizedBox(
                   width: 75.w,
                   child: Column(
@@ -78,25 +76,6 @@ class JobOfferCard extends StatelessWidget {
                           color: const Color(0xFFFEDB9B),
                           fontSize: 14.sp,
                           fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      SizedBox(height: 6.h),
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 6.w,
-                          vertical: 2.h,
-                        ),
-                        decoration: BoxDecoration(
-                          color: _getStatusBg(status ?? 'OFFER'),
-                          borderRadius: BorderRadius.circular(6.r),
-                        ),
-                        child: Text(
-                          (status ?? 'OFFER').toUpperCase(),
-                          style: GoogleFonts.inter(
-                            color: _getStatusText(status ?? 'OFFER'),
-                            fontSize: 9.sp,
-                            fontWeight: FontWeight.bold,
-                          ),
                         ),
                       ),
                     ],
@@ -252,33 +231,5 @@ class JobOfferCard extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  Color _getStatusBg(String status) {
-    switch (status.toUpperCase()) {
-      case 'ACCEPTED':
-      case 'COMPLETED':
-        return Colors.green.withValues(alpha: 0.2);
-      case 'PENDING':
-        return const Color(0xFFD08700).withValues(alpha: 0.2);
-      case 'CANCELLED':
-        return Colors.red.withValues(alpha: 0.2);
-      default:
-        return const Color(0xFF2A2A32);
-    }
-  }
-
-  Color _getStatusText(String status) {
-    switch (status.toUpperCase()) {
-      case 'ACCEPTED':
-      case 'COMPLETED':
-        return Colors.greenAccent;
-      case 'PENDING':
-        return const Color(0xFFD08700);
-      case 'CANCELLED':
-        return Colors.redAccent;
-      default:
-        return Colors.white70;
-    }
   }
 }

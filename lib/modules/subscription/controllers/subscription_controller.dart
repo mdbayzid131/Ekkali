@@ -1,62 +1,105 @@
 import 'package:get/get.dart';
+import 'package:in_app_purchase/in_app_purchase.dart';
+import 'package:moeb_26/core/services/subscription_service.dart';
 
 class SubscriptionController extends GetxController {
-  final RxString selectedPlan = 'yearly'.obs;
-  final RxBool isLoading = false.obs;
-  final RxBool isSubscribed = false.obs;
+  late final SubscriptionService _subscriptionService;
 
-  // Plan Details
+  // ─── Delegates from SubscriptionService ─────────────────────────────────────
+  RxBool get isPremium => _subscriptionService.isPremium;
+  RxBool get isLoading => _subscriptionService.isLoading;
+  RxBool get isAvailable => _subscriptionService.isAvailable;
+  Rx<ProductDetails?> get yearlyProduct => _subscriptionService.yearlyProduct;
+
+  // Keep isSubscribed as alias for backward compat with any older UI references
+  RxBool get isSubscribed => _subscriptionService.isPremium;
+
+  // ─── Plan Display Info ────────────────────────────────────────────────────────
   final String planName = 'Ekkali Premium';
-  final String planPrice = '\$29';
   final String planPeriod = '/ Year';
-  final String billingDescription =
-      'Billed annually at \$29.00 USD (\$2.41/mo)';
 
+  bool get hasProduct => _subscriptionService.yearlyProduct.value != null;
+
+  String get planPrice {
+    final product = _subscriptionService.yearlyProduct.value;
+    return product?.price ?? 'Not Found';
+  }
+
+  String get billingDescription {
+    final product = _subscriptionService.yearlyProduct.value;
+    if (product != null) {
+      return 'Billed annually at ${product.price}';
+    }
+    return 'Product unavailable from store';
+  }
+
+  // ─── Feature List ─────────────────────────────────────────────────────────────
   final List<Map<String, String>> features = [
     {
-      'title': 'Priority Job Matching',
-      'subtitle': 'First access to high-value client requests & premium rides',
-      'icon': 'crown',
+      'title': 'Job Opportunities',
+      'subtitle':
+          'Access job opportunities posted by other chauffeurs and grow your business.',
+      'icon': 'job',
     },
     {
-      'title': '0% Platform Commission',
-      'subtitle': 'Keep 100% of your earnings on direct bookings & invoices',
-      'icon': 'percent',
+      'title': 'Preferred Chauffeur Network',
+      'subtitle':
+          'Build your trusted network and connect with professional chauffeurs you can rely on.',
+      'icon': 'network',
     },
     {
-      'title': 'VIP Verified Badge',
-      'subtitle': 'Exclusive golden partner badge displayed on profile',
-      'icon': 'badge',
+      'title': 'Live Service Area Chats',
+      'subtitle':
+          'Communicate in real time with chauffeurs in your service area or connect with other service areas.',
+      'icon': 'chat',
     },
     {
-      'title': '24/7 VIP Concierge Support',
-      'subtitle': 'Direct line to dedicated chauffeur assistance team',
-      'icon': 'support',
+      'title': 'Invoice Creator, Schedule & Expense Tracker',
+      'subtitle':
+          'Manage your private bookings, create professional invoices, organize your schedule, and track your business expenses.',
+      'icon': 'invoice',
+    },
+    {
+      'title': 'Meet & Greet Sign Creator',
+      'subtitle':
+          'Create professional airport and client welcome signs with ease.',
+      'icon': 'flight',
+    },
+    {
+      'title': 'Marketplace – Buy & Sell',
+      'subtitle':
+          'Buy and sell business-related items, equipment, or services within the Ekkali network.',
+      'icon': 'marketplace',
+      'isNew': 'true',
+    },
+    {
+      'title': 'Deals & Exclusive Offers',
+      'subtitle':
+          'Access exclusive deals, discounts, and special offers from businesses serving the chauffeur industry.',
+      'icon': 'deals',
     },
   ];
 
-  void selectPlan(String planId) {
-    selectedPlan.value = planId;
+  @override
+  void onInit() {
+    super.onInit();
+    _subscriptionService = Get.find<SubscriptionService>();
+    _subscriptionService.loadProducts();
+    _subscriptionService.syncStatusWithBackend();
   }
 
+  // ─── Actions ──────────────────────────────────────────────────────────────────
+
+  /// Triggers the real in-app purchase flow
   Future<void> subscribe() async {
-    try {
-      isLoading.value = true;
-      await Future.delayed(const Duration(seconds: 2));
-      isSubscribed.value = true;
-      Get.snackbar(
-        'Success',
-        'Welcome to Ekkali Premium!',
-        snackPosition: SnackPosition.TOP,
-      );
-    } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Failed to process subscription. Please try again.',
-        snackPosition: SnackPosition.TOP,
-      );
-    } finally {
-      isLoading.value = false;
-    }
+    await _subscriptionService.buySubscription();
   }
+
+  /// Restores previously purchased subscriptions
+  Future<void> restorePurchases() async {
+    await _subscriptionService.restorePurchases();
+  }
+
+  /// Legacy plan selector (kept for UI compatibility)
+  void selectPlan(String planId) {}
 }

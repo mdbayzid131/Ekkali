@@ -1,177 +1,350 @@
-class MyRidesResponse {
+import 'package:moeb_26/data/models/user_profile_model.dart';
+
+class MyRidesModel {
   final bool success;
   final String message;
-  final Pagination? pagination;
-  final List<Ride> data;
+  final CursorPagination? cursor;
+  final List<RideData> data;
 
-  MyRidesResponse({
+  MyRidesModel({
     required this.success,
     required this.message,
-    this.pagination,
+    this.cursor,
     required this.data,
   });
 
-  factory MyRidesResponse.fromJson(Map<String, dynamic> json) {
-    return MyRidesResponse(
-      success: json['success'] ?? false,
-      message: json['message'] ?? '',
-      pagination: json['pagination'] != null
-          ? Pagination.fromJson(json['pagination'])
+  factory MyRidesModel.fromJson(Map<String, dynamic> json) {
+    return MyRidesModel(
+      success: json['success'] == true,
+      message: json['message']?.toString() ?? '',
+      cursor: json['cursor'] is Map<String, dynamic>
+          ? CursorPagination.fromJson(json['cursor'])
           : null,
-      data: json['data'] != null
-          ? (json['data'] as List)
-                .map((x) {
-                  try {
-                    return Ride.fromJson(x);
-                  } catch (e, stacktrace) {
-                    print("Error parsing ride: $e");
-                    print(stacktrace);
-                    return null;
-                  }
-                })
-                .where((ride) => ride != null)
-                .cast<Ride>()
-                .toList()
-          : [],
+      data: (json['data'] as List?)
+              ?.map((x) => RideData.fromJson(x as Map<String, dynamic>))
+              .toList() ??
+          [],
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'success': success,
+      'message': message,
+      'cursor': cursor?.toJson(),
+      'data': data.map((v) => v.toJson()).toList(),
+    };
   }
 }
 
-class Pagination {
-  final int total;
+class CursorPagination {
+  final String? nextCursor;
+  final bool hasMore;
   final int limit;
-  final int page;
-  final int totalPage;
 
-  Pagination({
-    required this.total,
-    required this.limit,
-    required this.page,
-    required this.totalPage,
+  CursorPagination({
+    this.nextCursor,
+    this.hasMore = false,
+    this.limit = 10,
   });
 
-  factory Pagination.fromJson(Map<String, dynamic> json) {
-    return Pagination(
-      total: json['total'] ?? 0,
-      limit: json['limit'] ?? 0,
-      page: json['page'] ?? 0,
-      totalPage: json['totalPage'] ?? 0,
+  factory CursorPagination.fromJson(Map<String, dynamic> json) {
+    return CursorPagination(
+      nextCursor: json['nextCursor']?.toString(),
+      hasMore: json['hasMore'] == true,
+      limit: (json['limit'] is num) ? (json['limit'] as num).toInt() : 10,
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'nextCursor': nextCursor,
+      'hasMore': hasMore,
+      'limit': limit,
+    };
   }
 }
 
-class Ride {
+class RideData {
   final String id;
+  final String? jobCreatorId;
+  final String? jobType;
   final String pickupLocation;
   final String dropoffLocation;
   final String? flightNumber;
+  final bool asap;
+  final String? date;
+  final String? time;
   final String vehicleType;
-  final bool? asap;
-  final num paymentAmount;
-  final String paymentType;
-  final String status;
-  final DateTime? date;
-  final String time;
+  final num? paymentAmount;
+  final String? paymentType;
+  final String? instruction;
+  final String? passengerName;
+  final String? passengerPhone;
+  final String? status;
   final String? rideStatus;
-  final Applicant? applicant;
-  final Driver? assignedTo;
-  final Driver? createdBy;
+  final String? name;
+  final String? nickname;
+  final String? company;
+  final String? companyName;
+  final String? companyRole;
+  final String? profilePicture;
+  final bool hasReview;
+  final bool isReviewedByDriver;
+  final bool isReviewedByCreator;
+  final String? createdAt;
+  final String? updatedAt;
+  final DriverData? createdBy;
+  final DriverData? assignedTo;
+  final ApplicantData? applicant;
 
-  Ride({
+  RideData({
     required this.id,
+    this.jobCreatorId,
+    this.jobType,
     required this.pickupLocation,
     required this.dropoffLocation,
-    required this.vehicleType,
-    this.asap,
-    required this.paymentAmount,
-    required this.paymentType,
-    required this.status,
-    this.date,
-    required this.time,
-    this.rideStatus,
-    this.applicant,
-    this.assignedTo,
-    this.createdBy,
     this.flightNumber,
+    this.asap = false,
+    this.date,
+    this.time,
+    required this.vehicleType,
+    this.paymentAmount,
+    this.paymentType,
+    this.instruction,
+    this.passengerName,
+    this.passengerPhone,
+    this.status,
+    this.rideStatus,
+    this.name,
+    this.nickname,
+    this.company,
+    this.companyName,
+    this.companyRole,
+    this.profilePicture,
+    this.hasReview = false,
+    this.isReviewedByDriver = false,
+    this.isReviewedByCreator = false,
+    this.createdAt,
+    this.updatedAt,
+    this.createdBy,
+    this.assignedTo,
+    this.applicant,
   });
 
-  factory Ride.fromJson(Map<String, dynamic> json) {
-    return Ride(
-      id: json['_id'] ?? '',
-      pickupLocation: json['pickupLocation'] ?? '',
-      dropoffLocation: json['dropoffLocation'] ?? '',
-      vehicleType: json['vehicleType'] ?? '',
-      asap: json['asap'],
-      paymentAmount: json['paymentAmount'] != null
-          ? num.tryParse(json['paymentAmount'].toString()) ?? 0
-          : 0,
-      paymentType: json['paymentType'] ?? '',
-      status: json['status'] ?? '',
-      rideStatus: json['rideStatus'],
-      date: json['date'] != null
-          ? DateTime.tryParse(json['date'].toString())
+  factory RideData.fromJson(Map<String, dynamic> json) {
+    DriverData? parseDriver(dynamic field) {
+      if (field is Map<String, dynamic>) {
+        return DriverData.fromJson(field);
+      }
+      return null;
+    }
+
+    final creatorId = json['jobCreatorId']?.toString() ??
+        json['creatorId']?.toString() ??
+        (json['createdBy'] is String ? json['createdBy']?.toString() : null);
+
+    return RideData(
+      id: json['_id']?.toString() ?? json['id']?.toString() ?? '',
+      jobCreatorId: creatorId,
+      jobType: json['jobType']?.toString(),
+      pickupLocation: json['pickup']?.toString() ??
+          json['pickupLocation']?.toString() ??
+          '',
+      dropoffLocation: json['dropoff']?.toString() ??
+          json['dropoffLocation']?.toString() ??
+          '',
+      flightNumber: json['flightNumber']?.toString(),
+      asap: json['asap'] == true,
+      date: json['date']?.toString(),
+      time: json['time']?.toString(),
+      vehicleType: json['vehicleType']?.toString() ?? 'Sedan',
+      paymentAmount: json['paymentAmount'] is num
+          ? (json['paymentAmount'] as num)
+          : num.tryParse(json['paymentAmount']?.toString() ?? ''),
+      paymentType: json['paymentType']?.toString(),
+      instruction: json['instruction']?.toString() ??
+          json['instructions']?.toString(),
+      passengerName: json['passengerName']?.toString(),
+      passengerPhone: json['passengerPhone']?.toString(),
+      status: json['status']?.toString(),
+      rideStatus: json['rideStatus']?.toString(),
+      name: json['name']?.toString(),
+      nickname: json['nickname']?.toString(),
+      company: json['company']?.toString(),
+      companyName: json['companyName']?.toString() ?? json['company']?.toString(),
+      companyRole: json['companyRole']?.toString(),
+      profilePicture: json['profilePicture']?.toString(),
+      hasReview: json['hasReview'] == true,
+      isReviewedByDriver: json['isReviewedByDriver'] == true,
+      isReviewedByCreator: json['isReviewedByCreator'] == true,
+      createdAt: json['createdAt']?.toString(),
+      updatedAt: json['updatedAt']?.toString(),
+      createdBy: parseDriver(json['createdBy']) ??
+          (creatorId != null
+              ? DriverData(
+                  id: creatorId,
+                  name: json['name']?.toString() ?? '',
+                  nickname: json['nickname']?.toString(),
+                  email: json['email']?.toString() ?? '',
+                  phone: json['phone']?.toString() ?? '',
+                  company: json['company']?.toString(),
+                  profilePicture: json['profilePicture']?.toString() ?? '',
+                )
+              : null),
+      assignedTo: parseDriver(json['assignedTo']),
+      applicant: json['applicant'] is Map<String, dynamic>
+          ? ApplicantData.fromJson(json['applicant'])
           : null,
-      time: json['time'] ?? '',
-      applicant: (json['applicant'] != null && json['applicant'] is Map)
-          ? Applicant.fromJson(json['applicant'])
-          : null,
-      assignedTo: (json['assignedTo'] != null && json['assignedTo'] is Map)
-          ? Driver.fromJson(json['assignedTo'])
-          : null,
-      createdBy: (json['createdBy'] != null && json['createdBy'] is Map)
-          ? Driver.fromJson(json['createdBy'])
-          : null,
-      flightNumber: json['flightNumber'],
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      '_id': id,
+      'jobCreatorId': jobCreatorId,
+      'jobType': jobType,
+      'pickup': pickupLocation,
+      'dropoff': dropoffLocation,
+      'flightNumber': flightNumber,
+      'asap': asap,
+      'date': date,
+      'time': time,
+      'vehicleType': vehicleType,
+      'paymentAmount': paymentAmount,
+      'paymentType': paymentType,
+      'instruction': instruction,
+      'passengerName': passengerName,
+      'passengerPhone': passengerPhone,
+      'status': status,
+      'rideStatus': rideStatus,
+      'name': name,
+      'nickname': nickname,
+      'company': company,
+      'companyName': companyName,
+      'companyRole': companyRole,
+      'profilePicture': profilePicture,
+      'hasReview': hasReview,
+      'isReviewedByDriver': isReviewedByDriver,
+      'isReviewedByCreator': isReviewedByCreator,
+      'createdAt': createdAt,
+      'updatedAt': updatedAt,
+    };
   }
 }
 
-class Driver {
+class DriverData {
   final String id;
   final String name;
+  final String? nickname;
   final String email;
   final String phone;
-  final String profilePicture;
   final String? company;
-  final String? nickname;
+  final String? companyRole;
+  final String profilePicture;
+  final String? selectedVehicle;
+  final double? averageRating;
+  final int? totalReviews;
+  final List<Vehicle>? vehicles;
 
-  Driver({
+  DriverData({
     required this.id,
     required this.name,
-    required this.email,
-    required this.phone,
-    required this.profilePicture,
-    this.company,
     this.nickname,
+    this.email = '',
+    this.phone = '',
+    this.company,
+    this.companyRole,
+    this.profilePicture = '',
+    this.selectedVehicle,
+    this.averageRating,
+    this.totalReviews,
+    this.vehicles,
   });
 
-  factory Driver.fromJson(Map<String, dynamic> json) {
-    return Driver(
-      id: json['_id'] ?? '',
-      name: json['name'] ?? '',
-      email: json['email'] ?? '',
-      phone: json['phone'] ?? '',
-      profilePicture: json['profilePicture'] ?? '',
-      company: json['company'],
-      nickname: json['nickname'],
+  factory DriverData.fromJson(Map<String, dynamic> json) {
+    List<Vehicle>? vehicleList;
+    if (json['vehicles'] is List) {
+      vehicleList = (json['vehicles'] as List)
+          .map((v) => Vehicle.fromJson(v as Map<String, dynamic>))
+          .toList();
+    }
+
+    return DriverData(
+      id: json['_id']?.toString() ?? json['id']?.toString() ?? '',
+      name: json['name']?.toString() ?? '',
+      nickname: json['nickname']?.toString(),
+      email: json['email']?.toString() ?? '',
+      phone: json['phone']?.toString() ?? '',
+      company: json['company']?.toString(),
+      companyRole: json['companyRole']?.toString(),
+      profilePicture: json['profilePicture']?.toString() ?? '',
+      selectedVehicle: json['selectedVehicle']?.toString(),
+      averageRating: json['averageRating'] is num
+          ? (json['averageRating'] as num).toDouble()
+          : null,
+      totalReviews: json['totalReviews'] is num
+          ? (json['totalReviews'] as num).toInt()
+          : null,
+      vehicles: vehicleList,
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      '_id': id,
+      'name': name,
+      'nickname': nickname,
+      'email': email,
+      'phone': phone,
+      'company': company,
+      'companyRole': companyRole,
+      'profilePicture': profilePicture,
+      'selectedVehicle': selectedVehicle,
+      'averageRating': averageRating,
+      'totalReviews': totalReviews,
+    };
   }
 }
 
-class Applicant {
-  final Driver? driver;
+class ApplicantData {
+  final DriverData? driver;
+  final String? vehicleId;
   final DateTime? appliedAt;
 
-  Applicant({this.driver, this.appliedAt});
+  ApplicantData({
+    this.driver,
+    this.vehicleId,
+    this.appliedAt,
+  });
 
-  factory Applicant.fromJson(Map<String, dynamic> json) {
-    return Applicant(
-      driver: (json['driver'] != null && json['driver'] is Map)
-          ? Driver.fromJson(json['driver'])
+  factory ApplicantData.fromJson(Map<String, dynamic> json) {
+    return ApplicantData(
+      driver: json['driver'] is Map<String, dynamic>
+          ? DriverData.fromJson(json['driver'])
           : null,
+      vehicleId: json['vehicleId']?.toString(),
       appliedAt: json['appliedAt'] != null
           ? DateTime.tryParse(json['appliedAt'].toString())
           : null,
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'driver': driver?.toJson(),
+      'vehicleId': vehicleId,
+      'appliedAt': appliedAt?.toIso8601String(),
+    };
+  }
 }
+
+// Aliases for compatibility
+typedef Ride = RideData;
+typedef Driver = DriverData;
+typedef Applicant = ApplicantData;
+typedef MyRidesResponse = MyRidesModel;
+typedef UpcomingRideData = RideData;
+typedef FinishRideData = RideData;
+typedef UpcomingRidesModel = MyRidesModel;
+typedef FinishRidesModel = MyRidesModel;

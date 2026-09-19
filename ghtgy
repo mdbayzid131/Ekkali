@@ -1,0 +1,231 @@
+Searched for "socket"
+
+ফ্রন্টএন্ড (React Native / Expo App এবং Admin Dashboard)-এর জন্য নিচে একটি পূর্ণাঙ্গ ও প্র্যাক্টিক্যাল **Socket Integration Guideline** দেওয়া হলো। 
+
+এটি ফলো করলে মোবাইল অ্যাপে কোনো **"Pull-to-Refresh"** ছাড়াই ইনস্ট্যান্ট স্ক্রিন আপডেট হবে:
+
+---
+
+### ১. সকেট কানেকশন ও অটো-রুম (Connection Setup)
+
+ইউজার লগইন করার পর সকেট ইনিশিয়ালাইজ করার সময় `auth.token`-এ ইউজারের JWT টোকেন পাঠাতে হবে।
+
+```typescript
+// services/socket.ts
+import { io, Socket } from 'socket.io-client';
+
+let socket: Socket | null = null;
+
+export const initSocket = (userToken: string) => {
+  if (socket?.connected) return socket;
+
+  socket = io('YOUR_BACKEND_URL', {
+    auth: { token: userToken },
+    transports: ['websocket'],
+    reconnection: true,
+    reconnectionAttempts: 5,
+  });
+
+  socket.on('connect', () => {
+    console.log('✅ Socket connected:', socket?.id);
+  });
+
+  socket.on('disconnect', (reason) => {
+    console.log('❌ Socket disconnected:', reason);
+  });
+
+  return socket;
+};
+
+export const getSocket = () => socket;
+```
+
+> **ব্যাকএন্ড সুবিধা:** টোকেন দিয়ে কানেক্ট হওয়ার সাথে সাথে ব্যাকএন্ড স্বয়ংক্রিয়ভাবে ইউজারকে দুটি রুমে জয়েন করিয়ে নেয়:
+> 1. `user::<userId>` (ইউজারের নিজস্ব নোটিফিকেশন, জব অ্যাসাইনমেন্ট ও ক্যান্সেলেশনের জন্য)
+> 2. `community::<serviceArea>` (ইউজারের লোকাল এরিয়ার নতুন জব ফিডের জন্য)
+
+---
+
+### ২. স্ক্রিন অনুযায়ী ইভেন্ট গাইডলাইন
+
+#### স্ক্রিন ১: Available Jobs / Driver Feed Screen (ড্রাইভারদের জন্য)
+এখানে কোনো রিফ্রেশ ছাড়া নতুন জব আসবে এবং অন্য কেউ নিয়ে নিলে রিমুভ হয়ে যাবে।
+
+```typescript
+// screens/AvailableJobsScreen.tsx
+import { useEffect, useState } from 'react';
+import { getSocket } from '../services/socket';
+
+export const AvailableJobsScreen = () => {
+  const [jobs, setJobs] = useState<Job[]>([]);
+
+  useEffect(() => {
+    const socket = getSocket();
+    if (!socket) return;
+
+    // ১. নতুন জব পোস্ট হলে ফিডের শীর্ষে যুক্ত হবে
+    const handleJobCreated = ({ job }: { job: Job }) => {
+      setJobs((prevJobs) => [job, ...prevJobs]);
+    };
+
+    // ২. কোনো জব অন্য কেউ নিয়ে নিলে বা ক্যান্সেল হলে ফিড থেকে সাথে সাথে মুছে যাবে
+    const handleJobRemoved = ({ jobId }: { jobId: string }) => {
+      setJobs((prevJobs) => prevJobs.filter((j) => j._id !== jobId));
+    };
+
+    socket.on('JOB_CREATED', handleJobCreated);
+    socket.on('JOB_REMOVED_FROM_FEED', handleJobRemoved);
+
+    return () => {
+      socket.off('JOB_CREATED', handleJobCreated);
+      socket.off('JOB_REMOVED_FROM_FEED', handleJobRemoved);
+    };
+  }, []);
+
+  return (/* JSX */);
+};
+```
+
+---
+
+#### স্ক্রিন ২: My Created Jobs Screen (অপারেটর / জব ক্রিয়েটরের জন্য)
+ড্রাইভার যখন জবটিতে অ্যাপ্লাই করবে, রিফ্রেশ ছাড়াই সাথে সাথে ব্যাজ বা নোটিফিকেশন আপডেট হবে।
+
+```typescript
+// screens/MyJobsScreen.tsx
+useEffect(() => {
+  const socket = getSocket();
+  if (!socket) return;
+
+  // ড্রাইভার অ্যাপ্লাই করলে
+  const handleApplicationReceived = (data: { jobId: string; applicant: any }) => {
+    // UI-তে ইনস্ট্যান্ট অ্যাপ্লিক্যান্ট শো করুন অথবা টোস্ট নোটিফিকেশন দিন
+    console.log('New driver applied:', data.applicant.name);
+    // React Query / State আপডেট:
+    updateJobApplicantState(data.jobId, data.applicant);
+  };
+
+  socket.on('JOB_APPLICATION_RECEIVED', handleApplicationReceived);
+
+  return () => {
+    socket.off('JOB_APPLICATION_RECEIVED', handleApplicationReceived);
+  };
+}, []);
+```
+
+---
+
+#### স্ক্রিন ৩: My Rides / Upcoming Rides Screen (ড্রাইভারদের জন্য)
+ক্রিয়েটর যখন ড্রাইভারকে জবটি দেবে, তখন ড্রাইভারের "Upcoming Rides" ট্যাবে স্বয়ংক্রিয়ভাবে জবটি চলে আসবে।
+
+```typescript
+// screens/MyRidesScreen.tsx
+useEffect(() => {
+  const socket = getSocket();
+  if (!socket) return;
+
+  // যখন জবটি এই ড্রাইভারকে অ্যাসাইন করা হয়
+  const handleJobAssigned = (data: { jobId: string; status: string; job: any }) => {
+    // ড্রাইভারের আপকামিং রাইডস লিস্টে জবটি ইনস্ট্যান্ট যোগ করুন
+    setUpcomingRides((prev) => [data.job || data, ...prev]);
+    showToast('Success', 'You have been assigned to a new ride!');
+  };
+
+  socket.on('JOB_ASSIGNED', handleJobAssigned);
+
+  return () => {
+    socket.off('JOB_ASSIGNED', handleJobAssigned);
+  };
+}, []);
+```
+
+---
+
+#### স্ক্রিন ৪: Live Ride Tracking / Job Details Screen (উভয়ের জন্য)
+ড্রাইভার বা ক্রিয়েটর যখন জব ডিটেইলস স্ক্রিনে থাকবে, তখন রাইড স্ট্যাটাস লাইভ আপডেট দেখতে পাবে।
+
+```typescript
+// screens/JobDetailsScreen.tsx
+useEffect(() => {
+  const socket = getSocket();
+  if (!socket || !jobId) return;
+
+  // ১. এই নির্দিষ্ট জবের রুমে জয়েন করুন
+  socket.emit('JOIN_JOB', { jobId });
+
+  // ২. লাইভ রাইড স্ট্যাটাস প্রগ্রেস (ON THE WAY -> AT THE LOCATION -> POB -> FINISHED)
+  const handleRideStatusUpdated = ({ jobId: updatedId, rideStatus, status }: any) => {
+    if (updatedId === jobId) {
+      setCurrentRideStatus(rideStatus); // লাইভ স্টেপার/ম্যাপ আপডেট
+    }
+  };
+
+  // ৩. যদি জবটি ক্যান্সেল করা হয়
+  const handleJobCancelled = ({ jobId: cancelledId }: any) => {
+    if (cancelledId === jobId) {
+      alert('This ride has been cancelled by the creator.');
+      navigation.goBack();
+    }
+  };
+
+  socket.on('RIDE_STATUS_UPDATED', handleRideStatusUpdated);
+  socket.on('JOB_CANCELLED', handleJobCancelled);
+
+  return () => {
+    // স্ক্রিন থেকে বের হওয়ার সময় লিভ করুন এবং ইভেন্ট লিসনার রিমুভ করুন
+    socket.emit('LEAVE_JOB', { jobId });
+    socket.off('RIDE_STATUS_UPDATED', handleRideStatusUpdated);
+    socket.off('JOB_CANCELLED', handleJobCancelled);
+  };
+}, [jobId]);
+```
+
+---
+
+#### স্ক্রিন ৫: Real-Time Chat Screen (১-অন-১ চ্যাট)
+চ্যাট স্ক্রিন ওপেন থাকলে কোনো পুল-ডাউন বা রিফ্রেশ ছাড়া মেসেজ লাইভ দেখা যাবে।
+
+```typescript
+// screens/ChatScreen.tsx
+useEffect(() => {
+  const socket = getSocket();
+  if (!socket || !chatId) return;
+
+  // ১. চ্যাট রুমে জয়েন করুন
+  socket.emit('JOIN_CHAT', { chatId });
+
+  // ২. নতুন মেসেজ রিসিভ করুন
+  const handleNewMessage = ({ chatId: msgChatId, message }: any) => {
+    if (msgChatId === chatId) {
+      setMessages((prev) => [...prev, message]);
+    }
+  };
+
+  socket.on('NEW_MESSAGE', handleNewMessage);
+
+  return () => {
+    socket.emit('LEAVE_CHAT', { chatId });
+    socket.off('NEW_MESSAGE', handleNewMessage);
+  };
+}, [chatId]);
+```
+
+---
+
+### ৩. সামারি ইভেন্ট টেবিল (Quick Reference)
+
+| ইভেন্ট নাম (`Event`) | কে লিসেন করবে? | কখন ট্রিগার হয়? | ক্লায়েন্টের করণীয় |
+| :--- | :--- | :--- | :--- |
+| **`JOB_CREATED`** | ড্রাইভার (Feed) | নতুন জব পোস্ট হলে | ফিডে জবটি যুক্ত করা |
+| **`JOB_REMOVED_FROM_FEED`** | ড্রাইভার (Feed) | জবটি অন্য কেউ নিলে / ক্যান্সেল হলে | ফিড থেকে জবটি রিমুভ করা |
+| **`JOB_APPLICATION_RECEIVED`** | ক্রিয়েটর (My Jobs) | ড্রাইভার অ্যাপ্লাই করলে | অ্যাপ্লিক্যান্ট কাউন্ট / কার্ড আপডেট করা |
+| **`JOB_ASSIGNED`** | ড্রাইভার (My Rides) | ড্রাইভারকে জব অ্যাসাইন করা হলে | My Rides লিস্টে ইনস্ট্যান্ট যুক্ত করা |
+| **`RIDE_STATUS_UPDATED`** | ক্রিয়েটর ও ড্রাইভার | স্ট্যাটাস আপডেট হলে (`ON THE WAY` ইত্যাদি) | লাইভ স্ট্যাটাস স্টেপার আপডেট করা |
+| **`JOB_CANCELLED`** | ক্রিয়েটর ও ড্রাইভার | জব ক্যান্সেল হলে | UI-তে "Cancelled" দেখানো |
+| **`NEW_MESSAGE`** | উভয় চ্যাট পার্টনার | চ্যাটে মেসেজ আসলে | মেসেজ লিস্টে সাথে সাথে অ্যাপেন্ড করা |
+
+এই প্যাটার্নে কোড করলে ক্লায়েন্টকে আর কোনো স্ক্রিনেই **Pull-to-refresh** করতে হবে না, সবকিছু রিয়েল-টাইমে আপডেট হবে।
+
+
+
+

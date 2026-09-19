@@ -3,6 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class VehicleModel {
+  // Unique identifier to use as a stable Widget key
+  final String id = DateTime.now().microsecondsSinceEpoch.toString();
+  bool isDisposed = false;
+
   final RxString selectedVehicleType;
   final TextEditingController makeController;
   final TextEditingController modelController;
@@ -13,10 +17,10 @@ class VehicleModel {
 
   // New Fields from DocumentsUpload
   final Rx<File?> commercialInsuranceFile = Rx<File?>(null);
-  final TextEditingController commercialInsuranceExpireController = TextEditingController();
+  final TextEditingController commercialInsuranceExpireController;
 
   final Rx<File?> vehicleRegistrationFile = Rx<File?>(null);
-  final TextEditingController vehicleRegistrationExpireController = TextEditingController();
+  final TextEditingController vehicleRegistrationExpireController;
 
   final Rx<File?> frontViewFile = Rx<File?>(null);
   final Rx<File?> rearViewFile = Rx<File?>(null);
@@ -29,7 +33,9 @@ class VehicleModel {
       yearController = TextEditingController(),
       colorInsideController = TextEditingController(),
       colorOutsideController = TextEditingController(),
-      licensePlateController = TextEditingController();
+      licensePlateController = TextEditingController(),
+      commercialInsuranceExpireController = TextEditingController(),
+      vehicleRegistrationExpireController = TextEditingController();
 
   factory VehicleModel.fromVehicle(dynamic vehicle) {
     final model = VehicleModel(initialType: vehicle.carType);
@@ -57,6 +63,8 @@ class VehicleModel {
   }
 
   void dispose() {
+    if (isDisposed) return;
+    isDisposed = true;
     makeController.dispose();
     modelController.dispose();
     yearController.dispose();

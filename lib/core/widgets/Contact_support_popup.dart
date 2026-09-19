@@ -8,6 +8,7 @@ import 'package:moeb_26/config/constants/icon_paths.dart';
 import 'package:moeb_26/core/widgets/CustomButton.dart';
 import 'package:moeb_26/core/widgets/CustomText.dart';
 import 'package:moeb_26/core/widgets/CustomTextField.dart';
+import 'package:moeb_26/config/themes/app_theme.dart';
 import 'package:moeb_26/core/widgets/Custom_ButtonIcon.dart';
 import '../../modules/auth/authentication/controllers/support_controller.dart';
 
@@ -110,9 +111,7 @@ class _ContactSupportViewState extends State<ContactSupportView> {
             controller.fetchMyTickets();
           });
         },
-        backgroundColor: const Color(
-          0xFFFF9800,
-        ), // Premium orange color matching App Theme
+        backgroundColor: AppColors.primaryColor,
         icon: const Icon(Icons.add, color: Colors.black),
         label: Text(
           "Create Ticket",
@@ -461,7 +460,7 @@ class _CreateSupportTicketViewState extends State<CreateSupportTicketView> {
                 children: [
                   Icon(
                     Icons.add_circle_outline,
-                    color: const Color(0xFFFF9800),
+                    color: AppColors.primaryColor,
                     size: 20.sp,
                   ),
                   SizedBox(width: 4.w),
@@ -469,7 +468,7 @@ class _CreateSupportTicketViewState extends State<CreateSupportTicketView> {
                     'Add File',
                     style: GoogleFonts.inter(
                       fontSize: 14.sp,
-                      color: const Color(0xFFFF9800),
+                      color: AppColors.primaryColor,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -655,6 +654,10 @@ class _CreateSupportTicketViewState extends State<CreateSupportTicketView> {
         Expanded(
           child: CustomButton(
             text: "Cancel",
+            backgroundColor: Colors.transparent,
+            textColor: Colors.white,
+            borderColor: Colors.white.withValues(alpha: 0.15),
+            padding: EdgeInsets.symmetric(vertical: 14.h),
             onPressed: () {
               Get.back();
             },
@@ -667,24 +670,28 @@ class _CreateSupportTicketViewState extends State<CreateSupportTicketView> {
               text: controller.isSubmitting.value
                   ? "Sending..."
                   : "Send Message",
-              backgroundColor: Colors.transparent,
-              borderColor: Colors.white,
-              textColor: Colors.white,
+              backgroundColor: AppColors.primaryColor,
+              textColor: Colors.black,
+              padding: EdgeInsets.symmetric(vertical: 14.h),
               iconWidget: controller.isSubmitting.value
                   ? SizedBox(
-                      width: 20.w,
-                      height: 20.w,
+                      width: 18.w,
+                      height: 18.w,
                       child: const CircularProgressIndicator(
                         strokeWidth: 2,
-                        color: Colors.white,
+                        color: Colors.black,
                       ),
                     )
                   : SvgPicture.asset(
                       AppIcons.send_icon,
-                      width: 24.w,
-                      height: 24.w,
+                      width: 18.sp,
+                      height: 18.sp,
+                      colorFilter: const ColorFilter.mode(
+                        Colors.black,
+                        BlendMode.srcIn,
+                      ),
                     ),
-              iconColor: Colors.white,
+              iconColor: Colors.black,
               iconOnRight: false,
               onPressed: () {
                 if (_formKey.currentState!.validate()) {

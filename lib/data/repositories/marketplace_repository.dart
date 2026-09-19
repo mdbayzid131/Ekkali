@@ -11,10 +11,16 @@ class MarketplaceRepo {
   Future<Response> getAllItems({
     String? searchTerm,
     String? condition,
-    int page = 1,
+    num? minPrice,
+    num? maxPrice,
     int limit = 10,
+    String? cursor,
   }) async {
-    final Map<String, dynamic> queryParams = {'page': page, 'limit': limit};
+    final Map<String, dynamic> queryParams = {'limit': limit};
+
+    if (cursor != null && cursor.isNotEmpty) {
+      queryParams['cursor'] = cursor;
+    }
 
     if (searchTerm != null && searchTerm.isNotEmpty) {
       queryParams['searchTerm'] = searchTerm;
@@ -24,26 +30,52 @@ class MarketplaceRepo {
       queryParams['condition'] = condition;
     }
 
-    return await apiClient.getData(ApiConstants.items, query: queryParams);
+    if (minPrice != null) {
+      queryParams['minPrice'] = minPrice;
+    }
+
+    if (maxPrice != null) {
+      queryParams['maxPrice'] = maxPrice;
+    }
+
+    return await apiClient.getData(ApiConstants.feedItems, query: queryParams);
   }
 
   Future<Response> getMyItems({
     String? searchTerm,
-    int page = 1,
+    String? condition,
+    num? minPrice,
+    num? maxPrice,
     int limit = 10,
-    String? sort = '-createdAt',
+    String? cursor,
   }) async {
-    final Map<String, dynamic> queryParams = {'page': page, 'limit': limit};
+    final Map<String, dynamic> queryParams = {'limit': limit};
 
-    if (sort != null && sort.isNotEmpty) {
-      queryParams['sort'] = sort;
+    if (cursor != null && cursor.isNotEmpty) {
+      queryParams['cursor'] = cursor;
     }
 
     if (searchTerm != null && searchTerm.isNotEmpty) {
       queryParams['searchTerm'] = searchTerm;
     }
 
+    if (condition != null && condition.isNotEmpty) {
+      queryParams['condition'] = condition;
+    }
+
+    if (minPrice != null) {
+      queryParams['minPrice'] = minPrice;
+    }
+
+    if (maxPrice != null) {
+      queryParams['maxPrice'] = maxPrice;
+    }
+
     return await apiClient.getData(ApiConstants.myItems, query: queryParams);
+  }
+
+  Future<Response> getItemById(String itemId) async {
+    return await apiClient.getData('${ApiConstants.items}/$itemId');
   }
 
   Future<Response> createItem({
@@ -56,7 +88,7 @@ class MarketplaceRepo {
   }) async {
     final Map<String, dynamic> body = {
       'title': title,
-      'price': price,
+      'price': num.tryParse(price) ?? price,
       'location': location,
     };
 
@@ -86,12 +118,12 @@ class MarketplaceRepo {
     String? condition,
     required String location,
     String? description,
-    List<File>? photos, // For new photos
+    List<File>? photos,
     String? status,
   }) async {
     final Map<String, dynamic> body = {
       'title': title,
-      'price': price,
+      'price': num.tryParse(price) ?? price,
       'location': location,
     };
 
@@ -117,6 +149,10 @@ class MarketplaceRepo {
       body,
       multipartBody: multipartBody,
     );
+  }
+
+  Future<Response> markItemAsSold(String itemId) async {
+    return await apiClient.patchData('${ApiConstants.items}/$itemId/sold', {});
   }
 
   Future<Response> deleteItem(String itemId) async {

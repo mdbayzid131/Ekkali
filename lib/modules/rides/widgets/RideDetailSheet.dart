@@ -2,55 +2,155 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
+import 'package:moeb_26/config/routes/app_pages.dart';
+import 'package:moeb_26/config/themes/app_theme.dart';
+import 'package:moeb_26/core/services/api_client.dart';
+import 'package:moeb_26/core/utils/helpers.dart';
+import 'package:moeb_26/core/widgets/CustomButton.dart';
+import 'package:moeb_26/data/models/my_rides_model.dart';
+import 'package:moeb_26/data/repositories/socket_repository.dart';
+import 'package:moeb_26/modules/preferred_drivers/controllers/preferred_drivers_controller.dart';
 
 class RideDetailSheet extends StatelessWidget {
-  final String title;
-  final String bookingNo;
-  final String dateTimeStr;
-  final String pickupLocation;
-  final String? pickupNotes;
-  final String dropoffLocation;
-  final String? dropoffNotes;
-  final String jobPosterName;
-  final String driverName;
-  final String vehicleInfo;
-  final String vehicleType;
-  final String? paymentType;
-  final String? amount;
-  final String? flightNumber;
-  final String? specialInstructions;
-  final String? status;
-  final String? actionButtonText;
-  final VoidCallback? onActionButtonPressed;
-  final VoidCallback? onChatPressed;
+  final RideData ride;
+  final bool isPast;
+  final String? dateHeader;
   final VoidCallback? onReviewPressed;
 
   const RideDetailSheet({
     super.key,
-    required this.title,
-    required this.bookingNo,
-    required this.dateTimeStr,
-    required this.pickupLocation,
-    this.pickupNotes,
-    required this.dropoffLocation,
-    this.dropoffNotes,
-    required this.jobPosterName,
-    required this.driverName,
-    required this.vehicleInfo,
-    required this.vehicleType,
-    this.paymentType,
-    this.amount,
-    this.flightNumber,
-    this.specialInstructions,
-    this.status,
-    this.actionButtonText,
-    this.onActionButtonPressed,
-    this.onChatPressed,
+    required this.ride,
+    required this.isPast,
+    this.dateHeader,
     this.onReviewPressed,
   });
 
+  String _formatDateTime(RideData r) {
+    if (r.asap) {
+      String datePart = "Today";
+      if (r.createdAt != null && r.createdAt!.isNotEmpty) {
+        try {
+          final dt = DateTime.parse(r.createdAt!);
+          datePart = DateFormat("MMM dd, yyyy").format(dt);
+        } catch (_) {}
+      }
+      return "$datePart • ASAP";
+    }
+
+    String datePart = "";
+    if (r.date != null && r.date!.isNotEmpty) {
+      try {
+        final dt = DateTime.parse(r.date!);
+        datePart = DateFormat("MMM dd, yyyy").format(dt);
+      } catch (_) {
+        datePart = r.date!;
+      }
+    } else {
+      datePart = dateHeader ?? "Today";
+    }
+
+    String timePart = "";
+    if (r.time != null && r.time!.isNotEmpty) {
+      try {
+        if (r.time!.contains(":")) {
+          final parts = r.time!.split(":");
+          final hour = int.parse(parts[0]);
+          final minute = int.parse(parts[1]);
+          final now = DateTime.now();
+          final timeDt = DateTime(now.year, now.month, now.day, hour, minute);
+          timePart = DateFormat("hh:mm a").format(timeDt);
+        } else {
+          timePart = r.time!;
+        }
+      } catch (_) {
+        timePart = r.time!;
+      }
+    }
+
+    if (timePart.isNotEmpty) {
+      return "$datePart • $timePart";
+    }
+    return datePart;
+  }
+
+  String _getPosterName(RideData r) {
+    if (r.name != null && r.name!.trim().isNotEmpty) return r.name!.trim();
+    if (r.createdBy?.name != null && r.createdBy!.name.trim().isNotEmpty) {
+      return r.createdBy!.name.trim();
+    }
+    if (r.companyName != null && r.companyName!.trim().isNotEmpty) {
+      return r.companyName!.trim();
+    }
+    return "Job Poster";
+  }
+
+  String _getPosterImage(RideData r) {
+    if (r.profilePicture != null && r.profilePicture!.trim().isNotEmpty) {
+      return r.profilePicture!.trim();
+    }
+    if (r.createdBy?.profilePicture != null &&
+        r.createdBy!.profilePicture.trim().isNotEmpty) {
+      return r.createdBy!.profilePicture.trim();
+    }
+    return "";
+  }
+
+  String _getPosterId(RideData r) {
+    return r.jobCreatorId ?? r.createdBy?.id ?? "";
+  }
+
+  String _getVehicleInfo(RideData r) {
+    final driver = r.assignedTo ?? r.applicant?.driver ?? r.createdBy;
+    if (driver?.vehicles != null && driver!.vehicles!.isNotEmpty) {
+      final v = driver.vehicles!.first;
+      return "${v.make} ${v.model}, ${v.colorOutside}";
+    }
+    return r.vehicleType.isNotEmpty ? r.vehicleType : "Sedan";
+  }
+
+  void _openChat(RideData r) async {
+    final String participantId = _getPosterId(r);
+    if (participantId.isNotEmpty) {
+      try {
+        final socketRepo = Get.isRegistered<SocketRepository>()
+            ? Get.find<SocketRepository>()
+            : Get.put(SocketRepository(apiClient: Get.find<ApiClient>()));
+
+        final chat = await socketRepo.createChat(participantId);
+        if (chat != null) {
+          Get.back();
+          Get.toNamed(Routes.chatDetailView, arguments: chat);
+          return;
+        }
+      } catch (e) {
+        debugPrint("Error opening chat: $e");
+      }
+    }
+
+    Helpers.showCustomSnackBar(
+      "Unable to start chat session with user right now.",
+      isError: true,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final title = isPast ? "Completed Ride" : "Upcoming Ride Details";
+    final dateTimeStr = _formatDateTime(ride);
+    final amountStr =
+        ride.paymentAmount != null ? "${ride.paymentAmount}" : "0.00";
+    final posterName = _getPosterName(ride);
+    final posterImage = _getPosterImage(ride);
+    final posterId = _getPosterId(ride);
+    final vehicleInfo = _getVehicleInfo(ride);
+    final paymentTypeStr = ride.paymentType?.isNotEmpty == true
+        ? ride.paymentType!
+        : "Credit Card on File";
+    final flightNumberStr =
+        ride.flightNumber?.isNotEmpty == true ? ride.flightNumber! : "N/A";
+    final instructions = ride.instruction ?? "";
+
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
       decoration: BoxDecoration(
@@ -77,16 +177,20 @@ class RideDetailSheet extends StatelessWidget {
             ),
             SizedBox(height: 16.h),
 
-            // Header Row: Title & Booking No
+            // Header Row: Title & Close Button
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  title,
-                  style: GoogleFonts.outfit(
-                    color: Colors.white,
-                    fontSize: 20.sp,
-                    fontWeight: FontWeight.bold,
+                Expanded(
+                  child: Text(
+                    title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.outfit(
+                      color: Colors.white,
+                      fontSize: 20.sp,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
                 IconButton(
@@ -107,7 +211,7 @@ class RideDetailSheet extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // DateTime Row
+                  // DateTime & Amount Row
                   Row(
                     children: [
                       Icon(
@@ -125,9 +229,9 @@ class RideDetailSheet extends StatelessWidget {
                         ),
                       ),
                       const Spacer(),
-                      if (amount != null && amount!.isNotEmpty) ...[
+                      if (amountStr.isNotEmpty) ...[
                         Text(
-                          "\$$amount",
+                          "\$$amountStr",
                           style: GoogleFonts.inter(
                             color: const Color(0xFFFEDB9B),
                             fontSize: 16.sp,
@@ -196,7 +300,7 @@ class RideDetailSheet extends StatelessWidget {
                                   ),
                                   SizedBox(height: 2.h),
                                   Text(
-                                    pickupLocation,
+                                    ride.pickupLocation,
                                     style: GoogleFonts.inter(
                                       color: Colors.white,
                                       fontSize: 14.sp,
@@ -220,7 +324,7 @@ class RideDetailSheet extends StatelessWidget {
                                   ),
                                   SizedBox(height: 2.h),
                                   Text(
-                                    dropoffLocation,
+                                    ride.dropoffLocation,
                                     style: GoogleFonts.inter(
                                       color: Colors.white,
                                       fontSize: 14.sp,
@@ -241,7 +345,7 @@ class RideDetailSheet extends StatelessWidget {
 
             SizedBox(height: 12.h),
 
-            // Section 2: Job Poster & Chauffeur / Vehicle Info
+            // Section 2: Job Poster & Chauffeur Info
             _buildSectionCard(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -250,75 +354,99 @@ class RideDetailSheet extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Expanded(
-                        child: Row(
-                          children: [
-                            Container(
-                              padding: EdgeInsets.all(8.r),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF1C1C1F),
-                                borderRadius: BorderRadius.circular(8.r),
-                                border: Border.all(
-                                  color: const Color(0xFF2A2A32),
-                                  width: 1,
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: () {
+                            final preferredController =
+                                Get.isRegistered<PreferredDriversController>()
+                                ? Get.find<PreferredDriversController>()
+                                : Get.put(PreferredDriversController());
+
+                            preferredController.openChauffeurProfile(
+                              userId: posterId,
+                              name: posterName,
+                              imageUrl: posterImage,
+                            );
+                          },
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 38.r,
+                                height: 38.r,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: const Color(0xFF1C1C1F),
+                                  border: Border.all(
+                                    color: const Color(0xFF2A2A32),
+                                    width: 1,
+                                  ),
+                                ),
+                                child: ClipOval(
+                                  child: posterImage.isNotEmpty
+                                      ? (posterImage.startsWith('http')
+                                          ? Image.network(
+                                              posterImage,
+                                              fit: BoxFit.cover,
+                                              errorBuilder: (_, __, ___) => Icon(
+                                                Icons.person_outline,
+                                                color: Colors.white70,
+                                                size: 20.sp,
+                                              ),
+                                            )
+                                          : Image.asset(
+                                              posterImage,
+                                              fit: BoxFit.cover,
+                                            ))
+                                      : Icon(
+                                          Icons.person_outline,
+                                          color: Colors.white70,
+                                          size: 20.sp,
+                                        ),
                                 ),
                               ),
-                              child: Icon(
-                                Icons.person_outline,
-                                color: Colors.white70,
-                                size: 20.sp,
-                              ),
-                            ),
-                            SizedBox(width: 12.w),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "JOB POSTER",
-                                    style: GoogleFonts.inter(
-                                      color: const Color(0xFF94A3B8),
-                                      fontSize: 9.sp,
-                                      fontWeight: FontWeight.bold,
-                                      letterSpacing: 1.0,
+                              SizedBox(width: 12.w),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "JOB POSTER",
+                                      style: GoogleFonts.inter(
+                                        color: const Color(0xFF94A3B8),
+                                        fontSize: 9.sp,
+                                        fontWeight: FontWeight.bold,
+                                        letterSpacing: 1.0,
+                                      ),
                                     ),
-                                  ),
-                                  SizedBox(height: 2.h),
-                                  Text(
-                                    jobPosterName.isNotEmpty
-                                        ? jobPosterName
-                                        : "Job Poster",
-                                    style: GoogleFonts.inter(
-                                      color: Colors.white,
-                                      fontSize: 14.sp,
-                                      fontWeight: FontWeight.w600,
+                                    SizedBox(height: 2.h),
+                                    Text(
+                                      posterName,
+                                      style: GoogleFonts.inter(
+                                        color: Colors.white,
+                                        fontSize: 14.sp,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
-                      if (onChatPressed != null) ...[
+                      if (!isPast) ...[
                         SizedBox(width: 8.w),
                         GestureDetector(
-                          onTap: () {
-                            Get.back();
-                            onChatPressed!();
-                          },
+                          onTap: () => _openChat(ride),
                           child: Container(
                             padding: EdgeInsets.all(10.r),
                             decoration: BoxDecoration(
-                              color: const Color(
-                                0xFFD08700,
-                              ).withValues(alpha: 0.15),
+                              color: const Color(0xFFD08700).withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(10.r),
                               border: Border.all(
-                                color: const Color(
-                                  0xFFD08700,
-                                ).withValues(alpha: 0.3),
+                                color: const Color(0xFFD08700).withValues(alpha: 0.3),
                               ),
                             ),
                             child: Icon(
@@ -358,7 +486,7 @@ class RideDetailSheet extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              "CHAUFFEUR & VEHICLE",
+                              "VEHICLE",
                               style: GoogleFonts.inter(
                                 color: const Color(0xFF94A3B8),
                                 fontSize: 9.sp,
@@ -368,7 +496,7 @@ class RideDetailSheet extends StatelessWidget {
                             ),
                             SizedBox(height: 2.h),
                             Text(
-                              driverName.isNotEmpty ? driverName : "Bayzid",
+                              vehicleInfo.isNotEmpty ? vehicleInfo : "N/A",
                               style: GoogleFonts.inter(
                                 color: Colors.white,
                                 fontSize: 14.sp,
@@ -377,19 +505,6 @@ class RideDetailSheet extends StatelessWidget {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
-                            if (vehicleInfo.isNotEmpty) ...[
-                              SizedBox(height: 2.h),
-                              Text(
-                                vehicleInfo,
-                                style: GoogleFonts.inter(
-                                  color: const Color(0xFF94A3B8),
-                                  fontSize: 12.sp,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ],
                           ],
                         ),
                       ),
@@ -417,9 +532,7 @@ class RideDetailSheet extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        (paymentType != null && paymentType!.isNotEmpty)
-                            ? paymentType!
-                            : "Credit Card on File",
+                        paymentTypeStr,
                         style: GoogleFonts.inter(
                           color: Colors.white,
                           fontSize: 13.sp,
@@ -441,9 +554,7 @@ class RideDetailSheet extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        (flightNumber != null && flightNumber!.isNotEmpty)
-                            ? flightNumber!
-                            : "N/A",
+                        flightNumberStr,
                         style: GoogleFonts.inter(
                           color: Colors.white,
                           fontSize: 13.sp,
@@ -472,9 +583,8 @@ class RideDetailSheet extends StatelessWidget {
                       border: Border.all(color: const Color(0xFF1B2033)),
                     ),
                     child: Text(
-                      (specialInstructions != null &&
-                              specialInstructions!.isNotEmpty)
-                          ? specialInstructions!
+                      instructions.isNotEmpty
+                          ? instructions
                           : "No special instructions provided.",
                       style: GoogleFonts.inter(
                         color: Colors.white.withValues(alpha: 0.85),
@@ -487,84 +597,74 @@ class RideDetailSheet extends StatelessWidget {
               ),
             ),
 
-            if (onReviewPressed != null) ...[
-              SizedBox(height: 20.h),
-              SizedBox(
-                width: double.infinity,
-                height: 52.h,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF22C55E),
-                    foregroundColor: Colors.white,
-                    elevation: 2,
-                    shadowColor: const Color(0xFF22C55E).withValues(alpha: 0.3),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16.r),
-                    ),
+            if (isPast) ...[
+              if (ride.hasReview != true && ride.isReviewedByDriver != true) ...[
+                SizedBox(height: 20.h),
+                CustomButton(
+                  text: "Rate & Review",
+                  backgroundColor: AppColors.primaryColor,
+                  textColor: Colors.black,
+                  icon: Icon(
+                    Icons.star_outline_rounded,
+                    size: 18.sp,
+                    color: Colors.black,
                   ),
                   onPressed: () {
                     Get.back();
-                    onReviewPressed!.call();
+                    if (onReviewPressed != null) {
+                      onReviewPressed!();
+                    } else {
+                      Get.toNamed(Routes.rideCompletedView, arguments: ride);
+                    }
                   },
+                  padding: EdgeInsets.symmetric(vertical: 16.h),
+                ),
+              ] else ...[
+                SizedBox(height: 20.h),
+                Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.symmetric(vertical: 14.h, horizontal: 16.w),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF10B981).withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(14.r),
+                    border: Border.all(
+                      color: const Color(0xFF10B981).withValues(alpha: 0.3),
+                    ),
+                  ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(
-                        Icons.star_outline_rounded,
-                        size: 18.sp,
-                        color: Colors.white,
+                      const Icon(
+                        Icons.star_rounded,
+                        color: Color(0xFF10B981),
+                        size: 20,
                       ),
                       SizedBox(width: 8.w),
                       Text(
-                        "Rate & Review Driver",
+                        "Review Submitted",
                         style: GoogleFonts.inter(
+                          color: const Color(0xFF10B981),
                           fontSize: 14.sp,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ],
                   ),
                 ),
-              ),
-            ] else if (actionButtonText != null && onActionButtonPressed != null) ...[
+              ],
+            ] else ...[
               SizedBox(height: 20.h),
-              SizedBox(
-                width: double.infinity,
-                height: 52.h,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFD08700),
-                    foregroundColor: Colors.black,
-                    elevation: 2,
-                    shadowColor: const Color(0xFFD08700).withValues(alpha: 0.3),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16.r),
-                    ),
-                  ),
-                  onPressed: () {
-                    Get.back();
-                    onActionButtonPressed!();
-                  },
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.navigation_outlined,
-                        size: 18.sp,
-                        color: Colors.black,
-                      ),
-                      SizedBox(width: 8.w),
-                      Text(
-                        actionButtonText!,
-                        style: GoogleFonts.inter(
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                    ],
-                  ),
+              CustomButton(
+                text: "View Ride Progress",
+                icon: Icon(
+                  Icons.navigation_outlined,
+                  size: 18.sp,
+                  color: Colors.black,
                 ),
+                onPressed: () {
+                  Get.back();
+                  Get.toNamed(Routes.rideDetailsView, arguments: ride.id);
+                },
               ),
             ],
           ],

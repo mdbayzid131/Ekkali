@@ -71,7 +71,12 @@ class SignInView extends GetView<SigninController> {
                     hintText: "Enter your password",
                     obscureText: !controller.isPasswordVisible.value,
                     textInputType: TextInputType.visiblePassword,
-                    validator: (value) => Validators.password(value),
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return "Enter your password";
+                      }
+                      return null;
+                    },
                     suffixIcon: IconButton(
                       icon: Icon(
                         controller.isPasswordVisible.value
@@ -96,21 +101,8 @@ class SignInView extends GetView<SigninController> {
                     ),
                   ),
                 ),
-                SizedBox(height: 20.h),
+                SizedBox(height: 24.h),
 
-                // ── Error Message ──
-                Obx(() {
-                  if (controller.errorMessage.value.isEmpty) {
-                    return const SizedBox.shrink();
-                  }
-                  return Padding(
-                    padding: EdgeInsets.only(bottom: 12.h),
-                    child: Text(
-                      controller.errorMessage.value,
-                      style: TextStyle(color: Colors.red, fontSize: 13.sp),
-                    ),
-                  );
-                }),
                 // ── Sign In Button ──
                 Obx(
                   () => CustomButton(

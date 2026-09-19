@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:moeb_26/core/services/marketplace_service.dart';
+import 'package:moeb_26/core/utils/helpers.dart';
 import 'package:moeb_26/data/models/my_items_model.dart';
+import 'package:moeb_26/modules/market_place/controllers/market_place_controller.dart';
 
 class MyItemsController extends GetxController {
   final MarketplaceService _marketplaceService = Get.put(MarketplaceService());
@@ -9,8 +11,10 @@ class MyItemsController extends GetxController {
   var myItems = <MyItemsModel>[].obs;
   var isLoading = false.obs;
   var isLoadMore = false.obs;
-  var currentPage = 1;
-  var totalPage = 1;
+
+  // Strict Cursor Pagination
+  String? nextCursor;
+  bool hasMore = true;
 
   final ScrollController scrollController = ScrollController();
 
@@ -36,7 +40,9 @@ class MyItemsController extends GetxController {
             scrollController.position.maxScrollExtent - 200 &&
         !isLoading.value &&
         !isLoadMore.value &&
-        currentPage < totalPage) {
+        hasMore &&
+        nextCursor != null &&
+        nextCursor!.isNotEmpty) {
       loadMoreMyItems();
     }
   }
@@ -44,45 +50,90 @@ class MyItemsController extends GetxController {
   Future<void> fetchMyItems() async {
     try {
       isLoading.value = true;
-      currentPage = 1;
-      final response = await _marketplaceService.getMyItems(page: currentPage);
+      nextCursor = null;
+      hasMore = true;
+
+      final response = await _marketplaceService.getMyItems(
+        limit: 10,
+      );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final myItemsResponse = MyItemsResponse.fromJson(response.data);
         final items = myItemsResponse.data ?? [];
-        totalPage = myItemsResponse.pagination?.totalPage ?? 1;
+
+        nextCursor = myItemsResponse.cursor?.nextCursor;
+        hasMore = myItemsResponse.cursor?.hasMore ?? (nextCursor != null && nextCursor!.isNotEmpty);
 
         myItems.assignAll(items);
       }
     } catch (e) {
       print("Error fetching my items: $e");
-      Get.snackbar(
-        "Error",
-        "Failed to fetch your items",
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      Helpers.showCustomSnackBar("Failed to fetch your items", isError: true);
     } finally {
       isLoading.value = false;
     }
   }
 
   Future<void> loadMoreMyItems() async {
+    if (!hasMore || isLoadMore.value || nextCursor == null || nextCursor!.isEmpty) return;
+
     try {
       isLoadMore.value = true;
-      currentPage++;
-      final response = await _marketplaceService.getMyItems(page: currentPage);
+
+      final response = await _marketplaceService.getMyItems(
+        cursor: nextCursor,
+        limit: 10,
+      );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final myItemsResponse = MyItemsResponse.fromJson(response.data);
         final items = myItemsResponse.data ?? [];
 
+        nextCursor = myItemsResponse.cursor?.nextCursor;
+        hasMore = myItemsResponse.cursor?.hasMore ?? (nextCursor != null && nextCursor!.isNotEmpty);
+
         myItems.addAll(items);
       }
     } catch (e) {
       print("Error loading more items: $e");
-      currentPage--; // Reset page on error
     } finally {
       isLoadMore.value = false;
+    }
+  }
+
+  Future<void> markAsSold(String id) async {
+    try {
+      final response = await _marketplaceService.markItemAsSold(id);
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final index = myItems.indexWhere((item) => item.id == id);
+        if (index != -1) {
+          final old = myItems[index];
+          myItems[index] = MyItemsModel(
+            id: old.id,
+            name: old.name,
+            price: old.price,
+            rating: old.rating,
+            imagePath: old.imagePath,
+            condition: old.condition,
+            status: "SOLD",
+            location: old.location,
+            description: old.description,
+            photos: old.photos,
+            createdAt: old.createdAt,
+          );
+        }
+        Helpers.showCustomSnackBar("Item marked as sold!", isError: false);
+
+        if (Get.isRegistered<MarketplaceController>()) {
+          Get.find<MarketplaceController>().fetchItems();
+        }
+      } else {
+        Helpers.showCustomSnackBar("Failed to mark item as sold", isError: true);
+      }
+    } catch (e) {
+      print("Error marking item as sold: $e");
+      Helpers.showCustomSnackBar("An error occurred while updating status", isError: true);
     }
   }
 
@@ -92,30 +143,17 @@ class MyItemsController extends GetxController {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         myItems.removeWhere((item) => item.id == id);
-        Get.back(); // Close the dialog
-        Get.snackbar(
-          "Success",
-          "Item deleted successfully",
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
-        );
+        Helpers.showCustomSnackBar("Item deleted successfully", isError: false);
+
+        if (Get.isRegistered<MarketplaceController>()) {
+          Get.find<MarketplaceController>().fetchItems();
+        }
       } else {
-        Get.back();
-        Get.snackbar(
-          "Error",
-          "Failed to delete item",
-          snackPosition: SnackPosition.BOTTOM,
-        );
+        Helpers.showCustomSnackBar("Failed to delete item", isError: true);
       }
     } catch (e) {
-      Get.back();
       print("Error deleting item: $e");
-      Get.snackbar(
-        "Error",
-        "An error occurred while deleting",
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      Helpers.showCustomSnackBar("An error occurred while deleting", isError: true);
     }
   }
 }

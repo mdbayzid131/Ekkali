@@ -7,12 +7,13 @@ class CustomButton extends StatelessWidget {
   final VoidCallback? onPressed;
   final Color? backgroundColor;
   final Color? textColor;
-  final double width;
+  final double? width;
   final TextStyle? style;
   final EdgeInsetsGeometry? padding;
   final Color? borderColor;
   final double? fontSize;
   final FontWeight? fontWeight;
+  final Widget? icon;
 
   final bool loading;
 
@@ -28,6 +29,7 @@ class CustomButton extends StatelessWidget {
     this.borderColor,
     this.fontSize,
     this.fontWeight,
+    this.icon,
     this.loading = false,
   });
 
@@ -38,19 +40,20 @@ class CustomButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: loading ? null : onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: backgroundColor ?? Colors.white,
+          backgroundColor: backgroundColor ?? const Color(0xFFFFDCA1),
           foregroundColor: textColor ?? Colors.black,
           elevation: 0,
           padding:
               padding ??
-              EdgeInsets.symmetric(vertical: 18.h), // Adjust padding if needed
+              EdgeInsets.symmetric(vertical: 14.h), // Adjust padding if needed
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16.r),
             side: borderColor != null
                 ? BorderSide(color: borderColor!)
                 : BorderSide.none,
           ),
-          disabledBackgroundColor: (backgroundColor ?? Colors.white).withValues(alpha: 0.6),
+          disabledBackgroundColor: (backgroundColor ?? const Color(0xFFFFDCA1))
+              .withValues(alpha: 0.6),
         ),
         child: loading
             ? SizedBox(
@@ -61,16 +64,35 @@ class CustomButton extends StatelessWidget {
                   color: textColor ?? Colors.black,
                 ),
               )
-            : Text(
-                text,
-                style:
-                    style ??
-                    GoogleFonts.inter(
-                      fontSize: fontSize ?? 16.sp, // Default font size with scaling
-                      fontWeight: fontWeight ?? FontWeight.bold,
-                      color: textColor ?? Colors.black,
-                    ),
-              ),
+            : (icon != null
+                  ? Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        icon!,
+                        SizedBox(width: 8.w),
+                        Text(
+                          text,
+                          style:
+                              style ??
+                              GoogleFonts.inter(
+                                fontSize: fontSize ?? 15.sp,
+                                fontWeight: fontWeight ?? FontWeight.w600,
+                                color: textColor ?? Colors.black,
+                              ),
+                        ),
+                      ],
+                    )
+                  : Text(
+                      text,
+                      style:
+                          style ??
+                          GoogleFonts.inter(
+                            fontSize: fontSize ?? 15.sp,
+                            fontWeight: fontWeight ?? FontWeight.w600,
+                            color: textColor ?? Colors.black,
+                          ),
+                    )),
       ),
     );
   }

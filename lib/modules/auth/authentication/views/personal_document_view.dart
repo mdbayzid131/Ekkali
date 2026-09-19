@@ -1,272 +1,313 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:moeb_26/config/themes/app_theme.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../../core/widgets/CustomButton.dart';
-import '../../../../core/widgets/CustomText.dart';
-import '../../../../core/widgets/CustomTextGary.dart';
+import 'package:moeb_26/config/routes/app_pages.dart';
+import 'package:moeb_26/config/themes/app_theme.dart';
+import 'package:moeb_26/core/widgets/custom_sub_appbar.dart';
 import '../controllers/personal_document_controller.dart';
 
-class PersonalDocumentView extends GetView<PersonalDocumentController> {
-  const PersonalDocumentView({super.key});
+class PersonalDocumentView extends StatelessWidget {
+  PersonalDocumentView({super.key});
+
+  final PersonalDocumentController controller =
+      Get.isRegistered<PersonalDocumentController>()
+          ? Get.find<PersonalDocumentController>()
+          : Get.put(PersonalDocumentController());
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      appBar: PreferredSize(
-        preferredSize: Size.fromHeight(60.h),
-        child: Container(
-          decoration: const BoxDecoration(
-            border: Border(
-              bottom: BorderSide(color: Color(0xFF1E1E1E), width: 1.5),
+      appBar: const CustomSubAppBar(title: "Compliance Documents"),
+      body: Obx(() {
+        if (controller.isLoading.value) {
+          return const Center(
+            child: CircularProgressIndicator(
+              color: AppColors.primaryColor,
             ),
-          ),
-          child: AppBar(
-            backgroundColor: Colors.black,
-            elevation: 0,
-            leading: IconButton(
-              icon: Icon(
-                Icons.arrow_back_ios_new,
-                color: Colors.white,
-                size: 20.sp,
-              ),
-              onPressed: () => Get.back(),
-            ),
-            title: Text(
-              'My Personal Documents',
-              style: GoogleFonts.inter(
-                color: Colors.white,
-                fontSize: 18.sp,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            centerTitle: true,
-          ),
-        ),
-      ),
-      body: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 20.w),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(height: 20.h),
-              CustomTextgray(
-                text: "Update or replace your professional documents.",
-                fontSize: 13.sp,
-                fontWeight: FontWeight.w400,
-              ),
-              SizedBox(height: 24.h),
+          );
+        }
 
-              _buildDocumentSection(
-                context: context,
+        return RefreshIndicator(
+          color: AppColors.primaryColor,
+          backgroundColor: const Color(0xFF1A1A1E),
+          onRefresh: () => controller.fetchDocuments(),
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(
+              parent: BouncingScrollPhysics(),
+            ),
+            padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 16.h),
+            children: [
+              // Clean Header Subtitle
+              Padding(
+                padding: EdgeInsets.only(left: 4.w, right: 4.w, bottom: 20.h),
+                child: Text(
+                  "Manage and keep your official documents verified to stay eligible for ride requests.",
+                  style: GoogleFonts.inter(
+                    color: const Color(0xFF94A3B8),
+                    fontSize: 13.sp,
+                    height: 1.45,
+                  ),
+                ),
+              ),
+
+              // Document Cards
+              _buildDocumentCard(
+                documentType: "DRIVING_LICENSE",
                 title: "Driving License",
-                fileRx: controller.drivingLicenseFile,
+                icon: Icons.badge_outlined,
+                statusRx: controller.drivingLicenseStatus,
                 urlRx: controller.drivingLicenseUrl,
                 expireController: controller.drivingLicenseExpireController,
+                expiryRx: controller.drivingLicenseExpiry,
               ),
 
-              SizedBox(height: 24.h),
-              _buildDocumentSection(
-                context: context,
+              _buildDocumentCard(
+                documentType: "HACK_LICENSE",
                 title: "Hack License",
-                fileRx: controller.hackLicenseFile,
+                icon: Icons.verified_user_outlined,
+                statusRx: controller.hackLicenseStatus,
                 urlRx: controller.hackLicenseUrl,
                 expireController: controller.hackLicenseExpireController,
+                expiryRx: controller.hackLicenseExpiry,
               ),
 
-              SizedBox(height: 24.h),
-              _buildDocumentSection(
-                context: context,
+              _buildDocumentCard(
+                documentType: "LOCAL_PERMIT",
                 title: "Local Permit",
-                fileRx: controller.localPermitFile,
+                icon: Icons.location_city_outlined,
+                statusRx: controller.localPermitStatus,
                 urlRx: controller.localPermitUrl,
                 expireController: controller.localPermitExpireController,
+                expiryRx: controller.localPermitExpiry,
               ),
 
+              SizedBox(height: 16.h),
+
+              // Subtle bottom compliance guarantee note
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.lock_outline_rounded,
+                    size: 13.sp,
+                    color: const Color(0xFF64748B),
+                  ),
+                  SizedBox(width: 6.w),
+                  Text(
+                    "Documents are encrypted & securely stored",
+                    style: GoogleFonts.inter(
+                      color: const Color(0xFF64748B),
+                      fontSize: 11.5.sp,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ],
+              ),
               SizedBox(height: 30.h),
-              Container(
-                width: double.infinity,
-                padding: EdgeInsets.all(18.w),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF1E2939),
-                  borderRadius: BorderRadius.circular(16.r),
-                ),
-                child: const CustomTextgray(
-                  text:
-                      "Updates to your documents may take up to 24-48 hours to be reviewed and approved by our admin team.",
-                ),
-              ),
-              SizedBox(height: 40.h),
-
-              Obx(
-                () => controller.isLoading.value
-                    ? const Center(child: CircularProgressIndicator())
-                    : CustomButton(
-                        text: "Update Documents",
-                        onPressed: () {
-                          controller.submitDocuments();
-                        },
-                      ),
-              ),
-              SizedBox(height: 60.h),
             ],
           ),
-        ),
-      ),
+        );
+      }),
     );
   }
 
-  // --- UI Helpers ---
-
-  Widget _buildFieldLabel(String text) {
-    return Padding(
-      padding: EdgeInsets.only(bottom: 8.h),
-      child: CustomText(
-        text: text,
-        fontWeight: FontWeight.w500,
-        fontSize: 13.sp,
-      ),
-    );
-  }
-
-  Widget _buildDocumentSection({
-    required BuildContext context,
+  /// Clean & Comfortable Document Card
+  Widget _buildDocumentCard({
+    required String documentType,
     required String title,
-    required Rx<File?> fileRx,
+    required IconData icon,
+    required RxnString statusRx,
     required RxnString urlRx,
     required TextEditingController expireController,
+    required RxString expiryRx,
   }) {
     return Obx(() {
-      final hasLocalFile = fileRx.value != null;
-      final hasServerUrl = urlRx.value != null && urlRx.value!.isNotEmpty;
-      final canPreview = hasLocalFile || hasServerUrl;
+      final status = statusRx.value;
+      final url = urlRx.value;
+      final expiryDate = expiryRx.value.isNotEmpty
+          ? expiryRx.value
+          : expireController.text.trim();
+      final hasUrl = url != null && url.isNotEmpty;
 
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Document picker row
-          Container(
-            padding: EdgeInsets.all(12.w),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16.r),
-              border: Border.all(color: AppColors.black200),
-            ),
-            child: Row(
-              children: [
-                _buildIcon(Icons.description_outlined),
-                SizedBox(width: 12.w),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      CustomText(
-                        text: title,
-                        fontWeight: FontWeight.w500,
-                        fontSize: 13.sp,
-                      ),
-                      if (hasLocalFile)
-                        Text(
-                          controller.getFileName(fileRx),
-                          style: TextStyle(
-                            color: Colors.green,
-                            fontSize: 11.sp,
-                          ),
-                        )
-                      else if (hasServerUrl)
-                        Text(
-                          "Current image on file",
-                          style: TextStyle(color: Colors.grey, fontSize: 11.sp),
+      return Container(
+        margin: EdgeInsets.only(bottom: 12.h),
+        decoration: BoxDecoration(
+          color: const Color(0xFF131316),
+          borderRadius: BorderRadius.circular(14.r),
+          border: Border.all(color: const Color(0xFF222228)),
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(14.r),
+            onTap: () {
+              Get.toNamed(
+                Routes.personalDocumentDetailView,
+                arguments: {"documentType": documentType},
+              )?.then((_) => controller.fetchDocuments());
+            },
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 15.h),
+              child: Row(
+                children: [
+                  // Leading Neutral Icon Box
+                  Container(
+                    width: 44.w,
+                    height: 44.w,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1C1C22),
+                      borderRadius: BorderRadius.circular(11.r),
+                      border: Border.all(color: const Color(0xFF282832)),
+                    ),
+                    child: Icon(
+                      icon,
+                      color: Colors.white,
+                      size: 21.sp,
+                    ),
+                  ),
+                  SizedBox(width: 14.w),
+
+                  // Content
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                title,
+                                style: GoogleFonts.inter(
+                                  color: Colors.white,
+                                  fontSize: 15.sp,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            SizedBox(width: 8.w),
+                            _buildStatusBadge(status),
+                          ],
                         ),
-                    ],
-                  ),
-                ),
-                // 👁 Eye preview icon — shows if local file or server URL exists
-                if (canPreview)
-                  IconButton(
-                    onPressed: () => controller.previewImage(
-                      context,
-                      fileRx,
-                      urlRx,
-                      title: title,
+                        SizedBox(height: 6.h),
+                        Row(
+                          children: [
+                            Text(
+                              expiryDate.isNotEmpty
+                                  ? "Expires $expiryDate"
+                                  : "No expiry set",
+                              style: GoogleFonts.inter(
+                                color: const Color(0xFF94A3B8),
+                                fontSize: 12.sp,
+                              ),
+                            ),
+                            if (hasUrl) ...[
+                              SizedBox(width: 6.w),
+                              Text(
+                                "•",
+                                style: TextStyle(
+                                  color: const Color(0xFF475569),
+                                  fontSize: 12.sp,
+                                ),
+                              ),
+                              SizedBox(width: 6.w),
+                              Text(
+                                "Attached",
+                                style: GoogleFonts.inter(
+                                  color: const Color(0xFF94A3B8),
+                                  fontSize: 12.sp,
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ],
                     ),
-                    icon: const Icon(
-                      Icons.remove_red_eye_outlined,
-                      color: Colors.blue,
-                    ),
-                    tooltip: "Preview current image",
                   ),
-                IconButton(
-                  onPressed: () => controller.pickFromCamera(fileRx),
-                  icon: const Icon(
-                    Icons.camera_alt_outlined,
-                    color: Colors.white,
+
+                  SizedBox(width: 10.w),
+                  Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    color: const Color(0xFF64748B),
+                    size: 13.sp,
                   ),
-                ),
-                IconButton(
-                  onPressed: () => controller.pickFromFile(context, fileRx),
-                  icon: const Icon(
-                    Icons.file_upload_outlined,
-                    color: Colors.white,
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-
-          // Expiry date field
-          SizedBox(height: 12.h),
-          _buildFieldLabel("Expiration Date"),
-          _buildExpireDateField(context, expireController),
-        ],
+        ),
       );
     });
   }
 
-  Widget _buildIcon(IconData icon) {
-    return Container(
-      padding: EdgeInsets.all(8.r),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1E2939),
-        borderRadius: BorderRadius.circular(12.r),
-      ),
-      child: Icon(icon, color: Colors.white, size: 22.sp),
-    );
-  }
+  /// Clean, Soft Status Badge
+  Widget _buildStatusBadge(String? status) {
+    if (status == null || status.isEmpty) {
+      return Container(
+        padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1E293B),
+          borderRadius: BorderRadius.circular(6.r),
+          border: Border.all(color: const Color(0xFF334155), width: 0.8),
+        ),
+        child: Text(
+          "Not Uploaded",
+          style: GoogleFonts.inter(
+            color: const Color(0xFF94A3B8),
+            fontSize: 10.5.sp,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      );
+    }
 
-  Widget _buildExpireDateField(
-    BuildContext context,
-    TextEditingController textController,
-  ) {
-    return TextFormField(
-      controller: textController,
-      readOnly: true,
-      onTap: () => controller.selectDate(context, textController),
-      style: TextStyle(color: Colors.white, fontSize: 14.sp),
-      decoration: InputDecoration(
-        hintText: "Select Date",
-        hintStyle: TextStyle(color: AppColors.gray100, fontSize: 14.sp),
-        suffixIcon: Icon(
-          Icons.calendar_month,
-          color: AppColors.gray100,
-          size: 20.sp,
-        ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16.r),
-          borderSide: const BorderSide(color: AppColors.black200),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16.r),
-          borderSide: const BorderSide(color: AppColors.black200),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16.r),
-          borderSide: const BorderSide(color: AppColors.black200),
+    final normalized = status.toUpperCase();
+    Color bg;
+    Color border;
+    Color textColor;
+    String label;
+
+    if (normalized == 'APPROVED') {
+      bg = const Color(0xFF064E3B).withValues(alpha: 0.35);
+      border = const Color(0xFF10B981).withValues(alpha: 0.3);
+      textColor = const Color(0xFF34D399);
+      label = "Approved";
+    } else if (normalized.contains('PENDING') || normalized.contains('SCAN')) {
+      bg = const Color(0xFF78350F).withValues(alpha: 0.35);
+      border = const Color(0xFFF59E0B).withValues(alpha: 0.3);
+      textColor = const Color(0xFFFBBF24);
+      label = "Pending";
+    } else if (normalized == 'REJECTED') {
+      bg = const Color(0xFF7F1D1D).withValues(alpha: 0.35);
+      border = const Color(0xFFEF4444).withValues(alpha: 0.3);
+      textColor = const Color(0xFFF87171);
+      label = "Rejected";
+    } else {
+      bg = const Color(0xFF1E293B);
+      border = const Color(0xFF334155);
+      textColor = const Color(0xFF94A3B8);
+      label = normalized;
+    }
+
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(6.r),
+        border: Border.all(color: border, width: 0.8),
+      ),
+      child: Text(
+        label,
+        style: GoogleFonts.inter(
+          color: textColor,
+          fontSize: 10.5.sp,
+          fontWeight: FontWeight.w600,
         ),
       ),
     );
   }
 }
+

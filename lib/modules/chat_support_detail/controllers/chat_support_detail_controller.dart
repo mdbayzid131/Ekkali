@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:moeb_26/core/utils/helpers.dart';
 import 'package:moeb_26/data/models/chat_message_model.dart';
 import 'package:moeb_26/core/services/socket_service.dart';
 import 'package:moeb_26/core/services/support_service.dart';
@@ -93,7 +94,7 @@ class SupportChatController extends GetxController {
       }
     } catch (e) {
       debugPrint("Error sending support message: $e");
-      Get.snackbar("Error", "Failed to send message");
+      Helpers.showCustomSnackBar("Failed to send message", isError: true);
     }
   }
 

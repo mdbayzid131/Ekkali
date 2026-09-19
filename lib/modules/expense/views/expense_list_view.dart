@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -13,6 +12,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:moeb_26/config/constants/icon_paths.dart';
 import 'add_expense_view.dart';
 import 'expense_detail_sheet.dart';
+
+import 'package:moeb_26/core/widgets/custom_sub_appbar.dart';
 
 class ExpenseListView extends GetView<ExpenseController> {
   const ExpenseListView({super.key});
@@ -35,188 +36,157 @@ class ExpenseListView extends GetView<ExpenseController> {
 
       return Scaffold(
         backgroundColor: backgroundColor,
-        appBar: PreferredSize(
-          preferredSize: Size.fromHeight(52.h),
-          child: Container(
-            decoration: const BoxDecoration(
-              border: Border(
-                bottom: BorderSide(color: borderColor, width: 1.5),
+        appBar: CustomSubAppBar(
+          title: 'Expenses',
+          actions: [
+            // Monthly/Yearly Filter Option
+            PopupMenuButton<String>(
+              icon: const Icon(Icons.filter_alt_outlined, color: Colors.white),
+              tooltip: "Filter Period",
+              offset: Offset(0, 48.h),
+              color: const Color(0xFF1E1E20),
+              surfaceTintColor: Colors.transparent,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12.r),
+                side: const BorderSide(color: Color(0xFF2C2C2C), width: 1),
               ),
+              constraints: BoxConstraints(maxWidth: 165.w),
+              onSelected: (val) {
+                if (controller.filterPeriod.value != val) {
+                  controller.filterPeriod.value = val;
+                  controller.fetchExpenses();
+                }
+              },
+              itemBuilder: (context) {
+                final current = controller.filterPeriod.value;
+                final activeColor = const Color(0xFFFFDCA1);
+                return [
+                  PopupMenuItem(
+                    value: 'Monthly',
+                    height: 38.h,
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.calendar_month_outlined,
+                          color: current == 'Monthly'
+                              ? activeColor
+                              : Colors.white70,
+                          size: 16.sp,
+                        ),
+                        SizedBox(width: 8.w),
+                        Text(
+                          'Monthly View',
+                          style: GoogleFonts.inter(
+                            color: current == 'Monthly'
+                                ? activeColor
+                                : Colors.white70,
+                            fontWeight: current == 'Monthly'
+                                ? FontWeight.w600
+                                : FontWeight.w400,
+                            fontSize: 13.sp,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  PopupMenuItem(
+                    value: 'Yearly',
+                    height: 38.h,
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.calendar_today_outlined,
+                          color: current == 'Yearly'
+                              ? activeColor
+                              : Colors.white70,
+                          size: 16.sp,
+                        ),
+                        SizedBox(width: 8.w),
+                        Text(
+                          'Yearly View',
+                          style: GoogleFonts.inter(
+                            color: current == 'Yearly'
+                                ? activeColor
+                                : Colors.white70,
+                            fontWeight: current == 'Yearly'
+                                ? FontWeight.w600
+                                : FontWeight.w400,
+                            fontSize: 13.sp,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ];
+              },
             ),
-            child: AppBar(
-              backgroundColor: backgroundColor,
-              elevation: 0,
-              leading: IconButton(
-                icon: Icon(
-                  Icons.arrow_back_ios_new,
-                  color: Colors.white,
-                  size: 18.sp,
-                ),
-                onPressed: () => Get.back(),
+            // Export PDF/CSV Options
+            PopupMenuButton<String>(
+              icon: const Icon(Icons.ios_share, color: Colors.white),
+              tooltip: "Export Options",
+              offset: Offset(0, 48.h),
+              color: const Color(0xFF1E1E20),
+              surfaceTintColor: Colors.transparent,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12.r),
+                side: const BorderSide(color: Color(0xFF2C2C2C), width: 1),
               ),
-              title: Text(
-                'Expense Tracker',
-                style: GoogleFonts.inter(
-                  color: Colors.white,
-                  fontSize: 17.sp,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              centerTitle: true,
-              actions: [
-                // Monthly/Yearly Filter Option
-                PopupMenuButton<String>(
-                  icon: const Icon(
-                    Icons.filter_alt_outlined,
-                    color: Colors.white,
-                  ),
-                  tooltip: "Filter Period",
-                  offset: Offset(0, 48.h),
-                  color: const Color(0xFF1E1E20),
-                  surfaceTintColor: Colors.transparent,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12.r),
-                    side: const BorderSide(color: Color(0xFF2C2C2C), width: 1),
-                  ),
-                  constraints: BoxConstraints(maxWidth: 165.w),
-                  onSelected: (val) {
-                    if (controller.filterPeriod.value != val) {
-                      controller.filterPeriod.value = val;
-                      controller.fetchExpenses();
-                    }
-                  },
-                  itemBuilder: (context) {
-                    final current = controller.filterPeriod.value;
-                    final activeColor = const Color(0xFFFFDCA1);
-                    return [
-                      PopupMenuItem(
-                        value: 'Monthly',
-                        height: 38.h,
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.calendar_month_outlined,
-                              color: current == 'Monthly'
-                                  ? activeColor
-                                  : Colors.white70,
-                              size: 16.sp,
-                            ),
-                            SizedBox(width: 8.w),
-                            Text(
-                              'Monthly View',
-                              style: GoogleFonts.inter(
-                                color: current == 'Monthly'
-                                    ? activeColor
-                                    : Colors.white70,
-                                fontWeight: current == 'Monthly'
-                                    ? FontWeight.w600
-                                    : FontWeight.w400,
-                                fontSize: 13.sp,
-                              ),
-                            ),
-                          ],
+              constraints: BoxConstraints(maxWidth: 150.w),
+              onSelected: (val) {
+                if (val == 'csv') {
+                  controller.exportToCSV();
+                } else if (val == 'pdf') {
+                  controller.exportToPDF();
+                }
+              },
+              itemBuilder: (context) => [
+                PopupMenuItem(
+                  value: 'csv',
+                  height: 38.h,
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.table_chart_outlined,
+                        color: const Color(0xFF10B981),
+                        size: 16.sp,
+                      ),
+                      SizedBox(width: 8.w),
+                      Text(
+                        'Export CSV',
+                        style: GoogleFonts.inter(
+                          color: Colors.white70,
+                          fontSize: 13.sp,
+                          fontWeight: FontWeight.w400,
                         ),
                       ),
-                      PopupMenuItem(
-                        value: 'Yearly',
-                        height: 38.h,
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.calendar_today_outlined,
-                              color: current == 'Yearly'
-                                  ? activeColor
-                                  : Colors.white70,
-                              size: 16.sp,
-                            ),
-                            SizedBox(width: 8.w),
-                            Text(
-                              'Yearly View',
-                              style: GoogleFonts.inter(
-                                color: current == 'Yearly'
-                                    ? activeColor
-                                    : Colors.white70,
-                                fontWeight: current == 'Yearly'
-                                    ? FontWeight.w600
-                                    : FontWeight.w400,
-                                fontSize: 13.sp,
-                              ),
-                            ),
-                          ],
+                    ],
+                  ),
+                ),
+                PopupMenuItem(
+                  value: 'pdf',
+                  height: 38.h,
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.picture_as_pdf_outlined,
+                        color: const Color(0xFFEF4444),
+                        size: 16.sp,
+                      ),
+                      SizedBox(width: 8.w),
+                      Text(
+                        'Export PDF',
+                        style: GoogleFonts.inter(
+                          color: Colors.white70,
+                          fontSize: 13.sp,
+                          fontWeight: FontWeight.w400,
                         ),
                       ),
-                    ];
-                  },
-                ),
-                // Export PDF/CSV Options
-                PopupMenuButton<String>(
-                  icon: const Icon(Icons.ios_share, color: Colors.white),
-                  tooltip: "Export Options",
-                  offset: Offset(0, 48.h),
-                  color: const Color(0xFF1E1E20),
-                  surfaceTintColor: Colors.transparent,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12.r),
-                    side: const BorderSide(color: Color(0xFF2C2C2C), width: 1),
+                    ],
                   ),
-                  constraints: BoxConstraints(maxWidth: 150.w),
-                  onSelected: (val) {
-                    if (val == 'csv') {
-                      controller.exportToCSV();
-                    } else if (val == 'pdf') {
-                      controller.exportToPDF();
-                    }
-                  },
-                  itemBuilder: (context) => [
-                    PopupMenuItem(
-                      value: 'csv',
-                      height: 38.h,
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.table_chart_outlined,
-                            color: const Color(0xFF10B981),
-                            size: 16.sp,
-                          ),
-                          SizedBox(width: 8.w),
-                          Text(
-                            'Export CSV',
-                            style: GoogleFonts.inter(
-                              color: Colors.white70,
-                              fontSize: 13.sp,
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    PopupMenuItem(
-                      value: 'pdf',
-                      height: 38.h,
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.picture_as_pdf_outlined,
-                            color: const Color(0xFFEF4444),
-                            size: 16.sp,
-                          ),
-                          SizedBox(width: 8.w),
-                          Text(
-                            'Export PDF',
-                            style: GoogleFonts.inter(
-                              color: Colors.white70,
-                              fontSize: 13.sp,
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
                 ),
               ],
             ),
-          ),
+          ],
         ),
         body: SafeArea(
           child: Column(
@@ -261,7 +231,7 @@ class ExpenseListView extends GetView<ExpenseController> {
                   if (controller.isLoading.value) {
                     return const Center(
                       child: CircularProgressIndicator(
-                        color: AppColors.orange100,
+                        color: AppColors.primaryColor,
                       ),
                     );
                   }
@@ -287,20 +257,47 @@ class ExpenseListView extends GetView<ExpenseController> {
                       ),
                     );
                   }
-                  return ListView.builder(
-                    padding: EdgeInsets.symmetric(horizontal: 16.w),
-                    itemCount: groupedExpenses.keys.length,
-                    itemBuilder: (context, index) {
-                      final category = groupedExpenses.keys.elementAt(index);
-                      final items = groupedExpenses[category]!;
-                      return _buildCategoryExpansionTile(
-                        context,
-                        category,
-                        items,
-                        borderColor,
-                        accentColor,
-                      );
-                    },
+                  return RefreshIndicator(
+                    color: AppColors.primaryColor,
+                    backgroundColor: const Color(0xFF1E1E1E),
+                    onRefresh: () => controller.fetchExpenses(isRefresh: true),
+                    child: ListView.builder(
+                      controller: controller.scrollController,
+                      physics: const AlwaysScrollableScrollPhysics(
+                        parent: BouncingScrollPhysics(),
+                      ),
+                      padding: EdgeInsets.symmetric(horizontal: 16.w),
+                      itemCount:
+                          groupedExpenses.keys.length +
+                          (controller.isLoadingMore.value ? 1 : 0),
+                      itemBuilder: (context, index) {
+                        if (index == groupedExpenses.keys.length) {
+                          return Padding(
+                            padding: EdgeInsets.symmetric(vertical: 16.h),
+                            child: const Center(
+                              child: SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2.5,
+                                  color: AppColors.primaryColor,
+                                ),
+                              ),
+                            ),
+                          );
+                        }
+
+                        final category = groupedExpenses.keys.elementAt(index);
+                        final items = groupedExpenses[category]!;
+                        return _buildCategoryExpansionTile(
+                          context,
+                          category,
+                          items,
+                          borderColor,
+                          accentColor,
+                        );
+                      },
+                    ),
                   );
                 }),
               ),
@@ -312,8 +309,7 @@ class ExpenseListView extends GetView<ExpenseController> {
           padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 15.h),
           child: CustomButton(
             text: "Track New Expense",
-            backgroundColor: accentColor,
-            textColor: Colors.black,
+
             onPressed: () {
               Get.to(() => AddExpenseView());
             },
@@ -555,46 +551,54 @@ class ExpenseListView extends GetView<ExpenseController> {
                   child: Row(
                     children: [
                       Expanded(
-                        flex: 2,
-                        child: Text(
-                          DateFormat('dd MMM').format(e.date),
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 11.sp,
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        flex: 4,
+                        flex: 8,
                         child: GestureDetector(
                           onTap: () => Get.bottomSheet(
                             ExpenseDetailSheet(expense: e),
                             isScrollControlled: true,
                             ignoreSafeArea: false,
                           ),
-                          child: Text(
-                            e.description.isNotEmpty
-                                ? e.description
-                                : "No description",
-                            style: TextStyle(
-                              color: Colors.grey[400],
-                              fontSize: 11.sp,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                          behavior: HitTestBehavior.opaque,
+                          child: Row(
+                            children: [
+                              Expanded(
+                                flex: 2,
+                                child: Text(
+                                  DateFormat('dd MMM').format(e.date),
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 11.sp,
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                flex: 4,
+                                child: Text(
+                                  e.description.isNotEmpty
+                                      ? e.description
+                                      : "No description",
+                                  style: TextStyle(
+                                    color: Colors.grey[400],
+                                    fontSize: 11.sp,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              Expanded(
+                                flex: 2,
+                                child: Text(
+                                  "\$${e.amount.toStringAsFixed(2)}",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 11.sp,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  textAlign: TextAlign.right,
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                      ),
-                      Expanded(
-                        flex: 2,
-                        child: Text(
-                          "\$${e.amount.toStringAsFixed(2)}",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 11.sp,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          textAlign: TextAlign.right,
                         ),
                       ),
                       Expanded(
@@ -722,38 +726,19 @@ class ExpenseListView extends GetView<ExpenseController> {
                                               ),
                                               SizedBox(width: 12.w),
                                               Expanded(
-                                                child: ElevatedButton(
+                                                child: CustomButton(
                                                   onPressed: () {
                                                     controller.deleteExpense(
                                                       e.id,
                                                     );
                                                     Get.back();
                                                   },
-                                                  style: ElevatedButton.styleFrom(
-                                                    backgroundColor:
-                                                        Colors.redAccent,
-                                                    foregroundColor:
-                                                        Colors.white,
-                                                    elevation: 0,
-                                                    padding:
-                                                        EdgeInsets.symmetric(
-                                                          vertical: 12.h,
-                                                        ),
-                                                    shape: RoundedRectangleBorder(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                            12.r,
-                                                          ),
-                                                    ),
-                                                  ),
-                                                  child: Text(
-                                                    "Delete",
-                                                    style: GoogleFonts.inter(
-                                                      color: Colors.white,
-                                                      fontSize: 13.sp,
-                                                      fontWeight:
-                                                          FontWeight.w600,
-                                                    ),
+                                                  text: "Delete",
+                                                  backgroundColor:
+                                                      Colors.redAccent,
+                                                  textColor: Colors.white,
+                                                  padding: EdgeInsets.symmetric(
+                                                    vertical: 12.h,
                                                   ),
                                                 ),
                                               ),
@@ -790,7 +775,7 @@ class ExpenseListView extends GetView<ExpenseController> {
                     ],
                   ),
                 );
-              }).toList(),
+              }),
             ],
           ),
         ),
