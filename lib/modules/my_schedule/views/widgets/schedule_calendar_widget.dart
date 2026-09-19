@@ -314,7 +314,10 @@ class _ScheduleCalendarWidgetState extends State<ScheduleCalendarWidget> {
         children: List.generate(7, (index) {
           final date = monday.add(Duration(days: index));
           return Expanded(
-            child: _buildDateCell(date, selected, controller),
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 3.w),
+              child: _buildDateCell(date, selected, controller),
+            ),
           );
         }),
       ),
@@ -346,7 +349,7 @@ class _ScheduleCalendarWidgetState extends State<ScheduleCalendarWidget> {
           crossAxisCount: 7,
           mainAxisSpacing: 6,
           crossAxisSpacing: 6,
-          childAspectRatio: 1.1,
+          childAspectRatio: 0.95,
         ),
         itemCount: totalCells,
         itemBuilder: (context, index) {
@@ -382,7 +385,7 @@ class _ScheduleCalendarWidgetState extends State<ScheduleCalendarWidget> {
       onTap: () => controller.selectDate(date),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
-        padding: EdgeInsets.symmetric(vertical: 6.h),
+        padding: EdgeInsets.symmetric(vertical: 4.h, horizontal: 2.w),
         decoration: BoxDecoration(
           color: isSelected
               ? AppColors.primaryColor
@@ -393,30 +396,31 @@ class _ScheduleCalendarWidgetState extends State<ScheduleCalendarWidget> {
               : Border.all(color: const Color(0xFF2B2B32), width: 1),
         ),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
               DateFormat('d').format(date),
               style: GoogleFonts.inter(
-                fontSize: 14.sp,
+                fontSize: 13.sp,
                 fontWeight: isSelected || isToday ? FontWeight.bold : FontWeight.w500,
                 color: isSelected
                     ? Colors.black
                     : (isCurrentMonth ? Colors.white : Colors.white24),
               ),
             ),
-            SizedBox(height: 3.h),
+            SizedBox(height: 2.h),
             if (hasJobs)
               Container(
-                width: 5.r,
-                height: 5.r,
+                width: 4.r,
+                height: 4.r,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: isSelected ? Colors.black : AppColors.primaryColor,
                 ),
               )
             else
-              SizedBox(height: 5.r),
+              SizedBox(height: 4.r),
           ],
         ),
       ),

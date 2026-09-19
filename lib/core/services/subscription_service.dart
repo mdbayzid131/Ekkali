@@ -24,8 +24,13 @@ class SubscriptionService extends GetxService {
   final InAppPurchase _iap = InAppPurchase.instance;
   StreamSubscription<List<PurchaseDetails>>? _purchaseSubscription;
 
+  // ─── Testing / Debug Override ───────────────────────────────────────────────
+  /// টেস্টিং পারপাসে পুরো অ্যাপে প্রিমিয়াম আনলক করতে চাইলে এটিকে `true` করে দিন।
+  /// Normal production/live মোডের জন্য এটিকে `false` রাখুন।
+  static const bool debugForcePremium = true;
+
   // ─── Observable State ───────────────────────────────────────────────────────
-  final RxBool isPremium = false.obs;
+  final RxBool isPremium = (debugForcePremium ? true : false).obs;
   final RxBool isAvailable = false.obs;
   final RxBool isLoading = false.obs;
   final Rx<ProductDetails?> yearlyProduct = Rx<ProductDetails?>(null);
@@ -46,6 +51,12 @@ class SubscriptionService extends GetxService {
 
   // ─── Initialization ──────────────────────────────────────────────────────────
   Future<void> _initService() async {
+    if (debugForcePremium) {
+      isPremium.value = true;
+      debugPrint('[SubscriptionService] ⚡ DEBUG MODE: Forced Premium is ACTIVE');
+      return;
+    }
+
     // 1. Load cached premium status first so UI is instant (only if token exists)
     await _loadCachedStatus();
 
@@ -382,6 +393,10 @@ class SubscriptionService extends GetxService {
 
   /// Sync subscription status from backend (non-blocking) - called on app start, login, or screen load
   Future<void> syncStatusWithBackend() async {
+    if (debugForcePremium) {
+      isPremium.value = true;
+      return;
+    }
     try {
       final token = await StorageService.getString(StorageConstants.bearerToken);
       if (token.isEmpty) {
