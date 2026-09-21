@@ -57,6 +57,18 @@ class SubscriptionService extends GetxService {
       return;
     }
 
+    // 1. Load cached premium status first so UI is instant (only if token exists)
+    await _loadCachedStatus();
+
+    // 2. Always sync status with backend if user has a token
+    syncStatusWithBackend();
+
+    // 3. Check if store is available
+    isAvailable.value = await _iap.isAvailable();
+    if (!isAvailable.value) {
+      debugPrint('[SubscriptionService] Store not available.');
+      return;
+    }
 
     // 4. iOS: enable pending transactions
     if (Platform.isIOS) {
