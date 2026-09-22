@@ -70,7 +70,6 @@ class SubscriptionController extends GetxController {
       'subtitle':
           'Buy and sell business-related items, equipment, or services within the Ekkali network.',
       'icon': 'marketplace',
-      'isNew': 'true',
     },
     {
       'title': 'Deals & Exclusive Offers',
