@@ -116,14 +116,6 @@ class RidesController extends GetxController {
               refreshCurrentTab();
             }
 
-            String applicantName = "A driver";
-            if (applicantData is Map && applicantData['name'] != null) {
-              applicantName = applicantData['name'].toString();
-            }
-            Helpers.showCustomSnackBar(
-              "$applicantName applied to your job!",
-              isError: false,
-            );
             debugPrint("✨ RidesController: Real-time application received for [$targetJobId]");
           }
         } catch (e) {

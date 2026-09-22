@@ -80,6 +80,13 @@ class FirebaseNotificationService {
       await sendTokenToBackend(newToken);
     });
 
+    // Set foreground notification options (shows heads-up banner on iOS)
+    await _messaging.setForegroundNotificationPresentationOptions(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
+
     // Initialize local notifications
     await _initializeLocalNotifications();
 
@@ -139,12 +146,15 @@ class FirebaseNotificationService {
       },
     );
 
-    // Create notification channel (Android)
+    // Create notification channel with MAX importance for Heads-up Banner (Android)
     const AndroidNotificationChannel channel = AndroidNotificationChannel(
       'high_importance_channel',
       'High Importance Notifications',
       description: 'This channel is used for important notifications.',
-      importance: Importance.high,
+      importance: Importance.max,
+      playSound: true,
+      enableVibration: true,
+      enableLights: true,
     );
 
     await _localNotifications
@@ -205,14 +215,18 @@ class FirebaseNotificationService {
           'High Importance Notifications',
           channelDescription:
               'This channel is used for important notifications.',
-          importance: Importance.high,
-          priority: Priority.high,
+          importance: Importance.max,
+          priority: Priority.max,
           icon: 'ic_notification',
+          playSound: true,
+          enableVibration: true,
         ),
         iOS: DarwinNotificationDetails(
           presentAlert: true,
-          presentBadge: true,
+          presentBanner: true,
           presentSound: true,
+          presentBadge: true,
+          presentList: true,
         ),
       ),
       payload: jsonEncode(message.data),
