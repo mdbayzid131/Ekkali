@@ -71,7 +71,9 @@ class ChatDetailController extends GetxController {
     socketService.joinChat(chat.id);
 
     _messageWorker = ever(socketService.lastReceivedMessage, (newMessage) {
-      if (newMessage != null && newMessage.text.trim().isNotEmpty) {
+      if (newMessage != null &&
+          (newMessage.text.trim().isNotEmpty ||
+              newMessage.attachments.isNotEmpty)) {
         if (newMessage.chatId == chat.id) {
           int tempIndex = messages.indexWhere((m) => m.id.startsWith('temp_'));
 

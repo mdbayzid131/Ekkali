@@ -362,7 +362,10 @@ class ChatView extends StatelessWidget {
                       children: [
                         Expanded(
                           child: Text(
-                            chat.lastMessage ?? 'No messages yet',
+                            (chat.lastMessage != null &&
+                                    chat.lastMessage!.trim().isNotEmpty)
+                                ? chat.lastMessage!
+                                : 'No messages yet',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: GoogleFonts.inter(
