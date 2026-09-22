@@ -16,6 +16,14 @@ class NavigationController extends GetxController {
         Get.arguments.containsKey('bottomIndex')) {
       currentIndex.value = Get.arguments['bottomIndex'];
     }
+
+    if (currentIndex.value == 1) {
+      try {
+        if (Get.isRegistered<RidesController>()) {
+          Get.find<RidesController>().refreshCurrentTab();
+        }
+      } catch (_) {}
+    }
   }
 
   void changeIndex(int index) {
