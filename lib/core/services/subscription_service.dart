@@ -26,7 +26,15 @@ class SubscriptionService extends GetxService {
 
   // ─── Testing / Debug Override ───────────────────────────────────────────────
 
-  static const bool debugForcePremium = true;
+  static const bool debugForcePremium = false;
+  final RxBool isDebugManualOverride = false.obs;
+
+  void toggleDebugPremium(bool value) {
+    isDebugManualOverride.value = true;
+    isPremium.value = value;
+    StorageService.setBool(StorageConstants.isPremium, value);
+    debugPrint('[SubscriptionService] ⚡ Manually toggled isPremium: $value');
+  }
 
   // ─── Observable State ───────────────────────────────────────────────────────
   final RxBool isPremium = (debugForcePremium ? true : false).obs;
@@ -409,8 +417,8 @@ class SubscriptionService extends GetxService {
 
   /// Sync subscription status from backend (non-blocking) - called on app start, login, or screen load
   Future<void> syncStatusWithBackend() async {
-    if (debugForcePremium) {
-      isPremium.value = true;
+    if (debugForcePremium || isDebugManualOverride.value) {
+      if (debugForcePremium) isPremium.value = true;
       return;
     }
     try {

@@ -99,6 +99,11 @@ class SubscriptionController extends GetxController {
     await _subscriptionService.restorePurchases();
   }
 
+  /// Temporary debug toggle for client testing on TestFlight
+  void toggleDebugPremium(bool value) {
+    _subscriptionService.toggleDebugPremium(value);
+  }
+
   /// Legacy plan selector (kept for UI compatibility)
   void selectPlan(String planId) {}
 }

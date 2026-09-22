@@ -20,7 +20,7 @@ class SubscriptionView extends StatelessWidget {
           children: [
             // --- TOP BAR ---
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -52,10 +52,110 @@ class SubscriptionView extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  SizedBox(width: 38.w),
+                  // --- TEMPORARY DEBUG TOGGLE SWITCH (TESTFLIGHT) ---
+                  Obx(() {
+                    final isPrem = controller.isPremium.value;
+                    return Container(
+                      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF181818),
+                        borderRadius: BorderRadius.circular(20.r),
+                        border: Border.all(
+                          color: isPrem
+                              ? AppColors.primaryColor.withValues(alpha: 0.6)
+                              : const Color(0xFF333333),
+                          width: 1,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            isPrem ? "PRO" : "FREE",
+                            style: GoogleFonts.inter(
+                              color: isPrem
+                                  ? AppColors.primaryColor
+                                  : const Color(0xFFA1A1AA),
+                              fontSize: 11.sp,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                          SizedBox(width: 4.w),
+                          SizedBox(
+                            height: 24.h,
+                            child: FittedBox(
+                              fit: BoxFit.fill,
+                              child: Switch(
+                                value: isPrem,
+                                activeColor: AppColors.primaryColor,
+                                activeTrackColor: AppColors.primaryColor
+                                    .withValues(alpha: 0.35),
+                                inactiveThumbColor: const Color(0xFF888888),
+                                inactiveTrackColor: const Color(0xFF262626),
+                                materialTapTargetSize:
+                                    MaterialTapTargetSize.shrinkWrap,
+                                onChanged: (val) {
+                                  controller.toggleDebugPremium(val);
+                                },
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }),
                 ],
               ),
             ),
+
+            // --- PREVIEW MODE INDICATOR BANNER ---
+            Obx(() {
+              final isPrem = controller.isPremium.value;
+              return Container(
+                width: double.infinity,
+                margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 2.h),
+                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                decoration: BoxDecoration(
+                  color: isPrem
+                      ? const Color(0xFF10B981).withValues(alpha: 0.1)
+                      : const Color(0xFF3B82F6).withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8.r),
+                  border: Border.all(
+                    color: isPrem
+                        ? const Color(0xFF10B981).withValues(alpha: 0.25)
+                        : const Color(0xFF3B82F6).withValues(alpha: 0.25),
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      isPrem
+                          ? Icons.check_circle_outline_rounded
+                          : Icons.visibility_outlined,
+                      color: isPrem
+                          ? const Color(0xFF34D399)
+                          : const Color(0xFF60A5FA),
+                      size: 14.sp,
+                    ),
+                    SizedBox(width: 6.w),
+                    Text(
+                      isPrem
+                          ? "Previewing: Premium Mode (All features unlocked)"
+                          : "Previewing: Free Mode (Subscription required)",
+                      style: GoogleFonts.inter(
+                        color: isPrem
+                            ? const Color(0xFF34D399)
+                            : const Color(0xFF60A5FA),
+                        fontSize: 11.sp,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }),
 
             // --- MAIN CONTENT ---
             Expanded(
