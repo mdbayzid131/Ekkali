@@ -35,7 +35,7 @@ class ApiConstants {
   static const String myJobs = '/jobs/my-jobs';
   static const String calendarJobs = '/jobs/calendar';
 
-  static const String getAllJobOffers = '/jobs';
+  static const String getAllJobOffers = '/jobs/feed';
   static const String applytoJob = '/jobs/{jobId}/apply';
   static const String myRides = '/jobs/my-rides';
   static const String rejectApplicant = '/jobs/{jobId}/reject-applicant';

@@ -16,9 +16,7 @@ import 'package:moeb_26/firebase_options.dart';
 // Background message handler (must be top-level function)
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   debugPrint('📬 Background Message: ${message.messageId}');
 }
 
@@ -136,8 +134,9 @@ class FirebaseNotificationService {
         debugPrint('🔔 Local notification tapped: ${response.payload}');
         if (response.payload != null) {
           try {
-            final Map<String, dynamic> data =
-                Map<String, dynamic>.from(jsonDecode(response.payload!));
+            final Map<String, dynamic> data = Map<String, dynamic>.from(
+              jsonDecode(response.payload!),
+            );
             _handleNotificationTap(RemoteMessage(data: data));
           } catch (e) {
             debugPrint('❌ Error handling local notification tap: $e');
@@ -179,7 +178,9 @@ class FirebaseNotificationService {
       if (Get.isRegistered<SocketService>()) {
         final activeChatId = Get.find<SocketService>().activeChatId;
         if (activeChatId != null && activeChatId == chatId) {
-          debugPrint('🔇 Suppressing foreground banner: user is actively chatting in $chatId');
+          debugPrint(
+            '🔇 Suppressing foreground banner: user is actively chatting in $chatId',
+          );
           return;
         }
       }
@@ -189,16 +190,20 @@ class FirebaseNotificationService {
     if (type == 'COMMUNITY_MESSAGE' || type == 'NEW_COMMUNITY_MESSAGE') {
       if (Get.isRegistered<SocketService>() &&
           Get.find<SocketService>().isCommunityActive) {
-        debugPrint('🔇 Suppressing foreground banner: user is actively in community chat');
+        debugPrint(
+          '🔇 Suppressing foreground banner: user is actively in community chat',
+        );
         return;
       }
     }
 
     // Extract title & body (supports both message.notification and data payload)
-    final String title = message.notification?.title ??
+    final String title =
+        message.notification?.title ??
         data['title']?.toString() ??
         'Notification';
-    final String body = message.notification?.body ??
+    final String body =
+        message.notification?.body ??
         data['body']?.toString() ??
         data['message']?.toString() ??
         '';
@@ -252,6 +257,11 @@ class FirebaseNotificationService {
         } else {
           Get.offAllNamed(Routes.bottomNabbarView, arguments: 1);
         }
+        break;
+
+      case 'JOB_REVIEWED':
+        // Review received -> go to Jobs/Rides tab
+        Get.offAllNamed(Routes.bottomNabbarView, arguments: 1);
         break;
 
       case 'CHAUFFEUR_APPLIED':
@@ -309,15 +319,16 @@ class FirebaseNotificationService {
     final String fcmToken = token ?? AppConstants.fcmToken;
     if (fcmToken.isEmpty) return;
 
-    final String bearerToken =
-        await StorageService.getString(StorageConstants.bearerToken);
+    final String bearerToken = await StorageService.getString(
+      StorageConstants.bearerToken,
+    );
     if (bearerToken.isEmpty) return;
 
     try {
       final NotificationsService notifService =
           Get.isRegistered<NotificationsService>()
-              ? Get.find<NotificationsService>()
-              : Get.put(NotificationsService());
+          ? Get.find<NotificationsService>()
+          : Get.put(NotificationsService());
 
       await notifService.registerDeviceToken(fcmToken);
       debugPrint('✅ FCM Token successfully registered on backend: $fcmToken');
@@ -337,8 +348,8 @@ class FirebaseNotificationService {
     try {
       final NotificationsService notifService =
           Get.isRegistered<NotificationsService>()
-              ? Get.find<NotificationsService>()
-              : Get.put(NotificationsService());
+          ? Get.find<NotificationsService>()
+          : Get.put(NotificationsService());
 
       await notifService.unregisterDeviceToken(fcmToken);
       debugPrint('✅ FCM Token successfully removed from backend: $fcmToken');
