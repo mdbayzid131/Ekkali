@@ -17,6 +17,8 @@ class ByTheHour extends StatelessWidget {
   ByTheHour({super.key});
 
   final fromController = TextEditingController();
+  final clientNameController = TextEditingController();
+  final clientPhoneController = TextEditingController();
   final durationController = TextEditingController();
   final dateController = TextEditingController();
   final pickupTimeController = TextEditingController();
@@ -38,6 +40,31 @@ class ByTheHour extends StatelessWidget {
           children: [
             JobPostSheetTabBarView.buildChauffeurSelection(context, controller),
             SizedBox(height: 16.h),
+            _buildFieldWithLabel(
+              "Client / Passenger Name (Optional)",
+              clientNameController,
+              "e.g., John Smith",
+              const Icon(
+                Icons.person_outline_rounded,
+                size: 20,
+                color: Colors.white,
+              ),
+              textInputType: TextInputType.name,
+              textCapitalization: TextCapitalization.words,
+              isRequired: false,
+            ),
+            _buildFieldWithLabel(
+              "Client Phone Number (Optional)",
+              clientPhoneController,
+              "e.g., +1 234 567 8900",
+              const Icon(
+                Icons.phone_outlined,
+                size: 20,
+                color: Colors.white,
+              ),
+              textInputType: TextInputType.phone,
+              isRequired: false,
+            ),
             _buildFieldWithLabel(
               "From",
               fromController,
@@ -291,6 +318,12 @@ class ByTheHour extends StatelessWidget {
                     pickupLocation: fromController.text.trim(),
                     dropoffLocation: "By the hour",
                     duration: durationVal.isNotEmpty ? durationVal : null,
+                    passengerName: clientNameController.text.trim().isNotEmpty
+                        ? clientNameController.text.trim()
+                        : null,
+                    passengerPhone: clientPhoneController.text.trim().isNotEmpty
+                        ? clientPhoneController.text.trim()
+                        : null,
                     date: controller.selectedDate.value!,
                     time: controller.selectedTime.value!,
                     paymentAmount: payController.text.trim(),

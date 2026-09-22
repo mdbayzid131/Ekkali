@@ -97,6 +97,31 @@ class ChatPreview {
         ? json['isRead'] as bool
         : (unread == 0);
 
+    String? lastMsg;
+    if (json['lastMessage'] != null) {
+      if (json['lastMessage'] is Map) {
+        lastMsg = json['lastMessage']['text']?.toString() ??
+            json['lastMessage']['message']?.toString() ??
+            json['lastMessage']['content']?.toString();
+        if ((lastMsg == null || lastMsg.trim().isEmpty) &&
+            json['lastMessage']['attachments'] is List &&
+            (json['lastMessage']['attachments'] as List).isNotEmpty) {
+          lastMsg = 'Attachment';
+        }
+      } else {
+        lastMsg = json['lastMessage']?.toString();
+      }
+    }
+
+    if (lastMsg == null || lastMsg.trim().isEmpty) {
+      if (json['attachments'] is List && (json['attachments'] as List).isNotEmpty) {
+        lastMsg = 'Attachment';
+      } else if (json['lastMessageAttachments'] is List &&
+          (json['lastMessageAttachments'] as List).isNotEmpty) {
+        lastMsg = 'Attachment';
+      }
+    }
+
     return ChatPreview(
       id: json['_id']?.toString() ?? json['id']?.toString() ?? '',
       participants: json['participants'] != null
@@ -110,8 +135,11 @@ class ChatPreview {
       jobId: json['jobId'] is Map
           ? json['jobId']['id']?.toString() ?? json['jobId']['_id']?.toString()
           : json['jobId']?.toString(),
-      lastMessage: json['lastMessage'],
-      lastMessageAt: json['lastMessageAt'],
+      lastMessage: lastMsg,
+      lastMessageAt: json['lastMessageAt']?.toString() ??
+          (json['lastMessage'] is Map
+              ? json['lastMessage']['createdAt']?.toString()
+              : null),
       createdBy: json['createdBy']?.toString() ?? '',
       createdAt: json['createdAt']?.toString() ?? '',
       updatedAt: json['updatedAt']?.toString() ?? '',

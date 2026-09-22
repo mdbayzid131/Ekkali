@@ -41,3 +41,149 @@ class VehicleTypeColors {
     return gray;
   }
 }
+
+class AppTheme {
+  static DatePickerThemeData get datePickerTheme => DatePickerThemeData(
+        backgroundColor: const Color(0xFF18181B),
+        headerBackgroundColor: const Color(0xFF18181B),
+        headerForegroundColor: AppColors.primaryColor,
+        surfaceTintColor: Colors.transparent,
+        dayForegroundColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) return Colors.black;
+          if (states.contains(WidgetState.disabled)) return Colors.white24;
+          return Colors.white;
+        }),
+        dayBackgroundColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return AppColors.primaryColor;
+          }
+          return null;
+        }),
+        todayForegroundColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) return Colors.black;
+          return AppColors.primaryColor;
+        }),
+        todayBorder: const BorderSide(
+          color: AppColors.primaryColor,
+          width: 1.5,
+        ),
+        yearForegroundColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) return Colors.black;
+          return Colors.white;
+        }),
+        yearBackgroundColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return AppColors.primaryColor;
+          }
+          return null;
+        }),
+        cancelButtonStyle: TextButton.styleFrom(
+          foregroundColor: Colors.white70,
+          textStyle: const TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        confirmButtonStyle: TextButton.styleFrom(
+          foregroundColor: AppColors.primaryColor,
+          textStyle: const TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      );
+
+  static TimePickerThemeData get timePickerTheme => TimePickerThemeData(
+        backgroundColor: const Color(0xFF18181B),
+        hourMinuteColor: const Color(0xFF24242A),
+        hourMinuteTextColor: Colors.white,
+        dayPeriodColor: WidgetStateColor.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return AppColors.primaryColor;
+          }
+          return const Color(0xFF24242A);
+        }),
+        dayPeriodTextColor: WidgetStateColor.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return Colors.black;
+          }
+          return Colors.white70;
+        }),
+        dayPeriodBorderSide: const BorderSide(
+          color: Color(0xFF33333C),
+          width: 1,
+        ),
+        dayPeriodShape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        dialHandColor: AppColors.primaryColor,
+        dialBackgroundColor: const Color(0xFF24242A),
+        dialTextColor: Colors.white,
+        entryModeIconColor: AppColors.primaryColor,
+        cancelButtonStyle: TextButton.styleFrom(
+          foregroundColor: Colors.white70,
+          textStyle: const TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        confirmButtonStyle: TextButton.styleFrom(
+          foregroundColor: AppColors.primaryColor,
+          textStyle: const TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      );
+
+  static Widget datePickerBuilder(BuildContext context, Widget? child) {
+    return Theme(
+      data: ThemeData.dark().copyWith(
+        colorScheme: const ColorScheme.dark(
+          primary: AppColors.primaryColor,
+          onPrimary: Colors.black,
+          surface: Color(0xFF18181B),
+          onSurface: Colors.white,
+        ),
+        datePickerTheme: datePickerTheme,
+        dialogTheme: DialogThemeData(
+          backgroundColor: const Color(0xFF18181B),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+            side: const BorderSide(color: Color(0xFF2A2A30), width: 1),
+          ),
+        ),
+      ),
+      child: child!,
+    );
+  }
+
+  static Widget timePickerBuilder(BuildContext context, Widget? child) {
+    return Theme(
+      data: ThemeData.dark().copyWith(
+        colorScheme: const ColorScheme.dark(
+          primary: AppColors.primaryColor,
+          onPrimary: Colors.black,
+          surface: Color(0xFF18181B),
+          onSurface: Colors.white,
+          secondaryContainer: AppColors.primaryColor,
+          onSecondaryContainer: Colors.black,
+          tertiaryContainer: AppColors.primaryColor,
+          onTertiaryContainer: Colors.black,
+        ),
+        timePickerTheme: timePickerTheme,
+        dialogTheme: DialogThemeData(
+          backgroundColor: const Color(0xFF18181B),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+            side: const BorderSide(color: Color(0xFF2A2A30), width: 1),
+          ),
+        ),
+      ),
+      child: MediaQuery(
+        data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: false),
+        child: child!,
+      ),
+    );
+  }
+}

@@ -114,7 +114,11 @@ class ChatController extends GetxController {
         int index = chats.indexWhere((c) => c.id == newMessage.chatId);
         if (index != -1) {
           final updatedChat = chats[index];
-          updatedChat.lastMessage = newMessage.text;
+          String displayMsg = newMessage.text.trim();
+          if (displayMsg.isEmpty && newMessage.attachments.isNotEmpty) {
+            displayMsg = "Attachment";
+          }
+          updatedChat.lastMessage = displayMsg.isNotEmpty ? displayMsg : "Attachment";
           updatedChat.lastMessageAt = newMessage.createdAt;
 
           // If the user is currently viewing this exact chat, keep it marked as READ

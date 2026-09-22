@@ -11,6 +11,7 @@ import 'package:moeb_26/core/widgets/CustomButton.dart';
 import 'package:moeb_26/modules/my_schedule/controllers/my_schedule_controller.dart';
 import 'package:moeb_26/modules/my_schedule/models/my_schedule_job_model.dart';
 import 'package:moeb_26/modules/my_schedule/views/widgets/add_schedule_job_sheet.dart';
+import 'package:moeb_26/core/utils/helpers.dart';
 
 class ScheduleJobDetailView extends StatelessWidget {
   final MyScheduleJobModel job;
@@ -537,7 +538,9 @@ class ScheduleJobDetailView extends StatelessWidget {
                                     ),
                                     SizedBox(height: 18.h),
                                     Text(
-                                      "DROP-OFF LOCATION",
+                                      (currentJob.jobType.toUpperCase() == "BY THE HOUR" || currentJob.dropoffLocation.toLowerCase().contains("by the hour"))
+                                          ? "SERVICE / DURATION"
+                                          : "DROP-OFF LOCATION",
                                       style: GoogleFonts.inter(
                                         fontSize: 10.sp,
                                         fontWeight: FontWeight.w600,
@@ -546,9 +549,11 @@ class ScheduleJobDetailView extends StatelessWidget {
                                     ),
                                     SizedBox(height: 2.h),
                                     Text(
-                                      currentJob.dropoffLocation.isNotEmpty
-                                          ? currentJob.dropoffLocation
-                                          : "As Directed",
+                                      Helpers.formatDropoffDisplay(
+                                        jobType: currentJob.jobType,
+                                        dropoffLocation: currentJob.dropoffLocation,
+                                        duration: currentJob.duration,
+                                      ),
                                       style: GoogleFonts.inter(
                                         fontSize: 13.sp,
                                         fontWeight: FontWeight.w500,

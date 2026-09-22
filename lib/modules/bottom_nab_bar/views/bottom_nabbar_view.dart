@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:moeb_26/config/constants/icon_paths.dart';
+import 'package:moeb_26/config/themes/app_theme.dart';
 import 'package:moeb_26/modules/bottom_nab_bar/controllers/bottom_nabbar_controller.dart';
 import 'package:moeb_26/modules/chat/controllers/chat_controller.dart';
 import 'package:moeb_26/modules/chat/views/chat_view.dart';
@@ -110,7 +111,7 @@ class BottomNabbarView extends StatelessWidget {
                         minHeight: 16.w,
                       ),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFEF4444),
+                        color: AppColors.primaryColor,
                         shape: unreadCount > 9
                             ? BoxShape.rectangle
                             : BoxShape.circle,
@@ -126,7 +127,7 @@ class BottomNabbarView extends StatelessWidget {
                       child: Text(
                         unreadCount > 99 ? '99+' : '$unreadCount',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: Colors.black,
                           fontSize: 9.sp,
                           fontWeight: FontWeight.bold,
                           height: 1.1,

@@ -345,27 +345,6 @@ class SubscriptionView extends StatelessWidget {
                                         children: [
                                           Row(
                                             children: [
-                                              if (feature['isNew'] == 'true') ...[
-                                                Container(
-                                                  padding: EdgeInsets.symmetric(
-                                                    horizontal: 6.w,
-                                                    vertical: 2.h,
-                                                  ),
-                                                  margin: EdgeInsets.only(right: 6.w),
-                                                  decoration: BoxDecoration(
-                                                    color: AppColors.orange100,
-                                                    borderRadius: BorderRadius.circular(4.r),
-                                                  ),
-                                                  child: Text(
-                                                    'NEW',
-                                                    style: GoogleFonts.inter(
-                                                      color: Colors.black,
-                                                      fontSize: 9.sp,
-                                                      fontWeight: FontWeight.w900,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
                                               Expanded(
                                                 child: Text(
                                                   feature['title']!,

@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:moeb_26/core/utils/media_picker_helper.dart';
 import 'package:intl/intl.dart';
+import 'package:moeb_26/config/themes/app_theme.dart';
 import 'package:moeb_26/core/utils/helpers.dart';
 import 'package:moeb_26/data/models/user_profile_model.dart';
 import 'package:moeb_26/modules/auth/profile/controllers/profile_controller.dart';
@@ -158,17 +159,7 @@ class VehicleActionController extends GetxController {
       initialDate: DateTime.now(),
       firstDate: DateTime(2020),
       lastDate: DateTime(2101),
-      builder: (context, child) => Theme(
-        data: Theme.of(context).copyWith(
-          colorScheme: const ColorScheme.dark(
-            primary: Color(0xFF14F195),
-            onPrimary: Colors.black,
-            surface: Color(0xFF1E2939),
-            onSurface: Colors.white,
-          ), dialogTheme: DialogThemeData(backgroundColor: const Color(0xFF1E2939)),
-        ),
-        child: child!,
-      ),
+      builder: AppTheme.datePickerBuilder,
     );
     if (picked != null) {
       controller.text = DateFormat('yyyy-MM-dd').format(picked);

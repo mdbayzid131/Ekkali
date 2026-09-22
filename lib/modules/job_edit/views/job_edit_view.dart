@@ -21,6 +21,8 @@ class _JobEditViewState extends State<JobEditView> {
   final pickupController = TextEditingController();
   final dropoffController = TextEditingController();
   final flightController = TextEditingController();
+  final clientNameController = TextEditingController();
+  final clientPhoneController = TextEditingController();
   final dateController = TextEditingController();
   final timeController = TextEditingController();
   final payController = TextEditingController();
@@ -36,6 +38,8 @@ class _JobEditViewState extends State<JobEditView> {
       pickupController.text = controller.job!.pickupLocation ?? '';
       dropoffController.text = controller.job!.dropoffLocation ?? '';
       flightController.text = controller.job!.flightNumber ?? '';
+      clientNameController.text = controller.job!.passengerName ?? '';
+      clientPhoneController.text = controller.job!.passengerPhone ?? '';
       payController.text =
           controller.job!.paymentAmount?.toString() ?? '';
       specialController.text = controller.job!.instruction ?? '';
@@ -54,6 +58,8 @@ class _JobEditViewState extends State<JobEditView> {
     pickupController.dispose();
     dropoffController.dispose();
     flightController.dispose();
+    clientNameController.dispose();
+    clientPhoneController.dispose();
     dateController.dispose();
     timeController.dispose();
     payController.dispose();
@@ -104,6 +110,35 @@ class _JobEditViewState extends State<JobEditView> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Client Name (Optional)
+                _buildFieldWithLabel(
+                  label: "Client / Passenger Name (Optional)",
+                  ctrl: clientNameController,
+                  hint: "e.g., John Smith",
+                  icon: const Icon(
+                    Icons.person_outline_rounded,
+                    size: 20,
+                    color: Colors.white,
+                  ),
+                  isRequired: false,
+                  textInputType: TextInputType.name,
+                  textCapitalization: TextCapitalization.words,
+                ),
+
+                // Client Phone (Optional)
+                _buildFieldWithLabel(
+                  label: "Client Phone Number (Optional)",
+                  ctrl: clientPhoneController,
+                  hint: "e.g., +1 234 567 8900",
+                  icon: const Icon(
+                    Icons.phone_outlined,
+                    size: 20,
+                    color: Colors.white,
+                  ),
+                  isRequired: false,
+                  textInputType: TextInputType.phone,
+                ),
+
                 // Pickup Location
                 _buildFieldWithLabel(
                   label: "Pickup Location",
@@ -270,6 +305,12 @@ class _JobEditViewState extends State<JobEditView> {
                                 flightNumber: flightController.text,
                                 paymentAmount: payController.text,
                                 instruction: specialController.text,
+                                passengerName: clientNameController.text.trim().isNotEmpty
+                                    ? clientNameController.text.trim()
+                                    : null,
+                                passengerPhone: clientPhoneController.text.trim().isNotEmpty
+                                    ? clientPhoneController.text.trim()
+                                    : null,
                               );
                             }
                           },

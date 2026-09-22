@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:moeb_26/config/constants/icon_paths.dart';
 import 'package:moeb_26/config/themes/app_theme.dart';
+import 'package:moeb_26/core/utils/helpers.dart';
 import 'package:moeb_26/core/widgets/CustomText_Field_Hight.dart';
 import 'package:moeb_26/core/widgets/custom_sub_appbar.dart';
 import 'package:moeb_26/core/widgets/CustomButton.dart';
@@ -28,6 +29,7 @@ class _AddScheduleJobSheetState extends State<AddScheduleJobSheet> {
   late TextEditingController _phoneController;
   late TextEditingController _pickupController;
   late TextEditingController _dropoffController;
+  late TextEditingController _durationController;
   late TextEditingController _fareController;
   late TextEditingController _flightNumberController;
   late TextEditingController _notesController;
@@ -35,6 +37,7 @@ class _AddScheduleJobSheetState extends State<AddScheduleJobSheet> {
   late TextEditingController _dateController;
   late TextEditingController _timeController;
 
+  late String _selectedJobType; // "ONE WAY" or "BY THE HOUR"
   late DateTime _selectedDateTime;
   late String _selectedVehicleType;
   late bool _isPaid;
@@ -59,14 +62,31 @@ class _AddScheduleJobSheetState extends State<AddScheduleJobSheet> {
     final job = widget.existingJob;
     final controller = Get.find<MyScheduleController>();
 
+    final existingDropoff = job?.dropoffLocation ?? '';
+    final isByHour =
+        job?.jobType == 'BY THE HOUR' ||
+        existingDropoff.toLowerCase().contains('by the hour');
+    _selectedJobType = isByHour ? 'BY THE HOUR' : 'ONE WAY';
+
     _nameController = TextEditingController(text: job?.clientName ?? '');
     _phoneController = TextEditingController(text: job?.clientPhone ?? '');
     _pickupController = TextEditingController(text: job?.pickupLocation ?? '');
-    _dropoffController = TextEditingController(text: job?.dropoffLocation ?? '');
+    _dropoffController = TextEditingController(
+      text: isByHour ? '' : existingDropoff,
+    );
+    _durationController = TextEditingController(
+      text:
+          job?.duration ??
+          (isByHour ? Helpers.formatDurationToH(existingDropoff) : ''),
+    );
     _fareController = TextEditingController(text: job?.fare ?? '');
-    _flightNumberController = TextEditingController(text: job?.flightNumber ?? '');
+    _flightNumberController = TextEditingController(
+      text: job?.flightNumber ?? '',
+    );
     _notesController = TextEditingController(text: job?.notes ?? '');
-    _paymentInfoController = TextEditingController(text: job?.paymentInfo ?? '');
+    _paymentInfoController = TextEditingController(
+      text: job?.paymentInfo ?? '',
+    );
 
     _selectedDateTime = job?.pickupDateTime ?? controller.selectedDate.value;
     _dateController = TextEditingController(
@@ -106,6 +126,7 @@ class _AddScheduleJobSheetState extends State<AddScheduleJobSheet> {
     _phoneController.dispose();
     _pickupController.dispose();
     _dropoffController.dispose();
+    _durationController.dispose();
     _fareController.dispose();
     _flightNumberController.dispose();
     _notesController.dispose();
@@ -121,19 +142,7 @@ class _AddScheduleJobSheetState extends State<AddScheduleJobSheet> {
       initialDate: _selectedDateTime,
       firstDate: DateTime.now().subtract(const Duration(days: 365)),
       lastDate: DateTime.now().add(const Duration(days: 365)),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.dark(
-              primary: AppColors.primaryColor,
-              onPrimary: Colors.black,
-              surface: Color(0xFF1E1E22),
-              onSurface: Colors.white,
-            ),
-          ),
-          child: child!,
-        );
-      },
+      builder: AppTheme.datePickerBuilder,
     );
 
     if (pickedDate == null) return;
@@ -154,19 +163,7 @@ class _AddScheduleJobSheetState extends State<AddScheduleJobSheet> {
     final pickedTime = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.fromDateTime(_selectedDateTime),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.dark(
-              primary: AppColors.primaryColor,
-              onPrimary: Colors.black,
-              surface: Color(0xFF1E1E22),
-              onSurface: Colors.white,
-            ),
-          ),
-          child: child!,
-        );
-      },
+      builder: AppTheme.timePickerBuilder,
     );
 
     if (pickedTime == null) return;
@@ -188,20 +185,38 @@ class _AddScheduleJobSheetState extends State<AddScheduleJobSheet> {
       final controller = Get.find<MyScheduleController>();
       final isEdit = widget.existingJob != null;
 
+      final isByHour = _selectedJobType == "BY THE HOUR";
+      final cleanDuration = Helpers.formatDurationToH(
+        _durationController.text.trim(),
+      );
+      final dropoffText = isByHour
+          ? (_dropoffController.text.trim().isNotEmpty &&
+                    _dropoffController.text.trim() != "By the hour"
+                ? _dropoffController.text.trim()
+                : (cleanDuration.isNotEmpty
+                      ? "By the hour ($cleanDuration)"
+                      : "By the hour"))
+          : _dropoffController.text.trim();
+
       final job = MyScheduleJobModel(
-        id: isEdit ? widget.existingJob!.id : DateTime.now().millisecondsSinceEpoch.toString(),
+        id: isEdit
+            ? widget.existingJob!.id
+            : DateTime.now().millisecondsSinceEpoch.toString(),
         clientName: _nameController.text.trim(),
         clientPhone: _phoneController.text.trim(),
+        jobType: _selectedJobType,
+        duration: cleanDuration.isNotEmpty ? cleanDuration : null,
         pickupDateTime: _selectedDateTime,
         pickupLocation: _pickupController.text.trim(),
-        dropoffLocation: _dropoffController.text.trim(),
+        dropoffLocation: dropoffText,
         vehicleType: _selectedVehicleType,
         fare: _fareController.text.trim(),
         notes: _notesController.text.trim(),
         flightNumber: _flightNumberController.text.trim().isNotEmpty
             ? _flightNumberController.text.trim()
             : null,
-        isDispatchedToNetwork: widget.existingJob?.isDispatchedToNetwork ?? false,
+        isDispatchedToNetwork:
+            widget.existingJob?.isDispatchedToNetwork ?? false,
         status: widget.existingJob?.status ?? "Scheduled",
         isPaid: _isPaid,
         assignedChauffeurId: widget.existingJob?.assignedChauffeurId,
@@ -222,6 +237,90 @@ class _AddScheduleJobSheetState extends State<AddScheduleJobSheet> {
         }
       }
     }
+  }
+
+  Widget _buildJobTypeSelector() {
+    return Container(
+      margin: EdgeInsets.only(bottom: 16.h),
+      child: Row(
+        children: [
+          Expanded(
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  _selectedJobType = "ONE WAY";
+                });
+              },
+              child: Container(
+                padding: EdgeInsets.symmetric(vertical: 14.h),
+                decoration: BoxDecoration(
+                  color: _selectedJobType == "ONE WAY"
+                      ? AppColors.primaryColor
+                      : const Color(0xFF1F1C1C),
+                  borderRadius: BorderRadius.circular(12.r),
+                  border: Border.all(
+                    color: _selectedJobType == "ONE WAY"
+                        ? AppColors.primaryColor
+                        : const Color(0xFF364153),
+                  ),
+                ),
+                child: Center(
+                  child: Text(
+                    'One Way',
+                    style: GoogleFonts.inter(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w600,
+                      color: _selectedJobType == "ONE WAY"
+                          ? Colors.black
+                          : Colors.grey,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          SizedBox(width: 14.w),
+          Expanded(
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  _selectedJobType = "BY THE HOUR";
+                  if (_durationController.text.isEmpty) {
+                    _durationController.text = "2 hours";
+                  }
+                });
+              },
+              child: Container(
+                padding: EdgeInsets.symmetric(vertical: 14.h),
+                decoration: BoxDecoration(
+                  color: _selectedJobType == "BY THE HOUR"
+                      ? AppColors.primaryColor
+                      : const Color(0xFF1F1C1C),
+                  borderRadius: BorderRadius.circular(12.r),
+                  border: Border.all(
+                    color: _selectedJobType == "BY THE HOUR"
+                        ? AppColors.primaryColor
+                        : const Color(0xFF364153),
+                  ),
+                ),
+                child: Center(
+                  child: Text(
+                    'By the hour',
+                    style: GoogleFonts.inter(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w600,
+                      color: _selectedJobType == "BY THE HOUR"
+                          ? Colors.black
+                          : Colors.grey,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -248,22 +347,24 @@ class _AddScheduleJobSheetState extends State<AddScheduleJobSheet> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               CustomTextgray(
-                text: "Logged as a private direct booking for your personal schedule",
+                text:
+                    "Logged as a private direct booking for your personal schedule",
                 fontSize: 12.sp,
               ),
               SizedBox(height: 16.h),
+
+              // Job Type Tab Bar Switcher (One Way / By The Hour)
+              _buildJobTypeSelector(),
 
               // Client Name
               _buildFieldWithLabel(
                 "Client Name",
                 _nameController,
                 "e.g. John Smith",
-                Icon(
-                  Icons.person_outline,
-                  size: 20.sp,
-                  color: Colors.white,
-                ),
-                validator: (v) => v == null || v.trim().isEmpty ? "Client name required" : null,
+                Icon(Icons.person_outline, size: 20.sp, color: Colors.white),
+                validator: (v) => v == null || v.trim().isEmpty
+                    ? "Client name required"
+                    : null,
               ),
 
               // Client Phone
@@ -271,13 +372,11 @@ class _AddScheduleJobSheetState extends State<AddScheduleJobSheet> {
                 "Client Phone Number",
                 _phoneController,
                 "e.g. +1 (555) 019-2834",
-                Icon(
-                  Icons.phone_outlined,
-                  size: 20.sp,
-                  color: Colors.white,
-                ),
+                Icon(Icons.phone_outlined, size: 20.sp, color: Colors.white),
                 textInputType: TextInputType.phone,
-                validator: (v) => v == null || v.trim().isEmpty ? "Phone number required" : null,
+                validator: (v) => v == null || v.trim().isEmpty
+                    ? "Phone number required"
+                    : null,
               ),
 
               // Date & Time Row (Matching JobPost Screen)
@@ -294,7 +393,8 @@ class _AddScheduleJobSheetState extends State<AddScheduleJobSheet> {
                       _dateController,
                       "Select Date",
                       () => _pickDate(context),
-                      validator: (v) => v == null || v.isEmpty ? "Date is required" : null,
+                      validator: (v) =>
+                          v == null || v.isEmpty ? "Date is required" : null,
                     ),
                   ),
                   SizedBox(width: 12.w),
@@ -309,7 +409,8 @@ class _AddScheduleJobSheetState extends State<AddScheduleJobSheet> {
                       _timeController,
                       "Select Time",
                       () => _pickTime(context),
-                      validator: (v) => v == null || v.isEmpty ? "Time is required" : null,
+                      validator: (v) =>
+                          v == null || v.isEmpty ? "Time is required" : null,
                     ),
                   ),
                 ],
@@ -317,7 +418,9 @@ class _AddScheduleJobSheetState extends State<AddScheduleJobSheet> {
 
               // Pickup Location
               _buildFieldWithLabel(
-                "Pickup Location",
+                _selectedJobType == "BY THE HOUR"
+                    ? "From / Pickup Location"
+                    : "Pickup Location",
                 _pickupController,
                 "e.g. JFK Terminal 4 / Address",
                 SvgPicture.asset(
@@ -325,21 +428,39 @@ class _AddScheduleJobSheetState extends State<AddScheduleJobSheet> {
                   height: 20.sp,
                   width: 20.sp,
                 ),
-                validator: (v) => v == null || v.trim().isEmpty ? "Pickup location required" : null,
+                validator: (v) => v == null || v.trim().isEmpty
+                    ? "Pickup location required"
+                    : null,
               ),
 
-              // Drop-off Location
-              _buildFieldWithLabel(
-                "Drop-off Location",
-                _dropoffController,
-                "e.g. Hotel / Destination",
-                SvgPicture.asset(
-                  AppIcons.fromlocation_icon,
-                  height: 20.sp,
-                  width: 20.sp,
+              // Drop-off Location (for One Way) OR Duration (for By The Hour)
+              if (_selectedJobType == "ONE WAY") ...[
+                _buildFieldWithLabel(
+                  "Drop-off Location",
+                  _dropoffController,
+                  "e.g. Hotel / Destination",
+                  SvgPicture.asset(
+                    AppIcons.fromlocation_icon,
+                    height: 20.sp,
+                    width: 20.sp,
+                  ),
+                  validator: (v) => v == null || v.trim().isEmpty
+                      ? "Drop-off location required"
+                      : null,
                 ),
-                validator: (v) => v == null || v.trim().isEmpty ? "Drop-off location required" : null,
-              ),
+              ] else ...[
+                _buildFieldWithLabel(
+                  "Duration",
+                  _durationController,
+                  "e.g. 2 hours",
+                  SvgPicture.asset(
+                    AppIcons.duration_icon,
+                    height: 20.sp,
+                    width: 20.sp,
+                  ),
+                  isRequired: false,
+                ),
+              ],
 
               // Vehicle Type Chip Pills Selector (Matching JobPost Screen)
               FormField<String>(
@@ -406,7 +527,9 @@ class _AddScheduleJobSheetState extends State<AddScheduleJobSheet> {
                                 style: GoogleFonts.inter(
                                   fontSize: 12.sp,
                                   fontWeight: FontWeight.w400,
-                                  color: isSelected ? Colors.white : Colors.grey.shade600,
+                                  color: isSelected
+                                      ? Colors.white
+                                      : Colors.grey.shade600,
                                 ),
                               ),
                             ),
@@ -418,7 +541,10 @@ class _AddScheduleJobSheetState extends State<AddScheduleJobSheet> {
                           padding: EdgeInsets.only(top: 8.h),
                           child: Text(
                             state.errorText!,
-                            style: GoogleFonts.inter(color: Colors.redAccent, fontSize: 12.sp),
+                            style: GoogleFonts.inter(
+                              color: Colors.redAccent,
+                              fontSize: 12.sp,
+                            ),
                           ),
                         ),
                     ],
@@ -485,7 +611,9 @@ class _AddScheduleJobSheetState extends State<AddScheduleJobSheet> {
                               "Unpaid",
                               style: GoogleFonts.inter(
                                 fontSize: 13.sp,
-                                fontWeight: !_isPaid ? FontWeight.bold : FontWeight.w500,
+                                fontWeight: !_isPaid
+                                    ? FontWeight.bold
+                                    : FontWeight.w500,
                                 color: !_isPaid
                                     ? const Color(0xFFF87171)
                                     : Colors.white70,
@@ -530,7 +658,9 @@ class _AddScheduleJobSheetState extends State<AddScheduleJobSheet> {
                               "Paid",
                               style: GoogleFonts.inter(
                                 fontSize: 13.sp,
-                                fontWeight: _isPaid ? FontWeight.bold : FontWeight.w500,
+                                fontWeight: _isPaid
+                                    ? FontWeight.bold
+                                    : FontWeight.w500,
                                 color: _isPaid
                                     ? const Color(0xFF4ADE80)
                                     : Colors.white70,
@@ -570,8 +700,15 @@ class _AddScheduleJobSheetState extends State<AddScheduleJobSheet> {
                         value: _selectedPaymentMethod,
                         isExpanded: true,
                         dropdownColor: Colors.black,
-                        icon: Icon(Icons.keyboard_arrow_down, color: Colors.white70, size: 20.sp),
-                        style: GoogleFonts.inter(color: Colors.white, fontSize: 14.sp),
+                        icon: Icon(
+                          Icons.keyboard_arrow_down,
+                          color: Colors.white70,
+                          size: 20.sp,
+                        ),
+                        style: GoogleFonts.inter(
+                          color: Colors.white,
+                          fontSize: 14.sp,
+                        ),
                         items: _paymentMethods.map((method) {
                           return DropdownMenuItem<String>(
                             value: method,
@@ -589,8 +726,6 @@ class _AddScheduleJobSheetState extends State<AddScheduleJobSheet> {
                   SizedBox(height: 16.h),
                 ],
               ),
-
-
 
               // Flight Number (Optional)
               _buildFieldWithLabel(
@@ -645,10 +780,7 @@ class _AddScheduleJobSheetState extends State<AddScheduleJobSheet> {
       children: [
         Row(
           children: [
-            if (icon != null) ...[
-              icon,
-              SizedBox(width: 8.w),
-            ],
+            if (icon != null) ...[icon, SizedBox(width: 8.w)],
             Text(
               label + (isRequired ? ' *' : ''),
               style: GoogleFonts.inter(
@@ -685,10 +817,7 @@ class _AddScheduleJobSheetState extends State<AddScheduleJobSheet> {
       children: [
         Row(
           children: [
-            if (icon != null) ...[
-              icon,
-              SizedBox(width: 8.w),
-            ],
+            if (icon != null) ...[icon, SizedBox(width: 8.w)],
             Text(
               '$label *',
               style: GoogleFonts.inter(

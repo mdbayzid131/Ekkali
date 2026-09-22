@@ -13,6 +13,7 @@ import 'package:moeb_26/core/widgets/CustomButton.dart';
 import 'package:moeb_26/data/models/my_rides_model.dart';
 import 'package:moeb_26/data/repositories/socket_repository.dart';
 import 'package:moeb_26/modules/preferred_drivers/controllers/preferred_drivers_controller.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class RideDetailSheet extends StatelessWidget {
   final RideData ride;
@@ -156,15 +157,17 @@ class RideDetailSheet extends StatelessWidget {
     final currentStatus = (ride.status ?? 'PENDING').toUpperCase();
     final isPending = currentStatus == 'PENDING';
     final isCancelled = currentStatus == 'CANCELLED';
-    final isAssigned = currentStatus == 'ASSIGNED' || currentStatus == 'IN PROGRESS';
+    final isAssigned =
+        currentStatus == 'ASSIGNED' || currentStatus == 'IN PROGRESS';
 
     final String title = isCreatedByMe
         ? (isPast ? "Completed Job Details" : "Created Job Details")
         : (isPast ? "Completed Ride" : "Upcoming Ride Details");
 
     final dateTimeStr = _formatDateTime(ride);
-    final amountStr =
-        ride.paymentAmount != null ? "${ride.paymentAmount}" : "0.00";
+    final amountStr = ride.paymentAmount != null
+        ? "${ride.paymentAmount}"
+        : "0.00";
     final posterName = _getPosterName(ride);
     final posterImage = _getPosterImage(ride);
     final posterId = _getPosterId(ride);
@@ -172,8 +175,9 @@ class RideDetailSheet extends StatelessWidget {
     final paymentTypeStr = ride.paymentType?.isNotEmpty == true
         ? ride.paymentType!
         : "Credit Card on File";
-    final flightNumberStr =
-        ride.flightNumber?.isNotEmpty == true ? ride.flightNumber! : "N/A";
+    final flightNumberStr = ride.flightNumber?.isNotEmpty == true
+        ? ride.flightNumber!
+        : "N/A";
     final instructions = ride.instruction ?? "";
 
     final chauffeur = _getChauffeur(ride);
@@ -395,7 +399,11 @@ class RideDetailSheet extends StatelessWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    (ride.jobType?.toUpperCase() == "BY THE HOUR" || ride.dropoffLocation.toLowerCase().contains("by the hour"))
+                                    (ride.jobType?.toUpperCase() ==
+                                                "BY THE HOUR" ||
+                                            ride.dropoffLocation
+                                                .toLowerCase()
+                                                .contains("by the hour"))
                                         ? "SERVICE / DURATION"
                                         : "DROPOFF",
                                     style: GoogleFonts.inter(
@@ -442,6 +450,15 @@ class RideDetailSheet extends StatelessWidget {
               vehicleInfo: vehicleInfo,
               isPending: isPending,
               hasApplicant: hasApplicant,
+              isPast: isPast,
+            ),
+
+            // Section 2.5: Passenger / Client Details
+            _buildPassengerSection(
+              ride: ride,
+              isCreatedByMe: isCreatedByMe,
+              isPending: isPending,
+              chauffeur: chauffeur,
               isPast: isPast,
             ),
 
@@ -561,8 +578,10 @@ class RideDetailSheet extends StatelessWidget {
       final String driverName = chauffeur?.name.isNotEmpty == true
           ? chauffeur!.name
           : (isPending
-              ? (hasApplicant ? "1 Applicant Available" : "Awaiting Chauffeur")
-              : "Not Assigned");
+                ? (hasApplicant
+                      ? "1 Applicant Available"
+                      : "Awaiting Chauffeur")
+                : "Not Assigned");
       final String driverImage = chauffeur?.profilePicture ?? '';
       final String driverId = chauffeur?.id ?? '';
       final double? driverRating = chauffeur?.averageRating;
@@ -581,8 +600,8 @@ class RideDetailSheet extends StatelessWidget {
                       if (driverId.isNotEmpty) {
                         final preferredController =
                             Get.isRegistered<PreferredDriversController>()
-                                ? Get.find<PreferredDriversController>()
-                                : Get.put(PreferredDriversController());
+                            ? Get.find<PreferredDriversController>()
+                            : Get.put(PreferredDriversController());
 
                         preferredController.openChauffeurProfile(
                           userId: driverId,
@@ -607,19 +626,19 @@ class RideDetailSheet extends StatelessWidget {
                           child: ClipOval(
                             child: driverImage.isNotEmpty
                                 ? (driverImage.startsWith('http')
-                                    ? Image.network(
-                                        driverImage,
-                                        fit: BoxFit.cover,
-                                        errorBuilder: (_, __, ___) => Icon(
-                                          Icons.person_outline,
-                                          color: const Color(0xFFFEDB9B),
-                                          size: 20.sp,
-                                        ),
-                                      )
-                                    : Image.asset(
-                                        driverImage,
-                                        fit: BoxFit.cover,
-                                      ))
+                                      ? Image.network(
+                                          driverImage,
+                                          fit: BoxFit.cover,
+                                          errorBuilder: (_, __, ___) => Icon(
+                                            Icons.person_outline,
+                                            color: const Color(0xFFFEDB9B),
+                                            size: 20.sp,
+                                          ),
+                                        )
+                                      : Image.asset(
+                                          driverImage,
+                                          fit: BoxFit.cover,
+                                        ))
                                 : Icon(
                                     isPending
                                         ? Icons.hourglass_empty_rounded
@@ -785,8 +804,8 @@ class RideDetailSheet extends StatelessWidget {
                     onTap: () {
                       final preferredController =
                           Get.isRegistered<PreferredDriversController>()
-                              ? Get.find<PreferredDriversController>()
-                              : Get.put(PreferredDriversController());
+                          ? Get.find<PreferredDriversController>()
+                          : Get.put(PreferredDriversController());
 
                       preferredController.openChauffeurProfile(
                         userId: posterId,
@@ -810,19 +829,19 @@ class RideDetailSheet extends StatelessWidget {
                           child: ClipOval(
                             child: posterImage.isNotEmpty
                                 ? (posterImage.startsWith('http')
-                                    ? Image.network(
-                                        posterImage,
-                                        fit: BoxFit.cover,
-                                        errorBuilder: (_, __, ___) => Icon(
-                                          Icons.person_outline,
-                                          color: Colors.white70,
-                                          size: 20.sp,
-                                        ),
-                                      )
-                                    : Image.asset(
-                                        posterImage,
-                                        fit: BoxFit.cover,
-                                      ))
+                                      ? Image.network(
+                                          posterImage,
+                                          fit: BoxFit.cover,
+                                          errorBuilder: (_, __, ___) => Icon(
+                                            Icons.person_outline,
+                                            color: Colors.white70,
+                                            size: 20.sp,
+                                          ),
+                                        )
+                                      : Image.asset(
+                                          posterImage,
+                                          fit: BoxFit.cover,
+                                        ))
                                 : Icon(
                                     Icons.person_outline,
                                     color: Colors.white70,
@@ -940,6 +959,161 @@ class RideDetailSheet extends StatelessWidget {
         ),
       );
     }
+  }
+
+  Widget _buildPassengerSection({
+    required RideData ride,
+    required bool isCreatedByMe,
+    required bool isPending,
+    required DriverData? chauffeur,
+    required bool isPast,
+  }) {
+    // If not created by me and still pending (job applicant not accepted yet)
+    if (!isCreatedByMe && isPending && chauffeur == null) {
+      return Column(
+        children: [
+          SizedBox(height: 12.h),
+          _buildSectionCard(
+            child: Row(
+              children: [
+                Container(
+                  padding: EdgeInsets.all(8.r),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1C1C1F),
+                    borderRadius: BorderRadius.circular(8.r),
+                    border: Border.all(
+                      color: const Color(0xFF2A2A32),
+                      width: 1,
+                    ),
+                  ),
+                  child: Icon(
+                    Icons.lock_outline_rounded,
+                    color: const Color(0xFFFEDB9B),
+                    size: 20.sp,
+                  ),
+                ),
+                SizedBox(width: 12.w),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "PASSENGER DETAILS",
+                        style: GoogleFonts.inter(
+                          color: const Color(0xFF94A3B8),
+                          fontSize: 9.sp,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1.0,
+                        ),
+                      ),
+                      SizedBox(height: 2.h),
+                      Text(
+                        "Passenger details will be available once you are accepted for this ride.",
+                        style: GoogleFonts.inter(
+                          color: Colors.white70,
+                          fontSize: 12.sp,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      );
+    }
+
+    final String pName = (ride.passengerName != null &&
+            ride.passengerName!.trim().isNotEmpty)
+        ? ride.passengerName!.trim()
+        : "N/A";
+    final String pPhone = (ride.passengerPhone != null &&
+            ride.passengerPhone!.trim().isNotEmpty)
+        ? ride.passengerPhone!.trim()
+        : "N/A";
+
+    return Column(
+      children: [
+        SizedBox(height: 12.h),
+        _buildSectionCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "PASSENGER DETAILS",
+                style: GoogleFonts.inter(
+                  color: const Color(0xFF94A3B8),
+                  fontSize: 9.sp,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.0,
+                ),
+              ),
+              SizedBox(height: 10.h),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          pName,
+                          style: GoogleFonts.inter(
+                            color: pName != "N/A" ? Colors.white : Colors.white38,
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        SizedBox(height: 4.h),
+                        Text(
+                          pPhone,
+                          style: GoogleFonts.inter(
+                            color: pPhone != "N/A"
+                                ? const Color(0xFF94A3B8)
+                                : Colors.white38,
+                            fontSize: 13.sp,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (pPhone != "N/A" && pPhone.isNotEmpty)
+                    GestureDetector(
+                      onTap: () async {
+                        final phone = pPhone.trim();
+                        final Uri launchUri = Uri(scheme: 'tel', path: phone);
+                        if (await canLaunchUrl(launchUri)) {
+                          await launchUrl(launchUri);
+                        }
+                      },
+                      child: Container(
+                        padding: EdgeInsets.all(10.r),
+                        decoration: BoxDecoration(
+                          color: const Color(
+                            0xFFD08700,
+                          ).withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(10.r),
+                          border: Border.all(
+                            color: const Color(
+                              0xFFD08700,
+                            ).withValues(alpha: 0.3),
+                          ),
+                        ),
+                        child: Icon(
+                          Icons.phone_outlined,
+                          color: const Color(0xFFFEDB9B),
+                          size: 20.sp,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
   }
 
   Widget _buildBottomActions({
