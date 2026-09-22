@@ -8,6 +8,7 @@ import 'package:moeb_26/config/constants/icon_paths.dart';
 import 'package:moeb_26/config/themes/app_theme.dart';
 import 'package:moeb_26/core/widgets/CustomButton.dart';
 import 'package:moeb_26/core/widgets/CustomText_Field_Hight.dart';
+import 'package:intl/intl.dart';
 import '../controllers/job_edit_controller.dart';
 
 class JobEditView extends StatefulWidget {
@@ -45,10 +46,35 @@ class _JobEditViewState extends State<JobEditView> {
       specialController.text = controller.job!.instruction ?? '';
 
       if (controller.job!.date != null && controller.job!.date!.isNotEmpty) {
-        dateController.text = controller.job!.date!;
+        try {
+          final dt = DateTime.parse(controller.job!.date!);
+          dateController.text = DateFormat('yyyy-MM-dd').format(dt);
+        } catch (_) {
+          dateController.text = controller.job!.date!;
+        }
       }
       if (controller.job!.time != null && controller.job!.time!.isNotEmpty) {
-        timeController.text = controller.job!.time!;
+        if (controller.formattedTime.value.isNotEmpty) {
+          timeController.text = controller.formattedTime.value;
+        } else {
+          try {
+            final raw = controller.job!.time!;
+            final parts = raw.split(':');
+            if (parts.length >= 2) {
+              int hour = int.parse(parts[0].trim());
+              int minute = int.parse(parts[1].split(' ')[0].trim());
+              if (raw.toLowerCase().contains('pm') && hour < 12) hour += 12;
+              if (raw.toLowerCase().contains('am') && hour == 12) hour = 0;
+              final now = DateTime.now();
+              final dt = DateTime(now.year, now.month, now.day, hour, minute);
+              timeController.text = DateFormat('hh:mm a').format(dt);
+            } else {
+              timeController.text = raw;
+            }
+          } catch (_) {
+            timeController.text = controller.job!.time!;
+          }
+        }
       }
     }
   }

@@ -425,31 +425,31 @@ class MyScheduleView extends GetView<MyScheduleController> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              width: 75.r,
-              height: 75.r,
+              width: 60.r,
+              height: 60.r,
               decoration: const BoxDecoration(
                 shape: BoxShape.circle,
                 color: Color(0xFF141416),
               ),
               child: Icon(
                 Icons.calendar_today_outlined,
-                size: 34.sp,
+                size: 26.sp,
                 color: AppColors.gray100,
               ),
             ),
-            SizedBox(height: 16.h),
+            SizedBox(height: 14.h),
             Text(
               "No bookings for $dateStr",
               style: GoogleFonts.inter(
-                fontSize: 16.sp,
-                fontWeight: FontWeight.bold,
+                fontSize: 15.sp,
+                fontWeight: FontWeight.w600,
                 color: Colors.white,
               ),
               textAlign: TextAlign.center,
             ),
             SizedBox(height: 6.h),
             Text(
-              "Your direct schedule is clear for this date. You can add a new private booking anytime.",
+              "Your schedule is clear for this date.",
               style: GoogleFonts.inter(
                 fontSize: 12.sp,
                 color: AppColors.gray100,

@@ -168,7 +168,9 @@ class SocketService extends GetxService with WidgetsBindingObserver {
     for (var event in jobCreatedEvents) {
       socket.on(event, (data) {
         debugPrint('📥 SocketService: Received event [$event]: $data');
-        lastCreatedJob.value = data;
+        if (!_isDuplicateEvent(event, data)) {
+          lastCreatedJob.value = data;
+        }
       });
     }
 
@@ -182,7 +184,9 @@ class SocketService extends GetxService with WidgetsBindingObserver {
     for (var event in jobRemovedEvents) {
       socket.on(event, (data) {
         debugPrint('📥 SocketService: Received event [$event]: $data');
-        lastRemovedJobFeed.value = data;
+        if (!_isDuplicateEvent(event, data)) {
+          lastRemovedJobFeed.value = data;
+        }
       });
     }
 
@@ -195,7 +199,9 @@ class SocketService extends GetxService with WidgetsBindingObserver {
     for (var event in jobAppEvents) {
       socket.on(event, (data) {
         debugPrint('📥 SocketService: Received event [$event]: $data');
-        lastJobApplication.value = data;
+        if (!_isDuplicateEvent(event, data)) {
+          lastJobApplication.value = data;
+        }
       });
     }
 
@@ -208,7 +214,9 @@ class SocketService extends GetxService with WidgetsBindingObserver {
     for (var event in jobAssignedEvents) {
       socket.on(event, (data) {
         debugPrint('📥 SocketService: Received event [$event]: $data');
-        lastJobAssigned.value = data;
+        if (!_isDuplicateEvent(event, data)) {
+          lastJobAssigned.value = data;
+        }
       });
     }
 
@@ -221,7 +229,9 @@ class SocketService extends GetxService with WidgetsBindingObserver {
     for (var event in rideStatusEvents) {
       socket.on(event, (data) {
         debugPrint('📥 SocketService: Received event [$event]: $data');
-        lastRideStatusUpdated.value = data;
+        if (!_isDuplicateEvent(event, data)) {
+          lastRideStatusUpdated.value = data;
+        }
       });
     }
 
@@ -234,7 +244,9 @@ class SocketService extends GetxService with WidgetsBindingObserver {
     for (var event in jobCancelledEvents) {
       socket.on(event, (data) {
         debugPrint('📥 SocketService: Received event [$event]: $data');
-        lastJobCancelled.value = data;
+        if (!_isDuplicateEvent(event, data)) {
+          lastJobCancelled.value = data;
+        }
       });
     }
 
@@ -245,6 +257,29 @@ class SocketService extends GetxService with WidgetsBindingObserver {
     );
 
     socket.connect();
+  }
+
+  final Map<String, DateTime> _lastEventTimestamps = {};
+
+  bool _isDuplicateEvent(String eventName, dynamic data) {
+    String? id;
+    if (data is Map) {
+      id = data['jobId']?.toString() ??
+          data['id']?.toString() ??
+          data['_id']?.toString() ??
+          data['chatId']?.toString();
+    } else if (data is String) {
+      id = data;
+    }
+    final key = '$eventName::$id';
+    final now = DateTime.now();
+    final lastTime = _lastEventTimestamps[key];
+    if (lastTime != null && now.difference(lastTime).inMilliseconds < 1500) {
+      debugPrint('⏭️ SocketService: Duplicate [$eventName] suppressed for $id');
+      return true;
+    }
+    _lastEventTimestamps[key] = now;
+    return false;
   }
 
   final Set<String> _activeRooms = {};

@@ -21,9 +21,16 @@ class RideCompletedController extends GetxController {
 
   Future<void> submitReview() async {
     final dynamic ride = Get.arguments;
-    final String jobId = ride is Map
-        ? (ride['id']?.toString() ?? ride['_id']?.toString() ?? "")
-        : (ride?.id ?? "");
+    String jobId = "";
+    if (ride is String) {
+      jobId = ride;
+    } else if (ride is Map) {
+      jobId = (ride['jobId'] ?? ride['id'] ?? ride['_id'] ?? "").toString();
+    } else if (ride != null) {
+      try {
+        jobId = (ride.id ?? "").toString();
+      } catch (_) {}
+    }
 
     if (jobId.isEmpty) {
       Helpers.showCustomSnackBar("Job ID not found", isError: true);
@@ -31,7 +38,7 @@ class RideCompletedController extends GetxController {
     }
 
     if (rating.value == 0) {
-      Helpers.showCustomSnackBar("Please select a rating", isError: true);
+      Helpers.showCustomSnackBar("Please select a rating (1-5 stars)", isError: true);
       return;
     }
 
@@ -40,7 +47,7 @@ class RideCompletedController extends GetxController {
       final response = await _jobRepo.submitReview(
         jobId: jobId,
         rating: rating.value,
-        comment: feedback.value,
+        comment: feedback.value.trim().isEmpty ? null : feedback.value.trim(),
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
@@ -72,19 +79,15 @@ class RideCompletedController extends GetxController {
   }
 
   void _navigateBack() {
-    // Refresh parent controllers
+    // Refresh rides in controller if present
     try {
       if (Get.isRegistered<RidesController>()) {
         Get.find<RidesController>().refreshCurrentTab();
       }
     } catch (_) {}
 
-    // Pop back to the caller screen (e.g. MyJobsView or RidesView)
-    if (Get.key.currentState?.canPop() == true) {
-      Get.back();
-    } else {
-      Get.offAllNamed(Routes.bottomNabbarView, arguments: 1);
-    }
+    // Directly navigate to the Rides Tab (index 1) in BottomNavBar
+    Get.offAllNamed(Routes.bottomNabbarView, arguments: 1);
   }
 
   @override

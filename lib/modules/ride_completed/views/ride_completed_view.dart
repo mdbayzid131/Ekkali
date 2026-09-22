@@ -150,7 +150,7 @@ class RideCompletedView extends StatelessWidget {
                 child: Column(
                   children: [
                     Text(
-                      "Rate the Job Poster",
+                      "Rate Your Experience",
                       style: GoogleFonts.inter(
                         color: Colors.white,
                         fontSize: 15.sp,

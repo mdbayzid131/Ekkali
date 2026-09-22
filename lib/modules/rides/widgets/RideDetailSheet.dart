@@ -969,7 +969,7 @@ class RideDetailSheet extends StatelessWidget {
     required bool isPast,
   }) {
     // If not created by me and still pending (job applicant not accepted yet)
-    if (!isCreatedByMe && isPending && chauffeur == null) {
+    if (!isCreatedByMe && isPending) {
       return Column(
         children: [
           SizedBox(height: 12.h),
@@ -1024,12 +1024,12 @@ class RideDetailSheet extends StatelessWidget {
       );
     }
 
-    final String pName = (ride.passengerName != null &&
-            ride.passengerName!.trim().isNotEmpty)
+    final String pName =
+        (ride.passengerName != null && ride.passengerName!.trim().isNotEmpty)
         ? ride.passengerName!.trim()
         : "N/A";
-    final String pPhone = (ride.passengerPhone != null &&
-            ride.passengerPhone!.trim().isNotEmpty)
+    final String pPhone =
+        (ride.passengerPhone != null && ride.passengerPhone!.trim().isNotEmpty)
         ? ride.passengerPhone!.trim()
         : "N/A";
 
@@ -1060,7 +1060,9 @@ class RideDetailSheet extends StatelessWidget {
                         Text(
                           pName,
                           style: GoogleFonts.inter(
-                            color: pName != "N/A" ? Colors.white : Colors.white38,
+                            color: pName != "N/A"
+                                ? Colors.white
+                                : Colors.white38,
                             fontSize: 14.sp,
                             fontWeight: FontWeight.w600,
                           ),
@@ -1123,7 +1125,47 @@ class RideDetailSheet extends StatelessWidget {
     required bool isPast,
     required bool hasApplicant,
   }) {
+    final bool isRideCancelled =
+        (ride.status ?? '').toUpperCase() == 'CANCELLED' ||
+        (ride.rideStatus ?? '').toUpperCase() == 'CANCELLED';
+
     if (isPast) {
+      if (isRideCancelled) {
+        return Padding(
+          padding: EdgeInsets.only(top: 16.h),
+          child: Container(
+            width: double.infinity,
+            padding: EdgeInsets.symmetric(vertical: 14.h, horizontal: 16.w),
+            decoration: BoxDecoration(
+              color: const Color(0xFFEF4444).withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(14.r),
+              border: Border.all(
+                color: const Color(0xFFEF4444).withValues(alpha: 0.3),
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(
+                  Icons.cancel_outlined,
+                  color: Color(0xFFF87171),
+                  size: 20,
+                ),
+                SizedBox(width: 8.w),
+                Text(
+                  "Ride Cancelled",
+                  style: GoogleFonts.inter(
+                    color: const Color(0xFFF87171),
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }
+
       final isReviewed = isCreatedByMe
           ? (ride.hasReview == true || ride.isReviewedByCreator == true)
           : (ride.hasReview == true || ride.isReviewedByDriver == true);
