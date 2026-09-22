@@ -293,6 +293,56 @@ class JobOfferDetailSheet extends StatelessWidget {
               ),
             ),
 
+            // Section 2.5: Locked Passenger Info Notice
+            SizedBox(height: 12.h),
+            _buildSectionCard(
+              child: Row(
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(8.r),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1C1C1F),
+                      borderRadius: BorderRadius.circular(8.r),
+                      border: Border.all(
+                        color: const Color(0xFF2A2A32),
+                        width: 1,
+                      ),
+                    ),
+                    child: Icon(
+                      Icons.lock_outline_rounded,
+                      color: const Color(0xFFFEDB9B),
+                      size: 20.sp,
+                    ),
+                  ),
+                  SizedBox(width: 12.w),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "PASSENGER DETAILS",
+                          style: GoogleFonts.inter(
+                            color: const Color(0xFF94A3B8),
+                            fontSize: 9.sp,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1.0,
+                          ),
+                        ),
+                        SizedBox(height: 2.h),
+                        Text(
+                          "Passenger details will be available once you are accepted for this ride.",
+                          style: GoogleFonts.inter(
+                            color: Colors.white70,
+                            fontSize: 12.sp,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
             // Section 3: Extra Info (Payment, Flight & Instructions)
             SizedBox(height: 12.h),
             _buildSectionCard(

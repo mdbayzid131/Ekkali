@@ -148,6 +148,8 @@ class JobEditController extends GetxController {
     required String flightNumber,
     required String paymentAmount,
     required String instruction,
+    String? passengerName,
+    String? passengerPhone,
   }) async {
     if (job == null || job!.id == null) {
       Helpers.showCustomSnackBar('Invalid job reference.', isError: true);
@@ -194,6 +196,8 @@ class JobEditController extends GetxController {
         paymentAmount: double.tryParse(paymentAmount) ?? (job!.paymentAmount?.toDouble() ?? 0.0),
         paymentType: normalizedPayment,
         jobType: job!.jobType ?? 'ONE WAY',
+        passengerName: passengerName?.isNotEmpty == true ? passengerName : null,
+        passengerPhone: passengerPhone?.isNotEmpty == true ? passengerPhone : null,
         instruction: instruction.trim().isNotEmpty ? instruction.trim() : '',
       );
 

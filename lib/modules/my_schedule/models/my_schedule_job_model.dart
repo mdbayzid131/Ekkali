@@ -2,6 +2,8 @@ class MyScheduleJobModel {
   final String id;
   final String clientName;
   final String clientPhone;
+  final String jobType; // "ONE WAY" or "BY THE HOUR"
+  final String? duration; // e.g. "2 h", "4 h"
   final DateTime pickupDateTime;
   final String pickupLocation;
   final String dropoffLocation;
@@ -21,6 +23,8 @@ class MyScheduleJobModel {
     required this.id,
     required this.clientName,
     required this.clientPhone,
+    this.jobType = "ONE WAY",
+    this.duration,
     required this.pickupDateTime,
     required this.pickupLocation,
     required this.dropoffLocation,
@@ -41,6 +45,8 @@ class MyScheduleJobModel {
     String? id,
     String? clientName,
     String? clientPhone,
+    String? jobType,
+    String? duration,
     DateTime? pickupDateTime,
     String? pickupLocation,
     String? dropoffLocation,
@@ -60,6 +66,8 @@ class MyScheduleJobModel {
       id: id ?? this.id,
       clientName: clientName ?? this.clientName,
       clientPhone: clientPhone ?? this.clientPhone,
+      jobType: jobType ?? this.jobType,
+      duration: duration ?? this.duration,
       pickupDateTime: pickupDateTime ?? this.pickupDateTime,
       pickupLocation: pickupLocation ?? this.pickupLocation,
       dropoffLocation: dropoffLocation ?? this.dropoffLocation,
@@ -138,13 +146,20 @@ class MyScheduleJobModel {
         ? rawFlight.trim()
         : null;
 
+    final String rawDropoff = json['dropoff']?.toString() ?? '';
+    final String rawJobType = json['jobType']?.toString() ??
+        (rawDropoff.toLowerCase().contains('by the hour') ? 'BY THE HOUR' : 'ONE WAY');
+    final String? rawDuration = json['duration']?.toString();
+
     return MyScheduleJobModel(
       id: json['_id'] ?? '',
       clientName: name,
       clientPhone: phone,
+      jobType: rawJobType,
+      duration: rawDuration,
       pickupDateTime: parsedDateTime,
       pickupLocation: json['pickup'] ?? '',
-      dropoffLocation: json['dropoff'] ?? '',
+      dropoffLocation: rawDropoff,
       vehicleType: json['vehicleType'] ?? 'Sedan',
       fare: fareStr,
       notes: json['instruction'] ?? '',

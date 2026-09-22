@@ -57,6 +57,8 @@ class JobData {
   int? paymentAmount;
   String? paymentType;
   String? instruction;
+  String? passengerName;
+  String? passengerPhone;
   String? serviceArea;
   String? dispatchType;
   String? status;
@@ -90,6 +92,8 @@ class JobData {
     this.paymentAmount,
     this.paymentType,
     this.instruction,
+    this.passengerName,
+    this.passengerPhone,
     this.serviceArea,
     this.dispatchType,
     this.status,
@@ -141,6 +145,17 @@ class JobData {
           : null,
       paymentType: json['paymentType'],
       instruction: json['instruction'],
+      passengerName: json['passengerName']?.toString() ??
+          json['clientName']?.toString() ??
+          (json['passenger'] is String ? json['passenger']?.toString() : null) ??
+          (json['passenger'] is Map ? json['passenger']['name']?.toString() : null) ??
+          (json['client'] is Map ? json['client']['name']?.toString() : null),
+      passengerPhone: json['passengerPhone']?.toString() ??
+          json['clientPhone']?.toString() ??
+          json['passengerPhoneNumber']?.toString() ??
+          json['clientPhoneNumber']?.toString() ??
+          (json['passenger'] is Map ? json['passenger']['phone']?.toString() : null) ??
+          (json['client'] is Map ? json['client']['phone']?.toString() : null),
       serviceArea: json['serviceArea'] is Map
           ? (json['serviceArea']['areaName']?.toString() ??
               json['serviceArea']['name']?.toString())

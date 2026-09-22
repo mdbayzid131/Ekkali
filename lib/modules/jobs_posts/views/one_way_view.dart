@@ -19,6 +19,8 @@ class OnewayScreen extends StatelessWidget {
   final pickupController = TextEditingController();
   final dropoffController = TextEditingController();
   final flightController = TextEditingController();
+  final clientNameController = TextEditingController();
+  final clientPhoneController = TextEditingController();
   final dateController = TextEditingController();
   final timeController = TextEditingController();
   final payController = TextEditingController();
@@ -41,6 +43,31 @@ class OnewayScreen extends StatelessWidget {
               postJobController,
             ),
             SizedBox(height: 16.h),
+            _buildFieldWithLabel(
+              "Client / Passenger Name (Optional)",
+              clientNameController,
+              "e.g., John Smith",
+              const Icon(
+                Icons.person_outline_rounded,
+                size: 20,
+                color: Colors.white,
+              ),
+              textInputType: TextInputType.name,
+              textCapitalization: TextCapitalization.words,
+              isRequired: false,
+            ),
+            _buildFieldWithLabel(
+              "Client Phone Number (Optional)",
+              clientPhoneController,
+              "e.g., +1 234 567 8900",
+              const Icon(
+                Icons.phone_outlined,
+                size: 20,
+                color: Colors.white,
+              ),
+              textInputType: TextInputType.phone,
+              isRequired: false,
+            ),
             _buildFieldWithLabel(
               "Pickup Location",
               pickupController,
@@ -341,6 +368,12 @@ class OnewayScreen extends StatelessWidget {
                     pickupLocation: pickupController.text,
                     dropoffLocation: dropoffController.text,
                     flightNumber: flightController.text,
+                    passengerName: clientNameController.text.trim().isNotEmpty
+                        ? clientNameController.text.trim()
+                        : null,
+                    passengerPhone: clientPhoneController.text.trim().isNotEmpty
+                        ? clientPhoneController.text.trim()
+                        : null,
                     date: postJobController.isAsap.value
                         ? null
                         : postJobController.selectedDate.value,

@@ -145,9 +145,10 @@ class MyScheduleController extends GetxController {
           : 'CREDIT CARD ON FILE';
 
       final response = await Get.find<JobService>().createJob(
-        jobType: 'ONE WAY',
+        jobType: job.jobType.isNotEmpty ? job.jobType : 'ONE WAY',
         pickup: job.pickupLocation,
         dropoff: job.dropoffLocation,
+        duration: job.duration,
         date: dateStr,
         time: timeStr,
         vehicleType: job.vehicleType,
@@ -218,7 +219,7 @@ class MyScheduleController extends GetxController {
 
       final response = await Get.find<JobService>().updateJob(
         jobId: updatedJob.id,
-        jobType: 'ONE WAY',
+        jobType: updatedJob.jobType.isNotEmpty ? updatedJob.jobType : 'ONE WAY',
         pickupLocation: updatedJob.pickupLocation,
         dropoffLocation: updatedJob.dropoffLocation,
         date: dateStr,

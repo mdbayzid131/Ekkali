@@ -185,6 +185,8 @@ class RideData {
       paymentAmount: paymentAmount?.toInt(),
       paymentType: paymentType,
       instruction: instruction,
+      passengerName: passengerName,
+      passengerPhone: passengerPhone,
       status: status,
       rideStatus: rideStatus,
       applicantCount: applicantCount,
@@ -281,8 +283,17 @@ class RideData {
       paymentStatus: json['paymentStatus']?.toString(),
       instruction: json['instruction']?.toString() ??
           json['instructions']?.toString(),
-      passengerName: json['passengerName']?.toString(),
-      passengerPhone: json['passengerPhone']?.toString(),
+      passengerName: json['passengerName']?.toString() ??
+          json['clientName']?.toString() ??
+          (json['passenger'] is String ? json['passenger']?.toString() : null) ??
+          (json['passenger'] is Map ? json['passenger']['name']?.toString() : null) ??
+          (json['client'] is Map ? json['client']['name']?.toString() : null),
+      passengerPhone: json['passengerPhone']?.toString() ??
+          json['clientPhone']?.toString() ??
+          json['passengerPhoneNumber']?.toString() ??
+          json['clientPhoneNumber']?.toString() ??
+          (json['passenger'] is Map ? json['passenger']['phone']?.toString() : null) ??
+          (json['client'] is Map ? json['client']['phone']?.toString() : null),
       status: json['status']?.toString(),
       rideStatus: json['rideStatus']?.toString(),
       applicantCount: json['applicantCount'] is num
