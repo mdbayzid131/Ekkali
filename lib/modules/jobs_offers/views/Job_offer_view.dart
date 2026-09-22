@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:moeb_26/config/themes/app_theme.dart';
+import 'package:moeb_26/core/utils/helpers.dart';
 import 'package:moeb_26/core/widgets/Custom_Job_Button.dart';
 import 'package:moeb_26/data/models/job_offer_model.dart';
 import 'package:moeb_26/modules/jobs_offers/controllers/Job_offer_controller.dart';
@@ -233,10 +234,17 @@ class JobOfferView extends StatelessWidget {
                             ),
                           ),
                           ...offers.map((job) {
+                            final formattedDropoff =
+                                Helpers.formatDropoffDisplay(
+                                  jobType: job.jobType,
+                                  dropoffLocation: job.dropoff,
+                                  duration: job.duration,
+                                );
+
                             return JobOfferCard(
                               time: job.displayTime,
                               pickupLocation: job.pickup,
-                              dropoffLocation: job.dropoff,
+                              dropoffLocation: formattedDropoff,
                               passengerName: job.passengerName,
                               companyName: job.companyName,
                               vehicleType: job.vehicleType,
@@ -252,7 +260,7 @@ class JobOfferView extends StatelessWidget {
                                         : "$dateHeader • ${job.displayTime}",
                                     pickupLocation: job.pickup,
                                     pickupNotes: job.pickupNotes,
-                                    dropoffLocation: job.dropoff,
+                                    dropoffLocation: formattedDropoff,
                                     dropoffNotes: job.dropoffNotes,
                                     passengerName: job.passengerName,
                                     companyName: job.companyName,

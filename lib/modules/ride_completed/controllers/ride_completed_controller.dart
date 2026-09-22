@@ -5,7 +5,6 @@ import 'package:moeb_26/config/routes/app_pages.dart';
 import 'package:moeb_26/core/utils/helpers.dart';
 import 'package:moeb_26/data/repositories/job_repository.dart';
 
-import 'package:moeb_26/modules/my_jobs/controllers/my_jobs_controller.dart';
 import 'package:moeb_26/modules/rides/controllers/rides_controller.dart';
 
 class RideCompletedController extends GetxController {
@@ -74,12 +73,6 @@ class RideCompletedController extends GetxController {
 
   void _navigateBack() {
     // Refresh parent controllers
-    try {
-      if (Get.isRegistered<BookingController>()) {
-        Get.find<BookingController>().fetchJobs(isRefresh: true);
-      }
-    } catch (_) {}
-
     try {
       if (Get.isRegistered<RidesController>()) {
         Get.find<RidesController>().refreshCurrentTab();

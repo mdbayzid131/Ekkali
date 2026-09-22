@@ -13,7 +13,6 @@ import 'package:moeb_26/modules/chat_community/bindings/chat_community_detail_bi
 import 'package:moeb_26/modules/chat_detail/bindings/chat_detail_binding.dart';
 import 'package:moeb_26/modules/auth/profile/bindings/profile_binding.dart';
 import 'package:moeb_26/modules/job_edit/bindings/job_edit_binding.dart';
-import 'package:moeb_26/modules/my_jobs/bindings/my_jobs_binding.dart';
 import 'package:moeb_26/modules/my_items/bindings/my_items_binding.dart';
 import 'package:moeb_26/modules/ride_completed/bindings/ride_completed_binding.dart';
 import 'package:moeb_26/modules/my_ride_progress_details/bindings/my_ride_progress_details_binding.dart';
@@ -48,7 +47,7 @@ import 'package:moeb_26/modules/job_edit/views/job_edit_view.dart';
 import 'package:moeb_26/modules/ratings_feedback/views/ratings_feedback_view.dart';
 import 'package:moeb_26/modules/my_job_progress_details/views/my_job_progress_details_view.dart';
 import 'package:moeb_26/modules/my_job_progress_details/bindings/my_job_progress_details_binding.dart';
-import 'package:moeb_26/modules/my_jobs/views/my_jobs_view.dart';
+import 'package:moeb_26/modules/rides/views/rides_view.dart';
 import 'package:moeb_26/modules/request_submitted/views/request_submitted_view.dart';
 import 'package:moeb_26/modules/my_items/views/my_Items_view.dart';
 import 'package:moeb_26/modules/request_under_review/views/request_under_review_view.dart';
@@ -221,9 +220,8 @@ class Routes {
     ),
     GetPage(
       name: myJobsView,
-      page: () => MyJobsView(),
+      page: () => RidesView(),
       transition: Transition.noTransition,
-      binding: MyJobsBinding(),
     ),
     GetPage(
       name: jobEditView,

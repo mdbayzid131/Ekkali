@@ -286,19 +286,18 @@ class ByTheHour extends StatelessWidget {
                 }
 
                 if (_formKey.currentState!.validate()) {
+                  final durationVal = durationController.text.trim();
                   controller.submitByTheHourJob(
-                    pickupLocation: fromController.text,
+                    pickupLocation: fromController.text.trim(),
                     dropoffLocation: "By the hour",
-                    duration: durationController.text.isEmpty
-                        ? "Not specified"
-                        : durationController.text,
+                    duration: durationVal.isNotEmpty ? durationVal : null,
                     date: controller.selectedDate.value!,
                     time: controller.selectedTime.value!,
-                    paymentAmount: payController.text,
+                    paymentAmount: payController.text.trim(),
                     paymentType: controller.selectedRole.value,
-                    instruction: specialController.text.isEmpty
+                    instruction: specialController.text.trim().isEmpty
                         ? null
-                        : specialController.text,
+                        : specialController.text.trim(),
                   );
                 }
               },

@@ -6,7 +6,9 @@ import 'package:intl/intl.dart';
 import 'package:moeb_26/config/routes/app_pages.dart';
 import 'package:moeb_26/config/themes/app_theme.dart';
 import 'package:moeb_26/core/services/api_client.dart';
+import 'package:moeb_26/core/services/user_service.dart';
 import 'package:moeb_26/core/utils/helpers.dart';
+import 'package:moeb_26/core/widgets/CustomButton.dart';
 import 'package:moeb_26/data/models/my_rides_model.dart';
 import 'package:moeb_26/data/repositories/socket_repository.dart';
 import 'package:moeb_26/core/services/subscription_service.dart';
@@ -81,7 +83,7 @@ class _RidesViewState extends State<RidesView> {
   }
 
   String _getVehicleInfo(RideData ride) {
-    final driver = ride.assignedTo ?? ride.applicant?.driver;
+    final driver = ride.assignedTo ?? ride.effectiveApplicantDriver;
     if (driver?.vehicles != null && driver!.vehicles!.isNotEmpty) {
       final v = driver.vehicles!.first;
       return "${v.make} ${v.model}, ${v.colorOutside}";
@@ -114,7 +116,7 @@ class _RidesViewState extends State<RidesView> {
   }
 
   String _getDriverName(RideData ride) {
-    final driver = ride.assignedTo ?? ride.applicant?.driver;
+    final driver = ride.assignedTo ?? ride.effectiveApplicantDriver;
     if (driver?.nickname != null && driver!.nickname!.trim().isNotEmpty) {
       return driver.nickname!;
     }
@@ -134,6 +136,12 @@ class _RidesViewState extends State<RidesView> {
       grouped[header]!.add(ride);
     }
     return grouped;
+  }
+
+  String get _currentUserId {
+    return Get.isRegistered<UserService>()
+        ? Get.find<UserService>().userId
+        : "";
   }
 
   @override
@@ -265,6 +273,7 @@ class _RidesViewState extends State<RidesView> {
     }
 
     final grouped = _groupRidesByDate(controller.upcomingRides);
+    final myId = _currentUserId;
 
     return RefreshIndicator(
       color: AppColors.primaryColor,
@@ -312,11 +321,16 @@ class _RidesViewState extends State<RidesView> {
                 final posterName = _getJobPosterName(ride);
                 final driverName = _getDriverName(ride);
                 final vehicleInfo = _getVehicleInfo(ride);
+                final bool isMyJob = ride.isCreatedBy(myId);
 
                 return RideCard(
                   time: displayTime,
                   pickupLocation: ride.pickupLocation,
-                  dropoffLocation: ride.dropoffLocation,
+                  dropoffLocation: Helpers.formatDropoffDisplay(
+                    jobType: ride.jobType,
+                    dropoffLocation: ride.dropoffLocation,
+                    duration: ride.duration,
+                  ),
                   jobPosterName: posterName,
                   driverName: driverName,
                   vehicleInfo: vehicleInfo,
@@ -326,8 +340,16 @@ class _RidesViewState extends State<RidesView> {
                       : "0.00",
                   paymentType: ride.paymentType,
                   status: ride.status ?? "ASSIGNED",
+                  isCreatedByMe: isMyJob,
+                  hasApplicant: ride.hasApplicants,
+                  applicantCount: ride.applicantCount,
                   onChatTap: () => _openChatWithUser(ride),
-                  onTap: () => _openDetailSheet(ride, dateHeader, isPast: false),
+                  onTap: () => _openDetailSheet(
+                    ride,
+                    dateHeader,
+                    isPast: false,
+                    isCreatedByMe: isMyJob,
+                  ),
                 );
               }),
             ],
@@ -378,6 +400,7 @@ class _RidesViewState extends State<RidesView> {
     }
 
     final grouped = _groupRidesByDate(controller.pastRides);
+    final myId = _currentUserId;
 
     return RefreshIndicator(
       color: AppColors.primaryColor,
@@ -425,11 +448,16 @@ class _RidesViewState extends State<RidesView> {
                 final posterName = _getJobPosterName(ride);
                 final driverName = _getDriverName(ride);
                 final vehicleInfo = _getVehicleInfo(ride);
+                final bool isMyJob = ride.isCreatedBy(myId);
 
                 return RideCard(
                   time: displayTime,
                   pickupLocation: ride.pickupLocation,
-                  dropoffLocation: ride.dropoffLocation,
+                  dropoffLocation: Helpers.formatDropoffDisplay(
+                    jobType: ride.jobType,
+                    dropoffLocation: ride.dropoffLocation,
+                    duration: ride.duration,
+                  ),
                   jobPosterName: posterName,
                   driverName: driverName,
                   vehicleInfo: vehicleInfo,
@@ -439,7 +467,15 @@ class _RidesViewState extends State<RidesView> {
                       : "0.00",
                   paymentType: ride.paymentType,
                   status: ride.status ?? "COMPLETED",
-                  onTap: () => _openDetailSheet(ride, dateHeader, isPast: true),
+                  isCreatedByMe: isMyJob,
+                  hasApplicant: ride.hasApplicants,
+                  applicantCount: ride.applicantCount,
+                  onTap: () => _openDetailSheet(
+                    ride,
+                    dateHeader,
+                    isPast: true,
+                    isCreatedByMe: isMyJob,
+                  ),
                 );
               }),
             ],
@@ -451,7 +487,7 @@ class _RidesViewState extends State<RidesView> {
 
   void _openChatWithUser(RideData ride) async {
     final String? participantId =
-        ride.createdBy?.id ?? ride.assignedTo?.id ?? ride.applicant?.driver?.id;
+        ride.createdBy?.id ?? ride.assignedTo?.id ?? ride.effectiveApplicantDriver?.id;
     if (participantId != null && participantId.isNotEmpty) {
       try {
         final socketRepo = Get.isRegistered<SocketRepository>()
@@ -478,20 +514,115 @@ class _RidesViewState extends State<RidesView> {
     RideData ride,
     String dateHeader, {
     required bool isPast,
+    required bool isCreatedByMe,
   }) {
     Get.bottomSheet(
       RideDetailSheet(
         ride: ride,
         isPast: isPast,
         dateHeader: dateHeader,
+        isCreatedByMe: isCreatedByMe,
         onReviewPressed: isPast
             ? () {
                 Get.toNamed(Routes.rideCompletedView, arguments: ride);
               }
             : null,
+        onEditPressed: isCreatedByMe && !ride.hasApplicants
+            ? () {
+                Get.toNamed(Routes.jobEditView, arguments: ride);
+              }
+            : null,
+        onDeletePressed: isCreatedByMe
+            ? () {
+                _showDeleteDialog(jobId: ride.id);
+              }
+            : null,
+        onAcceptApplicant: isCreatedByMe && ride.hasApplicants
+            ? () {
+                controller.approveApplicant(jobId: ride.id);
+              }
+            : null,
+        onRejectApplicant: isCreatedByMe && ride.hasApplicants
+            ? () {
+                controller.rejectApplicant(jobId: ride.id);
+              }
+            : null,
+        onCancelJob: isCreatedByMe
+            ? () {
+                controller.cancelJob(jobId: ride.id);
+              }
+            : null,
       ),
       isScrollControlled: true,
       ignoreSafeArea: false,
+    );
+  }
+
+  void _showDeleteDialog({required String jobId}) {
+    Get.dialog(
+      Dialog(
+        backgroundColor: Colors.transparent,
+        child: Container(
+          padding: EdgeInsets.all(20.w),
+          decoration: BoxDecoration(
+            color: const Color(0xFF1E1E1E),
+            borderRadius: BorderRadius.circular(20.r),
+            border: Border.all(color: const Color(0xFF2C2C2C)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                "Delete Job",
+                style: GoogleFonts.inter(
+                  color: Colors.white,
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 10.h),
+              Text(
+                "Are you sure you want to delete this job?",
+                textAlign: TextAlign.center,
+                style: GoogleFonts.inter(color: Colors.grey, fontSize: 13.sp),
+              ),
+              SizedBox(height: 20.h),
+              Row(
+                children: [
+                  Expanded(
+                    child: CustomButton(
+                      text: "Cancel",
+                      backgroundColor: Colors.transparent,
+                      textColor: Colors.white,
+                      borderColor: Colors.grey,
+                      fontSize: 14.sp,
+                      onPressed: () => Get.back(),
+                      padding: EdgeInsets.symmetric(vertical: 12.h),
+                    ),
+                  ),
+                  SizedBox(width: 10.w),
+                  Expanded(
+                    child: CustomButton(
+                      text: "Delete",
+                      backgroundColor: Colors.redAccent,
+                      textColor: Colors.black,
+                      fontSize: 14.sp,
+                      onPressed: () {
+                        Get.back(); // Close confirmation dialog
+                        if (Get.isBottomSheetOpen == true) {
+                          Get.back(); // Close bottom sheet
+                        }
+                        controller.deleteJob(jobId: jobId);
+                      },
+                      padding: EdgeInsets.symmetric(vertical: 12.h),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

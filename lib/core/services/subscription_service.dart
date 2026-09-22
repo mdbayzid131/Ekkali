@@ -25,9 +25,8 @@ class SubscriptionService extends GetxService {
   StreamSubscription<List<PurchaseDetails>>? _purchaseSubscription;
 
   // ─── Testing / Debug Override ───────────────────────────────────────────────
-  /// টেস্টিং পারপাসে পুরো অ্যাপে প্রিমিয়াম আনলক করতে চাইলে এটিকে `true` করে দিন।
-  /// Normal production/live মোডের জন্য এটিকে `false` রাখুন।
-  static const bool debugForcePremium = false;
+
+  static const bool debugForcePremium = true;
 
   // ─── Observable State ───────────────────────────────────────────────────────
   final RxBool isPremium = (debugForcePremium ? true : false).obs;
@@ -53,7 +52,9 @@ class SubscriptionService extends GetxService {
   Future<void> _initService() async {
     if (debugForcePremium) {
       isPremium.value = true;
-      debugPrint('[SubscriptionService] ⚡ DEBUG MODE: Forced Premium is ACTIVE');
+      debugPrint(
+        '[SubscriptionService] ⚡ DEBUG MODE: Forced Premium is ACTIVE',
+      );
       return;
     }
 
@@ -100,10 +101,12 @@ class SubscriptionService extends GetxService {
       return;
     }
 
-    final cached = (await StorageService.getBool(StorageConstants.isPremium)) ?? false;
+    final cached =
+        (await StorageService.getBool(StorageConstants.isPremium)) ?? false;
     isPremium.value = cached;
-    final expiry =
-        await StorageService.getString(StorageConstants.subscriptionExpiry);
+    final expiry = await StorageService.getString(
+      StorageConstants.subscriptionExpiry,
+    );
     if (expiry.isNotEmpty) {
       subscriptionExpiry.value = expiry;
       // Auto-expire if past expiry date
@@ -126,7 +129,9 @@ class SubscriptionService extends GetxService {
         SubscriptionProductIds.all,
       );
       if (response.error != null) {
-        debugPrint('[SubscriptionService] Product query error: ${response.error}');
+        debugPrint(
+          '[SubscriptionService] Product query error: ${response.error}',
+        );
         return;
       }
       if (response.notFoundIDs.isNotEmpty) {
@@ -143,7 +148,9 @@ class SubscriptionService extends GetxService {
           }
         }
         yearlyProduct.value = matched ?? response.productDetails.first;
-        debugPrint('[SubscriptionService] Product loaded: ${yearlyProduct.value?.title} (${yearlyProduct.value?.price})');
+        debugPrint(
+          '[SubscriptionService] Product loaded: ${yearlyProduct.value?.title} (${yearlyProduct.value?.price})',
+        );
       }
     } catch (e) {
       debugPrint('[SubscriptionService] loadProducts error: $e');
@@ -190,10 +197,7 @@ class SubscriptionService extends GetxService {
     } catch (e) {
       isLoading.value = false;
       debugPrint('[SubscriptionService] buySubscription error: $e');
-      Helpers.showCustomSnackBar(
-        '$e',
-        isError: true,
-      );
+      Helpers.showCustomSnackBar('$e', isError: true);
     }
   }
 
@@ -207,17 +211,15 @@ class SubscriptionService extends GetxService {
     } catch (e) {
       isLoading.value = false;
       debugPrint('[SubscriptionService] restorePurchases error: $e');
-      Helpers.showCustomSnackBar(
-        '$e',
-        isError: true,
-      );
+      Helpers.showCustomSnackBar('$e', isError: true);
     }
   }
 
   // ─── Purchase Stream Handler ─────────────────────────────────────────────────
 
   Future<void> _onPurchaseUpdated(
-      List<PurchaseDetails> purchaseDetailsList) async {
+    List<PurchaseDetails> purchaseDetailsList,
+  ) async {
     for (final PurchaseDetails details in purchaseDetailsList) {
       debugPrint(
         '[SubscriptionService] Purchase update: ${details.productID} | ${details.status}',
@@ -298,12 +300,16 @@ class SubscriptionService extends GetxService {
         final receiptData = await SKReceiptManager.retrieveReceiptData();
         if (receiptData.isEmpty) {
           debugPrint('[SubscriptionService] No iOS receipt data available');
-          Helpers.showCustomSnackBar('No Apple receipt found to restore.', isError: true);
+          Helpers.showCustomSnackBar(
+            'No Apple receipt found to restore.',
+            isError: true,
+          );
           await _setNotPremium();
           return false;
         }
-        final response =
-            await _repo.verifyAppleReceipt(receiptData: receiptData);
+        final response = await _repo.verifyAppleReceipt(
+          receiptData: receiptData,
+        );
         if (response.data != null && response.data is Map) {
           final res = SubscriptionStatusResponse.fromJson(
             Map<String, dynamic>.from(response.data as Map),
@@ -315,12 +321,15 @@ class SubscriptionService extends GetxService {
             isPremium.value = isPrem;
             if (expiry != null && expiry.isNotEmpty) {
               await StorageService.setString(
-                  StorageConstants.subscriptionExpiry, expiry);
+                StorageConstants.subscriptionExpiry,
+                expiry,
+              );
               subscriptionExpiry.value = expiry;
             }
             return true;
           } else {
-            final errorMsg = response.data?['message'] ??
+            final errorMsg =
+                response.data?['message'] ??
                 'Apple receipt verification failed.';
             Helpers.showCustomSnackBar(errorMsg.toString(), isError: true);
             await _setNotPremium();
@@ -341,8 +350,12 @@ class SubscriptionService extends GetxService {
         // Validation check: If user canceled or token/productId is empty, do NOT call backend
         if (purchaseToken.isEmpty || productId.isEmpty) {
           debugPrint(
-              '[SubscriptionService] Empty purchaseToken or productId. Skipping backend verification.');
-          Helpers.showCustomSnackBar('No Google Play purchase token found.', isError: true);
+            '[SubscriptionService] Empty purchaseToken or productId. Skipping backend verification.',
+          );
+          Helpers.showCustomSnackBar(
+            'No Google Play purchase token found.',
+            isError: true,
+          );
           await _setNotPremium();
           return false;
         }
@@ -363,12 +376,15 @@ class SubscriptionService extends GetxService {
             isPremium.value = isPrem;
             if (expiry != null && expiry.isNotEmpty) {
               await StorageService.setString(
-                  StorageConstants.subscriptionExpiry, expiry);
+                StorageConstants.subscriptionExpiry,
+                expiry,
+              );
               subscriptionExpiry.value = expiry;
             }
             return true;
           } else {
-            final errorMsg = response.data?['message'] ??
+            final errorMsg =
+                response.data?['message'] ??
                 'Google Play purchase verification failed.';
             Helpers.showCustomSnackBar(errorMsg.toString(), isError: true);
             await _setNotPremium();
@@ -398,16 +414,24 @@ class SubscriptionService extends GetxService {
       return;
     }
     try {
-      final token = await StorageService.getString(StorageConstants.bearerToken);
+      final token = await StorageService.getString(
+        StorageConstants.bearerToken,
+      );
       if (token.isEmpty) {
-        debugPrint('[SubscriptionService] No bearer token found. Skipping status sync.');
+        debugPrint(
+          '[SubscriptionService] No bearer token found. Skipping status sync.',
+        );
         isPremium.value = false;
         subscriptionExpiry.value = '';
         return;
       }
 
-      final isApproved = await StorageService.getBool(StorageConstants.isApproved);
-      final isOnboard = await StorageService.getBool(StorageConstants.isOnboard);
+      final isApproved = await StorageService.getBool(
+        StorageConstants.isApproved,
+      );
+      final isOnboard = await StorageService.getBool(
+        StorageConstants.isOnboard,
+      );
       if (isApproved != true || isOnboard != true) {
         debugPrint(
           '[SubscriptionService] User is pending approval or onboarding (isApproved: $isApproved, isOnboard: $isOnboard). Skipping subscription status sync.',
@@ -429,7 +453,9 @@ class SubscriptionService extends GetxService {
 
           if (expiry != null && expiry.isNotEmpty) {
             await StorageService.setString(
-                StorageConstants.subscriptionExpiry, expiry);
+              StorageConstants.subscriptionExpiry,
+              expiry,
+            );
             subscriptionExpiry.value = expiry;
           } else if (!isPrem) {
             await StorageService.remove(StorageConstants.subscriptionExpiry);

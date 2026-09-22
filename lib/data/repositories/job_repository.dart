@@ -22,6 +22,7 @@ class JobRepo {
     String? paymentStatus,
     String? passengerName,
     String? passengerPhone,
+    String? duration,
     List<String>? targetedChauffeurs,
     String? serviceAreaId,
     List<String>? serviceAreaIds,
@@ -36,6 +37,10 @@ class JobRepo {
       "dispatchType": dispatchType,
       "asap": asap,
     };
+
+    if (duration != null && duration.isNotEmpty) {
+      body["duration"] = duration;
+    }
 
     if (!asap) {
       if (date != null && date.isNotEmpty) {
@@ -77,11 +82,11 @@ class JobRepo {
     return await apiClient.postData(ApiConstants.createJob, body);
   }
 
-  Future<Response> getCalendarJobs({required int month, required int year}) async {
-    final Map<String, dynamic> query = {
-      'month': month,
-      'year': year,
-    };
+  Future<Response> getCalendarJobs({
+    required int month,
+    required int year,
+  }) async {
+    final Map<String, dynamic> query = {'month': month, 'year': year};
     return await apiClient.getData(ApiConstants.calendarJobs, query: query);
   }
 
@@ -90,16 +95,11 @@ class JobRepo {
     if (cursor != null && cursor.isNotEmpty) {
       query['cursor'] = cursor;
     }
-    return await apiClient.getData(
-      ApiConstants.myJobs,
-      query: query,
-    );
+    return await apiClient.getData(ApiConstants.myJobs, query: query);
   }
 
   Future<Response> getAllJobOffers() async {
-    return await apiClient.getData(
-      ApiConstants.getAllJobOffers,
-    );
+    return await apiClient.getData(ApiConstants.getAllJobOffers);
   }
 
   Future<Response> applyToJob({required String jobId}) async {
@@ -114,10 +114,7 @@ class JobRepo {
     if (cursor != null && cursor.isNotEmpty) {
       query['cursor'] = cursor;
     }
-    return await apiClient.getData(
-      ApiConstants.myRides,
-      query: query,
-    );
+    return await apiClient.getData(ApiConstants.myRides, query: query);
   }
 
   Future<Response> getPastJobs({String? cursor, int limit = 10}) async {
@@ -125,10 +122,7 @@ class JobRepo {
     if (cursor != null && cursor.isNotEmpty) {
       query['cursor'] = cursor;
     }
-    return await apiClient.getData(
-      ApiConstants.myRides,
-      query: query,
-    );
+    return await apiClient.getData(ApiConstants.myRides, query: query);
   }
 
   Future<Response> rejectApplicant({required String jobId}) async {

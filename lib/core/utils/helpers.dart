@@ -48,6 +48,58 @@ class Helpers {
     return '$hours:$mins:$secs';
   }
 
+  /// Format duration input string to "X h" (e.g. "7", "7 hours", "7h", "7 hrs" → "7 h")
+  static String formatDurationToH(String? duration) {
+    if (duration == null || duration.trim().isEmpty) return '';
+    final trimmed = duration.trim();
+    final regExp = RegExp(
+      r'^(\d+(?:\.\d+)?)\s*(?:h|hr|hrs|hour|hours)?$',
+      caseSensitive: false,
+    );
+    final match = regExp.firstMatch(trimmed);
+    if (match != null) {
+      return '${match.group(1)}h';
+    }
+    return trimmed;
+  }
+
+  /// Format dropoff location string, ensuring By The Hour shows "By the hour (X h)"
+  static String formatDropoffDisplay({
+    String? jobType,
+    String? dropoffLocation,
+    String? duration,
+  }) {
+    final isByTheHour =
+        (jobType?.toUpperCase() == 'BY THE HOUR') ||
+        (dropoffLocation != null &&
+            dropoffLocation.toLowerCase().contains('by the hour'));
+
+    if (isByTheHour) {
+      String? d = duration;
+      if (d == null || d.trim().isEmpty) {
+        if (dropoffLocation != null) {
+          final match = RegExp(
+            r'by the hour\s*\(([^)]+)\)',
+            caseSensitive: false,
+          ).firstMatch(dropoffLocation);
+          if (match != null) {
+            d = match.group(1);
+          }
+        }
+      }
+      final formattedD = formatDurationToH(d);
+      if (formattedD.isNotEmpty) {
+        return 'By the hour ($formattedD)';
+      }
+      return 'By the hour';
+    }
+
+    if (dropoffLocation == null || dropoffLocation.trim().isEmpty) {
+      return 'As Directed';
+    }
+    return dropoffLocation;
+  }
+
   // ──────────────────── LOGGING ────────────────────
 
   /// General debug log (only in debug mode)
@@ -385,7 +437,7 @@ class Helpers {
         final jpegBytes = img.encodeJpg(resized, quality: 70);
 
         final tempDir = Directory.systemTemp;
-        
+
         // Extract original file name supporting both / and \ separators
         final originalFileName = file.path.split('/').last.split('\\').last;
         final baseName = originalFileName.contains('.')
@@ -393,7 +445,9 @@ class Helpers {
             : originalFileName;
 
         // Create a unique subdirectory to prevent name collisions while keeping the filename clean
-        final sessionDir = Directory('${tempDir.path}/compressed_${DateTime.now().microsecondsSinceEpoch}');
+        final sessionDir = Directory(
+          '${tempDir.path}/compressed_${DateTime.now().microsecondsSinceEpoch}',
+        );
         await sessionDir.create(recursive: true);
 
         final tempPath = '${sessionDir.path}/$baseName.jpg';
