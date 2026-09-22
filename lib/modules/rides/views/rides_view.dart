@@ -522,7 +522,9 @@ class _RidesViewState extends State<RidesView> {
         isPast: isPast,
         dateHeader: dateHeader,
         isCreatedByMe: isCreatedByMe,
-        onReviewPressed: isPast
+        onReviewPressed: (isPast &&
+                ride.status?.toUpperCase() != 'CANCELLED' &&
+                ride.rideStatus?.toUpperCase() != 'CANCELLED')
             ? () {
                 Get.toNamed(Routes.rideCompletedView, arguments: ride);
               }

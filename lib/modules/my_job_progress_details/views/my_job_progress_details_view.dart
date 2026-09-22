@@ -126,10 +126,13 @@ class _MyJobProgressDetailsViewState extends State<MyJobProgressDetailsView> {
               controller.myJobView.value!.rideStatus = "CANCELLED";
               controller.myJobView.refresh();
             }
-            Helpers.showCustomSnackBar(
-              "This ride has been cancelled.",
-              isError: true,
-            );
+            // Only show cancellation snackbar if cancelled by someone else (not the current user's active cancel action)
+            if (!controller.isActionLoading.value) {
+              Helpers.showCustomSnackBar(
+                "This ride has been cancelled.",
+                isError: true,
+              );
+            }
           }
         } catch (e) {
           debugPrint(

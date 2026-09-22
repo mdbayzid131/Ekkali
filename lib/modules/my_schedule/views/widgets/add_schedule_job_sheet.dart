@@ -331,7 +331,7 @@ class _AddScheduleJobSheetState extends State<AddScheduleJobSheet> {
     return Scaffold(
       backgroundColor: const Color(0xFF0A0A0C),
       appBar: CustomSubAppBar(
-        title: isEdit ? "Edit Direct Booking" : "Add Direct Booking",
+        title: isEdit ? "Edit Private Booking" : "Add Private Booking",
         onBackPressed: () => Get.back(),
       ),
       body: SingleChildScrollView(

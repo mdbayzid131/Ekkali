@@ -75,9 +75,6 @@ class ProfileController extends GetxController {
     cashAppController = TextEditingController(text: cashApp.value);
 
     fetchUserProfile();
-    fetchVehicles();
-    fetchServiceAreas();
-    fetchLegalPages();
   }
 
   /// Fetches vehicles list from GET /api/v1/vehicles
