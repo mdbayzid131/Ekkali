@@ -18,6 +18,7 @@ class JobOfferModel {
   final String passengerName;
   final String? instruction;
   final String? flightNumber;
+  final String? duration;
   final String? createdBy;
   final DateTime? createdAt;
   final DateTime? updatedAt;
@@ -42,6 +43,7 @@ class JobOfferModel {
     required this.passengerName,
     this.instruction,
     this.flightNumber,
+    this.duration,
     this.createdBy,
     this.createdAt,
     this.updatedAt,
@@ -124,6 +126,7 @@ class JobOfferModel {
           json['specialInstructions']?.toString(),
       flightNumber:
           json['flightNumber']?.toString() ?? json['flight']?.toString(),
+      duration: json['duration']?.toString(),
       createdBy: (json['createdBy'] is Map)
           ? (json['createdBy']['id'] ?? json['createdBy']['_id'])?.toString()
           : (json['createdBy'] ??

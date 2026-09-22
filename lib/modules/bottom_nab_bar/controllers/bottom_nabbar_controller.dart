@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import '../../rides/controllers/rides_controller.dart';
-import '../../my_jobs/controllers/my_jobs_controller.dart';
+import '../../jobs_offers/controllers/Job_offer_controller.dart';
 import '../../chat/controllers/chat_controller.dart';
 
 class NavigationController extends GetxController {
@@ -23,7 +23,9 @@ class NavigationController extends GetxController {
     if (index == 0) {
       // Index 0 is JobOfferPage
       try {
-        Get.find<BookingController>().fetchJobOffers(isRefresh: true);
+        if (Get.isRegistered<JobOfferController>()) {
+          Get.find<JobOfferController>().fetchJobOffers(isRefresh: true);
+        }
       } catch (e) {
         debugPrint("NavigationController fetchJobOffers error: $e");
       }

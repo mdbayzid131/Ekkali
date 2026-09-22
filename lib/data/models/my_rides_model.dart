@@ -1,3 +1,4 @@
+import 'package:moeb_26/data/models/my_jobs_model.dart' as jm;
 import 'package:moeb_26/data/models/user_profile_model.dart';
 
 class MyRidesModel {
@@ -72,17 +73,20 @@ class RideData {
   final String pickupLocation;
   final String dropoffLocation;
   final String? flightNumber;
+  final String? duration;
   final bool asap;
   final String? date;
   final String? time;
   final String vehicleType;
   final num? paymentAmount;
   final String? paymentType;
+  final String? paymentStatus;
   final String? instruction;
   final String? passengerName;
   final String? passengerPhone;
   final String? status;
   final String? rideStatus;
+  final int? applicantCount;
   final String? name;
   final String? nickname;
   final String? company;
@@ -97,6 +101,7 @@ class RideData {
   final DriverData? createdBy;
   final DriverData? assignedTo;
   final ApplicantData? applicant;
+  final List<DriverData>? applicants;
 
   RideData({
     required this.id,
@@ -105,17 +110,20 @@ class RideData {
     required this.pickupLocation,
     required this.dropoffLocation,
     this.flightNumber,
+    this.duration,
     this.asap = false,
     this.date,
     this.time,
     required this.vehicleType,
     this.paymentAmount,
     this.paymentType,
+    this.paymentStatus,
     this.instruction,
     this.passengerName,
     this.passengerPhone,
     this.status,
     this.rideStatus,
+    this.applicantCount,
     this.name,
     this.nickname,
     this.company,
@@ -130,7 +138,105 @@ class RideData {
     this.createdBy,
     this.assignedTo,
     this.applicant,
+    this.applicants,
   });
+
+  bool isCreatedBy(String currentUserId) {
+    if (currentUserId.isEmpty) return false;
+    return (jobCreatorId != null && jobCreatorId == currentUserId) ||
+        (createdBy?.id != null && createdBy!.id == currentUserId);
+  }
+
+  bool isAssignedToMe(String currentUserId) {
+    if (currentUserId.isEmpty) return false;
+    return assignedTo?.id != null && assignedTo!.id == currentUserId;
+  }
+
+  bool isAppliedByMe(String currentUserId) {
+    if (currentUserId.isEmpty) return false;
+    if (applicant?.driver?.id == currentUserId) return true;
+    if (applicants != null && applicants!.any((a) => a.id == currentUserId)) {
+      return true;
+    }
+    return false;
+  }
+
+  bool get hasApplicants =>
+      (applicant?.driver != null) ||
+      (applicants != null && applicants!.isNotEmpty) ||
+      ((applicantCount ?? 0) > 0);
+
+  DriverData? get effectiveApplicantDriver =>
+      applicant?.driver ??
+      (applicants != null && applicants!.isNotEmpty ? applicants!.first : null);
+
+  jm.JobData toJobData() {
+    return jm.JobData(
+      id: id,
+      jobType: jobType,
+      pickupLocation: pickupLocation,
+      dropoffLocation: dropoffLocation,
+      flightNumber: flightNumber,
+      duration: duration,
+      asap: asap,
+      date: date,
+      time: time,
+      vehicleType: vehicleType,
+      paymentAmount: paymentAmount?.toInt(),
+      paymentType: paymentType,
+      instruction: instruction,
+      status: status,
+      rideStatus: rideStatus,
+      applicantCount: applicantCount,
+      createdBy: createdBy != null
+          ? jm.Driver(
+              id: createdBy!.id,
+              name: createdBy!.name,
+              nickname: createdBy!.nickname,
+              email: createdBy!.email,
+              phone: createdBy!.phone,
+              company: createdBy!.company,
+              companyRole: createdBy!.companyRole,
+              profilePicture: createdBy!.profilePicture,
+            )
+          : null,
+      companyName: companyName ?? company ?? name,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+      hasReview: hasReview,
+      isReviewedByCreator: isReviewedByCreator,
+      isReviewedByDriver: isReviewedByDriver,
+      assignedTo: assignedTo != null
+          ? jm.Driver(
+              id: assignedTo!.id,
+              name: assignedTo!.name,
+              nickname: assignedTo!.nickname,
+              email: assignedTo!.email,
+              phone: assignedTo!.phone,
+              company: assignedTo!.company,
+              companyRole: assignedTo!.companyRole,
+              profilePicture: assignedTo!.profilePicture,
+            )
+          : null,
+      applicant: applicant != null
+          ? jm.Applicant(
+              driver: applicant!.driver != null
+                  ? jm.Driver(
+                      id: applicant!.driver!.id,
+                      name: applicant!.driver!.name,
+                      nickname: applicant!.driver!.nickname,
+                      email: applicant!.driver!.email,
+                      phone: applicant!.driver!.phone,
+                      company: applicant!.driver!.company,
+                      companyRole: applicant!.driver!.companyRole,
+                      profilePicture: applicant!.driver!.profilePicture,
+                    )
+                  : null,
+              appliedAt: applicant!.appliedAt?.toIso8601String(),
+            )
+          : null,
+    );
+  }
 
   factory RideData.fromJson(Map<String, dynamic> json) {
     DriverData? parseDriver(dynamic field) {
@@ -144,6 +250,14 @@ class RideData {
         json['creatorId']?.toString() ??
         (json['createdBy'] is String ? json['createdBy']?.toString() : null);
 
+    List<DriverData>? parsedApplicants;
+    if (json['applicants'] is List) {
+      parsedApplicants = (json['applicants'] as List)
+          .whereType<Map<String, dynamic>>()
+          .map((d) => DriverData.fromJson(d))
+          .toList();
+    }
+
     return RideData(
       id: json['_id']?.toString() ?? json['id']?.toString() ?? '',
       jobCreatorId: creatorId,
@@ -155,6 +269,7 @@ class RideData {
           json['dropoffLocation']?.toString() ??
           '',
       flightNumber: json['flightNumber']?.toString(),
+      duration: json['duration']?.toString(),
       asap: json['asap'] == true,
       date: json['date']?.toString(),
       time: json['time']?.toString(),
@@ -163,16 +278,21 @@ class RideData {
           ? (json['paymentAmount'] as num)
           : num.tryParse(json['paymentAmount']?.toString() ?? ''),
       paymentType: json['paymentType']?.toString(),
+      paymentStatus: json['paymentStatus']?.toString(),
       instruction: json['instruction']?.toString() ??
           json['instructions']?.toString(),
       passengerName: json['passengerName']?.toString(),
       passengerPhone: json['passengerPhone']?.toString(),
       status: json['status']?.toString(),
       rideStatus: json['rideStatus']?.toString(),
+      applicantCount: json['applicantCount'] is num
+          ? (json['applicantCount'] as num).toInt()
+          : int.tryParse(json['applicantCount']?.toString() ?? ''),
       name: json['name']?.toString(),
       nickname: json['nickname']?.toString(),
       company: json['company']?.toString(),
-      companyName: json['companyName']?.toString() ?? json['company']?.toString(),
+      companyName:
+          json['companyName']?.toString() ?? json['company']?.toString(),
       companyRole: json['companyRole']?.toString(),
       profilePicture: json['profilePicture']?.toString(),
       hasReview: json['hasReview'] == true,
@@ -196,6 +316,7 @@ class RideData {
       applicant: json['applicant'] is Map<String, dynamic>
           ? ApplicantData.fromJson(json['applicant'])
           : null,
+      applicants: parsedApplicants,
     );
   }
 
@@ -213,11 +334,13 @@ class RideData {
       'vehicleType': vehicleType,
       'paymentAmount': paymentAmount,
       'paymentType': paymentType,
+      'paymentStatus': paymentStatus,
       'instruction': instruction,
       'passengerName': passengerName,
       'passengerPhone': passengerPhone,
       'status': status,
       'rideStatus': rideStatus,
+      'applicantCount': applicantCount,
       'name': name,
       'nickname': nickname,
       'company': company,
@@ -319,10 +442,17 @@ class ApplicantData {
   });
 
   factory ApplicantData.fromJson(Map<String, dynamic> json) {
+    DriverData? driverData;
+    if (json.containsKey('driver') && json['driver'] is Map<String, dynamic>) {
+      driverData = DriverData.fromJson(json['driver']);
+    } else if (json.containsKey('_id') ||
+        json.containsKey('id') ||
+        json.containsKey('name')) {
+      driverData = DriverData.fromJson(json);
+    }
+
     return ApplicantData(
-      driver: json['driver'] is Map<String, dynamic>
-          ? DriverData.fromJson(json['driver'])
-          : null,
+      driver: driverData,
       vehicleId: json['vehicleId']?.toString(),
       appliedAt: json['appliedAt'] != null
           ? DateTime.tryParse(json['appliedAt'].toString())
@@ -348,3 +478,4 @@ typedef UpcomingRideData = RideData;
 typedef FinishRideData = RideData;
 typedef UpcomingRidesModel = MyRidesModel;
 typedef FinishRidesModel = MyRidesModel;
+

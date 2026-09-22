@@ -5,7 +5,8 @@ import 'package:intl/intl.dart';
 import 'package:moeb_26/core/utils/helpers.dart';
 import 'package:moeb_26/data/models/my_jobs_model.dart';
 import 'package:moeb_26/data/repositories/job_repository.dart';
-import '../../my_jobs/controllers/my_jobs_controller.dart';
+import 'package:moeb_26/data/models/my_rides_model.dart';
+import 'package:moeb_26/modules/rides/controllers/rides_controller.dart';
 
 class JobEditController extends GetxController {
   final JobRepo _jobRepo = Get.find<JobRepo>();
@@ -33,6 +34,9 @@ class JobEditController extends GetxController {
     super.onInit();
     if (Get.arguments is JobData) {
       job = Get.arguments as JobData;
+      initFields();
+    } else if (Get.arguments is RideData) {
+      job = (Get.arguments as RideData).toJobData();
       initFields();
     }
   }
@@ -241,9 +245,9 @@ class JobEditController extends GetxController {
 
         Helpers.showCustomSnackBar('Job updated successfully.', isError: false);
 
-        // Refresh the jobs list in BookingController
-        if (Get.isRegistered<BookingController>()) {
-          Get.find<BookingController>().fetchJobs(isRefresh: true);
+        // Refresh the rides list
+        if (Get.isRegistered<RidesController>()) {
+          Get.find<RidesController>().refreshCurrentTab();
         }
       } else {
         final message = response.data is Map

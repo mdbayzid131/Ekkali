@@ -50,7 +50,89 @@ class RidesController extends GetxController {
   void _setupSocketListeners() {
     if (_socketService == null) return;
 
-    // 1. Listen for new assigned jobs (JOB_ASSIGNED)
+    // 1. Listen for Driver Applications (JOB_APPLICATION_RECEIVED)
+    _socketWorkers.add(
+      ever(_socketService!.lastJobApplication, (data) {
+        if (data == null) return;
+        try {
+          String? targetJobId;
+          dynamic applicantData;
+
+          if (data is Map) {
+            targetJobId = data['jobId']?.toString() ??
+                data['id']?.toString() ??
+                data['_id']?.toString();
+            applicantData = data['applicant'] ?? data['data'];
+          }
+
+          if (targetJobId != null && targetJobId.isNotEmpty) {
+            final index = upcomingRides.indexWhere((r) => r.id == targetJobId);
+            if (index != -1) {
+              final currentRide = upcomingRides[index];
+              // Update applicant details if available
+              ApplicantData? newApp;
+              if (applicantData is Map<String, dynamic>) {
+                newApp = ApplicantData.fromJson(applicantData);
+              }
+              final updatedRide = RideData(
+                id: currentRide.id,
+                jobCreatorId: currentRide.jobCreatorId,
+                jobType: currentRide.jobType,
+                pickupLocation: currentRide.pickupLocation,
+                dropoffLocation: currentRide.dropoffLocation,
+                flightNumber: currentRide.flightNumber,
+                asap: currentRide.asap,
+                date: currentRide.date,
+                time: currentRide.time,
+                vehicleType: currentRide.vehicleType,
+                paymentAmount: currentRide.paymentAmount,
+                paymentType: currentRide.paymentType,
+                paymentStatus: currentRide.paymentStatus,
+                instruction: currentRide.instruction,
+                passengerName: currentRide.passengerName,
+                passengerPhone: currentRide.passengerPhone,
+                status: currentRide.status,
+                rideStatus: currentRide.rideStatus,
+                applicantCount: (currentRide.applicantCount ?? 0) + 1,
+                name: currentRide.name,
+                nickname: currentRide.nickname,
+                company: currentRide.company,
+                companyName: currentRide.companyName,
+                companyRole: currentRide.companyRole,
+                profilePicture: currentRide.profilePicture,
+                hasReview: currentRide.hasReview,
+                isReviewedByDriver: currentRide.isReviewedByDriver,
+                isReviewedByCreator: currentRide.isReviewedByCreator,
+                createdAt: currentRide.createdAt,
+                updatedAt: currentRide.updatedAt,
+                createdBy: currentRide.createdBy,
+                assignedTo: currentRide.assignedTo,
+                applicant: newApp ?? currentRide.applicant,
+                applicants: currentRide.applicants,
+              );
+              upcomingRides[index] = updatedRide;
+              upcomingRides.refresh();
+            } else {
+              refreshCurrentTab();
+            }
+
+            String applicantName = "A driver";
+            if (applicantData is Map && applicantData['name'] != null) {
+              applicantName = applicantData['name'].toString();
+            }
+            Helpers.showCustomSnackBar(
+              "$applicantName applied to your job!",
+              isError: false,
+            );
+            debugPrint("✨ RidesController: Real-time application received for [$targetJobId]");
+          }
+        } catch (e) {
+          debugPrint("❌ RidesController: Error handling JOB_APPLICATION_RECEIVED: $e");
+        }
+      }),
+    );
+
+    // 2. Listen for new assigned jobs (JOB_ASSIGNED)
     _socketWorkers.add(
       ever(_socketService!.lastJobAssigned, (data) {
         if (data == null) return;
@@ -68,8 +150,14 @@ class RidesController extends GetxController {
 
           if (jobMap != null) {
             final newRide = RideData.fromJson(jobMap);
-            if (newRide.id.isNotEmpty && !upcomingRides.any((r) => r.id == newRide.id)) {
-              upcomingRides.insert(0, newRide);
+            if (newRide.id.isNotEmpty) {
+              final existingIndex = upcomingRides.indexWhere((r) => r.id == newRide.id);
+              if (existingIndex != -1) {
+                upcomingRides[existingIndex] = newRide;
+                upcomingRides.refresh();
+              } else {
+                upcomingRides.insert(0, newRide);
+              }
               Helpers.showCustomSnackBar(
                 "You have been assigned to a new ride!",
                 isError: false,
@@ -83,7 +171,7 @@ class RidesController extends GetxController {
       }),
     );
 
-    // 2. Listen for Ride Status Updates (RIDE_STATUS_UPDATED)
+    // 3. Listen for Ride Status Updates (RIDE_STATUS_UPDATED)
     _socketWorkers.add(
       ever(_socketService!.lastRideStatusUpdated, (data) {
         if (data == null) return;
@@ -101,6 +189,48 @@ class RidesController extends GetxController {
             if (newStatus == "FINISHED" || newStatus == "COMPLETED") {
               // Refresh lists to properly move to past rides
               refreshCurrentTab();
+            } else if (newStatus != null) {
+              final index = upcomingRides.indexWhere((r) => r.id == targetJobId);
+              if (index != -1) {
+                final current = upcomingRides[index];
+                upcomingRides[index] = RideData(
+                  id: current.id,
+                  jobCreatorId: current.jobCreatorId,
+                  jobType: current.jobType,
+                  pickupLocation: current.pickupLocation,
+                  dropoffLocation: current.dropoffLocation,
+                  flightNumber: current.flightNumber,
+                  asap: current.asap,
+                  date: current.date,
+                  time: current.time,
+                  vehicleType: current.vehicleType,
+                  paymentAmount: current.paymentAmount,
+                  paymentType: current.paymentType,
+                  paymentStatus: current.paymentStatus,
+                  instruction: current.instruction,
+                  passengerName: current.passengerName,
+                  passengerPhone: current.passengerPhone,
+                  status: current.status,
+                  rideStatus: newStatus,
+                  applicantCount: current.applicantCount,
+                  name: current.name,
+                  nickname: current.nickname,
+                  company: current.company,
+                  companyName: current.companyName,
+                  companyRole: current.companyRole,
+                  profilePicture: current.profilePicture,
+                  hasReview: current.hasReview,
+                  isReviewedByDriver: current.isReviewedByDriver,
+                  isReviewedByCreator: current.isReviewedByCreator,
+                  createdAt: current.createdAt,
+                  updatedAt: current.updatedAt,
+                  createdBy: current.createdBy,
+                  assignedTo: current.assignedTo,
+                  applicant: current.applicant,
+                  applicants: current.applicants,
+                );
+                upcomingRides.refresh();
+              }
             }
           }
         } catch (e) {
@@ -109,7 +239,7 @@ class RidesController extends GetxController {
       }),
     );
 
-    // 3. Listen for Job Cancellations (JOB_CANCELLED)
+    // 4. Listen for Job Cancellations (JOB_CANCELLED)
     _socketWorkers.add(
       ever(_socketService!.lastJobCancelled, (data) {
         if (data == null) return;
@@ -277,6 +407,118 @@ class RidesController extends GetxController {
       fetchUpcomingJobs();
     } else if (index == 1) {
       fetchPastJobs();
+    }
+  }
+
+  Future<void> approveApplicant({required String jobId}) async {
+    try {
+      isLoadingList.value = true;
+      final response = await _jobRepo.approveApplicant(jobId: jobId);
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        Helpers.showCustomSnackBar(
+          response.data?['message'] ??
+              'Applicant approved and job assigned successfully.',
+          isError: false,
+        );
+        await refreshCurrentTab();
+      } else {
+        final message = response.data is Map
+            ? (response.data['message'] ?? 'Failed to approve applicant.')
+            : 'Failed to approve applicant.';
+        Helpers.showCustomSnackBar(message, isError: true);
+      }
+    } on DioException catch (e) {
+      final message =
+          e.response?.data?['message'] ?? 'Failed to approve applicant.';
+      Helpers.showCustomSnackBar(message, isError: true);
+    } catch (e) {
+      debugPrint("Error approving applicant: $e");
+      Helpers.showCustomSnackBar('Something went wrong.', isError: true);
+    } finally {
+      isLoadingList.value = false;
+    }
+  }
+
+  Future<void> rejectApplicant({required String jobId}) async {
+    try {
+      isLoadingList.value = true;
+      final response = await _jobRepo.rejectApplicant(jobId: jobId);
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        Helpers.showCustomSnackBar(
+          response.data?['message'] ?? 'Applicant rejected successfully.',
+          isError: false,
+        );
+        await refreshCurrentTab();
+      } else {
+        final message = response.data is Map
+            ? (response.data['message'] ?? 'Failed to reject applicant.')
+            : 'Failed to reject applicant.';
+        Helpers.showCustomSnackBar(message, isError: true);
+      }
+    } on DioException catch (e) {
+      final message =
+          e.response?.data?['message'] ?? 'Failed to reject applicant.';
+      Helpers.showCustomSnackBar(message, isError: true);
+    } catch (e) {
+      debugPrint("Error rejecting applicant: $e");
+      Helpers.showCustomSnackBar('Something went wrong.', isError: true);
+    } finally {
+      isLoadingList.value = false;
+    }
+  }
+
+  Future<void> deleteJob({required String jobId}) async {
+    try {
+      isLoadingList.value = true;
+      final response = await _jobRepo.deleteJob(jobId: jobId);
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        upcomingRides.removeWhere((job) => job.id == jobId);
+        pastRides.removeWhere((job) => job.id == jobId);
+        Helpers.showCustomSnackBar('Job deleted successfully.', isError: false);
+      } else {
+        final message = response.data is Map
+            ? (response.data['message'] ?? 'Failed to delete job.')
+            : 'Failed to delete job.';
+        Helpers.showCustomSnackBar(message, isError: true);
+      }
+    } on DioException catch (e) {
+      final message =
+          e.response?.data?['message'] ?? 'Failed to delete job.';
+      Helpers.showCustomSnackBar(message, isError: true);
+    } catch (e) {
+      debugPrint("Error deleting job: $e");
+      Helpers.showCustomSnackBar('Something went wrong.', isError: true);
+    } finally {
+      isLoadingList.value = false;
+    }
+  }
+
+  Future<bool> cancelJob({required String jobId}) async {
+    try {
+      isLoadingList.value = true;
+      final response = await _jobRepo.cancelJobOffer(jobId: jobId);
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        Helpers.showCustomSnackBar('Job cancelled successfully.', isError: false);
+        await refreshCurrentTab();
+        return true;
+      } else {
+        final message = response.data is Map
+            ? (response.data['message'] ?? 'Failed to cancel job.')
+            : 'Failed to cancel job.';
+        Helpers.showCustomSnackBar(message, isError: true);
+        return false;
+      }
+    } on DioException catch (e) {
+      final message =
+          e.response?.data?['message'] ?? 'Failed to cancel job.';
+      Helpers.showCustomSnackBar(message, isError: true);
+      return false;
+    } catch (e) {
+      debugPrint("Error canceling job: $e");
+      Helpers.showCustomSnackBar('Something went wrong.', isError: true);
+      return false;
+    } finally {
+      isLoadingList.value = false;
     }
   }
 

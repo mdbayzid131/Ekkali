@@ -1,69 +1,235 @@
-[GETX] CLOSE BOTTOMSHEET 686579533
-I/flutter (23266):
-I/flutter (23266): ┌ ➡️➡️➡️➡️ REQUEST ══════════════════════════════════════ ➡️➡️➡️➡️
-I/flutter (23266): │ PATCH https://nayem5001.binarybards.online/api/v1/jobs/6aadfedd02a9dac45dbf6135
-I/flutter (23266): │ Headers: {Content-Type: application/json, Authorization: ***}
-I/flutter (23266): │ Body: {
-I/flutter (23266): │ Body:   "dispatchType": "ALL CHAUFFEURS",
-I/flutter (23266): │ Body:   "serviceAreaId": "6a95569561f4ff5a4cbcfea6"
-I/flutter (23266): │ Body: }
-I/flutter (23266): └ ➡️➡️➡️➡️ REQUEST ══════════════════════════════════════ ➡️➡️➡️➡️
-I/flutter (23266): 
-I/flutter (23266):
-I/flutter (23266): ┌ ✅✅✅✅ RESPONSE ══════════════════════════════════════ ✅✅✅✅
-I/flutter (23266): │ [ PATCH 200] https://nayem5001.binarybards.online/api/v1/jobs/6aadfedd02a9dac45dbf6135
-I/flutter (23266): │ {
-I/flutter (23266): │   "success": true,
-I/flutter (23266): │   "message": "Job updated successfully",
-I/flutter (23266): │   "data": {
-I/flutter (23266): │     "_id": "6aadfedd02a9dac45dbf6135",
-I/flutter (23266): │     "jobType": "ONE WAY",
-I/flutter (23266): │     "pickup": "Dhaka",
-I/flutter (23266): │     "dropoff": "Fairfax",
-I/flutter (23266): │     "flightNumber": "Fata",
-I/flutter (23266): │     "asap": false,
-I/flutter (23266): │     "date": "2026-09-19T00:00:00.000Z",
-I/flutter (23266): │     "time": "09:17",
-I/flutter (23266): │     "vehicleType": "SEDAN",
-I/flutter (23266): │     "paymentAmount": 57,
-I/flutter (23266): │     "paymentType": "CREDIT CARD ON FILE",
-I/flutter (23266): │     "paymentStatus": "PAID",
-I/flutter (23266): │     "instruction": "okay",
-I/flutter (23266): │     "serviceAreaId": "6a95569561f4ff5a4cbcfea6",
-I/flutter (23266): │     "serviceArea": "Miami, FL",
-I/flutter (23266): │     "serviceAreaIds": [
-I/flutter (23266): │       "6a95569561f4ff5a4cbcfea6"
-I/flutter (23266): │     ],
-I/flutter (23266): │     "serviceAreas": [
-I/flutter (23266): │       "Miami, FL"
-I/flutter (23266): │     ],
-I/flutter (23266): │     "dispatchType": "ALL CHAUFFEURS",
-I/flutter (23266): │     "isPersonalNote": true,
-I/flutter (23266): │     "passengerName": "jhon",
-I/flutter (23266): │     "passengerPhone": "1537375458",
-I/flutter (23266): │     "status": "PENDING",
-I/flutter (23266): │     "rideStatus": null,
-I/flutter (23266): │     "createdBy": {
-I/flutter (23266): │       "_id": "6aa78db9024769aaa7c39f79",
-I/flutter (23266): │       "name": "Anar",
-I/flutter (23266): │       "email": "colod80763@hebase.com",
-I/flutter (23266): │       "phone": "04648434",
-I/flutter (23266): │       "companyRole": "Chauffeur",
-I/flutter (23266): │       "profilePicture": "https://i.ibb.co/z5YHLV9/profile.png",
-I/flutter (23266): │       "selectedVehicle": "6aa78e79024769aaa7c39fd6",
-I/flutter (23266): │       "averageRating": 5,
-I/flutter (23266): │       "totalReviews": 1,
-I/flutter (23266): │       "nickname": ""
-I/flutter (23266): │     },
-I/flutter (23266): │     "targetedChauffeurs": [],
-I/flutter (23266): │     "createdAt": "2026-09-19T03:17:49.538Z",
-I/flutter (23266): │     "updatedAt": "2026-09-19T03:19:18.008Z",
-I/flutter (23266): │     "__v": 0,
-I/flutter (23266): │     "hasReview": false,
-I/flutter (23266): │     "isReviewedByCreator": false,
-I/flutter (23266): │     "isReviewedByDriver": false,
-I/flutter (23266): │     "id": "6aadfedd02a9dac45dbf6135"
-I/flutter (23266): │   }
-I/flutter (23266): │ }
-I/flutter (23266): └ ✅✅✅✅ RESPONSE ══════════════════════════════════════ ✅✅✅│
-I/flutter (23266):
+I/flutter (20967):
+I/flutter (20967): ┌ ➡️➡️➡️➡️ REQUEST ══════════════════════════════════════ ➡️➡️➡️➡️
+I/flutter (20967): │ GET https://nayem5001.binarybards.online/api/v1/jobs/my-rides?type=upcoming&limit=10
+I/flutter (20967): │ Headers: {Content-Type: application/json, Authorization: ***}
+I/flutter (20967): │ Query: {type: upcoming, limit: 10}
+I/flutter (20967): └ ➡️➡️➡️➡️ REQUEST ══════════════════════════════════════ ➡️➡️➡️➡️
+I/flutter (20967): 
+I/flutter (20967):
+I/flutter (20967): ┌ ✅✅✅✅ RESPONSE ══════════════════════════════════════ ✅✅✅✅
+I/flutter (20967): │ [ GET 200] https://nayem5001.binarybards.online/api/v1/jobs/my-rides?type=upcoming&limit=10
+I/flutter (20967): │ {
+I/flutter (20967): │   "success": true,
+I/flutter (20967): │   "message": "My rides retrieved successfully",
+I/flutter (20967): │   "cursor": {
+I/flutter (20967): │     "nextCursor": null,
+I/flutter (20967): │     "hasMore": false,
+I/flutter (20967): │     "limit": 10
+I/flutter (20967): │   },
+I/flutter (20967): │   "data": [
+I/flutter (20967): │     {
+I/flutter (20967): │       "_id": "6ab1eaef851adc6bf9608ed3",
+I/flutter (20967): │       "jobCreatorId": "6ab1011fef1345b0d168de79",
+I/flutter (20967): │       "createdBy": {
+I/flutter (20967): │         "_id": "6ab1011fef1345b0d168de79",
+I/flutter (20967): │         "name": "Md Bayzid",
+I/flutter (20967): │         "email": "mdbayazid131@gmail.com",
+I/flutter (20967): │         "phone": "54854559",
+I/flutter (20967): │         "companyRole": "Chauffeur",
+I/flutter (20967): │         "profilePicture": "https://i.ibb.co/z5YHLV9/profile.png",
+I/flutter (20967): │         "selectedVehicle": "6ab10b8e1aa40c7b27b5513e",
+I/flutter (20967): │         "averageRating": 0,
+I/flutter (20967): │         "totalReviews": 0
+I/flutter (20967): │       },
+I/flutter (20967): │       "jobType": "ONE WAY",
+I/flutter (20967): │       "pickup": "Dhaka",
+I/flutter (20967): │       "dropoff": "Daridpur",
+I/flutter (20967): │       "flightNumber": "1245",
+I/flutter (20967): │       "asap": true,
+I/flutter (20967): │       "date": null,
+I/flutter (20967): │       "time": null,
+I/flutter (20967): │       "vehicleType": "SEDAN",
+I/flutter (20967): │       "paymentAmount": 25,
+I/flutter (20967): │       "paymentType": "CREDIT CARD ON FILE",
+I/flutter (20967): │       "paymentStatus": "UNPAID",
+I/flutter (20967): │       "instruction": null,
+I/flutter (20967): │       "passengerName": null,
+I/flutter (20967): │       "passengerPhone": null,
+I/flutter (20967): │       "status": "PENDING",
+I/flutter (20967): │       "rideStatus": null,
+I/flutter (20967): │       "applicantCount": 0,
+I/flutter (20967): │       "applicant": null,
+I/flutter (20967): │       "applicants": [],
+I/flutter (20967): │       "assignedTo": null,
+I/flutter (20967): │       "name": "Md Bayzid",
+I/flutter (20967): │       "nickname": null,
+I/flutter (20967): │       "company": null,
+I/flutter (20967): │       "companyRole": "Chauffeur",
+I/flutter (20967): │       "profilePicture": "https://i.ibb.co/z5YHLV9/profile.png",
+I/flutter (20967): │       "hasReview": false,
+I/flutter (20967): │       "isReviewedByDriver": false,
+I/flutter (20967): │       "isReviewedByCreator": false,
+I/flutter (20967): │       "createdAt": "2026-09-22T02:41:51.641Z",
+I/flutter (20967): │       "updatedAt": "2026-09-22T02:41:51.641Z"
+I/flutter (20967): │     },
+I/flutter (20967): │     {
+I/flutter (20967): │       "_id": "6ab1ec92851adc6bf960904e",
+I/flutter (20967): │       "jobCreatorId": "6ab1011fef1345b0d168de79",
+I/flutter (20967): │       "createdBy": {
+I/flutter (20967): │         "_id": "6ab1011fef1345b0d168de79",
+I/flutter (20967): │         "name": "Md Bayzid",
+I/flutter (20967): │         "email": "mdbayazid131@gmail.com",
+I/flutter (20967): │         "phone": "54854559",
+I/flutter (20967): │         "companyRole": "Chauffeur",
+I/flutter (20967): │         "profilePicture": "https://i.ibb.co/z5YHLV9/profile.png",
+I/flutter (20967): │         "selectedVehicle": "6ab10b8e1aa40c7b27b5513e",
+I/flutter (20967): │         "averageRating": 0,
+I/flutter (20967): │         "totalReviews": 0
+I/flutter (20967): │       },
+I/flutter (20967): │       "jobType": "ONE WAY",
+I/flutter (20967): │       "pickup": "mohakhali",
+I/flutter (20967): │       "dropoff": "airport",
+I/flutter (20967): │       "flightNumber": "748382",
+I/flutter (20967): │       "asap": true,
+I/flutter (20967): │       "date": null,
+I/flutter (20967): │       "time": null,
+I/flutter (20967): │       "vehicleType": "SUV",
+I/flutter (20967): │       "paymentAmount": 58,
+I/flutter (20967): │       "paymentType": "CREDIT CARD ON FILE",
+I/flutter (20967): │       "paymentStatus": "UNPAID",
+I/flutter (20967): │       "instruction": null,
+I/flutter (20967): │       "passengerName": null,
+I/flutter (20967): │       "passengerPhone": null,
+I/flutter (20967): │       "status": "PENDING",
+I/flutter (20967): │       "rideStatus": null,
+I/flutter (20967): │       "applicantCount": 0,
+I/flutter (20967): │       "applicant": null,
+I/flutter (20967): │       "applicants": [],
+I/flutter (20967): │       "assignedTo": null,
+I/flutter (20967): │       "name": "Md Bayzid",
+I/flutter (20967): │       "nickname": null,
+I/flutter (20967): │       "company": null,
+I/flutter (20967): │       "companyRole": "Chauffeur",
+I/flutter (20967): │       "profilePicture": "https://i.ibb.co/z5YHLV9/profile.png",
+I/flutter (20967): │       "hasReview": false,
+I/flutter (20967): │       "isReviewedByDriver": false,
+I/flutter (20967): │       "isReviewedByCreator": false,
+I/flutter (20967): │       "createdAt": "2026-09-22T02:48:50.398Z",
+I/flutter (20967): │       "updatedAt": "2026-09-22T02:48:50.398Z"
+I/flutter (20967): │     },
+I/flutter (20967): │     {
+I/flutter (20967): │       "_id": "6ab1ee40851adc6bf9609270",
+I/flutter (20967): │       "jobCreatorId": "6ab1ebc2851adc6bf9608f6a",
+I/flutter (20967): │       "createdBy": {
+I/flutter (20967): │         "_id": "6ab1ebc2851adc6bf9608f6a",
+I/flutter (20967): │         "name": "Demo",
+I/flutter (20967): │         "email": "mdbayazid131.dev@gmail.com",
+I/flutter (20967): │         "phone": "5484646946",
+I/flutter (20967): │         "companyRole": "Chauffeur",
+I/flutter (20967): │         "profilePicture": "https://i.ibb.co/z5YHLV9/profile.png",
+I/flutter (20967): │         "selectedVehicle": "6ab1edad851adc6bf96090f6",
+I/flutter (20967): │         "averageRating": 0,
+I/flutter (20967): │         "totalReviews": 0
+I/flutter (20967): │       },
+I/flutter (20967): │       "jobType": "ONE WAY",
+I/flutter (20967): │       "pickup": "uttora",
+I/flutter (20967): │       "dropoff": "dhanmondi",
+I/flutter (20967): │       "flightNumber": "6372",
+I/flutter (20967): │       "asap": true,
+I/flutter (20967): │       "date": null,
+I/flutter (20967): │       "time": null,
+I/flutter (20967): │       "vehicleType": "SEDAN/SUV",
+I/flutter (20967): │       "paymentAmount": 358,
+I/flutter (20967): │       "paymentType": "CREDIT CARD ON FILE",
+I/flutter (20967): │       "paymentStatus": "UNPAID",
+I/flutter (20967): │       "instruction": null,
+I/flutter (20967): │       "passengerName": null,
+I/flutter (20967): │       "passengerPhone": null,
+I/flutter (20967): │       "status": "ASSIGNED",
+I/flutter (20967): │       "rideStatus": "PENDING",
+I/flutter (20967): │       "applicantCount": 0,
+I/flutter (20967): │       "applicant": null,
+I/flutter (20967): │       "applicants": [],
+I/flutter (20967): │       "assignedTo": {
+I/flutter (20967): │         "_id": "6ab1011fef1345b0d168de79",
+I/flutter (20967): │         "name": "Md Bayzid",
+I/flutter (20967): │         "email": "mdbayazid131@gmail.com",
+I/flutter (20967): │         "phone": "54854559",
+I/flutter (20967): │         "companyRole": "Chauffeur",
+I/flutter (20967): │         "profilePicture": "https://i.ibb.co/z5YHLV9/profile.png",
+I/flutter (20967): │         "selectedVehicle": "6ab10b8e1aa40c7b27b5513e",
+I/flutter (20967): │         "averageRating": 0,
+I/flutter (20967): │         "totalReviews": 0
+I/flutter (20967): │       },
+I/flutter (20967): │       "name": "Demo",
+I/flutter (20967): │       "nickname": null,
+I/flutter (20967): │       "company": null,
+I/flutter (20967): │       "companyRole": "Chauffeur",
+I/flutter (20967): │       "profilePicture": "https://i.ibb.co/z5YHLV9/profile.png",
+I/flutter (20967): │       "hasReview": false,
+I/flutter (20967): │       "isReviewedByDriver": false,
+I/flutter (20967): │       "isReviewedByCreator": false,
+I/flutter (20967): │       "createdAt": "2026-09-22T02:56:00.782Z",
+I/flutter (20967): │       "updatedAt": "2026-09-22T03:08:02.781Z"
+I/flutter (20967): │     },
+I/flutter (20967): │     {
+I/flutter (20967): │       "_id": "6ab1eec5851adc6bf96092ec",
+I/flutter (20967): │       "jobCreatorId": "6ab1ebc2851adc6bf9608f6a",
+I/flutter (20967): │       "createdBy": {
+I/flutter (20967): │         "_id": "6ab1ebc2851adc6bf9608f6a",
+I/flutter (20967): │         "name": "Demo",
+I/flutter (20967): │         "email": "mdbayazid131.dev@gmail.com",
+I/flutter (20967): │         "phone": "5484646946",
+I/flutter (20967): │         "companyRole": "Chauffeur",
+I/flutter (20967): │         "profilePicture": "https://i.ibb.co/z5YHLV9/profile.png",
+I/flutter (20967): │         "selectedVehicle": "6ab1edad851adc6bf96090f6",
+I/flutter (20967): │         "averageRating": 0,
+I/flutter (20967): │         "totalReviews": 0
+I/flutter (20967): │       },
+I/flutter (20967): │       "jobType": "BY THE HOUR",
+I/flutter (20967): │       "pickup": "Bdda",
+I/flutter (20967): │       "dropoff": "By the hour",
+I/flutter (20967): │       "flightNumber": null,
+I/flutter (20967): │       "asap": false,
+I/flutter (20967): │       "date": "2026-09-30T00:00:00.000Z",
+I/flutter (20967): │       "time": "08:58",
+I/flutter (20967): │       "vehicleType": "LIMO STRETCH",
+I/flutter (20967): │       "paymentAmount": 28,
+I/flutter (20967): │       "paymentType": "CREDIT CARD ON FILE",
+I/flutter (20967): │       "paymentStatus": "UNPAID",
+I/flutter (20967): │       "instruction": null,
+I/flutter (20967): │       "passengerName": null,
+I/flutter (20967): │       "passengerPhone": null,
+I/flutter (20967): │       "status": "PENDING",
+I/flutter (20967): │       "rideStatus": null,
+I/flutter (20967): │       "applicantCount": 1,
+I/flutter (20967): │       "applicant": {
+I/flutter (20967): │         "_id": "6ab1011fef1345b0d168de79",
+I/flutter (20967): │         "name": "Md Bayzid",
+I/flutter (20967): │         "email": "mdbayazid131@gmail.com",
+I/flutter (20967): │         "phone": "54854559",
+I/flutter (20967): │         "companyRole": "Chauffeur",
+I/flutter (20967): │         "profilePicture": "https://i.ibb.co/z5YHLV9/profile.png",
+I/flutter (20967): │         "selectedVehicle": "6ab10b8e1aa40c7b27b5513e",
+I/flutter (20967): │         "averageRating": 0,
+I/flutter (20967): │         "totalReviews": 0
+I/flutter (20967): │       },
+I/flutter (20967): │       "applicants": [
+I/flutter (20967): │         {
+I/flutter (20967): │           "_id": "6ab1011fef1345b0d168de79",
+I/flutter (20967): │           "name": "Md Bayzid",
+I/flutter (20967): │           "email": "mdbayazid131@gmail.com",
+I/flutter (20967): │           "phone": "54854559",
+I/flutter (20967): │           "companyRole": "Chauffeur",
+I/flutter (20967): │           "profilePicture": "https://i.ibb.co/z5YHLV9/profile.png",
+I/flutter (20967): │           "selectedVehicle": "6ab10b8e1aa40c7b27b5513e",
+I/flutter (20967): │           "averageRating": 0,
+I/flutter (20967): │           "totalReviews": 0
+I/flutter (20967): │         }
+I/flutter (20967): │       ],
+I/flutter (20967): │       "assignedTo": null,
+I/flutter (20967): │       "name": "Demo",
+I/flutter (20967): │       "nickname": null,
+I/flutter (20967): │       "company": null,
+I/flutter (20967): │       "companyRole": "Chauffeur",
+I/flutter (20967): │       "profilePicture": "https://i.ibb.co/z5YHLV9/profile.png",
+I/flutter (20967): │       "hasReview": false,
+I/flutter (20967): │       "isReviewedByDriver": false,
+I/flutter (20967): │       "isReviewedByCreator": false,
+I/flutter (20967): │       "createdAt": "2026-09-22T02:58:13.244Z",
+I/flutter (20967): │       "updatedAt": "2026-09-22T03:07:42.115Z"
+I/flutter (20967): │     }
+I/flutter (20967): │   ]
+I/flutter (20967): │ }
+I/flutter (20967): └ ✅✅✅✅ RESPONSE ══════════════════════════════════════ ✅✅✅│
+I/flutter (20967):

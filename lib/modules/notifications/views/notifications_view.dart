@@ -7,7 +7,6 @@ import 'package:moeb_26/config/routes/app_pages.dart';
 import 'package:moeb_26/config/themes/app_theme.dart';
 import 'package:moeb_26/core/widgets/custom_sub_appbar.dart';
 import 'package:moeb_26/data/models/Notifications_Model.dart';
-import 'package:moeb_26/modules/my_jobs/controllers/my_jobs_controller.dart';
 import '../controllers/notifications_controller.dart';
 
 class NotificationsView extends StatelessWidget {
@@ -370,12 +369,7 @@ class NotificationsView extends StatelessWidget {
         title.contains('job') ||
         subtitle.contains('job') ||
         title.contains('acceptance')) {
-      final BookingController bookingController =
-          Get.isRegistered<BookingController>()
-              ? Get.find<BookingController>()
-              : Get.put(BookingController());
-      bookingController.isJobAcceptanceView.value = true;
-      Get.toNamed(Routes.myJobsView);
+      Get.offAllNamed(Routes.bottomNabbarView, arguments: 1);
     } else if (type == 'REMINDER' ||
         title.contains('deal') ||
         subtitle.contains('deal') ||

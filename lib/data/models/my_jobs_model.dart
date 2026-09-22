@@ -49,6 +49,7 @@ class JobData {
   String? dropoffNotes;
   String? companyName;
   String? flightNumber;
+  String? duration;
   bool? asap;
   String? date;
   String? time;
@@ -81,6 +82,7 @@ class JobData {
     this.pickupNotes,
     this.dropoffNotes,
     this.flightNumber,
+    this.duration,
     this.asap,
     this.date,
     this.time,
@@ -129,6 +131,7 @@ class JobData {
       pickupNotes: json['pickupNotes'],
       dropoffNotes: json['dropoffNotes'],
       flightNumber: json['flightNumber'],
+      duration: json['duration']?.toString(),
       asap: json['asap'] == true,
       date: json['date'],
       time: json['time'],

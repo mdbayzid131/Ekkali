@@ -418,15 +418,18 @@ class PostJobController extends GetxController {
         }
       }
 
-      final String finalDropoff =
-          (dropoffLocation != null && dropoffLocation.isNotEmpty)
+      final String cleanDuration = Helpers.formatDurationToH(duration);
+      final String finalDropoff = (dropoffLocation != null && dropoffLocation.isNotEmpty && dropoffLocation != "By the hour")
           ? dropoffLocation
-          : "By the hour";
+          : (cleanDuration.isNotEmpty
+              ? "By the hour ($cleanDuration)"
+              : "By the hour");
 
       final response = await _jobService.createJob(
         jobType: "BY THE HOUR",
         pickup: pickupLocation,
         dropoff: finalDropoff,
+        duration: cleanDuration.isNotEmpty ? cleanDuration : null,
         date: formattedDate,
         time: formattedTimeStr,
         asap: isAsapRide,

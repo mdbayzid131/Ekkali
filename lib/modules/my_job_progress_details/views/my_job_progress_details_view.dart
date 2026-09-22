@@ -15,7 +15,7 @@ import 'package:moeb_26/core/services/socket_service.dart';
 import 'package:moeb_26/core/widgets/CustomButton.dart';
 import 'package:moeb_26/data/repositories/socket_repository.dart';
 import 'package:moeb_26/modules/preferred_drivers/controllers/preferred_drivers_controller.dart';
-import '../../my_jobs/controllers/my_jobs_controller.dart';
+import '../controllers/my_job_progress_details_controller.dart';
 
 class MyJobProgressDetailsView extends StatefulWidget {
   const MyJobProgressDetailsView({super.key});
@@ -26,9 +26,10 @@ class MyJobProgressDetailsView extends StatefulWidget {
 }
 
 class _MyJobProgressDetailsViewState extends State<MyJobProgressDetailsView> {
-  final BookingController controller = Get.isRegistered<BookingController>()
-      ? Get.find<BookingController>()
-      : Get.put(BookingController());
+  final MyJobProgressDetailsController controller =
+      Get.isRegistered<MyJobProgressDetailsController>()
+          ? Get.find<MyJobProgressDetailsController>()
+          : Get.put(MyJobProgressDetailsController());
   SocketService? socketService;
   final List<Worker> _socketWorkers = [];
   JobData? initialJob;
