@@ -8,13 +8,28 @@ import 'package:moeb_26/core/widgets/Custom_AppBar.dart';
 import 'package:moeb_26/core/widgets/CustomButton.dart';
 import 'package:moeb_26/modules/auth/profile/controllers/profile_controller.dart';
 
-class PersonalInformationView extends StatelessWidget {
+class PersonalInformationView extends StatefulWidget {
   const PersonalInformationView({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final ProfileController controller = Get.find<ProfileController>();
+  State<PersonalInformationView> createState() =>
+      _PersonalInformationViewState();
+}
 
+class _PersonalInformationViewState extends State<PersonalInformationView> {
+  late final ProfileController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = Get.find<ProfileController>();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.fetchUserProfile();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: CustomAppBar(
@@ -23,11 +38,20 @@ class PersonalInformationView extends StatelessWidget {
         showActions: false,
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
+        child: Obx(() {
+          if (controller.isLoading.value) {
+            return const Center(
+              child: CircularProgressIndicator(
+                color: AppColors.primaryColor,
+              ),
+            );
+          }
+
+          return SingleChildScrollView(
+            padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
               // Avatar & Camera Picker
               Obx(
                 () => Stack(
@@ -202,22 +226,27 @@ class PersonalInformationView extends StatelessWidget {
               ),
 
               SizedBox(height: 24.h),
-            ],
-          ),
-        ),
+            ],)
+          );
+        }),
       ),
-      bottomNavigationBar: SafeArea(
-        child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
-          decoration: const BoxDecoration(
-            color: Colors.black,
-            border: Border(
-              top: BorderSide(color: Color(0xFF1E1E1E), width: 1),
+      bottomNavigationBar: Obx(() {
+        if (controller.isLoading.value) {
+          return const SizedBox.shrink();
+        }
+        return SafeArea(
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
+            decoration: const BoxDecoration(
+              color: Colors.black,
+              border: Border(
+                top: BorderSide(color: Color(0xFF1E1E1E), width: 1),
+              ),
             ),
-          ),
-          child: Obx(
-            () => CustomButton(
-              text: controller.isUpdating.value ? "Saving..." : "Save Information",
+            child: CustomButton(
+              text: controller.isUpdating.value
+                  ? "Saving..."
+                  : "Save Information",
               onPressed: () => controller.saveProfile(),
               icon: controller.isUpdating.value
                   ? null
@@ -226,8 +255,8 @@ class PersonalInformationView extends StatelessWidget {
               padding: EdgeInsets.symmetric(vertical: 14.h),
             ),
           ),
-        ),
-      ),
+        );
+      }),
     );
   }
 
