@@ -969,7 +969,7 @@ class RideDetailSheet extends StatelessWidget {
     required bool isPast,
   }) {
     // If not created by me and still pending (job applicant not accepted yet)
-    if (!isCreatedByMe && isPending && chauffeur == null) {
+    if (!isCreatedByMe && isPending) {
       return Column(
         children: [
           SizedBox(height: 12.h),
@@ -1024,12 +1024,12 @@ class RideDetailSheet extends StatelessWidget {
       );
     }
 
-    final String pName = (ride.passengerName != null &&
-            ride.passengerName!.trim().isNotEmpty)
+    final String pName =
+        (ride.passengerName != null && ride.passengerName!.trim().isNotEmpty)
         ? ride.passengerName!.trim()
         : "N/A";
-    final String pPhone = (ride.passengerPhone != null &&
-            ride.passengerPhone!.trim().isNotEmpty)
+    final String pPhone =
+        (ride.passengerPhone != null && ride.passengerPhone!.trim().isNotEmpty)
         ? ride.passengerPhone!.trim()
         : "N/A";
 
@@ -1060,7 +1060,9 @@ class RideDetailSheet extends StatelessWidget {
                         Text(
                           pName,
                           style: GoogleFonts.inter(
-                            color: pName != "N/A" ? Colors.white : Colors.white38,
+                            color: pName != "N/A"
+                                ? Colors.white
+                                : Colors.white38,
                             fontSize: 14.sp,
                             fontWeight: FontWeight.w600,
                           ),
