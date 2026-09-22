@@ -92,24 +92,34 @@ class ProfileView extends StatelessWidget {
                   ),
                   SizedBox(height: 4.h),
 
-                  // --- BADGES FROM API ---
+                  // --- BADGES FROM API (STACKED VERTICALLY) ---
                   Obx(() {
-                    final badges = controller.userProfile.value?.badges ?? [];
-                    if (badges.isEmpty) return const SizedBox.shrink();
+                    final rawBadges = controller.userProfile.value?.badges ?? [];
+                    if (rawBadges.isEmpty) return const SizedBox.shrink();
+
+                    // Sort so "Elite Chauffeur" is always on top if present
+                    final sortedBadges = List<String>.from(rawBadges)..sort((a, b) {
+                      if (a.toLowerCase().contains('elite')) return -1;
+                      if (b.toLowerCase().contains('elite')) return 1;
+                      return 0;
+                    });
 
                     return Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         SizedBox(height: 6.h),
-                        Wrap(
-                          spacing: 6.w,
-                          runSpacing: 4.h,
-                          alignment: WrapAlignment.center,
-                          children: badges.map((b) {
-                            return Container(
+                        ...sortedBadges.map((b) {
+                          final bool isPartner = b.toLowerCase().contains('partner');
+                          final IconData badgeIcon = isPartner
+                              ? Icons.emoji_events_rounded
+                              : Icons.star_rounded;
+
+                          return Padding(
+                            padding: EdgeInsets.only(bottom: 6.h),
+                            child: Container(
                               padding: EdgeInsets.symmetric(
-                                horizontal: 10.w,
-                                vertical: 3.h,
+                                horizontal: 12.w,
+                                vertical: 4.h,
                               ),
                               decoration: BoxDecoration(
                                 color: const Color(0xFF27272A),
@@ -123,11 +133,11 @@ class ProfileView extends StatelessWidget {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Icon(
-                                    Icons.star,
+                                    badgeIcon,
                                     color: AppColors.primaryColor,
-                                    size: 11.sp,
+                                    size: 13.sp,
                                   ),
-                                  SizedBox(width: 4.w),
+                                  SizedBox(width: 5.w),
                                   Text(
                                     b,
                                     style: GoogleFonts.inter(
@@ -138,10 +148,10 @@ class ProfileView extends StatelessWidget {
                                   ),
                                 ],
                               ),
-                            );
-                          }).toList(),
-                        ),
-                        SizedBox(height: 10.h),
+                            ),
+                          );
+                        }),
+                        SizedBox(height: 6.h),
                       ],
                     );
                   }),

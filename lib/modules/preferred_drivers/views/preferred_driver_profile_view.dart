@@ -274,12 +274,24 @@ class _PreferredDriverProfileViewState
                 ),
                 if (chauffeur.badges.isNotEmpty) ...[
                   SizedBox(height: 6.h),
-                  Wrap(
-                    spacing: 6.w,
-                    runSpacing: 4.h,
-                    children: chauffeur.badges
-                        .map(
-                          (b) => Container(
+                  ...() {
+                    final sortedBadges = List<String>.from(chauffeur.badges)
+                      ..sort((a, b) {
+                        if (a.toLowerCase().contains('elite')) return -1;
+                        if (b.toLowerCase().contains('elite')) return 1;
+                        return 0;
+                      });
+                    return sortedBadges.map(
+                      (b) {
+                        final bool isPartner =
+                            b.toLowerCase().contains('partner');
+                        final IconData badgeIcon = isPartner
+                            ? Icons.emoji_events_rounded
+                            : Icons.star_rounded;
+
+                        return Padding(
+                          padding: EdgeInsets.only(bottom: 4.h),
+                          child: Container(
                             padding: EdgeInsets.symmetric(
                                 horizontal: 8.w, vertical: 2.h),
                             decoration: BoxDecoration(
@@ -291,10 +303,10 @@ class _PreferredDriverProfileViewState
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(Icons.star,
+                                Icon(badgeIcon,
                                     color: AppColors.primaryColor,
-                                    size: 10.sp),
-                                SizedBox(width: 3.w),
+                                    size: 11.sp),
+                                SizedBox(width: 4.w),
                                 Text(
                                   b,
                                   style: GoogleFonts.inter(
@@ -306,9 +318,10 @@ class _PreferredDriverProfileViewState
                               ],
                             ),
                           ),
-                        )
-                        .toList(),
-                  ),
+                        );
+                      },
+                    );
+                  }(),
                 ],
               ],
             ),

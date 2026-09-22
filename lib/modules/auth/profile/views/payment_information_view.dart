@@ -11,8 +11,7 @@ class PaymentInformationView extends StatefulWidget {
   const PaymentInformationView({super.key});
 
   @override
-  State<PaymentInformationView> createState() =>
-      _PaymentInformationViewState();
+  State<PaymentInformationView> createState() => _PaymentInformationViewState();
 }
 
 class _PaymentInformationViewState extends State<PaymentInformationView> {
@@ -40,9 +39,7 @@ class _PaymentInformationViewState extends State<PaymentInformationView> {
         child: Obx(() {
           if (controller.isLoading.value) {
             return const Center(
-              child: CircularProgressIndicator(
-                color: AppColors.primaryColor,
-              ),
+              child: CircularProgressIndicator(color: AppColors.primaryColor),
             );
           }
 
@@ -51,138 +48,137 @@ class _PaymentInformationViewState extends State<PaymentInformationView> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-              Text(
-                'Configure Accepted Payment Channels',
-                style: GoogleFonts.inter(
-                  color: const Color(0xFFD5C4AB),
-                  fontSize: 15.sp,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              SizedBox(height: 16.h),
-
-              // Zelle
-              _buildInputField(
-                label: 'Zelle Email / Phone',
-                controller: controller.zelleController,
-                hint: 'e.g. pay@chauffeur.com',
-                icon: Icons.account_balance_wallet_outlined,
-              ),
-
-              // Venmo
-              _buildInputField(
-                label: 'Venmo Handle',
-                controller: controller.venmoController,
-                hint: 'e.g. @ChauffeurPay',
-                icon: Icons.payment_outlined,
-              ),
-
-              // Cash App
-              _buildInputField(
-                label: 'Cash App Tag',
-                controller: controller.cashAppController,
-                hint: 'e.g. \$ChauffeurApp',
-                icon: Icons.monetization_on_outlined,
-              ),
-
-              // Card Payment Switch Card
-              Text(
-                'Card Payments',
-                style: GoogleFonts.inter(
-                  color: Colors.white,
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              SizedBox(height: 8.h),
-              Obx(
-                () => Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 16.w,
-                    vertical: 12.h,
+                Text(
+                  'Configure Accepted Payment Channels',
+                  style: GoogleFonts.inter(
+                    color: const Color(0xFFD5C4AB),
+                    fontSize: 15.sp,
+                    fontWeight: FontWeight.w600,
                   ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF1A1A1A),
-                    borderRadius: BorderRadius.circular(14.r),
-                    border: Border.all(
-                      color: const Color(0xFF2C2C2C),
+                ),
+                SizedBox(height: 16.h),
+
+                // Zelle
+                _buildInputField(
+                  label: 'Zelle Email / Phone',
+                  controller: controller.zelleController,
+                  hint: 'e.g. pay@chauffeur.com',
+                  icon: Icons.account_balance_wallet_outlined,
+                ),
+
+                // Venmo
+                _buildInputField(
+                  label: 'Venmo Handle',
+                  controller: controller.venmoController,
+                  hint: 'e.g. @ChauffeurPay',
+                  icon: Icons.payment_outlined,
+                ),
+
+                // Cash App
+                _buildInputField(
+                  label: 'Cash App Tag',
+                  controller: controller.cashAppController,
+                  hint: 'e.g. \$ChauffeurApp',
+                  icon: Icons.monetization_on_outlined,
+                ),
+
+                // Card Payment Switch Card
+                Text(
+                  'Card Payments',
+                  style: GoogleFonts.inter(
+                    color: Colors.white,
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                SizedBox(height: 8.h),
+                Obx(
+                  () => Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 16.w,
+                      vertical: 12.h,
                     ),
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 38.w,
-                        height: 38.w,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF27272A),
-                          borderRadius: BorderRadius.circular(8.r),
-                        ),
-                        child: Icon(
-                          Icons.credit_card_outlined,
-                          color: const Color(0xFFD5C4AB),
-                          size: 19.sp,
-                        ),
-                      ),
-                      SizedBox(width: 14.w),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "Accept Card Payments",
-                              style: GoogleFonts.inter(
-                                color: Colors.white,
-                                fontSize: 14.sp,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            SizedBox(height: 2.h),
-                            Text(
-                              "Allow affiliate / clients to pay via credit card",
-                              style: GoogleFonts.inter(
-                                color: const Color(0xFF71717A),
-                                fontSize: 11.sp,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      SizedBox(width: 14.w),
-                      GestureDetector(
-                        onTap: () {
-                          controller.cardPaymentAccepted.value =
-                              !controller.cardPaymentAccepted.value;
-                        },
-                        child: Container(
-                          width: 24.w,
-                          height: 24.w,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1A1A1A),
+                      borderRadius: BorderRadius.circular(14.r),
+                      border: Border.all(color: const Color(0xFF2C2C2C)),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 38.w,
+                          height: 38.w,
                           decoration: BoxDecoration(
-                            border: Border.all(
+                            color: const Color(0xFF27272A),
+                            borderRadius: BorderRadius.circular(8.r),
+                          ),
+                          child: Icon(
+                            Icons.credit_card_outlined,
+                            color: const Color(0xFFD5C4AB),
+                            size: 19.sp,
+                          ),
+                        ),
+                        SizedBox(width: 14.w),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Accept Card Payments",
+                                style: GoogleFonts.inter(
+                                  color: Colors.white,
+                                  fontSize: 14.sp,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              SizedBox(height: 2.h),
+                              Text(
+                                "Allow affiliate / clients to pay via credit card",
+                                style: GoogleFonts.inter(
+                                  color: const Color(0xFF71717A),
+                                  fontSize: 11.sp,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(width: 14.w),
+                        GestureDetector(
+                          onTap: () {
+                            controller.cardPaymentAccepted.value =
+                                !controller.cardPaymentAccepted.value;
+                          },
+                          child: Container(
+                            width: 24.w,
+                            height: 24.w,
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: controller.cardPaymentAccepted.value
+                                    ? AppColors.primaryColor
+                                    : const Color(0xFF71717A),
+                                width: 2,
+                              ),
+                              borderRadius: BorderRadius.circular(6.r),
                               color: controller.cardPaymentAccepted.value
                                   ? AppColors.primaryColor
-                                  : const Color(0xFF71717A),
-                              width: 2,
+                                  : Colors.transparent,
                             ),
-                            borderRadius: BorderRadius.circular(6.r),
-                            color: controller.cardPaymentAccepted.value
-                                ? AppColors.primaryColor
-                                : Colors.transparent,
+                            child: controller.cardPaymentAccepted.value
+                                ? Icon(
+                                    Icons.check,
+                                    color: Colors.black,
+                                    size: 16.sp,
+                                  )
+                                : null,
                           ),
-                          child: controller.cardPaymentAccepted.value
-                              ? Icon(
-                                  Icons.check,
-                                  color: Colors.black,
-                                  size: 16.sp,
-                                )
-                              : null,
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              SizedBox(height: 32.h),
-            ],)
+                SizedBox(height: 32.h),
+              ],
+            ),
           );
         }),
       ),
@@ -238,10 +234,7 @@ class _PaymentInformationViewState extends State<PaymentInformationView> {
           SizedBox(height: 8.h),
           TextFormField(
             controller: controller,
-            style: GoogleFonts.inter(
-              color: Colors.white,
-              fontSize: 14.sp,
-            ),
+            style: GoogleFonts.inter(color: Colors.white, fontSize: 14.sp),
             decoration: InputDecoration(
               filled: true,
               fillColor: const Color(0xFF1A1A1A),
@@ -265,7 +258,10 @@ class _PaymentInformationViewState extends State<PaymentInformationView> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(14.r),
-                borderSide: const BorderSide(color: AppColors.primaryColor, width: 1.5),
+                borderSide: const BorderSide(
+                  color: AppColors.primaryColor,
+                  width: 1.5,
+                ),
               ),
             ),
           ),
