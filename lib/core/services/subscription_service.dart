@@ -27,7 +27,7 @@ class SubscriptionService extends GetxService {
   // ─── Testing / Debug Override ───────────────────────────────────────────────
   /// টেস্টিং পারপাসে পুরো অ্যাপে প্রিমিয়াম আনলক করতে চাইলে এটিকে `true` করে দিন।
   /// Normal production/live মোডের জন্য এটিকে `false` রাখুন।
-  static const bool debugForcePremium = true;
+  static const bool debugForcePremium = false;
 
   // ─── Observable State ───────────────────────────────────────────────────────
   final RxBool isPremium = (debugForcePremium ? true : false).obs;
