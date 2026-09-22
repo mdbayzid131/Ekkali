@@ -74,9 +74,25 @@ class RideCard extends StatelessWidget {
         subtitleIcon = Icons.person_outline;
       }
     } else {
-      displaySubtitle =
-          jobPosterName.isNotEmpty ? jobPosterName : "Job Poster";
-      subtitleIcon = Icons.person_outline;
+      final upperStatus = (status ?? 'ASSIGNED').toUpperCase();
+      if (upperStatus == 'PENDING') {
+        displaySubtitle = "Application Pending";
+        subtitleIcon = Icons.hourglass_empty_rounded;
+        subtitleColor = const Color(0xFFFEDB9B);
+      } else if (upperStatus == 'ASSIGNED' || upperStatus == 'IN PROGRESS') {
+        displaySubtitle = "Chauffeur: Me";
+        subtitleIcon = Icons.person_outline;
+        subtitleColor = Colors.white70;
+      } else if (upperStatus == 'COMPLETED' || upperStatus == 'FINISHED') {
+        displaySubtitle = "Chauffeur: Me";
+        subtitleIcon = Icons.check_circle_outline;
+        subtitleColor = Colors.white70;
+      } else {
+        displaySubtitle =
+            jobPosterName.isNotEmpty ? jobPosterName : "Job Poster";
+        subtitleIcon = Icons.person_outline;
+        subtitleColor = Colors.white70;
+      }
     }
 
     return GestureDetector(
