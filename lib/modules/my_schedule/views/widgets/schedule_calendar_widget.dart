@@ -60,19 +60,7 @@ class _ScheduleCalendarWidgetState extends State<ScheduleCalendarWidget> {
       initialDate: controller.selectedDate.value,
       firstDate: DateTime.now().subtract(const Duration(days: 365)),
       lastDate: DateTime.now().add(const Duration(days: 365)),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.dark(
-              primary: AppColors.primaryColor,
-              onPrimary: Colors.black,
-              surface: Color(0xFF141416),
-              onSurface: Colors.white,
-            ),
-          ),
-          child: child!,
-        );
-      },
+      builder: AppTheme.datePickerBuilder,
     );
     if (picked != null) {
       controller.selectDate(picked);

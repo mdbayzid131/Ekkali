@@ -121,19 +121,7 @@ class _AddScheduleJobSheetState extends State<AddScheduleJobSheet> {
       initialDate: _selectedDateTime,
       firstDate: DateTime.now().subtract(const Duration(days: 365)),
       lastDate: DateTime.now().add(const Duration(days: 365)),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.dark(
-              primary: AppColors.primaryColor,
-              onPrimary: Colors.black,
-              surface: Color(0xFF1E1E22),
-              onSurface: Colors.white,
-            ),
-          ),
-          child: child!,
-        );
-      },
+      builder: AppTheme.datePickerBuilder,
     );
 
     if (pickedDate == null) return;
@@ -154,19 +142,7 @@ class _AddScheduleJobSheetState extends State<AddScheduleJobSheet> {
     final pickedTime = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.fromDateTime(_selectedDateTime),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.dark(
-              primary: AppColors.primaryColor,
-              onPrimary: Colors.black,
-              surface: Color(0xFF1E1E22),
-              onSurface: Colors.white,
-            ),
-          ),
-          child: child!,
-        );
-      },
+      builder: AppTheme.timePickerBuilder,
     );
 
     if (pickedTime == null) return;

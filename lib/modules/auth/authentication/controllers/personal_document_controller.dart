@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:moeb_26/config/themes/app_theme.dart';
 import 'package:moeb_26/core/services/api_client.dart';
 import 'package:moeb_26/core/utils/helpers.dart';
 import 'package:moeb_26/core/utils/media_picker_helper.dart';
@@ -259,20 +260,7 @@ class PersonalDocumentController extends GetxController {
       initialDate: DateTime.now(),
       firstDate: DateTime(2020),
       lastDate: DateTime(2101),
-      builder: (context, child) => Theme(
-        data: Theme.of(context).copyWith(
-          colorScheme: const ColorScheme.dark(
-            primary: Color(0xFF14F195),
-            onPrimary: Colors.black,
-            surface: Color(0xFF1E2939),
-            onSurface: Colors.white,
-          ),
-          dialogTheme: const DialogThemeData(
-            backgroundColor: Color(0xFF1E2939),
-          ),
-        ),
-        child: child!,
-      ),
+      builder: AppTheme.datePickerBuilder,
     );
     if (picked != null) {
       final formatted = DateFormat('yyyy-MM-dd').format(picked);

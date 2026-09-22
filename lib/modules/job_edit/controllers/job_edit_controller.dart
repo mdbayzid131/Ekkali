@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:moeb_26/config/themes/app_theme.dart';
 import 'package:moeb_26/core/utils/helpers.dart';
 import 'package:moeb_26/data/models/my_jobs_model.dart';
 import 'package:moeb_26/data/repositories/job_repository.dart';
@@ -113,26 +114,7 @@ class JobEditController extends GetxController {
       initialDate: selectedDate.value ?? DateTime.now(),
       firstDate: DateTime.now(),
       lastDate: DateTime(2035),
-      builder: (BuildContext context, Widget? child) {
-        return Theme(
-          data: ThemeData.dark().copyWith(
-            colorScheme: const ColorScheme.dark(
-              primary: Color(0xFFFEDB9B),
-              onPrimary: Colors.black,
-              surface: Color(0xFF1E1E1E),
-              onSurface: Colors.white,
-            ),
-            dialogTheme: DialogThemeData(
-              backgroundColor: const Color(0xFF1E1E1E),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-                side: const BorderSide(color: Color(0xFF404040), width: 1),
-              ),
-            ),
-          ),
-          child: child!,
-        );
-      },
+      builder: AppTheme.datePickerBuilder,
     );
     if (picked != null) {
       selectedDate.value = picked;
@@ -144,31 +126,7 @@ class JobEditController extends GetxController {
       context: context,
       initialTime: selectedTime.value ?? TimeOfDay.now(),
       initialEntryMode: TimePickerEntryMode.input,
-      builder: (BuildContext context, Widget? child) {
-        return Theme(
-          data: ThemeData.dark().copyWith(
-            colorScheme: const ColorScheme.dark(
-              primary: Color(0xFFFEDB9B),
-              onPrimary: Colors.black,
-              surface: Color(0xFF1E1E1E),
-              onSurface: Colors.white,
-              tertiaryContainer: Color(0xFFFEDB9B),
-              onTertiaryContainer: Colors.black,
-            ),
-            dialogTheme: DialogThemeData(
-              backgroundColor: const Color(0xFF1E1E1E),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-                side: const BorderSide(color: Color(0xFF404040), width: 1),
-              ),
-            ),
-          ),
-          child: MediaQuery(
-            data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: false),
-            child: child!,
-          ),
-        );
-      },
+      builder: AppTheme.timePickerBuilder,
     );
     if (picked != null) {
       selectedTime.value = picked;

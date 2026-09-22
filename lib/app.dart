@@ -20,6 +20,25 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           brightness: Brightness.dark,
           scaffoldBackgroundColor: AppColors.black100,
+          colorScheme: const ColorScheme.dark(
+            primary: AppColors.primaryColor,
+            onPrimary: Colors.black,
+            surface: Color(0xFF18181B),
+            onSurface: Colors.white,
+            secondaryContainer: AppColors.primaryColor,
+            onSecondaryContainer: Colors.black,
+            tertiaryContainer: AppColors.primaryColor,
+            onTertiaryContainer: Colors.black,
+          ),
+          datePickerTheme: AppTheme.datePickerTheme,
+          timePickerTheme: AppTheme.timePickerTheme,
+          dialogTheme: DialogThemeData(
+            backgroundColor: const Color(0xFF18181B),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+              side: const BorderSide(color: Color(0xFF2A2A30), width: 1),
+            ),
+          ),
           appBarTheme: const AppBarTheme(
             scrolledUnderElevation: 0,
             surfaceTintColor: Colors.transparent,

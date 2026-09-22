@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:moeb_26/config/constants/icon_paths.dart';
 import 'package:moeb_26/config/routes/app_pages.dart';
+import 'package:moeb_26/config/themes/app_theme.dart';
 import 'package:moeb_26/modules/notifications/controllers/notifications_controller.dart';
 import 'package:moeb_26/core/widgets/CustomText.dart';
 import 'package:moeb_26/core/widgets/CustomTextGary.dart';
@@ -136,7 +137,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                               width: 15.w,
                               height: 15.w,
                               decoration: const BoxDecoration(
-                                color: Colors.yellow,
+                                color: AppColors.primaryColor,
                                 shape: BoxShape.circle,
                               ),
                               child: Center(
@@ -316,39 +317,40 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                         ],
                       ),
                     ),
-                    PopupMenuItem<int>(
-                      value: 1,
-                      child: Row(
-                        children: [
-                          SvgPicture.asset(
-                            AppIcons.deals_icon,
-                            width: 24.sp,
-                            height: 24.sp,
-                            colorFilter: const ColorFilter.mode(
-                              Colors.white,
-                              BlendMode.srcIn,
-                            ),
-                          ),
-                          SizedBox(width: 12.w),
-                          Expanded(
-                            child: Text(
-                              'Deals',
-                              style: GoogleFonts.inter(
-                                color: Colors.white,
-                                fontSize: 14.sp,
-                                fontWeight: FontWeight.w500,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          Icon(
-                            CupertinoIcons.chevron_forward,
-                            size: 20.sp,
-                            color: Colors.white,
-                          ),
-                        ],
-                      ),
-                    ),
+                    // PopupMenuItem<int>(
+                    //   value: 1,
+                    //   child: Row(
+                    //     children: [
+                    //       SvgPicture.asset(
+                    //         AppIcons.deals_icon,
+                    //         width: 24.sp,
+                    //         height: 24.sp,
+                    //         colorFilter: const ColorFilter.mode(
+                    //           Colors.white,
+                    //           BlendMode.srcIn,
+                    //         ),
+                    //       ),
+                    //       SizedBox(width: 12.w),
+                    //       Expanded(
+                    //         child: Text(
+                    //           'Deals',
+                    //           style: GoogleFonts.inter(
+                    //             color: Colors.white,
+                    //             fontSize: 14.sp,
+                    //             fontWeight: FontWeight.w500,
+                    //           ),
+                    //           overflow: TextOverflow.ellipsis,
+                    //         ),
+                    //       ),
+                    //       Icon(
+                    //         CupertinoIcons.chevron_forward,
+                    //         size: 20.sp,
+                    //         color: Colors.white,
+                    //       ),
+                    //     ],
+                    //   ),
+                    // ),
+                 
                   ],
                   offset: const Offset(0, 50),
                 ),

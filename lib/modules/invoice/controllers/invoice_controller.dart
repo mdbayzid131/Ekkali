@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:moeb_26/config/themes/app_theme.dart';
 import 'package:moeb_26/data/models/invoice_model.dart';
 import 'package:moeb_26/data/repositories/invoice_repository.dart';
 import 'package:moeb_26/modules/invoice/views/invoice_preview_view.dart';
@@ -577,22 +578,7 @@ class InvoiceController extends GetxController {
             issuedDate.value.add(const Duration(days: 1)),
         firstDate: issuedDate.value,
         lastDate: DateTime(2100),
-        builder: (context, child) {
-          return Theme(
-            data: Theme.of(context).copyWith(
-              colorScheme: const ColorScheme.dark(
-                primary: Color(0xFFFEDB9B), // Soft peach-yellow
-                onPrimary: Colors.black,
-                surface: Color(0xFF1E1E1E),
-                onSurface: Colors.white,
-              ),
-              dialogTheme: const DialogThemeData(
-                backgroundColor: Color(0xFF1E1E1E),
-              ),
-            ),
-            child: child!,
-          );
-        },
+        builder: AppTheme.datePickerBuilder,
       );
       if (picked != null) {
         customDueDate.value = picked;
@@ -609,22 +595,7 @@ class InvoiceController extends GetxController {
       initialDate: issuedDate.value,
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.dark(
-              primary: Color(0xFFFEDB9B), // Soft peach-yellow
-              onPrimary: Colors.black,
-              surface: Color(0xFF1E1E1E),
-              onSurface: Colors.white,
-            ),
-            dialogTheme: const DialogThemeData(
-              backgroundColor: Color(0xFF1E1E1E),
-            ),
-          ),
-          child: child!,
-        );
-      },
+      builder: AppTheme.datePickerBuilder,
     );
     if (picked != null) {
       issuedDate.value = picked;

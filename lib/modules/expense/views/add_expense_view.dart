@@ -200,19 +200,7 @@ class AddExpenseView extends StatelessWidget {
                         initialDate: controller.selectedDate.value,
                         firstDate: DateTime(2020),
                         lastDate: DateTime.now().add(const Duration(days: 365)),
-                        builder: (context, child) {
-                          return Theme(
-                            data: Theme.of(context).copyWith(
-                              colorScheme: const ColorScheme.dark(
-                                primary: Color(0xFFFFDCA1),
-                                onPrimary: Colors.black,
-                                surface: Color(0xFF1E1E1E),
-                                onSurface: Colors.white,
-                              ),
-                            ),
-                            child: child!,
-                          );
-                        },
+                        builder: AppTheme.datePickerBuilder,
                       );
                       if (picked != null) {
                         controller.setDate(picked);

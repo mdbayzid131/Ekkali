@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:moeb_26/config/routes/app_pages.dart';
+import 'package:moeb_26/config/themes/app_theme.dart';
 import 'package:moeb_26/core/services/api_client.dart';
 import 'package:moeb_26/core/services/job_service.dart';
 import 'package:moeb_26/core/utils/helpers.dart';
@@ -197,26 +197,7 @@ class PostJobController extends GetxController {
       initialDate: selectedDate.value ?? DateTime.now(),
       firstDate: DateTime.now(),
       lastDate: DateTime(2030),
-      builder: (BuildContext context, Widget? child) {
-        return Theme(
-          data: ThemeData.dark().copyWith(
-            colorScheme: const ColorScheme.dark(
-              primary: Color(0xFF364153), // Selected date circle color
-              onPrimary: Colors.white, // Selected date text color
-              surface: Color(0xFF1E1E1E), // Slightly lighter than pure black
-              onSurface: Colors.white, // Text color on the picker
-            ),
-            dialogTheme: DialogThemeData(
-              backgroundColor: const Color(0xFF1E1E1E),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-                side: const BorderSide(color: Color(0xFF404040), width: 1),
-              ),
-            ),
-          ),
-          child: child!,
-        );
-      },
+      builder: AppTheme.datePickerBuilder,
     );
     if (picked != null && picked != selectedDate.value) {
       selectedDate.value = picked;
@@ -228,29 +209,7 @@ class PostJobController extends GetxController {
       context: context,
       initialTime: selectedTime.value ?? TimeOfDay.now(),
       initialEntryMode: TimePickerEntryMode.input,
-      builder: (BuildContext context, Widget? child) {
-        return Theme(
-          data: ThemeData.dark().copyWith(
-            colorScheme: const ColorScheme.dark(
-              primary: Color(0xFF364153), // Selection hand and selected circle
-              onPrimary: Colors.white,
-              surface: Color(0xFF1E1E1E), // Lighter background
-              onSurface: Colors.white, // Text color
-            ),
-            dialogTheme: DialogThemeData(
-              backgroundColor: const Color(0xFF1E1E1E),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-                side: const BorderSide(color: Color(0xFF404040), width: 1),
-              ),
-            ),
-          ),
-          child: MediaQuery(
-            data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: false),
-            child: child!,
-          ),
-        );
-      },
+      builder: AppTheme.timePickerBuilder,
     );
     if (picked != null && picked != selectedTime.value) {
       selectedTime.value = picked;
