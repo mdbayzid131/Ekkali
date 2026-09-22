@@ -254,6 +254,11 @@ class FirebaseNotificationService {
         }
         break;
 
+      case 'JOB_REVIEWED':
+        // Review received -> go to Jobs/Rides tab
+        Get.offAllNamed(Routes.bottomNabbarView, arguments: 1);
+        break;
+
       case 'CHAUFFEUR_APPLIED':
       case 'JOB_APPLICATION_RECEIVED':
         // Driver applied to creator's job -> Creator's Job Details / My Jobs
