@@ -71,12 +71,12 @@ class SubscriptionController extends GetxController {
           'Buy and sell business-related items, equipment, or services within the Ekkali network.',
       'icon': 'marketplace',
     },
-    {
-      'title': 'Deals & Exclusive Offers',
-      'subtitle':
-          'Access exclusive deals, discounts, and special offers from businesses serving the chauffeur industry.',
-      'icon': 'deals',
-    },
+    // {
+    //   'title': 'Deals & Exclusive Offers',
+    //   'subtitle':
+    //       'Access exclusive deals, discounts, and special offers from businesses serving the chauffeur industry.',
+    //   'icon': 'deals',
+    // },
   ];
 
   @override

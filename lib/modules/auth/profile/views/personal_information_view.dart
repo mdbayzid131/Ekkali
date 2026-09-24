@@ -91,25 +91,26 @@ class _PersonalInformationViewState extends State<PersonalInformationView> {
                                   )),
                       ),
                     ),
-                    Positioned(
-                      bottom: 0,
-                      right: 2.w,
-                      child: GestureDetector(
-                        onTap: () => controller.pickImage(context),
-                        child: Container(
-                          padding: EdgeInsets.all(6.r),
-                          decoration: const BoxDecoration(
-                            color: AppColors.primaryColor,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            Icons.camera_alt,
-                            color: Colors.black,
-                            size: 14.sp,
-                          ),
-                        ),
-                      ),
-                    ),
+                    // Camera icon removed - photo cannot be changed
+                    // Positioned(
+                    //   bottom: 0,
+                    //   right: 2.w,
+                    //   child: GestureDetector(
+                    //     onTap: () => controller.pickImage(context),
+                    //     child: Container(
+                    //       padding: EdgeInsets.all(6.r),
+                    //       decoration: const BoxDecoration(
+                    //         color: AppColors.primaryColor,
+                    //         shape: BoxShape.circle,
+                    //       ),
+                    //       child: Icon(
+                    //         Icons.camera_alt,
+                    //         color: Colors.black,
+                    //         size: 14.sp,
+                    //       ),
+                    //     ),
+                    //   ),
+                    // ),
                   ],
                 ),
               ),
@@ -188,19 +189,31 @@ class _PersonalInformationViewState extends State<PersonalInformationView> {
                 ),
               ),
 
-              // Phone Number
+              // Phone Number (ReadOnly)
               _buildInputField(
                 label: 'Phone Number',
                 controller: controller.phoneController,
+                readOnly: true,
                 icon: Icons.phone_outlined,
                 keyboardType: TextInputType.phone,
+                suffixIcon: Icon(
+                  Icons.lock_outline,
+                  color: const Color(0xFF71717A),
+                  size: 18.sp,
+                ),
               ),
 
-              // Company Name
+              // Company Name (ReadOnly)
               _buildInputField(
                 label: 'Company Name',
                 controller: controller.companyController,
+                readOnly: true,
                 icon: Icons.business_outlined,
+                suffixIcon: Icon(
+                  Icons.lock_outline,
+                  color: const Color(0xFF71717A),
+                  size: 18.sp,
+                ),
               ),
 
               // Service Area (Locked like Email)

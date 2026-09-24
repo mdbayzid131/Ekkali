@@ -515,10 +515,10 @@ class _AddNewVehicleViewState extends State<AddNewVehicleView> {
           ),
           SizedBox(height: 24.h),
 
-          /// Commercial Insurance
+          /// Commercial Insurance / ID card
           _buildUnifiedDocumentCard(
             context: context,
-            title: "Commercial Insurance",
+            title: "Commercial Insurance / ID card",
             isRequired: true,
             fileRx: controller.commercialInsuranceFile,
             urlRx: controller.commercialInsuranceUrl,

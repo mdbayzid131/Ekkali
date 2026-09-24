@@ -95,9 +95,9 @@ class JobOfferView extends StatelessWidget {
                 if (!isPrem) {
                   return const PremiumLockWidget(
                     icon: Icons.work_outline_rounded,
-                    title: "Unlock Exclusive Job Offers",
+                    title: "Unlock Exclusive Job Offer",
                     description:
-                        "Subscribe to Ekkali Premium to browse luxury chauffeur ride requests, view client payouts, and apply instantly.",
+                        "Join Ekkali Premium to discover job opportunities posted by fellow chauffeurs, review trip details, and connect directly with trusted members of the network.",
                   );
                 }
 

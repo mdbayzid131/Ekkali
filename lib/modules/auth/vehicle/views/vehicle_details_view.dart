@@ -570,7 +570,7 @@ class _VehicleDetailsViewState extends State<VehicleDetailsView> {
 
           // Commercial Insurance Tile
           _buildDocumentTile(
-            title: "Commercial Insurance",
+            title: "Commercial Insurance / ID card",
             expiryDate: vehicle.commercialInsuranceExpiryDate,
             imageUrl: vehicle.commercialInsuranceImage,
           ),
