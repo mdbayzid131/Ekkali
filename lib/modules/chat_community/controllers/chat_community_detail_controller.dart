@@ -12,6 +12,7 @@ import 'package:moeb_26/core/services/user_service.dart';
 import 'package:moeb_26/core/utils/helpers.dart';
 import 'package:moeb_26/data/models/chat_community_model.dart';
 import 'package:moeb_26/data/models/chat_model.dart';
+import 'package:moeb_26/core/services/chat_draft_service.dart';
 import 'package:moeb_26/modules/chat/controllers/chat_controller.dart';
 
 class CommunityChatDetailController extends GetxController {
@@ -45,6 +46,7 @@ class CommunityChatDetailController extends GetxController {
     super.onInit();
     room = Get.arguments;
     socketService.isCommunityActive = true;
+    _initDraft();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (Get.isRegistered<ChatController>()) {
         Get.find<ChatController>().markCommunityAsRead();
@@ -52,6 +54,31 @@ class CommunityChatDetailController extends GetxController {
     });
     scrollController.addListener(_onScroll);
     _initServiceAreaAndMessages();
+  }
+
+  void _initDraft() {
+    final draftKey = 'community_${room.id}';
+    final cached = ChatDraftService.getDraft(draftKey);
+    if (cached.isNotEmpty) {
+      messageController.text = cached;
+      messageController.selection = TextSelection.fromPosition(
+        TextPosition(offset: cached.length),
+      );
+    } else {
+      ChatDraftService.loadDraft(draftKey).then((saved) {
+        if (saved.isNotEmpty && messageController.text.isEmpty) {
+          messageController.text = saved;
+          messageController.selection = TextSelection.fromPosition(
+            TextPosition(offset: saved.length),
+          );
+        }
+      });
+    }
+    messageController.addListener(_onMessageChanged);
+  }
+
+  void _onMessageChanged() {
+    ChatDraftService.saveDraft('community_${room.id}', messageController.text);
   }
 
   Future<void> _initServiceAreaAndMessages() async {
@@ -370,6 +397,7 @@ class CommunityChatDetailController extends GetxController {
     messages.insert(0, tempMsg);
     messageController.clear();
     selectedImages.clear();
+    ChatDraftService.clearDraft('community_${room.id}');
 
     try {
       final response = await communityService.sendCommunityMessage(
@@ -391,6 +419,8 @@ class CommunityChatDetailController extends GetxController {
       debugPrint('Error sending community message: $e');
       messages.removeWhere((m) => m.id == tempId);
       selectedImages.addAll(imagesToSend);
+      messageController.text = text;
+      ChatDraftService.saveDraft('community_${room.id}', text);
       Helpers.showCustomSnackBar('Failed to send broadcast message', isError: true);
     }
   }
@@ -405,6 +435,8 @@ class CommunityChatDetailController extends GetxController {
     });
     scrollController.dispose();
     _commWorker?.dispose();
+    messageController.removeListener(_onMessageChanged);
+    ChatDraftService.saveDraft('community_${room.id}', messageController.text);
     messageController.dispose();
     super.onClose();
   }

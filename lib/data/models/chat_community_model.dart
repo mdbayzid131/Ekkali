@@ -1,6 +1,7 @@
 import 'chat_model.dart';
 
 class CommunityRoom {
+  final String? _id;
   final String name;
   final String serviceArea;
   final int totalMembers;
@@ -9,7 +10,12 @@ class CommunityRoom {
   int unreadCount;
   bool isRead;
 
+  String get id => (_id != null && _id.isNotEmpty)
+      ? _id
+      : (serviceArea.isNotEmpty ? serviceArea : 'global');
+
   CommunityRoom({
+    String? id,
     required this.name,
     required this.serviceArea,
     this.totalMembers = 0,
@@ -17,7 +23,7 @@ class CommunityRoom {
     this.lastMessageAt,
     this.unreadCount = 0,
     this.isRead = true,
-  });
+  }) : _id = id;
 
   factory CommunityRoom.fromJson(Map<String, dynamic> json) {
     final unread = json['unreadCount'] is int
@@ -28,6 +34,7 @@ class CommunityRoom {
         : (unread == 0);
 
     return CommunityRoom(
+      id: json['id']?.toString() ?? json['_id']?.toString(),
       name: json['name'] ?? '',
       serviceArea: json['serviceArea'] is Map
           ? (json['serviceArea']['areaName']?.toString() ??

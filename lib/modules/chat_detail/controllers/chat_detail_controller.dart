@@ -10,6 +10,7 @@ import 'package:moeb_26/data/models/chat_message_model.dart';
 import 'package:moeb_26/data/repositories/socket_repository.dart';
 import 'package:moeb_26/core/services/socket_service.dart';
 import 'package:moeb_26/core/services/user_service.dart';
+import 'package:moeb_26/core/services/chat_draft_service.dart';
 import 'package:moeb_26/modules/chat/controllers/chat_controller.dart';
 
 class ChatDetailController extends GetxController {
@@ -35,6 +36,7 @@ class ChatDetailController extends GetxController {
     super.onInit();
     chat = Get.arguments;
     socketService.activeChatId = chat.id;
+    _initDraft();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (Get.isRegistered<ChatController>()) {
         Get.find<ChatController>().markChatAsRead(chat.id);
@@ -43,6 +45,30 @@ class ChatDetailController extends GetxController {
     scrollController.addListener(_onScroll);
     _initWithUserId();
     setupSocket();
+  }
+
+  void _initDraft() {
+    final cached = ChatDraftService.getDraft(chat.id);
+    if (cached.isNotEmpty) {
+      messageController.text = cached;
+      messageController.selection = TextSelection.fromPosition(
+        TextPosition(offset: cached.length),
+      );
+    } else {
+      ChatDraftService.loadDraft(chat.id).then((saved) {
+        if (saved.isNotEmpty && messageController.text.isEmpty) {
+          messageController.text = saved;
+          messageController.selection = TextSelection.fromPosition(
+            TextPosition(offset: saved.length),
+          );
+        }
+      });
+    }
+    messageController.addListener(_onMessageChanged);
+  }
+
+  void _onMessageChanged() {
+    ChatDraftService.saveDraft(chat.id, messageController.text);
   }
 
   void _onScroll() {
@@ -263,6 +289,7 @@ class ChatDetailController extends GetxController {
 
       messages.insert(0, tempMessage);
       messageController.clear();
+      ChatDraftService.clearDraft(chat.id);
 
       try {
         final sentMessage = await socketRepo.sendMessage(
@@ -280,6 +307,8 @@ class ChatDetailController extends GetxController {
       } catch (e) {
         messages.removeWhere((m) => m.id == tempId);
         selectedImages.addAll(imagesToSend);
+        messageController.text = text;
+        ChatDraftService.saveDraft(chat.id, text);
         Helpers.showCustomSnackBar('Failed to send message', isError: true);
       }
     }
@@ -299,6 +328,8 @@ class ChatDetailController extends GetxController {
     scrollController.dispose();
     socketService.leaveChat(closingChatId);
     _messageWorker?.dispose();
+    messageController.removeListener(_onMessageChanged);
+    ChatDraftService.saveDraft(chat.id, messageController.text);
     messageController.dispose();
     super.onClose();
   }

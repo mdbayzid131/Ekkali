@@ -8,6 +8,7 @@ import 'package:moeb_26/data/repositories/socket_repository.dart';
 import 'package:moeb_26/core/services/community_service.dart';
 import 'package:moeb_26/core/services/socket_service.dart';
 import 'package:moeb_26/core/services/user_service.dart';
+import 'package:moeb_26/core/services/chat_draft_service.dart';
 
 class ChatController extends GetxController {
   final SocketRepository socketRepo = Get.find();
@@ -63,6 +64,9 @@ class ChatController extends GetxController {
         final actualArea = communityRoom.value?.serviceArea ?? targetArea;
         if (actualArea.isNotEmpty) {
           socketService.joinCommunity(actualArea);
+        }
+        if (communityRoom.value != null) {
+          ChatDraftService.loadDraft('community_${communityRoom.value!.id}');
         }
         return;
       }
@@ -216,6 +220,9 @@ class ChatController extends GetxController {
       isLoading.value = true;
       final result = await socketRepo.getChats();
       chats.assignAll(result);
+      for (final chat in result) {
+        ChatDraftService.loadDraft(chat.id);
+      }
       filterChats(searchController.value);
     } catch (e) {
       debugPrint('Error fetching chats from API: $e');

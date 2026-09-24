@@ -5,6 +5,7 @@ import 'package:moeb_26/data/models/chat_message_model.dart';
 import 'package:moeb_26/core/services/socket_service.dart';
 import 'package:moeb_26/core/services/support_service.dart';
 import 'package:moeb_26/core/services/user_service.dart';
+import 'package:moeb_26/core/services/chat_draft_service.dart';
 
 class SupportChatController extends GetxController {
   final SupportService _supportService = Get.find<SupportService>();
@@ -21,7 +22,33 @@ class SupportChatController extends GetxController {
   void onInit() {
     super.onInit();
     chatId = Get.arguments['chatId'];
+    _initDraft();
     _initializeChat();
+  }
+
+  void _initDraft() {
+    final draftKey = 'support_$chatId';
+    final cached = ChatDraftService.getDraft(draftKey);
+    if (cached.isNotEmpty) {
+      messageController.text = cached;
+      messageController.selection = TextSelection.fromPosition(
+        TextPosition(offset: cached.length),
+      );
+    } else {
+      ChatDraftService.loadDraft(draftKey).then((saved) {
+        if (saved.isNotEmpty && messageController.text.isEmpty) {
+          messageController.text = saved;
+          messageController.selection = TextSelection.fromPosition(
+            TextPosition(offset: saved.length),
+          );
+        }
+      });
+    }
+    messageController.addListener(_onMessageChanged);
+  }
+
+  void _onMessageChanged() {
+    ChatDraftService.saveDraft('support_$chatId', messageController.text);
   }
 
   Future<void> _initializeChat() async {
@@ -79,6 +106,7 @@ class SupportChatController extends GetxController {
     if (text.isEmpty) return;
 
     messageController.clear();
+    ChatDraftService.clearDraft('support_$chatId');
 
     try {
       // Use API for sending message as requested
@@ -94,6 +122,8 @@ class SupportChatController extends GetxController {
       }
     } catch (e) {
       debugPrint("Error sending support message: $e");
+      messageController.text = text;
+      ChatDraftService.saveDraft('support_$chatId', text);
       Helpers.showCustomSnackBar("Failed to send message", isError: true);
     }
   }
@@ -101,6 +131,8 @@ class SupportChatController extends GetxController {
   @override
   void onClose() {
     socketService.leaveRoom(chatId);
+    messageController.removeListener(_onMessageChanged);
+    ChatDraftService.saveDraft('support_$chatId', messageController.text);
     messageController.dispose();
     super.onClose();
   }

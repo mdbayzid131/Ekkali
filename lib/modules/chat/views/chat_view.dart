@@ -10,6 +10,7 @@ import 'package:moeb_26/core/widgets/premium_lock_widget.dart';
 import 'package:moeb_26/core/widgets/Custom_AppBar.dart';
 import 'package:moeb_26/data/models/chat_model.dart';
 import '../controllers/chat_controller.dart';
+import 'package:moeb_26/core/services/chat_draft_service.dart';
 import '../../../data/models/chat_community_model.dart';
 
 class ChatView extends StatelessWidget {
@@ -222,17 +223,46 @@ class ChatView extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Expanded(
-                        child: Text(
-                          room.lastMessage ?? 'No messages yet',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.inter(
-                            color: isUnread ? Colors.white : Colors.grey,
-                            fontSize: 14.sp,
-                            fontWeight:
-                                isUnread ? FontWeight.w700 : FontWeight.w400,
-                          ),
-                        ),
+                        child: Obx(() {
+                          final draft = ChatDraftService.drafts['community_${room.id}'];
+                          if (draft != null && draft.trim().isNotEmpty) {
+                            return RichText(
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              text: TextSpan(
+                                children: [
+                                  TextSpan(
+                                    text: 'Draft: ',
+                                    style: GoogleFonts.inter(
+                                      color: const Color(0xFFEF5350),
+                                      fontSize: 14.sp,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  TextSpan(
+                                    text: draft,
+                                    style: GoogleFonts.inter(
+                                      color: const Color(0xFFA1A1AA),
+                                      fontSize: 14.sp,
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }
+                          return Text(
+                            room.lastMessage ?? 'No messages yet',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.inter(
+                              color: isUnread ? Colors.white : Colors.grey,
+                              fontSize: 14.sp,
+                              fontWeight:
+                                  isUnread ? FontWeight.w700 : FontWeight.w400,
+                            ),
+                          );
+                        }),
                       ),
                       if (isUnread) ...[
                         SizedBox(width: 8.w),
@@ -361,20 +391,49 @@ class ChatView extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Expanded(
-                          child: Text(
-                            (chat.lastMessage != null &&
-                                    chat.lastMessage!.trim().isNotEmpty)
-                                ? chat.lastMessage!
-                                : 'No messages yet',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.inter(
-                              color: isUnread ? Colors.white : Colors.grey,
-                              fontSize: 14.sp,
-                              fontWeight:
-                                  isUnread ? FontWeight.w700 : FontWeight.w400,
-                            ),
-                          ),
+                          child: Obx(() {
+                            final draft = ChatDraftService.drafts[chat.id];
+                            if (draft != null && draft.trim().isNotEmpty) {
+                              return RichText(
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                text: TextSpan(
+                                  children: [
+                                    TextSpan(
+                                      text: 'Draft: ',
+                                      style: GoogleFonts.inter(
+                                        color: const Color(0xFFEF5350),
+                                        fontSize: 14.sp,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    TextSpan(
+                                      text: draft,
+                                      style: GoogleFonts.inter(
+                                        color: const Color(0xFFA1A1AA),
+                                        fontSize: 14.sp,
+                                        fontWeight: FontWeight.w400,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }
+                            return Text(
+                              (chat.lastMessage != null &&
+                                      chat.lastMessage!.trim().isNotEmpty)
+                                  ? chat.lastMessage!
+                                  : 'No messages yet',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: GoogleFonts.inter(
+                                color: isUnread ? Colors.white : Colors.grey,
+                                fontSize: 14.sp,
+                                fontWeight:
+                                    isUnread ? FontWeight.w700 : FontWeight.w400,
+                              ),
+                            );
+                          }),
                         ),
                         if (isUnread) ...[
                           SizedBox(width: 8.w),
