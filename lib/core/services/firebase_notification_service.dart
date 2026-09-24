@@ -308,6 +308,25 @@ class FirebaseNotificationService {
         }
         break;
 
+      case 'SUPPORT_MESSAGE':
+      case 'SUPPORT_TICKET':
+      case 'SUPPORT':
+        final String? ticketId = data['ticketId']?.toString() ??
+            data['id']?.toString() ??
+            data['_id']?.toString();
+        if (ticketId != null && ticketId.isNotEmpty) {
+          Get.toNamed(
+            Routes.supportTicketDetailView,
+            arguments: {
+              'ticketId': ticketId,
+              'id': ticketId,
+            },
+          );
+        } else {
+          Get.toNamed(Routes.notificationsView);
+        }
+        break;
+
       default:
         Get.toNamed(Routes.notificationsView);
         break;

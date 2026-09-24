@@ -34,23 +34,46 @@ class SupportRepo {
     }
   }
 
-  /// ===================== GET MESSAGES = : =====================
+  /// ===================== GET SUPPORT TICKET DETAILS & MESSAGES =====================
+  Future<Response> getSupportDetails(String ticketId) async {
+    return await apiClient.getData('${ApiConstants.supports}/$ticketId');
+  }
+
+  /// ===================== GET MESSAGES =====================
   Future<Response> getMessages(
     String chatId, {
     int page = 1,
     int limit = 20,
   }) async {
-    return await apiClient.getData(
-      ApiConstants.messages.replaceAll('{{chatId}}', chatId),
-      query: {'page': page, 'limit': limit, 'sort': '-createdAt'},
-    );
+    return await getSupportDetails(chatId);
   }
 
-  /// ===================== SEND MESSAGE =====================
-  Future<Response> sendMessage(String chatId, String message) async {
-    return await apiClient.postData(
-      ApiConstants.messages.replaceAll('{{chatId}}', chatId),
-      {"text": message},
-    );
+  /// ===================== SEND REPLY MESSAGE =====================
+  /// POST /api/v1/supports/:ticketId/messages
+  /// Content-Type: multipart/form-data
+  /// Body: message (Required), attachments (Optional)
+  Future<Response> sendMessage(
+    String ticketId,
+    String message, {
+    List<File>? attachments,
+  }) async {
+    final uri = '${ApiConstants.supports}/$ticketId/messages';
+    if (attachments != null && attachments.isNotEmpty) {
+      final multipartList = attachments
+          .map((file) => MultipartBody("attachments", file))
+          .toList();
+      return await apiClient.postMultipartData(
+        uri,
+        {"message": message},
+        multipartBody: multipartList,
+      );
+    } else {
+      final formData = FormData.fromMap({"message": message});
+      return await apiClient.postData(
+        uri,
+        formData,
+        extraHeaders: {'Content-Type': 'multipart/form-data'},
+      );
+    }
   }
 }

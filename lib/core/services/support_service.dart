@@ -36,6 +36,14 @@ class SupportService extends GetxService {
     }
   }
 
+  Future<Response> getSupportDetails(String ticketId) async {
+    try {
+      return await _supportRepo.getSupportDetails(ticketId);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<Response> getMessages(String chatId) async {
     try {
       return await _supportRepo.getMessages(chatId);
@@ -44,9 +52,17 @@ class SupportService extends GetxService {
     }
   }
 
-  Future<Response> sendMessage(String chatId, String message) async {
+  Future<Response> sendMessage(
+    String ticketId,
+    String message, {
+    List<File>? attachments,
+  }) async {
     try {
-      return await _supportRepo.sendMessage(chatId, message);
+      return await _supportRepo.sendMessage(
+        ticketId,
+        message,
+        attachments: attachments,
+      );
     } catch (e) {
       rethrow;
     }

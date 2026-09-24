@@ -70,6 +70,7 @@ class ApiConstants {
   //Support Endpoints
   static const String myTickets = '/supports/my-tickets';
   static const String createSupport = '/supports';
+  static const String supports = '/supports';
 
   // Community Chat Endpoints
   static const String communityRoom = '/community-chats/room';

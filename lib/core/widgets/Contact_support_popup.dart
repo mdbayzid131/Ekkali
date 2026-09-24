@@ -6,7 +6,6 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:moeb_26/config/constants/icon_paths.dart';
 import 'package:moeb_26/core/widgets/CustomButton.dart';
-import 'package:moeb_26/core/widgets/CustomText.dart';
 import 'package:moeb_26/core/widgets/CustomTextField.dart';
 import 'package:moeb_26/config/themes/app_theme.dart';
 import 'package:moeb_26/core/widgets/Custom_ButtonIcon.dart';
@@ -179,10 +178,28 @@ class _ContactSupportViewState extends State<ContactSupportView> {
     final hasMessages =
         ticket['messages'] != null && ticket['messages'].isNotEmpty;
     final lastMessage = hasMessages
-        ? ticket['messages'].last['message']
-        : 'No messages';
+        ? (ticket['messages'].last['message'] ?? ticket['messages'].last['text'] ?? '')
+        : '';
     final subject = ticket['subject'] ?? 'No Subject';
     final dateStr = _formatDate(ticket['createdAt']);
+    final status = (ticket['status'] ?? 'PENDING').toString().toUpperCase();
+
+    Color statusColor;
+    Color statusBgColor;
+    switch (status) {
+      case 'RESOLVED':
+      case 'COMPLETED':
+        statusColor = const Color(0xFF22C55E);
+        statusBgColor = const Color(0xFF22C55E).withValues(alpha: 0.15);
+        break;
+      case 'IN_PROGRESS':
+        statusColor = AppColors.primaryColor;
+        statusBgColor = AppColors.primaryColor.withValues(alpha: 0.15);
+        break;
+      default:
+        statusColor = const Color(0xFFF59E0B);
+        statusBgColor = const Color(0xFFF59E0B).withValues(alpha: 0.15);
+    }
 
     return Container(
       margin: EdgeInsets.only(bottom: 12.h),
@@ -202,19 +219,49 @@ class _ContactSupportViewState extends State<ContactSupportView> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      subject,
-                      style: GoogleFonts.inter(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16.sp,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            subject,
+                            style: GoogleFonts.inter(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16.sp,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        SizedBox(width: 8.w),
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 8.w,
+                            vertical: 3.h,
+                          ),
+                          decoration: BoxDecoration(
+                            color: statusBgColor,
+                            borderRadius: BorderRadius.circular(6.r),
+                            border: Border.all(
+                              color: statusColor.withValues(alpha: 0.3),
+                            ),
+                          ),
+                          child: Text(
+                            status,
+                            style: GoogleFonts.inter(
+                              color: statusColor,
+                              fontSize: 10.sp,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                     SizedBox(height: 6.h),
                     Text(
-                      lastMessage,
+                      lastMessage.isNotEmpty
+                          ? lastMessage
+                          : 'Tap to view ticket messages',
                       style: GoogleFonts.inter(
                         color: Colors.grey[400],
                         fontSize: 13.sp,

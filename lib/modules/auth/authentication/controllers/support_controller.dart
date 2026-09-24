@@ -90,19 +90,32 @@ class SupportController extends GetxController {
   }
 
   void handleTicketTap(dynamic ticket) {
-    if (ticket['chat'] == null) {
-      Helpers.showCustomSnackBar(
-        "Admin has not yet created a chat, please wait.",
-        isError: true,
-      );
-    } else {
-      final String chatId = ticket['chat']['_id'] ?? ticket['chat']['id'];
-      final String userId = ticket['user']?.toString() ?? '';
-      Get.toNamed(
-        Routes.chatSupportDetailView,
-        arguments: {'chatId': chatId, 'userId': userId},
-      );
+    final String ticketId = ticket['_id'] ?? ticket['id'] ?? '';
+    if (ticketId.isEmpty) {
+      Helpers.showCustomSnackBar("Invalid ticket ID", isError: true);
+      return;
     }
+
+    final String userId = ticket['user'] is Map
+        ? (ticket['user']['_id'] ?? ticket['user']['id'] ?? '')
+        : (ticket['user']?.toString() ?? '');
+    final String subject = ticket['subject'] ?? 'Support Chat';
+    final String status = ticket['status'] ?? 'PENDING';
+
+    final String createdAt = ticket['createdAt']?.toString() ?? '';
+
+    Get.toNamed(
+      Routes.supportTicketDetailView,
+      arguments: {
+        'ticketId': ticketId,
+        'id': ticketId,
+        'chatId': ticketId,
+        'userId': userId,
+        'subject': subject,
+        'status': status,
+        'createdAt': createdAt,
+      },
+    );
   }
 
   @override

@@ -43,6 +43,8 @@ import 'package:moeb_26/modules/chat_detail/views/chat_detail_view.dart';
 import 'package:moeb_26/modules/chat/views/chat_view.dart';
 import 'package:moeb_26/modules/chat_community/views/chat_community_detail_view.dart';
 import 'package:moeb_26/modules/chat_support_detail/views/chat_support_detail_view.dart';
+import 'package:moeb_26/modules/support_ticket_detail/views/support_ticket_detail_view.dart';
+import 'package:moeb_26/modules/support_ticket_detail/bindings/support_ticket_detail_binding.dart';
 import 'package:moeb_26/modules/job_edit/views/job_edit_view.dart';
 import 'package:moeb_26/modules/ratings_feedback/views/ratings_feedback_view.dart';
 import 'package:moeb_26/modules/my_job_progress_details/views/my_job_progress_details_view.dart';
@@ -116,6 +118,7 @@ class Routes {
   static const String changePasswordView = "/ChangePasswordView";
   static const String myItemsView = "/MyItemsView";
   static const String chatSupportDetailView = "/ChatSupportDetailView";
+  static const String supportTicketDetailView = "/SupportTicketDetailView";
   static const String privacyPolicySignUpView = "/PrivacyPolicySignUpView";
   static const String allVehicleView = "/AllVehicleView";
   static const String addNewVehicleView = "/AddNewVehicleView";
@@ -334,6 +337,12 @@ class Routes {
       name: chatSupportDetailView,
       page: () => SupportChatDetailView(),
       transition: Transition.noTransition,
+    ),
+    GetPage(
+      name: supportTicketDetailView,
+      page: () => const SupportTicketDetailView(),
+      transition: Transition.noTransition,
+      binding: SupportTicketDetailBinding(),
     ),
     GetPage(
       name: allVehicleView,

@@ -3,6 +3,9 @@ import 'package:get/get.dart';
 import 'package:moeb_26/config/constants/api_constants.dart';
 import 'package:moeb_26/config/constants/storage_constants.dart';
 import 'package:moeb_26/data/models/chat_message_model.dart';
+import 'package:moeb_26/config/routes/app_pages.dart';
+import 'package:moeb_26/core/utils/helpers.dart';
+import 'package:moeb_26/modules/support_ticket_detail/controllers/support_ticket_detail_controller.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:moeb_26/core/services/storege_service.dart';
 import 'api_client.dart';
@@ -246,6 +249,38 @@ class SocketService extends GetxService with WidgetsBindingObserver {
         debugPrint('📥 SocketService: Received event [$event]: $data');
         if (!_isDuplicateEvent(event, data)) {
           lastJobCancelled.value = data;
+        }
+      });
+    }
+
+    // 9. Support: Global in-app notification for new support messages
+    final List<String> supportMessageEvents = [
+      'NEW_SUPPORT_MESSAGE',
+      'new_support_message',
+      'support_message',
+    ];
+    for (var event in supportMessageEvents) {
+      socket.on(event, (data) {
+        debugPrint('🔔 SocketService: Received support event [$event]: $data');
+        if (data is Map) {
+          final ticketId = data['ticketId']?.toString() ??
+              data['id']?.toString() ??
+              data['_id']?.toString();
+          // If user is currently in SupportTicketDetailView for this ticket, active screen handles it via support-message::$ticketId
+          if (Get.currentRoute == Routes.supportTicketDetailView) {
+            if (Get.isRegistered<SupportTicketDetailController>()) {
+              final activeTicketId =
+                  Get.find<SupportTicketDetailController>().ticketId;
+              if (activeTicketId == ticketId) return;
+            }
+          }
+
+          final msg = data['message']?.toString() ??
+              'Support team has sent you a new message.';
+          Helpers.showCustomSnackBar(
+            'Support: $msg',
+            isError: false,
+          );
         }
       });
     }
