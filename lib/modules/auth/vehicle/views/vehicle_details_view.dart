@@ -68,9 +68,7 @@ class _VehicleDetailsViewState extends State<VehicleDetailsView> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      appBar: const CustomSubAppBar(
-        title: "Vehicle Details",
-      ),
+      appBar: const CustomSubAppBar(title: "Vehicle Details"),
       body: FutureBuilder<Vehicle?>(
         future: _vehicleFuture,
         initialData: cachedVehicle,
@@ -78,9 +76,7 @@ class _VehicleDetailsViewState extends State<VehicleDetailsView> {
           if (snapshot.connectionState == ConnectionState.waiting &&
               snapshot.data == null) {
             return const Center(
-              child: CircularProgressIndicator(
-                color: AppColors.primaryColor,
-              ),
+              child: CircularProgressIndicator(color: AppColors.primaryColor),
             );
           }
 
@@ -392,17 +388,11 @@ class _VehicleDetailsViewState extends State<VehicleDetailsView> {
           Row(
             children: [
               Expanded(
-                child: _buildPhotoTile(
-                  "Front View",
-                  vehicle.vehiclePhotoFront,
-                ),
+                child: _buildPhotoTile("Front View", vehicle.vehiclePhotoFront),
               ),
               SizedBox(width: 10.w),
               Expanded(
-                child: _buildPhotoTile(
-                  "Rear View",
-                  vehicle.vehiclePhotoRear,
-                ),
+                child: _buildPhotoTile("Rear View", vehicle.vehiclePhotoRear),
               ),
               SizedBox(width: 10.w),
               Expanded(
@@ -587,7 +577,9 @@ class _VehicleDetailsViewState extends State<VehicleDetailsView> {
     String formattedDate = "N/A";
     if (expiryDate != null && expiryDate.isNotEmpty) {
       try {
-        formattedDate = DateFormat('yyyy-MM-dd').format(DateTime.parse(expiryDate));
+        formattedDate = DateFormat(
+          'yyyy-MM-dd',
+        ).format(DateTime.parse(expiryDate));
       } catch (_) {
         formattedDate = expiryDate;
       }
@@ -602,13 +594,14 @@ class _VehicleDetailsViewState extends State<VehicleDetailsView> {
         borderRadius: BorderRadius.circular(10.r),
         border: Border.all(color: const Color(0xFF262626)),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Row 1: Document Icon + Full-width Title in 1 line
           Row(
             children: [
               Container(
-                padding: EdgeInsets.all(8.w),
+                padding: EdgeInsets.all(7.w),
                 decoration: BoxDecoration(
                   color: const Color(0xFF222222),
                   borderRadius: BorderRadius.circular(8.r),
@@ -616,76 +609,96 @@ class _VehicleDetailsViewState extends State<VehicleDetailsView> {
                 child: Icon(
                   Icons.description_outlined,
                   color: const Color(0xFF9E9E9E),
-                  size: 18.sp,
+                  size: 17.sp,
                 ),
               ),
               SizedBox(width: 10.w),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: GoogleFonts.inter(
-                      color: Colors.white,
-                      fontSize: 13.sp,
-                      fontWeight: FontWeight.w500,
-                    ),
+              Expanded(
+                child: Text(
+                  title,
+                  style: GoogleFonts.inter(
+                    color: Colors.white,
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.w500,
                   ),
-                  SizedBox(height: 2.h),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 10.h),
+
+          // Row 2: Expiry Date + View Button
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    Icons.event_outlined,
+                    color: const Color(0xFF6E6E6E),
+                    size: 13.sp,
+                  ),
+                  SizedBox(width: 5.w),
                   Text(
                     "Expires: $formattedDate",
                     style: GoogleFonts.inter(
-                      color: const Color(0xFF808080),
+                      color: const Color(0xFF888888),
                       fontSize: 11.sp,
                     ),
                   ),
                 ],
               ),
+              if (hasFile)
+                InkWell(
+                  onTap: () {
+                    Get.dialog(
+                      ImagePreviewPopup(imageUrl: imageUrl, title: title),
+                    );
+                  },
+                  borderRadius: BorderRadius.circular(6.r),
+                  child: Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 12.w,
+                      vertical: 5.h,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF222222),
+                      borderRadius: BorderRadius.circular(6.r),
+                      border: Border.all(color: const Color(0xFF333333)),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.remove_red_eye_outlined,
+                          color: const Color(0xFFB5B5B5),
+                          size: 13.sp,
+                        ),
+                        SizedBox(width: 5.w),
+                        Text(
+                          "View",
+                          style: GoogleFonts.inter(
+                            color: const Color(0xFFB5B5B5),
+                            fontSize: 11.sp,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              else
+                Text(
+                  "No File",
+                  style: GoogleFonts.inter(
+                    color: const Color(0xFF666666),
+                    fontSize: 11.sp,
+                  ),
+                ),
             ],
           ),
-          if (hasFile)
-            InkWell(
-              onTap: () {
-                Get.dialog(
-                  ImagePreviewPopup(imageUrl: imageUrl, title: title),
-                );
-              },
-              borderRadius: BorderRadius.circular(6.r),
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF222222),
-                  borderRadius: BorderRadius.circular(6.r),
-                  border: Border.all(color: const Color(0xFF333333)),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.remove_red_eye_outlined,
-                      color: const Color(0xFFB5B5B5),
-                      size: 13.sp,
-                    ),
-                    SizedBox(width: 4.w),
-                    Text(
-                      "View",
-                      style: GoogleFonts.inter(
-                        color: const Color(0xFFB5B5B5),
-                        fontSize: 11.sp,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            )
-          else
-            Text(
-              "No File",
-              style: GoogleFonts.inter(
-                color: const Color(0xFF666666),
-                fontSize: 11.sp,
-              ),
-            ),
         ],
       ),
     );
@@ -696,6 +709,7 @@ class _VehicleDetailsViewState extends State<VehicleDetailsView> {
       padding: EdgeInsets.only(bottom: isLast ? 0 : 10.h),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             label,
@@ -704,12 +718,16 @@ class _VehicleDetailsViewState extends State<VehicleDetailsView> {
               fontSize: 13.sp,
             ),
           ),
-          Text(
-            value,
-            style: GoogleFonts.inter(
-              color: const Color(0xFFD4D4D4),
-              fontSize: 13.sp,
-              fontWeight: FontWeight.w500,
+          SizedBox(width: 12.w),
+          Expanded(
+            child: Text(
+              value,
+              textAlign: TextAlign.end,
+              style: GoogleFonts.inter(
+                color: const Color(0xFFD4D4D4),
+                fontSize: 13.sp,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
         ],
@@ -1012,9 +1030,7 @@ class _VehicleDetailsViewState extends State<VehicleDetailsView> {
                     child: OutlinedButton(
                       onPressed: () => Get.back(),
                       style: OutlinedButton.styleFrom(
-                        side: const BorderSide(
-                          color: Color(0xFF2E2E2E),
-                        ),
+                        side: const BorderSide(color: Color(0xFF2E2E2E)),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10.r),
                         ),

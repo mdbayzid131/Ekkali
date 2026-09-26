@@ -1,178 +1,139 @@
-[GETX] GOING TO ROUTE /SupportTicketDetailView
-[GETX] Instance "SupportTicketDetailController" has been created
-I/flutter (31278): ✅ SupportTicketDetailController: Set userId from arguments: 6ab1011fef1345b0d168de79
-[GETX] Instance "SupportTicketDetailController" has been initialized
-I/flutter (31278):
-I/flutter (31278): ┌ ➡️➡️➡️➡️ REQUEST ══════════════════════════════════════ ➡️➡️➡️➡️
-I/flutter (31278): │ GET https://nayem5001.binarybards.online/api/v1/supports/6ab50c27c3bf3980107380ca
-I/flutter (31278): │ Headers: {Content-Type: application/json, Authorization: ***}
-I/flutter (31278): └ ➡️➡️➡️➡️ REQUEST ══════════════════════════════════════ ➡️➡️➡️➡️
-I/flutter (31278): 
-I/flutter (31278):
-I/flutter (31278): ┌ ✅✅✅✅ RESPONSE ══════════════════════════════════════ ✅✅✅✅
-I/flutter (31278): │ [ GET 200] https://nayem5001.binarybards.online/api/v1/supports/6ab50c27c3bf3980107380ca
-I/flutter (31278): │ {
-I/flutter (31278): │   "success": true,
-I/flutter (31278): │   "message": "Support ticket retrieved successfully",
-I/flutter (31278): │   "data": {
-I/flutter (31278): │     "_id": "6ab50c27c3bf3980107380ca",
-I/flutter (31278): │     "subject": "Hello how are you",
-I/flutter (31278): │     "user": {
-I/flutter (31278): │       "name": "Md Bayzid",
-I/flutter (31278): │       "email": "mdbayazid131@gmail.com",
-I/flutter (31278): │       "id": "6ab1011fef1345b0d168de79"
-I/flutter (31278): │     },
-I/flutter (31278): │     "status": "IN_PROGRESS",
-I/flutter (31278): │     "messages": [
-I/flutter (31278): │       {
-I/flutter (31278): │         "sender": {
-I/flutter (31278): │           "name": "Md Bayzid",
-I/flutter (31278): │           "email": "mdbayazid131@gmail.com"
-I/flutter (31278): │         },
-I/flutter (31278): │         "message": "hdhd you bro I ",
-I/flutter (31278): │         "attachments": [
-I/flutter (31278): │           "https://nayem5001.binarybards.online/uploads/images/2660f16a-c8b8-4565-9c63-b5a8bc2b50d2.jpg"
-I/flutter (31278): │         ],
-I/flutter (31278): │         "_id": "6ab50c27c3bf3980107380cb",
-I/flutter (31278): │         "createdAt": "2026-09-24T11:40:23.690Z"
-I/flutter (31278): │       },
-I/flutter (31278): │       {
-I/flutter (31278): │         "sender": {
-I/flutter (31278): │           "name": "Administrator",
-I/flutter (31278): │           "email": "admin@example.com"
-I/flutter (31278): │         },
-I/flutter (31278): │         "message": "hi",
-I/flutter (31278): │         "attachments": [],
-I/flutter (31278): │         "_id": "6ab50c3ec3bf3980107380fb",
-I/flutter (31278): │         "createdAt": "2026-09-24T11:40:46.339Z"
-I/flutter (31278): │       },
-I/flutter (31278): │       {
-I/flutter (31278): │         "sender": {
-I/flutter (31278): │           "name": "Administrator",
-I/flutter (31278): │           "email": "admin@example.com"
-I/flutter (31278): │         },
-I/flutter (31278): │         "message": "how are you",
-I/flutter (31278): │         "attachments": [],
-I/flutter (31278): │         "_id": "6ab50c44c3bf39801073811b",
-I/flutter (31278): │         "createdAt": "2026-09-24T11:40:52.724Z"
-I/flutter (31278): │       },
-I/flutter (31278): │       {
-I/flutter (31278): │         "sender": {
-I/flutter (31278): │           "name": "Md Bayzid",
-I/flutter (31278): │           "email": "mdbayazid131@gmail.com"
-I/flutter (31278): │         },
-I/flutter (31278): │         "message": "Hii",
-I/flutter (31278): │         "attachments": [],
-I/flutter (31278): │         "_id": "6ab50c6fc3bf398010738186",
-I/flutter (31278): │         "createdAt": "2026-09-24T11:41:35.311Z"
-I/flutter (31278): │       },
-I/flutter (31278): │       {
-I/flutter (31278): │         "sender": {
-I/flutter (31278): │           "name": "Md Bayzid",
-I/flutter (31278): │           "email": "mdbayazid131@gmail.com"
-I/flutter (31278): │         },
-I/flutter (31278): │         "message": "Hii",
-I/flutter (31278): │         "attachments": [],
-I/flutter (31278): │         "_id": "6ab50dfcc3bf39801073828a",
-I/flutter (31278): │         "createdAt": "2026-09-24T11:48:12.241Z"
-I/flutter (31278): │       },
-I/flutter (31278): │       {
-I/flutter (31278): │         "sender": {
-I/flutter (31278): │           "name": "Md Bayzid",
-I/flutter (31278): │           "email": "mdbayazid131@gmail.com"
-I/flutter (31278): │         },
-I/flutter (31278): │         "message": "Hello",
-I/flutter (31278): │         "attachments": [],
-I/flutter (31278): │         "_id": "6ab50dffc3bf3980107382b6",
-I/flutter (31278): │         "createdAt": "2026-09-24T11:48:15.701Z"
-I/flutter (31278): │       },
-I/flutter (31278): │       {
-I/flutter (31278): │         "sender": {
-I/flutter (31278): │           "name": "Md Bayzid",
-I/flutter (31278): │           "email": "mdbayazid131@gmail.com"
-I/flutter (31278): │         },
-I/flutter (31278): │         "message": "Toss",
-I/flutter (31278): │         "attachments": [],
-I/flutter (31278): │         "_id": "6ab50e0cc3bf398010738316",
-I/flutter (31278): │         "createdAt": "2026-09-24T11:48:28.763Z"
-I/flutter (31278): │       },
-I/flutter (31278): │       {
-I/flutter (31278): │         "sender": {
-I/flutter (31278): │           "name": "Administrator",
-I/flutter (31278): │           "email": "admin@example.com"
-I/flutter (31278): │         },
-I/flutter (31278): │         "message": "yo man",
-I/flutter (31278): │         "attachments": [],
-I/flutter (31278): │         "_id": "6ab50e14c3bf39801073836c",
-I/flutter (31278): │         "createdAt": "2026-09-24T11:48:36.737Z"
-I/flutter (31278): │       },
-I/flutter (31278): │       {
-I/flutter (31278): │         "sender": {
-I/flutter (31278): │           "name": "Md Bayzid",
-I/flutter (31278): │           "email": "mdbayazid131@gmail.com"
-I/flutter (31278): │         },
-I/flutter (31278): │         "message": "Hello",
-I/flutter (31278): │         "attachments": [],
-I/flutter (31278): │         "_id": "6ab50fafc3bf3980107384b3",
-I/flutter (31278): │         "createdAt": "2026-09-24T11:55:27.610Z"
-I/flutter (31278): │       },
-I/flutter (31278): │       {
-I/flutter (31278): │         "sender": {
-I/flutter (31278): │           "name": "Administrator",
-I/flutter (31278): │           "email": "admin@example.com"
-I/flutter (31278): │         },
-I/flutter (31278): │         "message": "hi",
-I/flutter (31278): │         "attachments": [],
-I/flutter (31278): │         "_id": "6ab50fd0c3bf39801073850c",
-I/flutter (31278): │         "createdAt": "2026-09-24T11:56:00.023Z"
-I/flutter (31278): │       },
-I/flutter (31278): │       {
-I/flutter (31278): │         "sender": {
-I/flutter (31278): │           "name": "Administrator",
-I/flutter (31278): │           "email": "admin@example.com"
-I/flutter (31278): │         },
-I/flutter (31278): │         "message": "how are you man",
-I/flutter (31278): │         "attachments": [],
-I/flutter (31278): │         "_id": "6ab50fd6c3bf398010738570",
-I/flutter (31278): │         "createdAt": "2026-09-24T11:56:06.513Z"
-I/flutter (31278): │       },
-I/flutter (31278): │       {
-I/flutter (31278): │         "sender": {
-I/flutter (31278): │           "name": "Md Bayzid",
-I/flutter (31278): │           "email": "mdbayazid131@gmail.com"
-I/flutter (31278): │         },
-I/flutter (31278): │         "message": "Haha",
-I/flutter (31278): │         "attachments": [],
-I/flutter (31278): │         "_id": "6ab50ffcc3bf39801073868c",
-I/flutter (31278): │         "createdAt": "2026-09-24T11:56:44.047Z"
-I/flutter (31278): │       },
-I/flutter (31278): │       {
-I/flutter (31278): │         "sender": {
-I/flutter (31278): │           "name": "Md Bayzid",
-I/flutter (31278): │           "email": "mdbayazid131@gmail.com"
-I/flutter (31278): │         },
-I/flutter (31278): │         "message": "Okay",
-I/flutter (31278): │         "attachments": [],
-I/flutter (31278): │         "_id": "6ab510c0c3bf398010738760",
-I/flutter (31278): │         "createdAt": "2026-09-24T12:00:00.807Z"
-I/flutter (31278): │       },
-I/flutter (31278): │       {
-I/flutter (31278): │         "sender": {
-I/flutter (31278): │           "name": "Administrator",
-I/flutter (31278): │           "email": "admin@example.com"
-I/flutter (31278): │         },
-I/flutter (31278): │         "message": "hello",
-I/flutter (31278): │         "attachments": [],
-I/flutter (31278): │         "_id": "6ab51134c3bf398010738819",
-I/flutter (31278): │         "createdAt": "2026-09-24T12:01:56.582Z"
-I/flutter (31278): │       }
-I/flutter (31278): │     ],
-I/flutter (31278): │     "createdAt": "2026-09-24T11:40:23.691Z",
-I/flutter (31278): │     "updatedAt": "2026-09-24T12:01:56.582Z",
-I/flutter (31278): │     "__v": 13,
-I/flutter (31278): │     "id": "6ab50c27c3bf3980107380ca"
-I/flutter (31278): │   }
-I/flutter (31278): │ }
-I/flutter (31278): └ ✅✅✅✅ RESPONSE ══════════════════════════════════════ ✅✅✅│
-I/flutter (31278):
-I/flutter (31278): 🔄 SupportTicketDetailController: Listening to socket event [support-message::6ab50c27c3bf3980107380ca]
+[GETX] Instance "PreferredDriversController" has been created
+[GETX] Instance "FavoriteChauffeurRepo" has been created
+[GETX] Instance "PreferredDriversController" has been initialized
+I/flutter (30651):
+I/flutter (30651): ┌ ➡️➡️➡️➡️ REQUEST ══════════════════════════════════════ ➡️➡️➡️➡️
+I/flutter (30651): │ GET https://nayem5001.binarybards.online/api/v1/users/favorites?limit=10
+I/flutter (30651): │ Headers: {Content-Type: application/json, Authorization: ***}
+I/flutter (30651): │ Query: {limit: 10}
+I/flutter (30651): └ ➡️➡️➡️➡️ REQUEST ══════════════════════════════════════ ➡️➡️➡️➡️
+I/flutter (30651): 
+I/flutter (30651):
+I/flutter (30651): ┌ ➡️➡️➡️➡️ REQUEST ══════════════════════════════════════ ➡️➡️➡️➡️
+I/flutter (30651): │ GET https://nayem5001.binarybards.online/api/v1/users/chauffeurs?limit=10
+I/flutter (30651): │ Headers: {Content-Type: application/json, Authorization: ***}
+I/flutter (30651): │ Query: {limit: 10}
+I/flutter (30651): └ ➡️➡️➡️➡️ REQUEST ══════════════════════════════════════ ➡️➡️➡️➡️
+I/flutter (30651): 
+I/flutter (30651):
+I/flutter (30651): ┌ ✅✅✅✅ RESPONSE ══════════════════════════════════════ ✅✅✅✅
+I/flutter (30651): │ [ GET 200] https://nayem5001.binarybards.online/api/v1/users/favorites?limit=10
+I/flutter (30651): │ {
+I/flutter (30651): │   "success": true,
+I/flutter (30651): │   "message": "Favorite chauffeurs retrieved successfully",
+I/flutter (30651): │   "cursor": {
+I/flutter (30651): │     "nextCursor": null,
+I/flutter (30651): │     "hasMore": false,
+I/flutter (30651): │     "limit": 10
+I/flutter (30651): │   },
+I/flutter (30651): │   "data": [
+I/flutter (30651): │     {
+I/flutter (30651): │       "_id": "6ab1ebc2851adc6bf9608f6a",
+I/flutter (30651): │       "name": "Demo",
+I/flutter (30651): │       "phone": "5484646946",
+I/flutter (30651): │       "serviceArea": "Boca Raton, FL",
+I/flutter (30651): │       "profilePicture": "https://i.ibb.co/z5YHLV9/profile.png",
+I/flutter (30651): │       "averageRating": 0,
+I/flutter (30651): │       "totalReviews": 0,
+I/flutter (30651): │       "badges": [
+I/flutter (30651): │         "Ekkali Elite Chauffeur",
+I/flutter (30651): │         "Ekkali Partner"
+I/flutter (30651): │       ],
+I/flutter (30651): │       "isFavorite": true
+I/flutter (30651): │     }
+I/flutter (30651): │   ]
+I/flutter (30651): │ }
+I/flutter (30651): └ ✅✅✅✅ RESPONSE ══════════════════════════════════════ ✅✅✅│
+I/flutter (30651): 
+I/flutter (30651):
+I/flutter (30651): ┌ ✅✅✅✅ RESPONSE ══════════════════════════════════════ ✅✅✅✅
+I/flutter (30651): │ [ GET 200] https://nayem5001.binarybards.online/api/v1/users/chauffeurs?limit=10
+I/flutter (30651): │ {
+I/flutter (30651): │   "success": true,
+I/flutter (30651): │   "message": "Chauffeurs retrieved successfully",
+I/flutter (30651): │   "cursor": {
+I/flutter (30651): │     "nextCursor": null,
+I/flutter (30651): │     "hasMore": false,
+I/flutter (30651): │     "limit": 10
+I/flutter (30651): │   },
+I/flutter (30651): │   "data": [
+I/flutter (30651): │     {
+I/flutter (30651): │       "_id": "6ab1ebc2851adc6bf9608f6a",
+I/flutter (30651): │       "name": "Demo",
+I/flutter (30651): │       "phone": "5484646946",
+I/flutter (30651): │       "serviceArea": "Boca Raton, FL",
+I/flutter (30651): │       "profilePicture": "https://i.ibb.co/z5YHLV9/profile.png",
+I/flutter (30651): │       "averageRating": 0,
+I/flutter (30651): │       "totalReviews": 0,
+I/flutter (30651): │       "badges": [
+I/flutter (30651): │         "Ekkali Elite Chauffeur",
+I/flutter (30651): │         "Ekkali Partner"
+I/flutter (30651): │       ],
+I/flutter (30651): │       "isFavorite": true
+I/flutter (30651): │     },
+I/flutter (30651): │     {
+I/flutter (30651): │       "_id": "6ab10172ef1345b0d168deac",
+I/flutter (30651): │       "name": "khaled",
+I/flutter (30651): │       "phone": "123456789",
+I/flutter (30651): │       "serviceArea": "Miami, FL",
+I/flutter (30651): │       "profilePicture": "https://i.ibb.co/z5YHLV9/profile.png",
+I/flutter (30651): │       "averageRating": 0,
+I/flutter (30651): │       "totalReviews": 0,
+I/flutter (30651): │       "badges": [],
+I/flutter (30651): │       "isFavorite": false
+I/flutter (30651): │     }
+I/flutter (30651): │   ]
+I/flutter (30651): │ }
+I/flutter (30651): └ ✅✅✅✅ RESPONSE ══════════════════════════════════════ ✅✅✅│
+I/flutter (30651):
+[GETX] GOING TO ROUTE /PreferredDriverProfileView
+I/Quality (30651): Skipped: false 1 cost 20.353188 refreshRate 0 processName com.moeb26.app
+I/flutter (30651):
+I/flutter (30651): ┌ ➡️➡️➡️➡️ REQUEST ══════════════════════════════════════ ➡️➡️➡️➡️
+I/flutter (30651): │ GET https://nayem5001.binarybards.online/api/v1/users/6ab1ebc2851adc6bf9608f6a
+I/flutter (30651): │ Headers: {Content-Type: application/json, Authorization: ***}
+I/flutter (30651): └ ➡️➡️➡️➡️ REQUEST ══════════════════════════════════════ ➡️➡️➡️➡️
+I/flutter (30651): 
+I/flutter (30651):
+I/flutter (30651): ┌ ✅✅✅✅ RESPONSE ══════════════════════════════════════ ✅✅✅✅
+I/flutter (30651): │ [ GET 200] https://nayem5001.binarybards.online/api/v1/users/6ab1ebc2851adc6bf9608f6a
+I/flutter (30651): │ {
+I/flutter (30651): │   "success": true,
+I/flutter (30651): │   "message": "User details retrieved successfully",
+I/flutter (30651): │   "data": {
+I/flutter (30651): │     "_id": "6ab1ebc2851adc6bf9608f6a",
+I/flutter (30651): │     "name": "Demo",
+I/flutter (30651): │     "email": "mdbayazid131.dev@gmail.com",
+I/flutter (30651): │     "phone": "5484646946",
+I/flutter (30651): │     "serviceArea": "Boca Raton, FL",
+I/flutter (30651): │     "companyRole": "Chauffeur",
+I/flutter (30651): │     "profilePicture": "https://i.ibb.co/z5YHLV9/profile.png",
+I/flutter (30651): │     "averageRating": 0,
+I/flutter (30651): │     "totalReviews": 0,
+I/flutter (30651): │     "badges": [
+I/flutter (30651): │       "Ekkali Elite Chauffeur",
+I/flutter (30651): │       "Ekkali Partner"
+I/flutter (30651): │     ],
+I/flutter (30651): │     "paymentMethods": {
+I/flutter (30651): │       "cardPayment": {
+I/flutter (30651): │         "status": "NOT_ACCEPTED"
+I/flutter (30651): │       }
+I/flutter (30651): │     },
+I/flutter (30651): │     "createdAt": "2026-09-22T02:45:22.891Z",
+I/flutter (30651): │     "vehicles": [
+I/flutter (30651): │       {
+I/flutter (30651): │         "type": "SUV",
+I/flutter (30651): │         "makeAndModel": "Chevrolet Suburban"
+I/flutter (30651): │       },
+I/flutter (30651): │       {
+I/flutter (30651): │         "type": "SUV",
+I/flutter (30651): │         "makeAndModel": "Chevrolet Suburban"
+I/flutter (30651): │       }
+I/flutter (30651): │     ],
+I/flutter (30651): │     "documents": [],
+I/flutter (30651): │     "reviews": [],
+I/flutter (30651): │     "isFavorite": true
+I/flutter (30651): │   }
+I/flutter (30651): │ }
+I/flutter (30651): └ ✅✅✅✅ RESPONSE ══════════════════════════════════════ ✅✅✅│
+I/flutter (30651): 

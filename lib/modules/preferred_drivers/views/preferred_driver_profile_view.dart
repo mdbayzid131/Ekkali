@@ -482,64 +482,289 @@ class _PreferredDriverProfileViewState
 
   // ===================== TAB 1: INFORMATION =====================
   Widget _buildInformationTab(FavoriteChauffeur chauffeur) {
-    return Container(
+    return Column(
       key: const ValueKey('tab_info'),
-      padding: EdgeInsets.all(16.w),
-      decoration: BoxDecoration(
-        color: const Color(0xFF161618),
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: const Color(0xFF27272A), width: 1),
-      ),
-      child: Column(
-        children: [
-          _buildCompactInfoRow(
-            icon: Icons.business_outlined,
-            title: 'Company',
-            value: chauffeur.companyName.trim().isNotEmpty
-                ? chauffeur.companyName
-                : 'N/A',
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Chauffeur Personal & Company Information
+        Container(
+          padding: EdgeInsets.all(16.w),
+          decoration: BoxDecoration(
+            color: const Color(0xFF161618),
+            borderRadius: BorderRadius.circular(16.r),
+            border: Border.all(color: const Color(0xFF27272A), width: 1),
           ),
-          _buildDivider(),
-          _buildCompactInfoRow(
-            icon: Icons.badge_outlined,
-            title: 'Role',
-            value: chauffeur.companyRole.trim().isNotEmpty
-                ? chauffeur.companyRole
-                : 'N/A',
+          child: Column(
+            children: [
+              _buildCompactInfoRow(
+                icon: Icons.business_outlined,
+                title: 'Company',
+                value: chauffeur.companyName.trim().isNotEmpty
+                    ? chauffeur.companyName
+                    : 'N/A',
+              ),
+              _buildDivider(),
+              _buildCompactInfoRow(
+                icon: Icons.badge_outlined,
+                title: 'Role',
+                value: chauffeur.companyRole.trim().isNotEmpty
+                    ? chauffeur.companyRole
+                    : 'N/A',
+              ),
+              _buildDivider(),
+              _buildCompactInfoRow(
+                icon: Icons.phone_outlined,
+                title: 'Phone',
+                value:
+                    chauffeur.phone.trim().isNotEmpty ? chauffeur.phone : 'N/A',
+              ),
+              _buildDivider(),
+              _buildCompactInfoRow(
+                icon: Icons.email_outlined,
+                title: 'Email',
+                value:
+                    chauffeur.email.trim().isNotEmpty ? chauffeur.email : 'N/A',
+              ),
+              _buildDivider(),
+              _buildCompactInfoRow(
+                icon: Icons.map_outlined,
+                title: 'Service Area',
+                value: chauffeur.serviceArea.trim().isNotEmpty
+                    ? chauffeur.serviceArea
+                    : 'N/A',
+              ),
+              _buildDivider(),
+              _buildCompactInfoRow(
+                icon: Icons.calendar_today_outlined,
+                title: 'Member Since',
+                value: chauffeur.joinedDate.trim().isNotEmpty
+                    ? _formatMemberSince(chauffeur.joinedDate)
+                    : 'N/A',
+              ),
+            ],
           ),
-          _buildDivider(),
-          _buildCompactInfoRow(
-            icon: Icons.phone_outlined,
-            title: 'Phone',
-            value:
-                chauffeur.phone.trim().isNotEmpty ? chauffeur.phone : 'N/A',
-          ),
-          _buildDivider(),
-          _buildCompactInfoRow(
-            icon: Icons.email_outlined,
-            title: 'Email',
-            value:
-                chauffeur.email.trim().isNotEmpty ? chauffeur.email : 'N/A',
-          ),
-          _buildDivider(),
-          _buildCompactInfoRow(
-            icon: Icons.map_outlined,
-            title: 'Service Area',
-            value: chauffeur.serviceArea.trim().isNotEmpty
-                ? chauffeur.serviceArea
-                : 'N/A',
-          ),
+        ),
+        SizedBox(height: 18.h),
 
-          _buildDivider(),
-          _buildCompactInfoRow(
-            icon: Icons.calendar_today_outlined,
-            title: 'Member Since',
-            value: chauffeur.joinedDate.trim().isNotEmpty
-                ? _formatMemberSince(chauffeur.joinedDate)
-                : 'N/A',
+        // Vehicles & Fleet Section
+        _buildVehiclesSection(chauffeur),
+      ],
+    );
+  }
+
+  Widget _buildVehiclesSection(FavoriteChauffeur chauffeur) {
+    final vehicles = chauffeur.vehicles.isNotEmpty
+        ? chauffeur.vehicles
+        : (chauffeur.vehicleName.isNotEmpty
+            ? [
+                ChauffeurVehicle(
+                  type: 'Vehicle',
+                  makeAndModel: chauffeur.vehicleName,
+                )
+              ]
+            : <ChauffeurVehicle>[]);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Section Header
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 2.w),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    Icons.directions_car_filled_rounded,
+                    color: AppColors.primaryColor,
+                    size: 16.sp,
+                  ),
+                  SizedBox(width: 8.w),
+                  Text(
+                    'Vehicles & Fleet',
+                    style: GoogleFonts.inter(
+                      color: const Color(0xFFD5C4AB),
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+              if (vehicles.isNotEmpty)
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF27272A),
+                    borderRadius: BorderRadius.circular(10.r),
+                    border: Border.all(
+                      color: const Color(0xFF3F3F46),
+                      width: 0.8,
+                    ),
+                  ),
+                  child: Text(
+                    '${vehicles.length} ${vehicles.length == 1 ? 'Vehicle' : 'Vehicles'}',
+                    style: GoogleFonts.inter(
+                      color: AppColors.primaryColor,
+                      fontSize: 10.sp,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+            ],
           ),
-        ],
-      ),
+        ),
+        SizedBox(height: 10.h),
+
+        // Vehicle Cards
+        if (vehicles.isEmpty)
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+            decoration: BoxDecoration(
+              color: const Color(0xFF161618),
+              borderRadius: BorderRadius.circular(16.r),
+              border: Border.all(color: const Color(0xFF27272A), width: 1),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 36.w,
+                  height: 36.w,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF222226),
+                    borderRadius: BorderRadius.circular(8.r),
+                  ),
+                  child: Icon(
+                    Icons.directions_car_outlined,
+                    color: const Color(0xFFD5C4AB),
+                    size: 18.sp,
+                  ),
+                ),
+                SizedBox(width: 12.w),
+                Expanded(
+                  child: Text(
+                    'No vehicles registered yet',
+                    style: GoogleFonts.inter(
+                      color: const Color(0xFF8E8E93),
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          )
+        else
+          Container(
+            padding: EdgeInsets.all(14.w),
+            decoration: BoxDecoration(
+              color: const Color(0xFF161618),
+              borderRadius: BorderRadius.circular(16.r),
+              border: Border.all(color: const Color(0xFF27272A), width: 1),
+            ),
+            child: Column(
+              children: [
+                for (int i = 0; i < vehicles.length; i++) ...[
+                  if (i > 0) _buildDivider(),
+                  _buildVehicleItem(vehicles[i]),
+                ],
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildVehicleItem(ChauffeurVehicle vehicle) {
+    final bool isSuv = vehicle.type.toLowerCase().contains('suv');
+    final IconData vehicleIcon = isSuv
+        ? Icons.directions_car_rounded
+        : Icons.local_taxi_rounded;
+
+    return Row(
+      children: [
+        // Vehicle Icon
+        Container(
+          width: 40.w,
+          height: 40.w,
+          decoration: BoxDecoration(
+            color: const Color(0xFF222226),
+            borderRadius: BorderRadius.circular(10.r),
+            border: Border.all(
+              color: const Color(0xFF2E2E33),
+              width: 0.8,
+            ),
+          ),
+          child: Center(
+            child: Icon(
+              vehicleIcon,
+              color: AppColors.primaryColor,
+              size: 20.sp,
+            ),
+          ),
+        ),
+        SizedBox(width: 12.w),
+
+        // Make & Model + License Plate (if available)
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                vehicle.makeAndModel.isNotEmpty
+                    ? vehicle.makeAndModel
+                    : 'Unknown Model',
+                style: GoogleFonts.inter(
+                  color: Colors.white,
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w600,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              if (vehicle.licensePlate.isNotEmpty || vehicle.year > 0) ...[
+                SizedBox(height: 3.h),
+                Text(
+                  [
+                    if (vehicle.year > 0) '${vehicle.year}',
+                    if (vehicle.licensePlate.isNotEmpty) vehicle.licensePlate,
+                  ].join(' • '),
+                  style: GoogleFonts.inter(
+                    color: const Color(0xFFD5C4AB),
+                    fontSize: 11.sp,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+        SizedBox(width: 8.w),
+
+        // Vehicle Type Pill Badge
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+          decoration: BoxDecoration(
+            color: const Color(0xFF27272A),
+            borderRadius: BorderRadius.circular(8.r),
+            border: Border.all(
+              color: const Color(0xFF3F3F46),
+              width: 0.8,
+            ),
+          ),
+          child: Text(
+            vehicle.type.toUpperCase(),
+            style: GoogleFonts.inter(
+              color: const Color(0xFFFEDB9B),
+              fontSize: 11.sp,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 0.4,
+            ),
+          ),
+        ),
+      ],
     );
   }
 

@@ -59,6 +59,32 @@ class ChauffeurReview {
   }
 }
 
+class ChauffeurVehicle {
+  final String type;
+  final String makeAndModel;
+  final String licensePlate;
+  final int year;
+
+  ChauffeurVehicle({
+    required this.type,
+    required this.makeAndModel,
+    this.licensePlate = '',
+    this.year = 0,
+  });
+
+  factory ChauffeurVehicle.fromJson(Map<String, dynamic> json) {
+    return ChauffeurVehicle(
+      type: json['type']?.toString() ?? json['carType']?.toString() ?? 'Vehicle',
+      makeAndModel: json['makeAndModel']?.toString() ??
+          '${json['make'] ?? ''} ${json['model'] ?? ''}'.trim(),
+      licensePlate: json['licensePlate']?.toString() ?? '',
+      year: json['year'] is int
+          ? json['year']
+          : int.tryParse(json['year']?.toString() ?? '') ?? 0,
+    );
+  }
+}
+
 class FavoriteChauffeur {
   final String id;
   final String name;
@@ -71,6 +97,7 @@ class FavoriteChauffeur {
   final String imageUrl;
   final String joinedDate;
   final String vehicleName;
+  final List<ChauffeurVehicle> vehicles;
   final String languages;
   final String phone;
   final String email;
@@ -98,6 +125,7 @@ class FavoriteChauffeur {
     this.imageUrl = '',
     this.joinedDate = '',
     this.vehicleName = '',
+    this.vehicles = const [],
     this.languages = '',
     this.phone = '',
     this.email = '',
@@ -128,6 +156,19 @@ class FavoriteChauffeur {
       for (var b in json['badges']) {
         if (b != null && b.toString().isNotEmpty) {
           badgesList.add(b.toString());
+        }
+      }
+    }
+
+    final List<ChauffeurVehicle> vehiclesList = [];
+    if (json['vehicles'] is List) {
+      for (var v in json['vehicles']) {
+        if (v is Map<String, dynamic>) {
+          vehiclesList.add(ChauffeurVehicle.fromJson(v));
+        } else if (v is Map) {
+          vehiclesList.add(
+            ChauffeurVehicle.fromJson(Map<String, dynamic>.from(v)),
+          );
         }
       }
     }
@@ -210,6 +251,7 @@ class FavoriteChauffeur {
       email: json['email']?.toString() ?? '',
       carTag: json['carTag']?.toString() ?? '',
       badges: badgesList,
+      vehicles: vehiclesList,
       zelle: zelleVal,
       venmo: venmoVal,
       cashApp: cashAppVal,
@@ -233,6 +275,7 @@ class FavoriteChauffeur {
     String? imageUrl,
     String? joinedDate,
     String? vehicleName,
+    List<ChauffeurVehicle>? vehicles,
     String? languages,
     String? phone,
     String? email,
@@ -260,6 +303,7 @@ class FavoriteChauffeur {
       imageUrl: imageUrl ?? this.imageUrl,
       joinedDate: joinedDate ?? this.joinedDate,
       vehicleName: vehicleName ?? this.vehicleName,
+      vehicles: vehicles ?? this.vehicles,
       languages: languages ?? this.languages,
       phone: phone ?? this.phone,
       email: email ?? this.email,
