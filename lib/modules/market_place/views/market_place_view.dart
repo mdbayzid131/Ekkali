@@ -72,6 +72,8 @@ class MarketPlaceView extends StatelessWidget {
                         Get.bottomSheet(
                           SellItemBottomSheet(),
                           isScrollControlled: true,
+                          isDismissible: false,
+                          enableDrag: false,
                           backgroundColor: Colors.transparent,
                         );
                       },

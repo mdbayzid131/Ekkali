@@ -494,6 +494,8 @@ class _MarketplaceItemDetailViewState extends State<MarketplaceItemDetailView> {
                                           editItemId: widget.item.id,
                                         ),
                                         isScrollControlled: true,
+                                        isDismissible: false,
+                                        enableDrag: false,
                                         backgroundColor: Colors.transparent,
                                       );
                                     },
@@ -556,6 +558,8 @@ class _MarketplaceItemDetailViewState extends State<MarketplaceItemDetailView> {
                                       editItemId: widget.item.id,
                                     ),
                                     isScrollControlled: true,
+                                    isDismissible: false,
+                                    enableDrag: false,
                                     backgroundColor: Colors.transparent,
                                   );
                                 },

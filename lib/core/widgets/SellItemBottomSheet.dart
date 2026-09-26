@@ -16,58 +16,62 @@ class SellItemBottomSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DraggableScrollableSheet(
-      initialChildSize: 0.9,
-      maxChildSize: 0.95,
-      minChildSize: 0.5,
-      builder: (context, scrollController) => Container(
-        decoration: BoxDecoration(
-          color: const Color(0xFF0F0F0B), // Black background as per image
-          borderRadius: BorderRadius.vertical(top: Radius.circular(30.r)),
-        ),
-        child: Column(
-          children: [
-            // Header
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
-              decoration: BoxDecoration(
-                color: const Color(0xFF1E2632), // Dark blue header
-                borderRadius: BorderRadius.vertical(top: Radius.circular(30.r)),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    editItemId == null ? "Item Description" : "Edit Item",
-                    style: GoogleFonts.inter(
-                      color: Colors.white,
-                      fontSize: 20.sp,
-                      fontWeight: FontWeight.bold,
-                    ),
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.9,
+      decoration: BoxDecoration(
+        color: const Color(0xFF0F0F0B), // Black background as per image
+        borderRadius: BorderRadius.vertical(top: Radius.circular(30.r)),
+      ),
+      child: Column(
+        children: [
+          // Header
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
+            decoration: BoxDecoration(
+              color: const Color(0xFF1E2632), // Dark blue header
+              borderRadius: BorderRadius.vertical(top: Radius.circular(30.r)),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  editItemId == null ? "Item Description" : "Edit Item",
+                  style: GoogleFonts.inter(
+                    color: Colors.white,
+                    fontSize: 20.sp,
+                    fontWeight: FontWeight.bold,
                   ),
-                  GestureDetector(
-                    onTap: () => Get.back(),
+                ),
+                GestureDetector(
+                  onTap: () => Get.back(),
+                  child: Container(
+                    padding: EdgeInsets.all(6.w),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.1),
+                      shape: BoxShape.circle,
+                    ),
                     child: Icon(
                       Icons.close,
-                      color: Colors.white.withValues(alpha: 0.5),
-                      size: 24.sp,
+                      color: Colors.white,
+                      size: 20.sp,
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
+          ),
 
-            Expanded(
-              child: Form(
-                key: _formKey,
-                child: SingleChildScrollView(
-                  controller: scrollController,
-                  padding: EdgeInsets.fromLTRB(
-                    20.w,
-                    20.h,
-                    20.w,
-                    MediaQuery.of(context).viewInsets.bottom + 20.h,
-                  ),
+          Expanded(
+            child: Form(
+              key: _formKey,
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                padding: EdgeInsets.fromLTRB(
+                  20.w,
+                  20.h,
+                  20.w,
+                  MediaQuery.of(context).viewInsets.bottom + 20.h,
+                ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -345,11 +349,10 @@ class SellItemBottomSheet extends StatelessWidget {
                   ),
                 ),
               ),
-            ),
-          ],
+            ),]
         ),
-      ),
-    );
+      );
+    
   }
 
   Widget _buildLabel(String label) {

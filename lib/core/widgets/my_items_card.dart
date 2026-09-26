@@ -282,6 +282,8 @@ class MyItemsCard extends StatelessWidget {
                   Get.bottomSheet(
                     SellItemBottomSheet(editItemId: item.id),
                     isScrollControlled: true,
+                    isDismissible: false,
+                    enableDrag: false,
                     backgroundColor: Colors.transparent,
                   );
                 },
