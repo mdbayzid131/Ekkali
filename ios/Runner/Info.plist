@@ -81,6 +81,10 @@
 		<string>This app requires access to your camera to let you take photos for your profile and marketplace listings.</string>
 		<key>NSMicrophoneUsageDescription</key>
 		<string>This app requires access to your microphone to let you record videos for your listings.</string>
+		<key>NSLocationWhenInUseUsageDescription</key>
+		<string>This app requires access to your location to provide accurate pickup and drop-off coordinates, nearby chauffeur services, and ride tracking.</string>
+		<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+		<string>This app requires access to your location to track rides and calculate routes effectively.</string>
 		<key>io.flutter.embedded_views_preview</key>
 		<true/>
 	</dict>
