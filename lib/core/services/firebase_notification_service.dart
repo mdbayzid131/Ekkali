@@ -10,8 +10,8 @@ import 'package:moeb_26/config/constants/storage_constants.dart';
 import 'package:moeb_26/core/services/notifications_service.dart';
 import 'package:moeb_26/core/services/socket_service.dart';
 import 'package:moeb_26/core/services/storege_service.dart';
-import 'package:moeb_26/data/models/chat_model.dart';
 import 'package:moeb_26/firebase_options.dart';
+import 'package:moeb_26/modules/bottom_nab_bar/controllers/bottom_nabbar_controller.dart';
 
 // Background message handler (must be top-level function)
 @pragma('vm:entry-point')
@@ -107,8 +107,14 @@ class FirebaseNotificationService {
     RemoteMessage? initialMessage = await _messaging.getInitialMessage();
     if (initialMessage != null) {
       debugPrint('🚀 App opened from notification: ${initialMessage.data}');
-      _handleNotificationTap(initialMessage);
+      pendingInitialMessage = initialMessage;
     }
+  }
+
+  static RemoteMessage? pendingInitialMessage;
+
+  static void handleNotificationMessage(RemoteMessage message) {
+    _handleNotificationTap(message);
   }
 
   // Initialize local notifications
@@ -234,103 +240,258 @@ class FirebaseNotificationService {
           presentList: true,
         ),
       ),
-      payload: jsonEncode(message.data),
+      payload: jsonEncode({
+        ...message.data,
+        'title': title,
+        'body': body,
+      }),
     );
+  }
+
+  /// Unified navigation to the Ride page and Ride bottom sheet
+  static void navigateToRideSheet(String? jobId) {
+    if (Get.isBottomSheetOpen == true) {
+      Get.back();
+    }
+    if (Get.isDialogOpen == true) {
+      Get.back();
+    }
+
+    if (Get.currentRoute == Routes.bottomNabbarView) {
+      if (Get.isRegistered<NavigationController>()) {
+        Get.find<NavigationController>().navigateToRidesTab(targetJobId: jobId);
+      } else {
+        final nav = Get.put(NavigationController());
+        nav.navigateToRidesTab(targetJobId: jobId);
+      }
+    } else {
+      Get.offAllNamed(Routes.bottomNabbarView, arguments: {
+        'bottomIndex': 1,
+        'targetJobId': jobId,
+      });
+    }
+  }
+
+  /// Unified navigation to the Chat list tab (never chat detail screen)
+  static void navigateToChatList() {
+    if (Get.isBottomSheetOpen == true) {
+      Get.back();
+    }
+    if (Get.isDialogOpen == true) {
+      Get.back();
+    }
+
+    if (Get.currentRoute == Routes.bottomNabbarView) {
+      if (Get.isRegistered<NavigationController>()) {
+        Get.find<NavigationController>().navigateToChatTab();
+      } else {
+        final nav = Get.put(NavigationController());
+        nav.navigateToChatTab();
+      }
+    } else {
+      Get.offAllNamed(Routes.bottomNabbarView, arguments: 2);
+    }
+  }
+
+  /// Unified router for both push notification taps and in-app notification taps
+  static void navigateToNotificationTarget({
+    required String type,
+    String? jobId,
+    String? chatId,
+    String? title,
+    String? subtitle,
+    Map<String, dynamic>? data,
+  }) {
+    Map<String, dynamic>? nestedData;
+    if (data != null && data.containsKey('data')) {
+      if (data['data'] is Map<String, dynamic>) {
+        nestedData = data['data'] as Map<String, dynamic>;
+      } else if (data['data'] is String) {
+        try {
+          final dec = jsonDecode(data['data']);
+          if (dec is Map<String, dynamic>) {
+            nestedData = dec;
+          }
+        } catch (_) {}
+      }
+    }
+
+    final String resolvedJobId = (jobId != null && jobId.isNotEmpty)
+        ? jobId
+        : (data?['jobId']?.toString() ??
+            nestedData?['jobId']?.toString() ??
+            data?['id']?.toString() ??
+            nestedData?['id']?.toString() ??
+            data?['_id']?.toString() ??
+            nestedData?['_id']?.toString() ??
+            data?['rideId']?.toString() ??
+            nestedData?['rideId']?.toString() ??
+            (data != null && data['job'] is Map
+                ? data['job']['_id']?.toString() ??
+                    data['job']['id']?.toString()
+                : null) ??
+            (nestedData != null && nestedData['job'] is Map
+                ? nestedData['job']['_id']?.toString() ??
+                    nestedData['job']['id']?.toString()
+                : null) ??
+            (data != null && data['ride'] is Map
+                ? data['ride']['_id']?.toString() ??
+                    data['ride']['id']?.toString()
+                : null) ??
+            (nestedData != null && nestedData['ride'] is Map
+                ? nestedData['ride']['_id']?.toString() ??
+                    nestedData['ride']['id']?.toString()
+                : null) ??
+            '');
+
+    final String resolvedChatId = (chatId != null && chatId.isNotEmpty)
+        ? chatId
+        : (data?['chatId']?.toString() ??
+            nestedData?['chatId']?.toString() ??
+            '');
+
+    final String upperType = type.trim().toUpperCase();
+    final String lowerTitle = (title ?? '').toLowerCase();
+    final String lowerSubtitle = (subtitle ?? '').toLowerCase();
+
+    debugPrint(
+      '📍 Unified Notification Navigation: type=$upperType, jobId=$resolvedJobId, chatId=$resolvedChatId, title=$lowerTitle',
+    );
+
+    // 1. CHAT RELATED NOTIFICATIONS: Always go to Chat list (Index 2), NEVER chat detail
+    final bool isChat = upperType == 'NEW_MESSAGE' ||
+        upperType == 'MESSAGE' ||
+        upperType == 'CHAT' ||
+        upperType == 'COMMUNITY_MESSAGE' ||
+        upperType == 'NEW_COMMUNITY_MESSAGE' ||
+        resolvedChatId.isNotEmpty ||
+        lowerTitle.contains('message') ||
+        lowerTitle.contains('chat') ||
+        lowerSubtitle.contains('message') ||
+        lowerSubtitle.contains('chat');
+
+    if (isChat) {
+      navigateToChatList();
+      return;
+    }
+
+    // 2. JOB RELATED NOTIFICATIONS: Always open Ride page & Bottom Sheet, NEVER separate job details
+    final bool isJob = upperType == 'JOB_ASSIGNED' ||
+        upperType == 'JOB_APPLICATION_RECEIVED' ||
+        upperType == 'CHAUFFEUR_APPLIED' ||
+        upperType == 'JOB_CANCELLED' ||
+        upperType == 'JOB_REVIEWED' ||
+        upperType == 'JOB_APPLICANT_REJECTED' ||
+        upperType == 'TASK' ||
+        upperType.contains('JOB') ||
+        upperType.contains('RIDE') ||
+        resolvedJobId.isNotEmpty ||
+        lowerTitle.contains('job') ||
+        lowerTitle.contains('ride') ||
+        lowerTitle.contains('applicant') ||
+        lowerTitle.contains('chauffeur') ||
+        lowerTitle.contains('assigned') ||
+        lowerTitle.contains('acceptance') ||
+        lowerSubtitle.contains('job') ||
+        lowerSubtitle.contains('ride');
+
+    if (isJob) {
+      if (upperType == 'JOB_APPLICANT_REJECTED' && resolvedJobId.isEmpty) {
+        // Driver rejected without job info -> Available Jobs Feed
+        Get.offAllNamed(Routes.bottomNabbarView, arguments: 0);
+      } else {
+        navigateToRideSheet(resolvedJobId.isNotEmpty ? resolvedJobId : null);
+      }
+      return;
+    }
+
+    // 3. SUPPORT TICKET
+    if (upperType == 'SUPPORT' ||
+        upperType == 'SUPPORT_MESSAGE' ||
+        upperType == 'SUPPORT_TICKET' ||
+        lowerTitle.contains('support') ||
+        lowerSubtitle.contains('ticket')) {
+      final String? ticketId = data?['ticketId']?.toString() ??
+          data?['id']?.toString() ??
+          data?['_id']?.toString();
+      if (ticketId != null && ticketId.isNotEmpty) {
+        Get.toNamed(
+          Routes.supportTicketDetailView,
+          arguments: {
+            'ticketId': ticketId,
+            'id': ticketId,
+          },
+        );
+      } else {
+        Get.toNamed(Routes.notificationsView);
+      }
+      return;
+    }
+
+    // 4. DEALS & OFFERS
+    if (upperType == 'REMINDER' ||
+        upperType == 'DEAL' ||
+        upperType == 'OFFER' ||
+        lowerTitle.contains('deal') ||
+        lowerTitle.contains('offer') ||
+        lowerTitle.contains('saving') ||
+        lowerSubtitle.contains('deal') ||
+        lowerSubtitle.contains('offer')) {
+      Get.toNamed(Routes.dealsView);
+      return;
+    }
+
+    // 5. INVOICES & PAYMENTS
+    if (upperType.contains('INVOICE') ||
+        upperType.contains('PAYMENT') ||
+        lowerTitle.contains('invoice') ||
+        lowerTitle.contains('payment') ||
+        lowerSubtitle.contains('invoice') ||
+        lowerSubtitle.contains('payment')) {
+      Get.toNamed(Routes.invoiceHistoryView);
+      return;
+    }
+
+    // 6. MARKETPLACE / ITEMS
+    if (lowerTitle.contains('item') ||
+        lowerTitle.contains('market') ||
+        lowerSubtitle.contains('item') ||
+        lowerSubtitle.contains('market')) {
+      Get.toNamed(Routes.myItemsView);
+      return;
+    }
+
+    // 7. DEFAULT FALLBACK
+    if (Get.currentRoute == Routes.notificationsView) {
+      Get.offAllNamed(Routes.bottomNabbarView, arguments: 0);
+    } else {
+      Get.toNamed(Routes.notificationsView);
+    }
   }
 
   // Handle notification tap & Deep Linking
   static void _handleNotificationTap(RemoteMessage message) {
     final Map<String, dynamic> data = message.data;
     final String type = (data['type'] ?? data['notificationType'] ?? '')
-        .toString()
-        .toUpperCase();
+        .toString();
     final String? jobId = data['jobId']?.toString() ?? data['id']?.toString();
     final String? chatId = data['chatId']?.toString();
+    final String title = message.notification?.title ??
+        data['title']?.toString() ??
+        '';
+    final String subtitle = message.notification?.body ??
+        data['body']?.toString() ??
+        data['message']?.toString() ??
+        '';
 
-    debugPrint('📍 Navigating based on notification: type=$type, data=$data');
-
-    switch (type) {
-      case 'JOB_ASSIGNED':
-        // Driver assigned to a ride -> My Rides / Ride Details
-        if (jobId != null && jobId.isNotEmpty) {
-          Get.toNamed(Routes.rideDetailsView, arguments: jobId);
-        } else {
-          Get.offAllNamed(Routes.bottomNabbarView, arguments: 1);
-        }
-        break;
-
-      case 'JOB_REVIEWED':
-        // Review received -> go to Jobs/Rides tab
-        Get.offAllNamed(Routes.bottomNabbarView, arguments: 1);
-        break;
-
-      case 'CHAUFFEUR_APPLIED':
-      case 'JOB_APPLICATION_RECEIVED':
-        // Driver applied to creator's job -> Creator's Job Details / My Jobs
-        if (jobId != null && jobId.isNotEmpty) {
-          Get.toNamed(Routes.myJobProgressDetailsView, arguments: jobId);
-        } else {
-          Get.offAllNamed(Routes.bottomNabbarView, arguments: 1);
-        }
-        break;
-
-      case 'JOB_APPLICANT_REJECTED':
-        // Driver rejected -> Available Jobs Feed
-        Get.offAllNamed(Routes.bottomNabbarView, arguments: 0);
-        break;
-
-      case 'JOB_CANCELLED':
-        // Ride cancelled -> Alert / Job Details
-        if (jobId != null && jobId.isNotEmpty) {
-          Get.toNamed(Routes.myJobProgressDetailsView, arguments: jobId);
-        } else {
-          Get.offAllNamed(Routes.bottomNabbarView, arguments: 1);
-        }
-        break;
-
-      case 'NEW_MESSAGE':
-      case 'MESSAGE':
-      case 'CHAT':
-        // Chat message -> Chat Details screen or Chat tab
-        if (chatId != null && chatId.isNotEmpty) {
-          Get.toNamed(
-            Routes.chatDetailView,
-            arguments: ChatPreview(
-              id: chatId,
-              participants: const [],
-              createdBy: '',
-              createdAt: '',
-              updatedAt: '',
-            ),
-          );
-        } else {
-          Get.offAllNamed(Routes.bottomNabbarView, arguments: 2);
-        }
-        break;
-
-      case 'SUPPORT_MESSAGE':
-      case 'SUPPORT_TICKET':
-      case 'SUPPORT':
-        final String? ticketId = data['ticketId']?.toString() ??
-            data['id']?.toString() ??
-            data['_id']?.toString();
-        if (ticketId != null && ticketId.isNotEmpty) {
-          Get.toNamed(
-            Routes.supportTicketDetailView,
-            arguments: {
-              'ticketId': ticketId,
-              'id': ticketId,
-            },
-          );
-        } else {
-          Get.toNamed(Routes.notificationsView);
-        }
-        break;
-
-      default:
-        Get.toNamed(Routes.notificationsView);
-        break;
-    }
+    navigateToNotificationTarget(
+      type: type,
+      jobId: jobId,
+      chatId: chatId,
+      title: title,
+      subtitle: subtitle,
+      data: data,
+    );
   }
 
   // Send token to backend

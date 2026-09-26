@@ -2,19 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
 import 'package:moeb_26/config/routes/app_pages.dart';
 import 'package:moeb_26/config/themes/app_theme.dart';
 import 'package:moeb_26/core/services/api_client.dart';
 import 'package:moeb_26/core/services/user_service.dart';
 import 'package:moeb_26/core/utils/helpers.dart';
-import 'package:moeb_26/core/widgets/CustomButton.dart';
 import 'package:moeb_26/data/models/my_rides_model.dart';
 import 'package:moeb_26/data/repositories/socket_repository.dart';
 import 'package:moeb_26/core/services/subscription_service.dart';
 import 'package:moeb_26/core/widgets/premium_lock_widget.dart';
 import 'package:moeb_26/modules/rides/widgets/RideCard.dart';
-import 'package:moeb_26/modules/rides/widgets/RideDetailSheet.dart';
 import '../../../core/widgets/Custom_AppBar.dart';
 import '../controllers/rides_controller.dart';
 
@@ -29,56 +26,8 @@ class _RidesViewState extends State<RidesView> {
   final RidesController controller = Get.find<RidesController>();
   final List<String> _tabs = ["Upcoming", "Past"];
 
-  String _formatDateHeader(RideData ride) {
-    DateTime? parsed;
-
-    if (ride.asap) {
-      if (ride.createdAt != null && ride.createdAt!.isNotEmpty) {
-        try {
-          parsed = DateTime.parse(ride.createdAt!).toLocal();
-        } catch (_) {}
-      }
-      parsed ??= DateTime.now();
-    } else {
-      final dateStr = ride.date;
-      if (dateStr != null && dateStr.isNotEmpty && dateStr != "null") {
-        try {
-          parsed = DateTime.parse(dateStr).toLocal();
-        } catch (_) {}
-      }
-      if (parsed == null &&
-          ride.createdAt != null &&
-          ride.createdAt!.isNotEmpty) {
-        try {
-          parsed = DateTime.parse(ride.createdAt!).toLocal();
-        } catch (_) {}
-      }
-    }
-
-    if (parsed == null) {
-      return "Scheduled";
-    }
-
-    try {
-      final now = DateTime.now();
-      final today = DateTime(now.year, now.month, now.day);
-      final rideDate = DateTime(parsed.year, parsed.month, parsed.day);
-
-      if (rideDate == today) {
-        return "Today, ${DateFormat('MMM dd').format(parsed)}";
-      } else if (rideDate == today.add(const Duration(days: 1))) {
-        return "Tomorrow, ${DateFormat('MMM dd').format(parsed)}";
-      } else if (rideDate == today.subtract(const Duration(days: 1))) {
-        return "Yesterday, ${DateFormat('MMM dd').format(parsed)}";
-      } else if (parsed.year != now.year) {
-        return DateFormat('EEE, MMM dd, yyyy').format(parsed);
-      } else {
-        return DateFormat('EEE, MMM dd').format(parsed);
-      }
-    } catch (_) {
-      return DateFormat('MMM dd').format(parsed);
-    }
-  }
+  String _formatDateHeader(RideData ride) =>
+      RidesController.formatDateHeader(ride);
 
   String _formatTime(RideData ride) {
     if (ride.asap) {
@@ -533,115 +482,11 @@ class _RidesViewState extends State<RidesView> {
     required bool isPast,
     required bool isCreatedByMe,
   }) {
-    Get.bottomSheet(
-      RideDetailSheet(
-        ride: ride,
-        isPast: isPast,
-        dateHeader: dateHeader,
-        isCreatedByMe: isCreatedByMe,
-        onReviewPressed: (isPast &&
-                ride.status?.toUpperCase() != 'CANCELLED' &&
-                ride.rideStatus?.toUpperCase() != 'CANCELLED')
-            ? () {
-                Get.toNamed(Routes.rideCompletedView, arguments: ride);
-              }
-            : null,
-        onEditPressed: isCreatedByMe && !ride.hasApplicants
-            ? () {
-                Get.toNamed(Routes.jobEditView, arguments: ride);
-              }
-            : null,
-        onDeletePressed: isCreatedByMe
-            ? () {
-                _showDeleteDialog(jobId: ride.id);
-              }
-            : null,
-        onAcceptApplicant: isCreatedByMe && ride.hasApplicants
-            ? () {
-                controller.approveApplicant(jobId: ride.id);
-              }
-            : null,
-        onRejectApplicant: isCreatedByMe && ride.hasApplicants
-            ? () {
-                controller.rejectApplicant(jobId: ride.id);
-              }
-            : null,
-        onCancelJob: isCreatedByMe
-            ? () {
-                controller.cancelJob(jobId: ride.id);
-              }
-            : null,
-      ),
-      isScrollControlled: true,
-      ignoreSafeArea: false,
-    );
-  }
-
-  void _showDeleteDialog({required String jobId}) {
-    Get.dialog(
-      Dialog(
-        backgroundColor: Colors.transparent,
-        child: Container(
-          padding: EdgeInsets.all(20.w),
-          decoration: BoxDecoration(
-            color: const Color(0xFF1E1E1E),
-            borderRadius: BorderRadius.circular(20.r),
-            border: Border.all(color: const Color(0xFF2C2C2C)),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                "Delete Job",
-                style: GoogleFonts.inter(
-                  color: Colors.white,
-                  fontSize: 18.sp,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              SizedBox(height: 10.h),
-              Text(
-                "Are you sure you want to delete this job?",
-                textAlign: TextAlign.center,
-                style: GoogleFonts.inter(color: Colors.grey, fontSize: 13.sp),
-              ),
-              SizedBox(height: 20.h),
-              Row(
-                children: [
-                  Expanded(
-                    child: CustomButton(
-                      text: "Cancel",
-                      backgroundColor: Colors.transparent,
-                      textColor: Colors.white,
-                      borderColor: Colors.grey,
-                      fontSize: 14.sp,
-                      onPressed: () => Get.back(),
-                      padding: EdgeInsets.symmetric(vertical: 12.h),
-                    ),
-                  ),
-                  SizedBox(width: 10.w),
-                  Expanded(
-                    child: CustomButton(
-                      text: "Delete",
-                      backgroundColor: Colors.redAccent,
-                      textColor: Colors.black,
-                      fontSize: 14.sp,
-                      onPressed: () {
-                        Get.back(); // Close confirmation dialog
-                        if (Get.isBottomSheetOpen == true) {
-                          Get.back(); // Close bottom sheet
-                        }
-                        controller.deleteJob(jobId: jobId);
-                      },
-                      padding: EdgeInsets.symmetric(vertical: 12.h),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
+    controller.showRideDetailSheet(
+      ride,
+      isPast: isPast,
+      isCreatedByMe: isCreatedByMe,
+      dateHeader: dateHeader,
     );
   }
 }

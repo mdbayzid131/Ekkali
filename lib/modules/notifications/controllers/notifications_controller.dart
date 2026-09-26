@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:moeb_26/core/services/notifications_service.dart';
-import 'package:moeb_26/data/models/Notifications_Model.dart';
+import 'package:moeb_26/data/models/notifications_model.dart';
 
 class NotificationController extends GetxController {
   final NotificationsService _notificationsService =
@@ -110,15 +110,7 @@ class NotificationController extends GetxController {
       if (response.statusCode == 200 || response.statusCode == 201) {
         // Update local list directly for instant UI feedback
         for (var i = 0; i < notifications.length; i++) {
-          notifications[i] = NotificationItem(
-            id: notifications[i].id,
-            title: notifications[i].title,
-            subtitle: notifications[i].subtitle,
-            type: notifications[i].type,
-            isRead: true,
-            createdAt: notifications[i].createdAt,
-            icon: notifications[i].icon,
-          );
+          notifications[i] = notifications[i].copyWith(isRead: true);
         }
         notifications.refresh();
       }
@@ -135,15 +127,7 @@ class NotificationController extends GetxController {
         // Find and update locally
         int index = notifications.indexWhere((n) => n.id == notificationId);
         if (index != -1) {
-          notifications[index] = NotificationItem(
-            id: notifications[index].id,
-            title: notifications[index].title,
-            subtitle: notifications[index].subtitle,
-            type: notifications[index].type,
-            isRead: true,
-            createdAt: notifications[index].createdAt,
-            icon: notifications[index].icon,
-          );
+          notifications[index] = notifications[index].copyWith(isRead: true);
           notifications.refresh();
         }
       }

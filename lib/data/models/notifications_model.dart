@@ -8,6 +8,9 @@ class NotificationItem {
   final bool isRead;
   final DateTime createdAt;
   final String icon;
+  final String? jobId;
+  final String? chatId;
+  final Map<String, dynamic>? data;
 
   NotificationItem({
     required this.id,
@@ -17,7 +20,36 @@ class NotificationItem {
     required this.isRead,
     required this.createdAt,
     required this.icon,
+    this.jobId,
+    this.chatId,
+    this.data,
   });
+
+  NotificationItem copyWith({
+    String? id,
+    String? title,
+    String? subtitle,
+    String? type,
+    bool? isRead,
+    DateTime? createdAt,
+    String? icon,
+    String? jobId,
+    String? chatId,
+    Map<String, dynamic>? data,
+  }) {
+    return NotificationItem(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      subtitle: subtitle ?? this.subtitle,
+      type: type ?? this.type,
+      isRead: isRead ?? this.isRead,
+      createdAt: createdAt ?? this.createdAt,
+      icon: icon ?? this.icon,
+      jobId: jobId ?? this.jobId,
+      chatId: chatId ?? this.chatId,
+      data: data ?? this.data,
+    );
+  }
 
   factory NotificationItem.fromJson(Map<String, dynamic> json) {
     String type = json['type']?.toString() ??
@@ -47,6 +79,38 @@ class NotificationItem {
       } catch (_) {}
     }
 
+    Map<String, dynamic>? rawData;
+    if (json['data'] is Map<String, dynamic>) {
+      rawData = json['data'] as Map<String, dynamic>;
+    } else if (json['payload'] is Map<String, dynamic>) {
+      rawData = json['payload'] as Map<String, dynamic>;
+    }
+
+    final dynamic jobObj = (json['job'] is Map)
+        ? json['job']
+        : (rawData != null && rawData['job'] is Map ? rawData['job'] : null);
+    final dynamic chatObj = (json['chat'] is Map)
+        ? json['chat']
+        : (rawData != null && rawData['chat'] is Map ? rawData['chat'] : null);
+
+    String? parsedJobId = json['jobId']?.toString() ??
+        rawData?['jobId']?.toString() ??
+        rawData?['id']?.toString() ??
+        rawData?['_id']?.toString() ??
+        json['rideId']?.toString() ??
+        rawData?['rideId']?.toString();
+
+    if (parsedJobId == null && jobObj is Map) {
+      parsedJobId = jobObj['_id']?.toString() ?? jobObj['id']?.toString();
+    }
+
+    String? parsedChatId = json['chatId']?.toString() ??
+        rawData?['chatId']?.toString();
+
+    if (parsedChatId == null && chatObj is Map) {
+      parsedChatId = chatObj['_id']?.toString() ?? chatObj['id']?.toString();
+    }
+
     return NotificationItem(
       id: json['_id']?.toString() ?? json['id']?.toString() ?? '',
       title: json['title']?.toString() ??
@@ -63,6 +127,9 @@ class NotificationItem {
           json['status']?.toString().toUpperCase() == 'READ',
       createdAt: parsedDate,
       icon: iconPath,
+      jobId: parsedJobId,
+      chatId: parsedChatId,
+      data: rawData ?? (json['data'] is Map ? Map<String, dynamic>.from(json['data']) : null),
     );
   }
 

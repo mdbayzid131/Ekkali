@@ -81,7 +81,15 @@ class SplashScreenController extends GetxController {
           Get.find<SubscriptionService>().syncStatusWithBackend();
         }
       } catch (_) {}
-      Get.offAllNamed(Routes.bottomNabbarView);
+
+      // If user opened the app from a push notification in terminated state, route appropriately
+      if (FirebaseNotificationService.pendingInitialMessage != null) {
+        final initialMsg = FirebaseNotificationService.pendingInitialMessage!;
+        FirebaseNotificationService.pendingInitialMessage = null;
+        FirebaseNotificationService.handleNotificationMessage(initialMsg);
+      } else {
+        Get.offAllNamed(Routes.bottomNabbarView);
+      }
     } else {
       // Incomplete onboarding, unapproved, or logged out:
       // Clear incomplete local session so user logs in and gets fresh server status

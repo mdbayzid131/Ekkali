@@ -1,14 +1,22 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
+import 'package:moeb_26/config/routes/app_pages.dart';
 import 'package:moeb_26/core/services/socket_service.dart';
+import 'package:moeb_26/core/services/user_service.dart';
 import 'package:moeb_26/core/utils/helpers.dart';
+import 'package:moeb_26/core/widgets/CustomButton.dart';
 import 'package:moeb_26/data/models/my_rides_model.dart';
 import 'package:moeb_26/data/repositories/job_repository.dart';
+import 'package:moeb_26/modules/rides/widgets/RideDetailSheet.dart';
 
 class RidesController extends GetxController {
   final JobRepo _jobRepo = Get.find<JobRepo>();
   SocketService? _socketService;
+  String? _currentlyOpeningJobId;
 
   RxBool isLoadingList = false.obs;
   RxBool isLoadMore = false.obs;
@@ -34,6 +42,14 @@ class RidesController extends GetxController {
     super.onInit();
     if (Get.arguments is Map && Get.arguments.containsKey('ridesTab')) {
       selectedTab.value = Get.arguments['ridesTab'];
+    }
+    if (Get.arguments is Map && Get.arguments.containsKey('targetJobId')) {
+      final targetJobId = Get.arguments['targetJobId']?.toString();
+      if (targetJobId != null && targetJobId.isNotEmpty) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          openRideBottomSheet(targetJobId);
+        });
+      }
     }
     if (Get.isRegistered<SocketService>()) {
       _socketService = Get.find<SocketService>();
@@ -519,6 +535,255 @@ class RidesController extends GetxController {
       await fetchUpcomingJobs();
     } else if (selectedTab.value == 1) {
       await fetchPastJobs();
+    }
+  }
+
+  static String formatDateHeader(RideData ride) {
+    DateTime? parsed;
+    if (ride.asap) {
+      if (ride.createdAt != null && ride.createdAt!.isNotEmpty) {
+        try {
+          parsed = DateTime.parse(ride.createdAt!).toLocal();
+        } catch (_) {}
+      }
+      parsed ??= DateTime.now();
+    } else {
+      final dateStr = ride.date;
+      if (dateStr != null && dateStr.isNotEmpty && dateStr != "null") {
+        try {
+          parsed = DateTime.parse(dateStr).toLocal();
+        } catch (_) {}
+      }
+      if (parsed == null &&
+          ride.createdAt != null &&
+          ride.createdAt!.isNotEmpty) {
+        try {
+          parsed = DateTime.parse(ride.createdAt!).toLocal();
+        } catch (_) {}
+      }
+    }
+
+    if (parsed == null) {
+      return "Scheduled";
+    }
+
+    try {
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+      final rideDate = DateTime(parsed.year, parsed.month, parsed.day);
+
+      if (rideDate == today) {
+        return "Today, ${DateFormat('MMM dd').format(parsed)}";
+      } else if (rideDate == today.add(const Duration(days: 1))) {
+        return "Tomorrow, ${DateFormat('MMM dd').format(parsed)}";
+      } else if (rideDate == today.subtract(const Duration(days: 1))) {
+        return "Yesterday, ${DateFormat('MMM dd').format(parsed)}";
+      } else if (parsed.year != now.year) {
+        return DateFormat('EEE, MMM dd, yyyy').format(parsed);
+      } else {
+        return DateFormat('EEE, MMM dd').format(parsed);
+      }
+    } catch (_) {
+      return DateFormat('MMM dd').format(parsed);
+    }
+  }
+
+  void showDeleteDialog({required String jobId}) {
+    Get.dialog(
+      Dialog(
+        backgroundColor: Colors.transparent,
+        child: Container(
+          padding: EdgeInsets.all(20.w),
+          decoration: BoxDecoration(
+            color: const Color(0xFF1E1E1E),
+            borderRadius: BorderRadius.circular(20.r),
+            border: Border.all(color: const Color(0xFF2C2C2C)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                "Delete Job",
+                style: GoogleFonts.inter(
+                  color: Colors.white,
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 10.h),
+              Text(
+                "Are you sure you want to delete this job?",
+                textAlign: TextAlign.center,
+                style: GoogleFonts.inter(color: Colors.grey, fontSize: 13.sp),
+              ),
+              SizedBox(height: 20.h),
+              Row(
+                children: [
+                  Expanded(
+                    child: CustomButton(
+                      text: "Cancel",
+                      backgroundColor: Colors.transparent,
+                      textColor: Colors.white,
+                      borderColor: Colors.grey,
+                      fontSize: 14.sp,
+                      onPressed: () => Get.back(),
+                      padding: EdgeInsets.symmetric(vertical: 12.h),
+                    ),
+                  ),
+                  SizedBox(width: 10.w),
+                  Expanded(
+                    child: CustomButton(
+                      text: "Delete",
+                      backgroundColor: Colors.redAccent,
+                      textColor: Colors.black,
+                      fontSize: 14.sp,
+                      onPressed: () {
+                        Get.back(); // Close confirmation dialog
+                        if (Get.isBottomSheetOpen == true) {
+                          Get.back(); // Close bottom sheet
+                        }
+                        deleteJob(jobId: jobId);
+                      },
+                      padding: EdgeInsets.symmetric(vertical: 12.h),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> showRideDetailSheet(
+    RideData ride, {
+    required bool isPast,
+    required bool isCreatedByMe,
+    String? dateHeader,
+  }) async {
+    if (Get.isBottomSheetOpen == true) {
+      Get.back();
+      await Future.delayed(const Duration(milliseconds: 100));
+    }
+    if (Get.isDialogOpen == true) {
+      Get.back();
+      await Future.delayed(const Duration(milliseconds: 100));
+    }
+
+    Get.bottomSheet(
+      RideDetailSheet(
+        ride: ride,
+        isPast: isPast,
+        dateHeader: dateHeader ?? formatDateHeader(ride),
+        isCreatedByMe: isCreatedByMe,
+        onReviewPressed: (isPast &&
+                ride.status?.toUpperCase() != 'CANCELLED' &&
+                ride.rideStatus?.toUpperCase() != 'CANCELLED')
+            ? () {
+                Get.toNamed(Routes.rideCompletedView, arguments: ride);
+              }
+            : null,
+        onEditPressed: isCreatedByMe && !ride.hasApplicants
+            ? () {
+                Get.toNamed(Routes.jobEditView, arguments: ride);
+              }
+            : null,
+        onDeletePressed: isCreatedByMe
+            ? () {
+                showDeleteDialog(jobId: ride.id);
+              }
+            : null,
+        onAcceptApplicant: isCreatedByMe && ride.hasApplicants
+            ? () {
+                approveApplicant(jobId: ride.id);
+              }
+            : null,
+        onRejectApplicant: isCreatedByMe && ride.hasApplicants
+            ? () {
+                rejectApplicant(jobId: ride.id);
+              }
+            : null,
+        onCancelJob: isCreatedByMe
+            ? () {
+                cancelJob(jobId: ride.id);
+              }
+            : null,
+      ),
+      isScrollControlled: true,
+      ignoreSafeArea: false,
+    );
+  }
+
+  Future<void> openRideBottomSheet(String jobId) async {
+    if (jobId.isEmpty) return;
+    if (_currentlyOpeningJobId == jobId) {
+      debugPrint("ℹ️ openRideBottomSheet already in progress for: $jobId");
+      return;
+    }
+    _currentlyOpeningJobId = jobId;
+
+    try {
+      RideData? targetRide;
+      bool isPast = false;
+
+      // 1. Check in loaded upcomingRides
+      targetRide = upcomingRides.firstWhereOrNull((r) => r.id == jobId);
+
+      // 2. Check in loaded pastRides
+      if (targetRide == null) {
+        targetRide = pastRides.firstWhereOrNull((r) => r.id == jobId);
+        if (targetRide != null) {
+          isPast = true;
+        }
+      }
+
+      // 3. If not in memory yet, fetch directly from API
+      if (targetRide == null) {
+        try {
+          final response = await _jobRepo.getJobById(jobId: jobId);
+          if (response.statusCode == 200 || response.statusCode == 201) {
+            if (response.data != null &&
+                response.data['data'] != null &&
+                response.data['data'] is Map<String, dynamic>) {
+              targetRide = RideData.fromJson(response.data['data']);
+              final st =
+                  (targetRide.status ?? targetRide.rideStatus ?? '').toUpperCase();
+              isPast = (st == 'COMPLETED' || st == 'CANCELLED');
+            }
+          }
+        } catch (e) {
+          debugPrint("❌ Error fetching job by id ($jobId) for bottom sheet: $e");
+        }
+      }
+
+      if (targetRide != null) {
+        // Ensure the matching tab is selected
+        if (isPast && selectedTab.value != 1) {
+          selectedTab.value = 1;
+        } else if (!isPast && selectedTab.value != 0) {
+          selectedTab.value = 0;
+        }
+
+        final myId = Get.isRegistered<UserService>()
+            ? Get.find<UserService>().userId
+            : "";
+        final isCreatedByMe = targetRide.isCreatedBy(myId);
+
+        showRideDetailSheet(
+          targetRide,
+          isPast: isPast,
+          isCreatedByMe: isCreatedByMe,
+        );
+      } else {
+        debugPrint("⚠️ Ride not found with ID: $jobId");
+      }
+    } finally {
+      Future.delayed(const Duration(milliseconds: 1000), () {
+        if (_currentlyOpeningJobId == jobId) {
+          _currentlyOpeningJobId = null;
+        }
+      });
     }
   }
 }

@@ -3,10 +3,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:moeb_26/config/routes/app_pages.dart';
 import 'package:moeb_26/config/themes/app_theme.dart';
+import 'package:moeb_26/core/services/firebase_notification_service.dart';
 import 'package:moeb_26/core/widgets/custom_sub_appbar.dart';
-import 'package:moeb_26/data/models/Notifications_Model.dart';
+import 'package:moeb_26/data/models/notifications_model.dart';
 import '../controllers/notifications_controller.dart';
 
 class NotificationsView extends StatelessWidget {
@@ -355,39 +355,13 @@ class NotificationsView extends StatelessWidget {
       controller.markAsRead(currentNoti.id);
     }
 
-    final type = currentNoti.type.toUpperCase();
-    final title = currentNoti.title.toLowerCase();
-    final subtitle = currentNoti.subtitle.toLowerCase();
-
-    if (type == 'MESSAGE' ||
-        title.contains('message') ||
-        title.contains('chat') ||
-        subtitle.contains('message') ||
-        subtitle.contains('chat')) {
-      Get.offAllNamed(Routes.bottomNabbarView, arguments: 2);
-    } else if (type == 'TASK' ||
-        title.contains('job') ||
-        subtitle.contains('job') ||
-        title.contains('acceptance')) {
-      Get.offAllNamed(Routes.bottomNabbarView, arguments: 1);
-    } else if (type == 'REMINDER' ||
-        title.contains('deal') ||
-        subtitle.contains('deal') ||
-        title.contains('offer') ||
-        title.contains('saving')) {
-      Get.toNamed(Routes.dealsView);
-    } else if (title.contains('invoice') ||
-        title.contains('payment') ||
-        subtitle.contains('invoice') ||
-        subtitle.contains('payment')) {
-      Get.toNamed(Routes.invoiceHistoryView);
-    } else if (title.contains('item') ||
-        title.contains('market') ||
-        subtitle.contains('item') ||
-        subtitle.contains('market')) {
-      Get.toNamed(Routes.myItemsView);
-    } else {
-      Get.toNamed(Routes.bottomNabbarView);
-    }
+    FirebaseNotificationService.navigateToNotificationTarget(
+      type: currentNoti.type,
+      jobId: currentNoti.jobId,
+      chatId: currentNoti.chatId,
+      title: currentNoti.title,
+      subtitle: currentNoti.subtitle,
+      data: currentNoti.data,
+    );
   }
 }

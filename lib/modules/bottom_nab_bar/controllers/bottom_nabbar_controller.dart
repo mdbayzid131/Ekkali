@@ -10,19 +10,61 @@ class NavigationController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    String? targetJobId;
+
     if (Get.arguments is int) {
       currentIndex.value = Get.arguments;
-    } else if (Get.arguments is Map &&
-        Get.arguments.containsKey('bottomIndex')) {
-      currentIndex.value = Get.arguments['bottomIndex'];
+    } else if (Get.arguments is Map) {
+      if (Get.arguments.containsKey('bottomIndex')) {
+        currentIndex.value = Get.arguments['bottomIndex'];
+      }
+      targetJobId = Get.arguments['targetJobId']?.toString();
     }
 
     if (currentIndex.value == 1) {
-      try {
-        if (Get.isRegistered<RidesController>()) {
-          Get.find<RidesController>().refreshCurrentTab();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        try {
+          final ridesCtrl = Get.isRegistered<RidesController>()
+              ? Get.find<RidesController>()
+              : Get.put(RidesController());
+          ridesCtrl.refreshCurrentTab();
+          if (targetJobId != null && targetJobId.isNotEmpty) {
+            ridesCtrl.openRideBottomSheet(targetJobId);
+          }
+        } catch (e) {
+          debugPrint("NavigationController onInit rides error: $e");
         }
-      } catch (_) {}
+      });
+    } else if (currentIndex.value == 2) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        try {
+          if (Get.isRegistered<ChatController>()) {
+            Get.find<ChatController>().fetchChats();
+          }
+        } catch (_) {}
+      });
+    }
+  }
+
+  void navigateToRidesTab({String? targetJobId}) {
+    currentIndex.value = 1;
+    final ridesCtrl = Get.isRegistered<RidesController>()
+        ? Get.find<RidesController>()
+        : Get.put(RidesController());
+    ridesCtrl.refreshCurrentTab();
+    if (targetJobId != null && targetJobId.isNotEmpty) {
+      ridesCtrl.openRideBottomSheet(targetJobId);
+    }
+  }
+
+  void navigateToChatTab() {
+    currentIndex.value = 2;
+    try {
+      if (Get.isRegistered<ChatController>()) {
+        Get.find<ChatController>().fetchChats();
+      }
+    } catch (e) {
+      debugPrint("NavigationController navigateToChatTab error: $e");
     }
   }
 
@@ -40,7 +82,10 @@ class NavigationController extends GetxController {
     } else if (index == 1) {
       // Index 1 is RidesPage
       try {
-        Get.find<RidesController>().refreshCurrentTab();
+        final ridesCtrl = Get.isRegistered<RidesController>()
+            ? Get.find<RidesController>()
+            : Get.put(RidesController());
+        ridesCtrl.refreshCurrentTab();
       } catch (e) {
         debugPrint("NavigationController refreshCurrentTab error: $e");
       }
