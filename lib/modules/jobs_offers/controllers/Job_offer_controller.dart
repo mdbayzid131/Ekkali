@@ -187,15 +187,39 @@ class JobOfferController extends GetxController {
   void _groupOffersByDate(List<JobOfferModel> items) {
     final Map<String, List<JobOfferModel>> groups = {};
 
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
     for (final job in items) {
       String header;
+      DateTime? parsed;
+
       if (job.asap) {
-        final created = job.createdAt ?? DateTime.now();
-        header = "Today, ${DateFormat('MMM dd').format(created)}";
+        parsed = job.createdAt ?? DateTime.now();
       } else if (job.date != null) {
-        header = DateFormat('EEE, MMM dd').format(job.date!);
+        parsed = job.date;
       } else if (job.createdAt != null) {
-        header = "Today, ${DateFormat('MMM dd').format(job.createdAt!)}";
+        parsed = job.createdAt;
+      }
+
+      if (parsed != null) {
+        final localDate = parsed.toLocal();
+        final targetDate = DateTime(
+          localDate.year,
+          localDate.month,
+          localDate.day,
+        );
+        if (targetDate == today) {
+          header = "Today, ${DateFormat('MMM dd').format(localDate)}";
+        } else if (targetDate == today.add(const Duration(days: 1))) {
+          header = "Tomorrow, ${DateFormat('MMM dd').format(localDate)}";
+        } else if (targetDate == today.subtract(const Duration(days: 1))) {
+          header = "Yesterday, ${DateFormat('MMM dd').format(localDate)}";
+        } else if (localDate.year != now.year) {
+          header = DateFormat('EEE, MMM dd, yyyy').format(localDate);
+        } else {
+          header = DateFormat('EEE, MMM dd').format(localDate);
+        }
       } else {
         header = 'Available Offers';
       }

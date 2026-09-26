@@ -30,22 +30,36 @@ class _RidesViewState extends State<RidesView> {
   final List<String> _tabs = ["Upcoming", "Past"];
 
   String _formatDateHeader(RideData ride) {
+    DateTime? parsed;
+
     if (ride.asap) {
       if (ride.createdAt != null && ride.createdAt!.isNotEmpty) {
         try {
-          final parsed = DateTime.parse(ride.createdAt!).toLocal();
-          return "Today, ${DateFormat('MMM dd').format(parsed)}";
+          parsed = DateTime.parse(ride.createdAt!).toLocal();
         } catch (_) {}
       }
-      return "Today, ${DateFormat('MMM dd').format(DateTime.now())}";
+      parsed ??= DateTime.now();
+    } else {
+      final dateStr = ride.date;
+      if (dateStr != null && dateStr.isNotEmpty && dateStr != "null") {
+        try {
+          parsed = DateTime.parse(dateStr).toLocal();
+        } catch (_) {}
+      }
+      if (parsed == null &&
+          ride.createdAt != null &&
+          ride.createdAt!.isNotEmpty) {
+        try {
+          parsed = DateTime.parse(ride.createdAt!).toLocal();
+        } catch (_) {}
+      }
     }
 
-    final dateStr = ride.date;
-    if (dateStr == null || dateStr.isEmpty || dateStr == "null") {
+    if (parsed == null) {
       return "Scheduled";
     }
+
     try {
-      final parsed = DateTime.parse(dateStr).toLocal();
       final now = DateTime.now();
       final today = DateTime(now.year, now.month, now.day);
       final rideDate = DateTime(parsed.year, parsed.month, parsed.day);
@@ -56,10 +70,13 @@ class _RidesViewState extends State<RidesView> {
         return "Tomorrow, ${DateFormat('MMM dd').format(parsed)}";
       } else if (rideDate == today.subtract(const Duration(days: 1))) {
         return "Yesterday, ${DateFormat('MMM dd').format(parsed)}";
+      } else if (parsed.year != now.year) {
+        return DateFormat('EEE, MMM dd, yyyy').format(parsed);
+      } else {
+        return DateFormat('EEE, MMM dd').format(parsed);
       }
-      return DateFormat('EEE, MMM dd').format(parsed);
     } catch (_) {
-      return dateStr;
+      return DateFormat('MMM dd').format(parsed);
     }
   }
 
