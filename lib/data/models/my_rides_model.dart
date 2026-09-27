@@ -188,16 +188,47 @@ class RideData {
     return false;
   }
 
-  bool isAssignedToMe(String currentUserId) {
-    if (currentUserId.isEmpty) return false;
-    return assignedTo?.id != null && assignedTo!.id == currentUserId;
+  bool isAssignedToMe(
+    String currentUserId, {
+    String? userEmail,
+  }) {
+    if (currentUserId.isNotEmpty &&
+        assignedTo?.id != null &&
+        assignedTo!.id == currentUserId) {
+      return true;
+    }
+    if (userEmail != null &&
+        userEmail.isNotEmpty &&
+        assignedTo?.email.isNotEmpty == true &&
+        assignedTo!.email.trim().toLowerCase() ==
+            userEmail.trim().toLowerCase()) {
+      return true;
+    }
+    return false;
   }
 
-  bool isAppliedByMe(String currentUserId) {
-    if (currentUserId.isEmpty) return false;
-    if (applicant?.driver?.id == currentUserId) return true;
-    if (applicants != null && applicants!.any((a) => a.id == currentUserId)) {
-      return true;
+  bool isAppliedByMe(
+    String currentUserId, {
+    String? userEmail,
+  }) {
+    if (currentUserId.isNotEmpty) {
+      if (applicant?.driver?.id == currentUserId) return true;
+      if (applicants != null && applicants!.any((a) => a.id == currentUserId)) {
+        return true;
+      }
+    }
+    if (userEmail != null && userEmail.isNotEmpty) {
+      final uEmail = userEmail.trim().toLowerCase();
+      if (applicant?.driver?.email.isNotEmpty == true &&
+          applicant!.driver!.email.trim().toLowerCase() == uEmail) {
+        return true;
+      }
+      if (applicants != null &&
+          applicants!.any(
+            (a) => a.email.trim().toLowerCase() == uEmail,
+          )) {
+        return true;
+      }
     }
     return false;
   }
@@ -430,6 +461,7 @@ class DriverData {
   final String? companyRole;
   final String profilePicture;
   final String? selectedVehicle;
+  final Vehicle? selectedVehicleData;
   final double? averageRating;
   final int? totalReviews;
   final List<Vehicle>? vehicles;
@@ -444,17 +476,44 @@ class DriverData {
     this.companyRole,
     this.profilePicture = '',
     this.selectedVehicle,
+    this.selectedVehicleData,
     this.averageRating,
     this.totalReviews,
     this.vehicles,
   });
 
+  Vehicle? get effectiveVehicle {
+    if (selectedVehicleData != null) return selectedVehicleData;
+    if (vehicles != null && vehicles!.isNotEmpty) {
+      if (selectedVehicle != null && selectedVehicle!.isNotEmpty) {
+        return vehicles!.firstWhere(
+          (v) => v.id == selectedVehicle,
+          orElse: () => vehicles!.first,
+        );
+      }
+      return vehicles!.first;
+    }
+    return null;
+  }
+
   factory DriverData.fromJson(Map<String, dynamic> json) {
     List<Vehicle>? vehicleList;
     if (json['vehicles'] is List) {
       vehicleList = (json['vehicles'] as List)
-          .map((v) => Vehicle.fromJson(v as Map<String, dynamic>))
+          .whereType<Map<String, dynamic>>()
+          .map((v) => Vehicle.fromJson(v))
           .toList();
+    }
+
+    Vehicle? parsedSelectedVehicle;
+    String? selectedVehicleId;
+    if (json['selectedVehicle'] is Map<String, dynamic>) {
+      parsedSelectedVehicle = Vehicle.fromJson(
+        json['selectedVehicle'] as Map<String, dynamic>,
+      );
+      selectedVehicleId = parsedSelectedVehicle.id;
+    } else if (json['selectedVehicle'] != null) {
+      selectedVehicleId = json['selectedVehicle']?.toString();
     }
 
     return DriverData(
@@ -463,10 +522,11 @@ class DriverData {
       nickname: json['nickname']?.toString(),
       email: json['email']?.toString() ?? '',
       phone: json['phone']?.toString() ?? '',
-      company: json['company']?.toString(),
+      company: json['company']?.toString() ?? json['companyName']?.toString(),
       companyRole: json['companyRole']?.toString(),
       profilePicture: json['profilePicture']?.toString() ?? '',
-      selectedVehicle: json['selectedVehicle']?.toString(),
+      selectedVehicle: selectedVehicleId,
+      selectedVehicleData: parsedSelectedVehicle,
       averageRating: json['averageRating'] is num
           ? (json['averageRating'] as num).toDouble()
           : null,
@@ -487,7 +547,7 @@ class DriverData {
       'company': company,
       'companyRole': companyRole,
       'profilePicture': profilePicture,
-      'selectedVehicle': selectedVehicle,
+      'selectedVehicle': selectedVehicleData?.toJson() ?? selectedVehicle,
       'averageRating': averageRating,
       'totalReviews': totalReviews,
     };

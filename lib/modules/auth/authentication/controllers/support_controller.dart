@@ -54,8 +54,11 @@ class SupportController extends GetxController {
     }
   }
 
-  Future<void> createSupportTicket() async {
-    if (subjectController.text.isEmpty || messageController.text.isEmpty) {
+  Future<void> createSupportTicket([BuildContext? context]) async {
+    if (isSubmitting.value) return;
+
+    if (subjectController.text.trim().isEmpty ||
+        messageController.text.trim().isEmpty) {
       Helpers.showCustomSnackBar("Please fill all fields", isError: true);
       return;
     }
@@ -63,21 +66,41 @@ class SupportController extends GetxController {
     try {
       isSubmitting.value = true;
       final response = await _supportService.createSupport(
-        subject: subjectController.text,
-        message: messageController.text,
+        subject: subjectController.text.trim(),
+        message: messageController.text.trim(),
         attachments: selectedFiles,
       );
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
+      final isSuccess =
+          response.statusCode == 200 ||
+          response.statusCode == 201 ||
+          (response.data is Map && response.data['success'] == true);
+
+      if (isSuccess) {
+        subjectController.clear();
+        messageController.clear();
+        selectedFiles.clear();
+
+        if (context != null && Navigator.canPop(context)) {
+          Navigator.pop(context);
+        } else if (Get.context != null && Navigator.canPop(Get.context!)) {
+          Navigator.pop(Get.context!);
+        } else {
+          Get.back();
+        }
+
         Helpers.showCustomSnackBar(
           "Support request sent successfully",
           isError: false,
         );
-        subjectController.clear();
-        messageController.clear();
-        selectedFiles.clear();
+
         await fetchMyTickets(); // Refresh list
-        Get.back(); // Go back to previous screen
+      } else {
+        Helpers.showCustomSnackBar(
+          response.data?['message']?.toString() ??
+              "Failed to send support request",
+          isError: true,
+        );
       }
     } catch (e) {
       Helpers.showCustomSnackBar(

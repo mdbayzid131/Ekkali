@@ -193,6 +193,10 @@ class Helpers {
   }) {
     if (message == null || message.isEmpty) return;
 
+    if (Get.isSnackbarOpen) {
+      Get.closeCurrentSnackbar();
+    }
+
     // Map parameters to new style
     final SnackBarType resolvedType =
         type ?? (isError ? SnackBarType.error : SnackBarType.success);

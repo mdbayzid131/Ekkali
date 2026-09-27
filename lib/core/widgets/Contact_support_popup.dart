@@ -741,8 +741,9 @@ class _CreateSupportTicketViewState extends State<CreateSupportTicketView> {
               iconColor: Colors.black,
               iconOnRight: false,
               onPressed: () {
+                if (controller.isSubmitting.value) return;
                 if (_formKey.currentState!.validate()) {
-                  controller.createSupportTicket();
+                  controller.createSupportTicket(context);
                 }
               },
             ),

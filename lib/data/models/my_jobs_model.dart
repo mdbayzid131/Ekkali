@@ -218,6 +218,24 @@ class Driver {
     this.totalReviews,
   });
 
+  Vehicle? get effectiveVehicle {
+    if (selectedVehicle is Map) {
+      return Vehicle.fromJson(Map<String, dynamic>.from(selectedVehicle));
+    }
+    if (vehicles != null && vehicles!.isNotEmpty) {
+      if (selectedVehicle != null &&
+          selectedVehicle is String &&
+          selectedVehicle.toString().isNotEmpty) {
+        return vehicles!.firstWhere(
+          (v) => v.id == selectedVehicle,
+          orElse: () => vehicles!.first,
+        );
+      }
+      return vehicles!.first;
+    }
+    return null;
+  }
+
   factory Driver.fromJson(Map<String, dynamic> json) {
     String? comp;
     if (json['company'] is Map) {

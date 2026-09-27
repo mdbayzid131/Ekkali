@@ -49,10 +49,17 @@ class _RidesViewState extends State<RidesView> {
   }
 
   String _getVehicleInfo(RideData ride) {
-    final driver = ride.assignedTo ?? ride.effectiveApplicantDriver;
-    if (driver?.vehicles != null && driver!.vehicles!.isNotEmpty) {
-      final v = driver.vehicles!.first;
-      return "${v.make} ${v.model}, ${v.colorOutside}";
+    final driver =
+        ride.assignedTo ?? ride.effectiveApplicantDriver ?? ride.createdBy;
+    final vehicle = driver?.effectiveVehicle;
+    if (vehicle != null) {
+      final parts = <String>[];
+      if (vehicle.year > 0) parts.add("${vehicle.year}");
+      if (vehicle.make.isNotEmpty) parts.add(vehicle.make);
+      if (vehicle.model.isNotEmpty) parts.add(vehicle.model);
+      if (parts.isNotEmpty) {
+        return parts.join(' ');
+      }
     }
     return ride.vehicleType;
   }

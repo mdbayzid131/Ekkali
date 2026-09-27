@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -12,7 +13,9 @@ import 'package:moeb_26/core/services/user_service.dart';
 import 'package:moeb_26/core/utils/helpers.dart';
 import 'package:moeb_26/core/widgets/CustomButton.dart';
 import 'package:moeb_26/data/models/my_rides_model.dart';
+import 'package:moeb_26/data/models/user_profile_model.dart';
 import 'package:moeb_26/data/repositories/socket_repository.dart';
+import 'package:moeb_26/modules/auth/profile/controllers/profile_controller.dart';
 import 'package:moeb_26/modules/preferred_drivers/controllers/preferred_drivers_controller.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -129,11 +132,78 @@ class RideDetailSheet extends StatelessWidget {
 
   String _getVehicleInfo(RideData r) {
     final driver = r.assignedTo ?? r.effectiveApplicantDriver ?? r.createdBy;
-    if (driver?.vehicles != null && driver!.vehicles!.isNotEmpty) {
-      final v = driver.vehicles!.first;
-      return "${v.make} ${v.model}, ${v.colorOutside}";
+    final vehicle = driver?.effectiveVehicle;
+    if (vehicle != null) {
+      final parts = <String>[];
+      if (vehicle.year > 0) parts.add("${vehicle.year}");
+      if (vehicle.make.isNotEmpty) parts.add(vehicle.make);
+      if (vehicle.model.isNotEmpty) parts.add(vehicle.model);
+      if (parts.isNotEmpty) {
+        if (vehicle.colorOutside.isNotEmpty) {
+          return "${parts.join(' ')}, ${vehicle.colorOutside}";
+        }
+        return parts.join(' ');
+      }
     }
     return r.vehicleType.isNotEmpty ? r.vehicleType : "Sedan";
+  }
+
+  String _getSelectedVehicleDetail({
+    required bool isCreatedByMe,
+    required DriverData? chauffeur,
+  }) {
+    if (isCreatedByMe) {
+      // 1. My Created Job: Check applicant / assigned chauffeur's selected vehicle
+      final v = chauffeur?.effectiveVehicle;
+      if (v != null) {
+        final title = v.makeAndModel.isNotEmpty
+            ? v.makeAndModel
+            : "${v.make} ${v.model}".trim();
+        if (title.isNotEmpty) {
+          return v.year > 0 ? "${v.year} $title" : title;
+        }
+      }
+      return "";
+    } else {
+      // 2. Other's Job (Driver Mode): Check my applied / assigned vehicle
+      final v = ride.assignedTo?.effectiveVehicle ??
+          ride.applicant?.driver?.effectiveVehicle;
+      if (v != null) {
+        final title = v.makeAndModel.isNotEmpty
+            ? v.makeAndModel
+            : "${v.make} ${v.model}".trim();
+        if (title.isNotEmpty) {
+          return v.year > 0 ? "${v.year} $title" : title;
+        }
+      }
+      // Fallback to current logged-in driver's selected vehicle
+      try {
+        if (Get.isRegistered<ProfileController>()) {
+          final pCtrl = Get.find<ProfileController>();
+          final profile = pCtrl.userProfile.value;
+          final selectedId = profile?.selectedVehicle;
+          Vehicle? myV;
+          if (selectedId != null && selectedId.isNotEmpty) {
+            myV = pCtrl.vehiclesList.firstWhereOrNull((item) => item.id == selectedId) ??
+                profile?.vehicles.firstWhereOrNull((item) => item.id == selectedId);
+          }
+          myV ??= pCtrl.vehiclesList.isNotEmpty
+              ? pCtrl.vehiclesList.first
+              : (profile?.vehicles.isNotEmpty == true
+                  ? profile!.vehicles.first
+                  : null);
+          if (myV != null) {
+            final title = myV.makeAndModel.isNotEmpty
+                ? myV.makeAndModel
+                : "${myV.make} ${myV.model}".trim();
+            if (title.isNotEmpty) {
+              return myV.year > 0 ? "${myV.year} $title" : title;
+            }
+          }
+        }
+      } catch (_) {}
+      return "";
+    }
   }
 
   Future<void> _makePhoneCall(String phoneNumber) async {
@@ -638,6 +708,11 @@ class RideDetailSheet extends StatelessWidget {
     required bool hasApplicant,
     required bool isPast,
   }) {
+    final selectedVehicleDetail = _getSelectedVehicleDetail(
+      isCreatedByMe: isCreatedByMe,
+      chauffeur: chauffeur,
+    );
+
     if (isCreatedByMe) {
       // Creator Mode: Shows Chauffeur or Applicant
       final String personLabel = isPending
@@ -879,7 +954,7 @@ class RideDetailSheet extends StatelessWidget {
                       ),
                       SizedBox(height: 2.h),
                       Text(
-                        vehicleInfo.isNotEmpty ? vehicleInfo : "N/A",
+                        ride.vehicleType.isNotEmpty ? ride.vehicleType : "Sedan",
                         style: GoogleFonts.inter(
                           color: Colors.white,
                           fontSize: 14.sp,
@@ -891,6 +966,30 @@ class RideDetailSheet extends StatelessWidget {
                     ],
                   ),
                 ),
+                if (selectedVehicleDetail.isNotEmpty) ...[
+                  SizedBox(width: 8.w),
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1C1C1F),
+                      borderRadius: BorderRadius.circular(8.r),
+                      border: Border.all(
+                        color: const Color(0xFF2A2A32),
+                        width: 1,
+                      ),
+                    ),
+                    child: Text(
+                      selectedVehicleDetail,
+                      style: GoogleFonts.inter(
+                        color: const Color(0xFFFEDB9B),
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
               ],
             ),
           ],
@@ -1087,7 +1186,7 @@ class RideDetailSheet extends StatelessWidget {
                       ),
                       SizedBox(height: 2.h),
                       Text(
-                        vehicleInfo.isNotEmpty ? vehicleInfo : "N/A",
+                        ride.vehicleType.isNotEmpty ? ride.vehicleType : "Sedan",
                         style: GoogleFonts.inter(
                           color: Colors.white,
                           fontSize: 14.sp,
@@ -1099,6 +1198,30 @@ class RideDetailSheet extends StatelessWidget {
                     ],
                   ),
                 ),
+                if (selectedVehicleDetail.isNotEmpty) ...[
+                  SizedBox(width: 8.w),
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1C1C1F),
+                      borderRadius: BorderRadius.circular(8.r),
+                      border: Border.all(
+                        color: const Color(0xFF2A2A32),
+                        width: 1,
+                      ),
+                    ),
+                    child: Text(
+                      selectedVehicleDetail,
+                      style: GoogleFonts.inter(
+                        color: const Color(0xFFFEDB9B),
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
               ],
             ),
           ],

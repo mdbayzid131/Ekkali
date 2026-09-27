@@ -44,7 +44,23 @@ class MediaPickerHelper {
     return null;
   }
 
-  /// Shows dialog popup to choose between picking an image from Gallery or a PDF document.
+  /// Captures a photo directly from the Camera.
+  static Future<File?> pickFromCamera([BuildContext? context]) async {
+    try {
+      final XFile? picked = await _imagePicker.pickImage(
+        source: ImageSource.camera,
+        imageQuality: 85,
+      );
+      if (picked != null) {
+        return File(picked.path);
+      }
+    } catch (e) {
+      debugPrint("Error picking image from camera: $e");
+    }
+    return null;
+  }
+
+  /// Shows dialog popup to choose between picking an image from Camera, Gallery or a PDF document.
   static Future<File?> showImageOrPdfPicker(BuildContext context) async {
     final String? action = await Get.dialog<String>(
       Dialog(
@@ -56,10 +72,7 @@ class MediaPickerHelper {
             decoration: BoxDecoration(
               color: Colors.black,
               borderRadius: BorderRadius.circular(16.r),
-              border: Border.all(
-                color: const Color(0xFF374151),
-                width: 1.w,
-              ),
+              border: Border.all(color: const Color(0xFF374151), width: 1.w),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -91,6 +104,37 @@ class MediaPickerHelper {
                       color: Colors.grey.withAlpha(51),
                       shape: BoxShape.circle,
                     ),
+                    child: const Icon(
+                      Icons.camera_alt_outlined,
+                      color: Colors.grey,
+                    ),
+                  ),
+                  title: Text(
+                    "Camera",
+                    style: GoogleFonts.inter(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 14.sp,
+                    ),
+                  ),
+                  subtitle: Text(
+                    "Take a photo directly with camera",
+                    style: GoogleFonts.inter(
+                      color: Colors.grey,
+                      fontSize: 11.sp,
+                    ),
+                  ),
+                  onTap: () => Get.back(result: 'camera'),
+                ),
+                const Divider(color: Colors.white12),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: Container(
+                    padding: EdgeInsets.all(8.r),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.withAlpha(51),
+                      shape: BoxShape.circle,
+                    ),
                     child: const Icon(Icons.image_outlined, color: Colors.grey),
                   ),
                   title: Text(
@@ -103,7 +147,10 @@ class MediaPickerHelper {
                   ),
                   subtitle: Text(
                     "Choose a photo from your library",
-                    style: GoogleFonts.inter(color: Colors.grey, fontSize: 11.sp),
+                    style: GoogleFonts.inter(
+                      color: Colors.grey,
+                      fontSize: 11.sp,
+                    ),
                   ),
                   onTap: () => Get.back(result: 'image'),
                 ),
@@ -131,7 +178,10 @@ class MediaPickerHelper {
                   ),
                   subtitle: Text(
                     "Choose a PDF file from storage",
-                    style: GoogleFonts.inter(color: Colors.grey, fontSize: 11.sp),
+                    style: GoogleFonts.inter(
+                      color: Colors.grey,
+                      fontSize: 11.sp,
+                    ),
                   ),
                   onTap: () => Get.back(result: 'pdf'),
                 ),
@@ -143,7 +193,9 @@ class MediaPickerHelper {
       barrierColor: Colors.black.withAlpha(188),
     );
 
-    if (action == 'image') {
+    if (action == 'camera') {
+      return await pickFromCamera();
+    } else if (action == 'image') {
       return await pickSingleImage();
     } else if (action == 'pdf') {
       try {
