@@ -21,7 +21,8 @@ class MyRidesModel {
       cursor: json['cursor'] is Map<String, dynamic>
           ? CursorPagination.fromJson(json['cursor'])
           : null,
-      data: (json['data'] as List?)
+      data:
+          (json['data'] as List?)
               ?.map((x) => RideData.fromJson(x as Map<String, dynamic>))
               .toList() ??
           [],
@@ -43,11 +44,7 @@ class CursorPagination {
   final bool hasMore;
   final int limit;
 
-  CursorPagination({
-    this.nextCursor,
-    this.hasMore = false,
-    this.limit = 10,
-  });
+  CursorPagination({this.nextCursor, this.hasMore = false, this.limit = 10});
 
   factory CursorPagination.fromJson(Map<String, dynamic> json) {
     return CursorPagination(
@@ -58,11 +55,7 @@ class CursorPagination {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'nextCursor': nextCursor,
-      'hasMore': hasMore,
-      'limit': limit,
-    };
+    return {'nextCursor': nextCursor, 'hasMore': hasMore, 'limit': limit};
   }
 }
 
@@ -141,10 +134,58 @@ class RideData {
     this.applicants,
   });
 
-  bool isCreatedBy(String currentUserId) {
-    if (currentUserId.isEmpty) return false;
-    return (jobCreatorId != null && jobCreatorId == currentUserId) ||
-        (createdBy?.id != null && createdBy!.id == currentUserId);
+  bool isCreatedBy(
+    String currentUserId, {
+    String? userEmail,
+    String? userName,
+    String? userNickName,
+  }) {
+    if (currentUserId.isNotEmpty) {
+      if (jobCreatorId != null &&
+          jobCreatorId!.isNotEmpty &&
+          jobCreatorId == currentUserId) {
+        return true;
+      }
+      if (createdBy?.id != null &&
+          createdBy!.id.isNotEmpty &&
+          createdBy!.id == currentUserId) {
+        return true;
+      }
+    }
+    if (userEmail != null && userEmail.isNotEmpty) {
+      if (createdBy?.email != null &&
+          createdBy!.email.trim().toLowerCase() ==
+              userEmail.trim().toLowerCase()) {
+        return true;
+      }
+    }
+    if (userName != null && userName.isNotEmpty) {
+      final uName = userName.trim().toLowerCase();
+      if (name != null &&
+          name!.trim().isNotEmpty &&
+          name!.trim().toLowerCase() == uName) {
+        return true;
+      }
+      if (createdBy?.name != null &&
+          createdBy!.name.trim().isNotEmpty &&
+          createdBy!.name.trim().toLowerCase() == uName) {
+        return true;
+      }
+    }
+    if (userNickName != null && userNickName.isNotEmpty) {
+      final uNick = userNickName.trim().toLowerCase();
+      if (nickname != null &&
+          nickname!.trim().isNotEmpty &&
+          nickname!.trim().toLowerCase() == uNick) {
+        return true;
+      }
+      if (createdBy?.nickname != null &&
+          createdBy!.nickname!.trim().isNotEmpty &&
+          createdBy!.nickname!.trim().toLowerCase() == uNick) {
+        return true;
+      }
+    }
+    return false;
   }
 
   bool isAssignedToMe(String currentUserId) {
@@ -248,7 +289,8 @@ class RideData {
       return null;
     }
 
-    final creatorId = json['jobCreatorId']?.toString() ??
+    final creatorId =
+        json['jobCreatorId']?.toString() ??
         json['creatorId']?.toString() ??
         (json['createdBy'] is String ? json['createdBy']?.toString() : null);
 
@@ -264,10 +306,12 @@ class RideData {
       id: json['_id']?.toString() ?? json['id']?.toString() ?? '',
       jobCreatorId: creatorId,
       jobType: json['jobType']?.toString(),
-      pickupLocation: json['pickup']?.toString() ??
+      pickupLocation:
+          json['pickup']?.toString() ??
           json['pickupLocation']?.toString() ??
           '',
-      dropoffLocation: json['dropoff']?.toString() ??
+      dropoffLocation:
+          json['dropoff']?.toString() ??
           json['dropoffLocation']?.toString() ??
           '',
       flightNumber: json['flightNumber']?.toString(),
@@ -281,18 +325,26 @@ class RideData {
           : num.tryParse(json['paymentAmount']?.toString() ?? ''),
       paymentType: json['paymentType']?.toString(),
       paymentStatus: json['paymentStatus']?.toString(),
-      instruction: json['instruction']?.toString() ??
-          json['instructions']?.toString(),
-      passengerName: json['passengerName']?.toString() ??
+      instruction:
+          json['instruction']?.toString() ?? json['instructions']?.toString(),
+      passengerName:
+          json['passengerName']?.toString() ??
           json['clientName']?.toString() ??
-          (json['passenger'] is String ? json['passenger']?.toString() : null) ??
-          (json['passenger'] is Map ? json['passenger']['name']?.toString() : null) ??
+          (json['passenger'] is String
+              ? json['passenger']?.toString()
+              : null) ??
+          (json['passenger'] is Map
+              ? json['passenger']['name']?.toString()
+              : null) ??
           (json['client'] is Map ? json['client']['name']?.toString() : null),
-      passengerPhone: json['passengerPhone']?.toString() ??
+      passengerPhone:
+          json['passengerPhone']?.toString() ??
           json['clientPhone']?.toString() ??
           json['passengerPhoneNumber']?.toString() ??
           json['clientPhoneNumber']?.toString() ??
-          (json['passenger'] is Map ? json['passenger']['phone']?.toString() : null) ??
+          (json['passenger'] is Map
+              ? json['passenger']['phone']?.toString()
+              : null) ??
           (json['client'] is Map ? json['client']['phone']?.toString() : null),
       status: json['status']?.toString(),
       rideStatus: json['rideStatus']?.toString(),
@@ -311,7 +363,8 @@ class RideData {
       isReviewedByCreator: json['isReviewedByCreator'] == true,
       createdAt: json['createdAt']?.toString(),
       updatedAt: json['updatedAt']?.toString(),
-      createdBy: parseDriver(json['createdBy']) ??
+      createdBy:
+          parseDriver(json['createdBy']) ??
           (creatorId != null
               ? DriverData(
                   id: creatorId,
@@ -446,11 +499,7 @@ class ApplicantData {
   final String? vehicleId;
   final DateTime? appliedAt;
 
-  ApplicantData({
-    this.driver,
-    this.vehicleId,
-    this.appliedAt,
-  });
+  ApplicantData({this.driver, this.vehicleId, this.appliedAt});
 
   factory ApplicantData.fromJson(Map<String, dynamic> json) {
     DriverData? driverData;
@@ -489,4 +538,3 @@ typedef UpcomingRideData = RideData;
 typedef FinishRideData = RideData;
 typedef UpcomingRidesModel = MyRidesModel;
 typedef FinishRidesModel = MyRidesModel;
-

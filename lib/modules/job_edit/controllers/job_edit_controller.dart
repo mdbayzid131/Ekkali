@@ -7,6 +7,7 @@ import 'package:moeb_26/core/utils/helpers.dart';
 import 'package:moeb_26/data/models/my_jobs_model.dart';
 import 'package:moeb_26/data/repositories/job_repository.dart';
 import 'package:moeb_26/data/models/my_rides_model.dart';
+import 'package:moeb_26/modules/my_schedule/controllers/my_schedule_controller.dart';
 import 'package:moeb_26/modules/rides/controllers/rides_controller.dart';
 
 class JobEditController extends GetxController {
@@ -210,6 +211,11 @@ class JobEditController extends GetxController {
         // Refresh the rides list
         if (Get.isRegistered<RidesController>()) {
           Get.find<RidesController>().refreshCurrentTab();
+        }
+
+        // Refresh the schedule list if registered
+        if (Get.isRegistered<MyScheduleController>()) {
+          Get.find<MyScheduleController>().fetchCalendarJobs();
         }
       } else {
         final message = response.data is Map

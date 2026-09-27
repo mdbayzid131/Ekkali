@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -226,10 +227,21 @@ class AuthService extends GetxService {
       // 3. User info if present
       final user = authData['user'] ?? authData;
       if (user is Map<String, dynamic>) {
-        final id = user['_id'] ?? user['id'];
-        if (id != null) {
+        await StorageService.setString(
+          StorageConstants.userData,
+          json.encode(user),
+        );
+        if (Get.isRegistered<UserService>()) {
           final userService = Get.find<UserService>();
-          userService.userId = id.toString();
+          final id = user['_id'] ?? user['id'];
+          if (id != null) userService.userId = id.toString();
+          final email = user['email']?.toString();
+          if (email != null) userService.userEmail = email;
+          final name = user['name']?.toString() ?? user['fullName']?.toString();
+          if (name != null) userService.userName = name;
+          final nickname =
+              user['nickName']?.toString() ?? user['nickname']?.toString();
+          if (nickname != null) userService.userNickName = nickname;
           userService.fetchUserId();
         }
       }

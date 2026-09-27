@@ -104,10 +104,27 @@ class _RidesViewState extends State<RidesView> {
     return grouped;
   }
 
-  String get _currentUserId {
-    return Get.isRegistered<UserService>()
-        ? Get.find<UserService>().userId
-        : "";
+  String get _currentUserId =>
+      Get.isRegistered<UserService>() ? Get.find<UserService>().userId : "";
+
+  String get _currentUserEmail =>
+      Get.isRegistered<UserService>() ? Get.find<UserService>().userEmail : "";
+
+  String get _currentUserName =>
+      Get.isRegistered<UserService>() ? Get.find<UserService>().userName : "";
+
+  String get _currentUserNickName =>
+      Get.isRegistered<UserService>()
+          ? Get.find<UserService>().userNickName
+          : "";
+
+  bool _isRideCreatedByMe(RideData ride) {
+    return ride.isCreatedBy(
+      _currentUserId,
+      userEmail: _currentUserEmail,
+      userName: _currentUserName,
+      userNickName: _currentUserNickName,
+    );
   }
 
   @override
@@ -287,7 +304,7 @@ class _RidesViewState extends State<RidesView> {
                 final posterName = _getJobPosterName(ride);
                 final driverName = _getDriverName(ride);
                 final vehicleInfo = _getVehicleInfo(ride);
-                final bool isMyJob = ride.isCreatedBy(myId);
+                final bool isMyJob = _isRideCreatedByMe(ride);
 
                 return RideCard(
                   time: displayTime,
@@ -414,7 +431,7 @@ class _RidesViewState extends State<RidesView> {
                 final posterName = _getJobPosterName(ride);
                 final driverName = _getDriverName(ride);
                 final vehicleInfo = _getVehicleInfo(ride);
-                final bool isMyJob = ride.isCreatedBy(myId);
+                final bool isMyJob = _isRideCreatedByMe(ride);
 
                 return RideCard(
                   time: displayTime,

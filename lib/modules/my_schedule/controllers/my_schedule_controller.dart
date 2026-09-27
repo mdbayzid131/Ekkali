@@ -378,29 +378,43 @@ class MyScheduleController extends GetxController {
 
   Future<void> makePhoneCall(String phoneNumber) async {
     final cleanPhone = phoneNumber.replaceAll(RegExp(r'[^\d+]'), '');
-    final Uri launchUri = Uri(scheme: 'tel', path: cleanPhone);
+    if (cleanPhone.isEmpty) return;
+    final Uri launchUri = Uri.parse('tel:$cleanPhone');
     try {
-      if (await canLaunchUrl(launchUri)) {
+      final launched = await launchUrl(
+        launchUri,
+        mode: LaunchMode.externalApplication,
+      );
+      if (!launched) {
         await launchUrl(launchUri);
-      } else {
-        Helpers.showCustomSnackBar('Calling $phoneNumber...', isError: false);
       }
-    } catch (_) {
-      Helpers.showCustomSnackBar('Calling $phoneNumber...', isError: false);
+    } catch (e) {
+      debugPrint("Error making phone call: $e");
+      Helpers.showCustomSnackBar(
+        'Could not open phone dialer for $phoneNumber',
+        isError: true,
+      );
     }
   }
 
   Future<void> sendTextMessage(String phoneNumber) async {
     final cleanPhone = phoneNumber.replaceAll(RegExp(r'[^\d+]'), '');
-    final Uri launchUri = Uri(scheme: 'sms', path: cleanPhone);
+    if (cleanPhone.isEmpty) return;
+    final Uri launchUri = Uri.parse('sms:$cleanPhone');
     try {
-      if (await canLaunchUrl(launchUri)) {
+      final launched = await launchUrl(
+        launchUri,
+        mode: LaunchMode.externalApplication,
+      );
+      if (!launched) {
         await launchUrl(launchUri);
-      } else {
-        Helpers.showCustomSnackBar('Messaging $phoneNumber...', isError: false);
       }
-    } catch (_) {
-      Helpers.showCustomSnackBar('Messaging $phoneNumber...', isError: false);
+    } catch (e) {
+      debugPrint("Error sending text message: $e");
+      Helpers.showCustomSnackBar(
+        'Could not open SMS app for $phoneNumber',
+        isError: true,
+      );
     }
   }
 }

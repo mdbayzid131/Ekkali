@@ -18,30 +18,6 @@ class _PreferredDriverProfileViewState
     extends State<PreferredDriverProfileView> {
   int _selectedTabIndex = 0;
 
-  String _formatMemberSince(String dateStr) {
-    if (dateStr.isEmpty) return 'N/A';
-    try {
-      final date = DateTime.parse(dateStr);
-      final months = [
-        'January',
-        'February',
-        'March',
-        'April',
-        'May',
-        'June',
-        'July',
-        'August',
-        'September',
-        'October',
-        'November',
-        'December'
-      ];
-      return '${months[date.month - 1]} ${date.year}';
-    } catch (_) {
-      return dateStr;
-    }
-  }
-
   String _formatReviewDate(String dateStr) {
     if (dateStr.isEmpty) return 'N/A';
     try {
@@ -531,14 +507,6 @@ class _PreferredDriverProfileViewState
                 title: 'Service Area',
                 value: chauffeur.serviceArea.trim().isNotEmpty
                     ? chauffeur.serviceArea
-                    : 'N/A',
-              ),
-              _buildDivider(),
-              _buildCompactInfoRow(
-                icon: Icons.calendar_today_outlined,
-                title: 'Member Since',
-                value: chauffeur.joinedDate.trim().isNotEmpty
-                    ? _formatMemberSince(chauffeur.joinedDate)
                     : 'N/A',
               ),
             ],

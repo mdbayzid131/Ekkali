@@ -11,9 +11,21 @@ import 'package:moeb_26/data/repositories/user_repository.dart';
 class UserService extends GetxService {
   late UserRepo _userRepo;
   final RxString _userId = "".obs;
+  final RxString _userEmail = "".obs;
+  final RxString _userName = "".obs;
+  final RxString _userNickName = "".obs;
 
   String get userId => _userId.value;
   set userId(String value) => _userId.value = value;
+
+  String get userEmail => _userEmail.value;
+  set userEmail(String value) => _userEmail.value = value;
+
+  String get userName => _userName.value;
+  set userName(String value) => _userName.value = value;
+
+  String get userNickName => _userNickName.value;
+  set userNickName(String value) => _userNickName.value = value;
 
   @override
   void onInit() {
@@ -25,7 +37,7 @@ class UserService extends GetxService {
 
   /// Check for token and approval before fetching user data
   Future<void> checkTokenAndFetch() async {
-    // 1. Try to get userId from storage first
+    // 1. Try to get user data from storage first
     final String userData = await StorageService.getString(
       StorageConstants.userData,
     );
@@ -33,23 +45,27 @@ class UserService extends GetxService {
       try {
         final Map<String, dynamic> user = json.decode(userData);
         final id = user['_id'] ?? user['id'];
-        if (id != null) {
-          _userId.value = id.toString();
-          return;
-        }
+        if (id != null) _userId.value = id.toString();
+        final email = user['email']?.toString();
+        if (email != null) _userEmail.value = email;
+        final name = user['name']?.toString() ?? user['fullName']?.toString();
+        if (name != null) _userName.value = name;
+        final nickname =
+            user['nickName']?.toString() ?? user['nickname']?.toString();
+        if (nickname != null) _userNickName.value = nickname;
       } catch (_) {}
     }
 
     final token = await StorageService.getString(StorageConstants.bearerToken);
     final isApproved = await StorageService.getBool(StorageConstants.isApproved);
 
-    // Only call API if user is approved and token exists
+    // Fetch latest profile from API if authenticated
     if (token.isNotEmpty && isApproved == true) {
       await fetchUserId();
     }
   }
 
-  /// Fetch user profile and store the ID if not already set
+  /// Fetch user profile and store the ID and user details
   Future<void> fetchUserId() async {
     try {
       final token = await StorageService.getString(
@@ -61,12 +77,27 @@ class UserService extends GetxService {
       final profileService = Get.find<UserProfileService>();
       final response = await profileService.getUserProfile();
       if (response.statusCode == 200 && response.data != null) {
-        final id =
-            response.data['data']?['_id']?.toString() ??
-            response.data['data']?['id']?.toString();
-        if (id != null) {
-          _userId.value = id;
-          debugPrint("✅ UserService: Set userId from profile API: $id");
+        final rawData = response.data['data'] ?? response.data;
+        if (rawData is Map<String, dynamic>) {
+          await StorageService.setString(
+            StorageConstants.userData,
+            json.encode(rawData),
+          );
+
+          final id =
+              rawData['_id']?.toString() ?? rawData['id']?.toString();
+          if (id != null) {
+            _userId.value = id;
+            debugPrint("✅ UserService: Set userId from profile API: $id");
+          }
+          final email = rawData['email']?.toString();
+          if (email != null) _userEmail.value = email;
+          final name =
+              rawData['name']?.toString() ?? rawData['fullName']?.toString();
+          if (name != null) _userName.value = name;
+          final nickname =
+              rawData['nickName']?.toString() ?? rawData['nickname']?.toString();
+          if (nickname != null) _userNickName.value = nickname;
         }
       }
     } catch (e) {

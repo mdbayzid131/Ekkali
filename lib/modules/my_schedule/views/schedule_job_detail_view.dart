@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:moeb_26/config/constants/icon_paths.dart';
+import 'package:moeb_26/config/routes/app_pages.dart';
 import 'package:moeb_26/config/themes/app_theme.dart';
 import 'package:moeb_26/core/widgets/custom_sub_appbar.dart';
 import 'package:moeb_26/core/widgets/CustomButton.dart';
@@ -122,20 +123,22 @@ class ScheduleJobDetailView extends StatelessWidget {
       appBar: CustomSubAppBar(
         title: "Booking Details",
         actions: [
-          if (!job.isDispatchedToNetwork)
-            IconButton(
-              icon: SvgPicture.asset(
-                AppIcons.edit_icon,
-                width: 18.sp,
-                height: 18.sp,
-                colorFilter:
-                    const ColorFilter.mode(Colors.white, BlendMode.srcIn),
-              ),
-              onPressed: () {
-                Get.back();
-                Get.to(() => AddScheduleJobSheet(existingJob: job));
-              },
+          IconButton(
+            icon: SvgPicture.asset(
+              AppIcons.edit_icon_myjob,
+              width: 18.sp,
+              height: 18.sp,
+              colorFilter:
+                  const ColorFilter.mode(Colors.white70, BlendMode.srcIn),
             ),
+            onPressed: () {
+              final currentJob = controller.jobsList.firstWhere(
+                (j) => j.id == job.id,
+                orElse: () => job,
+              );
+              Get.toNamed(Routes.jobEditView, arguments: currentJob.toJobData());
+            },
+          ),
           IconButton(
             icon: SvgPicture.asset(
               AppIcons.delete_icon,

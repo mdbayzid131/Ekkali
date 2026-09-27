@@ -8,6 +8,7 @@ import 'package:moeb_26/config/constants/icon_paths.dart';
 import 'package:moeb_26/config/routes/app_pages.dart';
 import 'package:moeb_26/config/themes/app_theme.dart';
 import 'package:moeb_26/core/services/api_client.dart';
+import 'package:moeb_26/core/services/user_service.dart';
 import 'package:moeb_26/core/utils/helpers.dart';
 import 'package:moeb_26/core/widgets/CustomButton.dart';
 import 'package:moeb_26/data/models/my_rides_model.dart';
@@ -115,6 +116,13 @@ class RideDetailSheet extends StatelessWidget {
     return r.jobCreatorId ?? r.createdBy?.id ?? "";
   }
 
+  String _getPosterPhone(RideData r) {
+    if (r.createdBy?.phone != null && r.createdBy!.phone.trim().isNotEmpty) {
+      return r.createdBy!.phone.trim();
+    }
+    return "";
+  }
+
   DriverData? _getChauffeur(RideData r) {
     return r.assignedTo ?? r.effectiveApplicantDriver;
   }
@@ -126,6 +134,48 @@ class RideDetailSheet extends StatelessWidget {
       return "${v.make} ${v.model}, ${v.colorOutside}";
     }
     return r.vehicleType.isNotEmpty ? r.vehicleType : "Sedan";
+  }
+
+  Future<void> _makePhoneCall(String phoneNumber) async {
+    final cleanPhone = phoneNumber.replaceAll(RegExp(r'[^\d+]'), '');
+    if (cleanPhone.isEmpty) return;
+    final Uri launchUri = Uri.parse('tel:$cleanPhone');
+    try {
+      final launched = await launchUrl(
+        launchUri,
+        mode: LaunchMode.externalApplication,
+      );
+      if (!launched) {
+        await launchUrl(launchUri);
+      }
+    } catch (e) {
+      debugPrint("Error making phone call: $e");
+      Helpers.showCustomSnackBar(
+        'Could not open phone dialer for $phoneNumber',
+        isError: true,
+      );
+    }
+  }
+
+  Future<void> _sendTextMessage(String phoneNumber) async {
+    final cleanPhone = phoneNumber.replaceAll(RegExp(r'[^\d+]'), '');
+    if (cleanPhone.isEmpty) return;
+    final Uri launchUri = Uri.parse('sms:$cleanPhone');
+    try {
+      final launched = await launchUrl(
+        launchUri,
+        mode: LaunchMode.externalApplication,
+      );
+      if (!launched) {
+        await launchUrl(launchUri);
+      }
+    } catch (e) {
+      debugPrint("Error sending text message: $e");
+      Helpers.showCustomSnackBar(
+        'Could not open SMS app for $phoneNumber',
+        isError: true,
+      );
+    }
   }
 
   void _openChat(String participantId) async {
@@ -152,6 +202,22 @@ class RideDetailSheet extends StatelessWidget {
     );
   }
 
+  bool get _effectiveIsCreatedByMe {
+    if (isCreatedByMe) return true;
+    final uService =
+        Get.isRegistered<UserService>() ? Get.find<UserService>() : null;
+    final myId = uService?.userId ?? "";
+    final myEmail = uService?.userEmail ?? "";
+    final myName = uService?.userName ?? "";
+    final myNick = uService?.userNickName ?? "";
+    return ride.isCreatedBy(
+      myId,
+      userEmail: myEmail,
+      userName: myName,
+      userNickName: myNick,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final currentStatus = (ride.status ?? 'PENDING').toUpperCase();
@@ -160,7 +226,9 @@ class RideDetailSheet extends StatelessWidget {
     final isAssigned =
         currentStatus == 'ASSIGNED' || currentStatus == 'IN PROGRESS';
 
-    final String title = isCreatedByMe
+    final bool effectiveCreatedByMe = _effectiveIsCreatedByMe;
+
+    final String title = effectiveCreatedByMe
         ? (isPast ? "Completed Job Details" : "Created Job Details")
         : (isPast ? "Completed Ride" : "Upcoming Ride Details");
 
@@ -184,9 +252,9 @@ class RideDetailSheet extends StatelessWidget {
     final hasApplicant = ride.hasApplicants;
 
     final bool canEdit =
-        isCreatedByMe && isPending && !hasApplicant && onEditPressed != null;
+        effectiveCreatedByMe && isPending && !hasApplicant && onEditPressed != null;
     final bool canDelete =
-        isCreatedByMe && (isPending || isCancelled) && onDeletePressed != null;
+        effectiveCreatedByMe && (isPending || isCancelled) && onDeletePressed != null;
 
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
@@ -442,7 +510,7 @@ class RideDetailSheet extends StatelessWidget {
 
             // Section 2: Person & Vehicle Card
             _buildPersonSection(
-              isCreatedByMe: isCreatedByMe,
+              isCreatedByMe: effectiveCreatedByMe,
               posterName: posterName,
               posterImage: posterImage,
               posterId: posterId,
@@ -456,7 +524,7 @@ class RideDetailSheet extends StatelessWidget {
             // Section 2.5: Passenger / Client Details
             _buildPassengerSection(
               ride: ride,
-              isCreatedByMe: isCreatedByMe,
+              isCreatedByMe: effectiveCreatedByMe,
               isPending: isPending,
               chauffeur: chauffeur,
               isPast: isPast,
@@ -547,7 +615,7 @@ class RideDetailSheet extends StatelessWidget {
 
             // Section 4: Action Buttons based on Role & Status
             _buildBottomActions(
-              isCreatedByMe: isCreatedByMe,
+              isCreatedByMe: effectiveCreatedByMe,
               isPending: isPending,
               isAssigned: isAssigned,
               isPast: isPast,
@@ -715,7 +783,17 @@ class RideDetailSheet extends StatelessWidget {
                 if (driverId.isNotEmpty && !isPast) ...[
                   SizedBox(width: 8.w),
                   GestureDetector(
-                    onTap: () => _openChat(driverId),
+                    onTap: () {
+                      final driverPhone = chauffeur?.phone?.trim() ?? '';
+                      if (driverPhone.isNotEmpty) {
+                        _sendTextMessage(driverPhone);
+                      } else {
+                        Helpers.showCustomSnackBar(
+                          'Phone number not available for this chauffeur.',
+                          isError: true,
+                        );
+                      }
+                    },
                     child: Container(
                       padding: EdgeInsets.all(10.r),
                       decoration: BoxDecoration(
@@ -727,6 +805,35 @@ class RideDetailSheet extends StatelessWidget {
                       ),
                       child: Icon(
                         Icons.chat_bubble_outline_rounded,
+                        color: const Color(0xFFFEDB9B),
+                        size: 20.sp,
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 8.w),
+                  GestureDetector(
+                    onTap: () {
+                      final driverPhone = chauffeur?.phone?.trim() ?? '';
+                      if (driverPhone.isNotEmpty) {
+                        _makePhoneCall(driverPhone);
+                      } else {
+                        Helpers.showCustomSnackBar(
+                          'Phone number not available for this chauffeur.',
+                          isError: true,
+                        );
+                      }
+                    },
+                    child: Container(
+                      padding: EdgeInsets.all(10.r),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFD08700).withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(10.r),
+                        border: Border.all(
+                          color: const Color(0xFFD08700).withValues(alpha: 0.3),
+                        ),
+                      ),
+                      child: Icon(
+                        Icons.phone_outlined,
                         color: const Color(0xFFFEDB9B),
                         size: 20.sp,
                       ),
@@ -884,7 +991,17 @@ class RideDetailSheet extends StatelessWidget {
                 if (!isPast && posterId.isNotEmpty) ...[
                   SizedBox(width: 8.w),
                   GestureDetector(
-                    onTap: () => _openChat(posterId),
+                    onTap: () {
+                      final posterPhone = _getPosterPhone(ride);
+                      if (posterPhone.isNotEmpty) {
+                        _sendTextMessage(posterPhone);
+                      } else {
+                        Helpers.showCustomSnackBar(
+                          'Phone number not available for this job poster.',
+                          isError: true,
+                        );
+                      }
+                    },
                     child: Container(
                       padding: EdgeInsets.all(10.r),
                       decoration: BoxDecoration(
@@ -896,6 +1013,35 @@ class RideDetailSheet extends StatelessWidget {
                       ),
                       child: Icon(
                         Icons.chat_bubble_outline_rounded,
+                        color: const Color(0xFFFEDB9B),
+                        size: 20.sp,
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 8.w),
+                  GestureDetector(
+                    onTap: () {
+                      final posterPhone = _getPosterPhone(ride);
+                      if (posterPhone.isNotEmpty) {
+                        _makePhoneCall(posterPhone);
+                      } else {
+                        Helpers.showCustomSnackBar(
+                          'Phone number not available for this job poster.',
+                          isError: true,
+                        );
+                      }
+                    },
+                    child: Container(
+                      padding: EdgeInsets.all(10.r),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFD08700).withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(10.r),
+                        border: Border.all(
+                          color: const Color(0xFFD08700).withValues(alpha: 0.3),
+                        ),
+                      ),
+                      child: Icon(
+                        Icons.phone_outlined,
                         color: const Color(0xFFFEDB9B),
                         size: 20.sp,
                       ),
@@ -1080,15 +1226,32 @@ class RideDetailSheet extends StatelessWidget {
                       ],
                     ),
                   ),
-                  if (pPhone != "N/A" && pPhone.isNotEmpty)
+                  if (pPhone != "N/A" && pPhone.isNotEmpty) ...[
                     GestureDetector(
-                      onTap: () async {
-                        final phone = pPhone.trim();
-                        final Uri launchUri = Uri(scheme: 'tel', path: phone);
-                        if (await canLaunchUrl(launchUri)) {
-                          await launchUrl(launchUri);
-                        }
-                      },
+                      onTap: () => _sendTextMessage(pPhone),
+                      child: Container(
+                        padding: EdgeInsets.all(10.r),
+                        decoration: BoxDecoration(
+                          color: const Color(
+                            0xFFD08700,
+                          ).withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(10.r),
+                          border: Border.all(
+                            color: const Color(
+                              0xFFD08700,
+                            ).withValues(alpha: 0.3),
+                          ),
+                        ),
+                        child: Icon(
+                          Icons.chat_bubble_outline_rounded,
+                          color: const Color(0xFFFEDB9B),
+                          size: 20.sp,
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 8.w),
+                    GestureDetector(
+                      onTap: () => _makePhoneCall(pPhone),
                       child: Container(
                         padding: EdgeInsets.all(10.r),
                         decoration: BoxDecoration(
@@ -1109,6 +1272,7 @@ class RideDetailSheet extends StatelessWidget {
                         ),
                       ),
                     ),
+                  ],
                 ],
               ),
             ],

@@ -307,6 +307,14 @@ class RidesController extends GetxController {
     try {
       isLoadingList.value = true;
       upcomingNextCursor = null;
+
+      if (Get.isRegistered<UserService>()) {
+        final uService = Get.find<UserService>();
+        if (uService.userId.isEmpty) {
+          uService.checkTokenAndFetch();
+        }
+      }
+
       final response = await _jobRepo.getUpcomingJobs(cursor: null);
       if (response.statusCode == 200 || response.statusCode == 201) {
         if (response.data != null && response.data is Map<String, dynamic>) {
@@ -360,6 +368,14 @@ class RidesController extends GetxController {
     try {
       isLoadingList.value = true;
       pastNextCursor = null;
+
+      if (Get.isRegistered<UserService>()) {
+        final uService = Get.find<UserService>();
+        if (uService.userId.isEmpty) {
+          uService.checkTokenAndFetch();
+        }
+      }
+
       final response = await _jobRepo.getPastJobs(cursor: null);
       if (response.statusCode == 200 || response.statusCode == 201) {
         if (response.data != null && response.data is Map<String, dynamic>) {

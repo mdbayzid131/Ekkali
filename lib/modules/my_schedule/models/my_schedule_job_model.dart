@@ -1,3 +1,6 @@
+import 'package:intl/intl.dart';
+import 'package:moeb_26/data/models/my_jobs_model.dart' as jm;
+
 class MyScheduleJobModel {
   final String id;
   final String clientName;
@@ -168,6 +171,32 @@ class MyScheduleJobModel {
       status: json['status'] ?? 'Scheduled',
       isPaid: pStatus == 'PAID',
       paymentMethod: json['paymentType'] ?? 'CREDIT CARD ON FILE',
+    );
+  }
+
+  jm.JobData toJobData() {
+    final cleanFare = fare.replaceAll(RegExp(r'[^\d.]'), '');
+    final num? amount = num.tryParse(cleanFare);
+    final dateStr = DateFormat('yyyy-MM-dd').format(pickupDateTime);
+    final timeStr = DateFormat('HH:mm').format(pickupDateTime);
+
+    return jm.JobData(
+      id: id,
+      jobType: jobType,
+      pickupLocation: pickupLocation,
+      dropoffLocation: dropoffLocation,
+      flightNumber: flightNumber,
+      duration: duration,
+      asap: false,
+      date: dateStr,
+      time: timeStr,
+      vehicleType: vehicleType,
+      paymentAmount: amount?.toInt(),
+      paymentType: paymentMethod,
+      instruction: notes,
+      passengerName: clientName,
+      passengerPhone: clientPhone,
+      status: status,
     );
   }
 }
