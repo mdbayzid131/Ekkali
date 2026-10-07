@@ -15,8 +15,14 @@ class UserProfileRepo {
     return apiClient.patchData(ApiConstants.userProfile, body);
   }
 
-  Future<Response> getServiceAreas() {
-    return apiClient.getData(ApiConstants.serviceAreas);
+  Future<Response> getServiceAreas({int? limit, String? cursor}) {
+    final Map<String, dynamic> query = {};
+    if (limit != null) query['limit'] = limit;
+    if (cursor != null && cursor.isNotEmpty) query['cursor'] = cursor;
+    return apiClient.getData(
+      ApiConstants.serviceAreas,
+      query: query.isNotEmpty ? query : null,
+    );
   }
 
   Future<Response> getLegals() {

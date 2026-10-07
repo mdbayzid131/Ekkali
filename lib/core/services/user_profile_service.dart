@@ -14,8 +14,8 @@ class UserProfileService {
     return userProfileRepo.patchProfile(body);
   }
 
-  Future<Response> getServiceAreas() {
-    return userProfileRepo.getServiceAreas();
+  Future<Response> getServiceAreas({int? limit, String? cursor}) {
+    return userProfileRepo.getServiceAreas(limit: limit, cursor: cursor);
   }
 
   Future<Response> getLegals() {

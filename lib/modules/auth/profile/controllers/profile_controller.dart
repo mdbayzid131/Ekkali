@@ -173,12 +173,21 @@ class ProfileController extends GetxController {
   Future<void> fetchServiceAreas() async {
     isServiceAreasLoading.value = true;
     try {
-      var response = await _profileService.getServiceAreas();
+      final response = await _profileService.getServiceAreas(limit: 100);
       if (response.statusCode == 200) {
-        var dataList = response.data['data'] as List;
-        serviceAreas.value = dataList
-            .map((item) => item['areaName'].toString())
-            .toList();
+        final dataList = response.data['data'] as List?;
+        if (dataList != null) {
+          serviceAreas.value = dataList
+              .map((item) => (item is Map
+                      ? (item['areaName']?.toString() ??
+                          item['name']?.toString() ??
+                          '')
+                      : item.toString())
+                  .trim())
+              .where((name) => name.isNotEmpty)
+              .toSet()
+              .toList();
+        }
       }
     } catch (e) {
       debugPrint("Error fetching service areas: $e");

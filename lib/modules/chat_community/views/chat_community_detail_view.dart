@@ -151,12 +151,17 @@ class ChatCommunityDetailView extends StatelessWidget {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(
-                          controller.selectedState.value,
-                          style: GoogleFonts.inter(
-                            color: const Color(0xFFD5C4AB),
-                            fontSize: 13.sp,
-                            fontWeight: FontWeight.bold,
+                        ConstrainedBox(
+                          constraints: BoxConstraints(maxWidth: 130.w),
+                          child: Text(
+                            controller.selectedState.value,
+                            style: GoogleFonts.inter(
+                              color: const Color(0xFFD5C4AB),
+                              fontSize: 13.sp,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         SizedBox(width: 4.w),
@@ -174,8 +179,8 @@ class ChatCommunityDetailView extends StatelessWidget {
                       color: const Color(0xFF161618),
                       border: Border.all(color: const Color(0xFF27272A)),
                     ),
-                    maxHeight: 250.h,
-                    width: 170.w,
+                    maxHeight: 320.h,
+                    width: 210.w,
                   ),
                   items: (controller.states.isNotEmpty
                           ? controller.states
@@ -189,6 +194,8 @@ class ChatCommunityDetailView extends StatelessWidget {
                           color: Colors.white,
                           fontSize: 13.sp,
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     );
                   }).toList(),

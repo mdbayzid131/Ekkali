@@ -5,6 +5,7 @@ import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:moeb_26/config/routes/app_pages.dart';
 import 'package:moeb_26/config/themes/app_theme.dart';
 import 'package:moeb_26/core/bindings/initial_binding.dart';
+import 'package:moeb_26/core/services/screen_protector_service.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -51,6 +52,7 @@ class MyApp extends StatelessWidget {
           ),
         ),
         debugShowCheckedModeBanner: false,
+        navigatorObservers: [ScreenProtectorService.routeObserver],
         getPages: Routes.routes,
         initialRoute: Routes.splashView,
         initialBinding: InitialBinding(),

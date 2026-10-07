@@ -119,7 +119,7 @@ class CommunityChatDetailController extends GetxController {
   Future<void> fetchServiceAreas() async {
     isServiceAreasLoading.value = true;
     try {
-      final response = await _profileService.getServiceAreas();
+      final response = await _profileService.getServiceAreas(limit: 100);
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = response.data['data'];
         if (data is List) {
@@ -132,7 +132,9 @@ class CommunityChatDetailController extends GetxController {
                 }
                 return item.toString();
               })
-              .where((name) => name.trim().isNotEmpty)
+              .map((e) => e.trim())
+              .where((name) => name.isNotEmpty)
+              .toSet()
               .toList();
 
           if (loadedAreas.isNotEmpty) {

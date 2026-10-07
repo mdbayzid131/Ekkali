@@ -13,6 +13,7 @@ import 'package:moeb_26/modules/jobs_offers/widgets/JobOfferDetailSheet.dart';
 import 'package:moeb_26/core/services/subscription_service.dart';
 import 'package:moeb_26/core/widgets/premium_lock_widget.dart';
 import 'package:moeb_26/core/widgets/premium_required_dialog.dart';
+import 'package:moeb_26/core/widgets/secure_screen.dart';
 import '../../../core/widgets/Custom_AppBar.dart';
 import '../../jobs_posts/views/job_post_sheet_tabbar_view.dart';
 
@@ -25,9 +26,12 @@ class JobOfferView extends StatelessWidget {
         ? Get.find<JobOfferController>()
         : Get.put(JobOfferController());
 
-    return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: CustomAppBar(title: "Offers", notificationCount: 3),
+    return SecureScreen(
+      screenTitle: "Job Offers",
+      tabIndex: 0,
+      child: Scaffold(
+        backgroundColor: Colors.black,
+        appBar: CustomAppBar(title: "Offers", notificationCount: 3),
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: 20.w),
         child: Column(
@@ -292,6 +296,7 @@ class JobOfferView extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }
