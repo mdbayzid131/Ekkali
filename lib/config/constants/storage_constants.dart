@@ -13,5 +13,8 @@ class StorageConstants {
   static const String isOnboard = 'is_onboard';
   static const String isPremium = 'is_premium';
   static const String subscriptionExpiry = 'subscription_expiry';
+  static const String rememberMe = 'remember_me';
+  static const String savedEmail = 'saved_email';
+  static const String savedPassword = 'saved_password';
   // Add your storage keys here
 }

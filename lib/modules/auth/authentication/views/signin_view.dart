@@ -4,7 +4,6 @@ import 'package:get/get.dart';
 import 'package:moeb_26/config/routes/app_pages.dart';
 import 'package:moeb_26/config/themes/app_theme.dart';
 import 'package:moeb_26/core/utils/app_const.dart';
-import 'package:moeb_26/core/utils/validators.dart';
 import '../../../../core/widgets/CustomButton.dart';
 import '../../../../core/widgets/CustomText.dart';
 import '../../../../core/widgets/CustomTextField.dart';
@@ -88,18 +87,71 @@ class SignInView extends GetView<SigninController> {
                     ),
                   ),
                 ),
-                SizedBox(height: 20.h),
-                GestureDetector(
-                  onTap: () {
-                    Get.toNamed(Routes.resetPasswordView);
-                  },
-                  child: Align(
-                    alignment: Alignment.centerRight,
-                    child: CustomTextgray(
-                      text: "Forgot Password?",
-                      color: AppColors.gray100,
+                SizedBox(height: 16.h),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // ── Remember Me ──
+                    GestureDetector(
+                      onTap: controller.toggleRememberMe,
+                      behavior: HitTestBehavior.opaque,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Obx(
+                            () {
+                              final isChecked = controller.rememberMe.value;
+                              return AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                width: 18.w,
+                                height: 18.w,
+                                decoration: BoxDecoration(
+                                  color: isChecked
+                                      ? AppColors.primaryColor
+                                      : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(4.r),
+                                  border: Border.all(
+                                    color: isChecked
+                                        ? AppColors.primaryColor
+                                        : AppColors.gray100,
+                                    width: 1.5,
+                                  ),
+                                ),
+                                child: isChecked
+                                    ? Icon(
+                                        Icons.check,
+                                        size: 13.sp,
+                                        color: Colors.black,
+                                      )
+                                    : null,
+                              );
+                            },
+                          ),
+                          SizedBox(width: 8.w),
+                          CustomTextgray(
+                            text: "Remember Me",
+                            fontSize: 13.sp,
+                            fontWeight: FontWeight.w400,
+                            color: AppColors.gray100,
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
+
+                    // ── Forgot Password? ──
+                    GestureDetector(
+                      onTap: () {
+                        Get.toNamed(Routes.resetPasswordView);
+                      },
+                      child: CustomTextgray(
+                        text: "Forgot Password?",
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.w400,
+                        color: AppColors.gray100,
+                      ),
+                    ),
+                  ],
                 ),
                 SizedBox(height: 24.h),
 

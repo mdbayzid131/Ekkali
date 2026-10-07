@@ -1,8 +1,10 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:moeb_26/config/constants/storage_constants.dart';
 import 'package:moeb_26/config/routes/app_pages.dart';
 import 'package:moeb_26/core/services/auth_service.dart';
+import 'package:moeb_26/core/services/storege_service.dart';
 import 'package:moeb_26/core/utils/helpers.dart';
 
 class SigninController extends GetxController {
@@ -10,10 +12,16 @@ class SigninController extends GetxController {
 
   final isLoading = false.obs;
   final isPasswordVisible = false.obs;
+  final rememberMe = false.obs;
   final errorMessage = ''.obs;
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+
+  // ─── Toggle Remember Me ──────────────────────────────────────
+  void toggleRememberMe() {
+    rememberMe.value = !rememberMe.value;
+  }
 
   // ─── Toggle Password Visibility ──────────────────────────────
   void togglePasswordVisibility() {
@@ -66,6 +74,17 @@ class SigninController extends GetxController {
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
+        // ─── Save or clear Remember Me credentials ───────────
+        if (rememberMe.value) {
+          await StorageService.setBool(StorageConstants.rememberMe, true);
+          await StorageService.setString(StorageConstants.savedEmail, email);
+          await StorageService.setString(StorageConstants.savedPassword, password);
+        } else {
+          await StorageService.setBool(StorageConstants.rememberMe, false);
+          await StorageService.remove(StorageConstants.savedEmail);
+          await StorageService.remove(StorageConstants.savedPassword);
+        }
+
         final authData = response.data?['data'] ?? {};
         final bool isApproved = authData['isApproved'] == true;
         final bool isOnboard = authData['isOnboard'] == true;
@@ -147,15 +166,41 @@ class SigninController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    emailController.clear();
-    passwordController.clear();
     isLoading.value = false;
     errorMessage.value = '';
+    _loadSavedCredentials();
+  }
+
+  Future<void> _loadSavedCredentials() async {
+    try {
+      final bool isRemember =
+          await StorageService.getBool(StorageConstants.rememberMe) ?? false;
+      rememberMe.value = isRemember;
+      if (isRemember) {
+        final email =
+            await StorageService.getString(StorageConstants.savedEmail);
+        final password =
+            await StorageService.getString(StorageConstants.savedPassword);
+        if (email.isNotEmpty) {
+          emailController.text = email;
+        }
+        if (password.isNotEmpty) {
+          passwordController.text = password;
+        }
+      } else {
+        emailController.clear();
+        passwordController.clear();
+      }
+    } catch (e) {
+      debugPrint("Error loading saved credentials: $e");
+    }
   }
 
   // ─── Dispose ─────────────────────────────────────────────────
   @override
   void onClose() {
+    emailController.dispose();
+    passwordController.dispose();
     super.onClose();
   }
 }
