@@ -8,6 +8,7 @@ import 'package:moeb_26/config/routes/app_pages.dart';
 import 'package:moeb_26/config/constants/app_constants.dart';
 import 'package:moeb_26/config/constants/storage_constants.dart';
 import 'package:moeb_26/core/services/notifications_service.dart';
+import 'package:moeb_26/modules/notifications/controllers/notifications_controller.dart';
 import 'package:moeb_26/core/services/socket_service.dart';
 import 'package:moeb_26/core/services/storege_service.dart';
 import 'package:moeb_26/firebase_options.dart';
@@ -95,6 +96,9 @@ class FirebaseNotificationService {
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       debugPrint('📨 Foreground Message: ${message.notification?.title}');
       _showLocalNotification(message);
+      if (Get.isRegistered<NotificationController>()) {
+        Get.find<NotificationController>().fetchNotifications();
+      }
     });
 
     // Listen to notification taps when app is in background
@@ -160,6 +164,7 @@ class FirebaseNotificationService {
       playSound: true,
       enableVibration: true,
       enableLights: true,
+      showBadge: true,
     );
 
     await _localNotifications
@@ -231,6 +236,7 @@ class FirebaseNotificationService {
           icon: 'ic_notification',
           playSound: true,
           enableVibration: true,
+          channelShowBadge: true,
         ),
         iOS: DarwinNotificationDetails(
           presentAlert: true,

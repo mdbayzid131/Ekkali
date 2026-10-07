@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:moeb_26/core/services/badge_service.dart';
 import 'package:moeb_26/core/services/notifications_service.dart';
 import 'package:moeb_26/data/models/notifications_model.dart';
 
@@ -17,7 +18,12 @@ class NotificationController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    ever(notifications, (_) => _updateBadge());
     loadMuteAndDeletedStates().then((_) => fetchNotifications());
+  }
+
+  void _updateBadge() {
+    BadgeService.updateBadgeCount(unreadCount);
   }
 
   Future<void> loadMuteAndDeletedStates() async {

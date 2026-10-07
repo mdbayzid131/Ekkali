@@ -13,6 +13,7 @@ import 'package:moeb_26/core/services/socket_service.dart';
 import 'package:moeb_26/core/services/storege_service.dart';
 import 'package:moeb_26/core/services/subscription_service.dart';
 import 'package:moeb_26/core/services/user_service.dart';
+import 'package:moeb_26/core/services/badge_service.dart';
 import 'package:moeb_26/data/repositories/auth_reporitory.dart';
 import 'package:moeb_26/data/models/vehicle_model.dart';
 
@@ -280,6 +281,7 @@ class AuthService extends GetxService {
 
     ApiClient.temporaryToken = null;
     isLoggedIn.value = false;
+    await BadgeService.clearBadge();
   }
 
   bool get isAuthenticated => isLoggedIn.value;

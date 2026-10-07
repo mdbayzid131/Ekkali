@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
+import 'package:moeb_26/core/services/notifications_service.dart';
 import '../../rides/controllers/rides_controller.dart';
 import '../../jobs_offers/controllers/Job_offer_controller.dart';
 import '../../chat/controllers/chat_controller.dart';
@@ -10,6 +11,16 @@ class NavigationController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+
+    // Sync unread notification badge count on startup
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      try {
+        if (Get.isRegistered<NotificationsService>()) {
+          Get.find<NotificationsService>().syncUnreadBadge();
+        }
+      } catch (_) {}
+    });
+
     String? targetJobId;
 
     if (Get.arguments is int) {
