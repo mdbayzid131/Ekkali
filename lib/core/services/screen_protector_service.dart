@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 
 class ScreenProtectorService {
   static const MethodChannel _channel =
@@ -13,6 +14,9 @@ class ScreenProtectorService {
 
   static int _activeProtectorCount = 0;
   static bool _isSecureActive = false;
+
+  static int _activeWakeLockCount = 0;
+  static bool _isWakeLockActive = false;
 
   static final StreamController<bool> _screenCapturedController =
       StreamController<bool>.broadcast();
@@ -90,6 +94,39 @@ class ScreenProtectorService {
     }
   }
 
+  /// Enables screen keep-awake (Prevents screen from turning off/sleeping)
+  static Future<void> enableWakeLock() async {
+    _activeWakeLockCount++;
+
+    if (!_isWakeLockActive && _activeWakeLockCount > 0) {
+      _isWakeLockActive = true;
+      try {
+        await WakelockPlus.enable();
+        debugPrint('💡 ScreenProtector: Screen keep-awake ENABLED (no sleep)');
+      } catch (e) {
+        debugPrint('⚠️ ScreenProtector: Error enabling wakelock: $e');
+      }
+    }
+  }
+
+  /// Disables screen keep-awake (Restores normal screen sleeping)
+  static Future<void> disableWakeLock() async {
+    if (_activeWakeLockCount > 0) {
+      _activeWakeLockCount--;
+    }
+
+    if (_isWakeLockActive && _activeWakeLockCount <= 0) {
+      _isWakeLockActive = false;
+      _activeWakeLockCount = 0;
+      try {
+        await WakelockPlus.disable();
+        debugPrint('🌙 ScreenProtector: Screen keep-awake DISABLED (sleep restored)');
+      } catch (e) {
+        debugPrint('⚠️ ScreenProtector: Error disabling wakelock: $e');
+      }
+    }
+  }
+
   /// Checks if iOS screen is currently being recorded or mirrored
   static Future<bool> isScreenCaptured() async {
     if (!Platform.isIOS) return false;
@@ -103,4 +140,7 @@ class ScreenProtectorService {
 
   /// Current state of protection
   static bool get isProtectionActive => _isSecureActive;
+
+  /// Current state of wakelock
+  static bool get isWakeLockActive => _isWakeLockActive;
 }

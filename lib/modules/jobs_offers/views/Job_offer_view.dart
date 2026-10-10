@@ -29,6 +29,7 @@ class JobOfferView extends StatelessWidget {
     return SecureScreen(
       screenTitle: "Job Offers",
       tabIndex: 0,
+      keepScreenOn: true,
       child: Scaffold(
         backgroundColor: Colors.black,
         appBar: CustomAppBar(title: "Offers", notificationCount: 3),

@@ -21,6 +21,7 @@ class SecureScreen extends StatefulWidget {
   final bool protectInBackground;
   final VoidCallback? onScreenshotAttempted;
   final int? tabIndex;
+  final bool keepScreenOn;
 
   const SecureScreen({
     super.key,
@@ -31,6 +32,7 @@ class SecureScreen extends StatefulWidget {
     this.protectInBackground = true,
     this.onScreenshotAttempted,
     this.tabIndex,
+    this.keepScreenOn = false,
   });
 
   @override
@@ -44,6 +46,9 @@ class _SecureScreenState extends State<SecureScreen>
   StreamSubscription<bool>? _captureSubscription;
   StreamSubscription<void>? _screenshotSubscription;
   bool _isRouteActive = true;
+  bool _hasActiveProtection = false;
+  bool _hasActiveWakeLock = false;
+  bool _wasWakeLockPausedForLifecycle = false;
   Worker? _navWorker;
 
   @override
@@ -51,21 +56,35 @@ class _SecureScreenState extends State<SecureScreen>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
 
-    if (widget.enabled) {
-      _enableProtection();
-      _setupIosListeners();
+    final bool isTabMatching = widget.tabIndex == null ||
+        (!Get.isRegistered<NavigationController>() ||
+            Get.find<NavigationController>().currentIndex.value == widget.tabIndex);
 
-      if (widget.tabIndex != null && Get.isRegistered<NavigationController>()) {
-        _navWorker = ever(Get.find<NavigationController>().currentIndex, (int index) {
-          if (index == widget.tabIndex) {
-            if (widget.enabled && _isRouteActive) {
-              _enableProtection();
-            }
-          } else {
-            _disableProtection();
-          }
-        });
+    if (isTabMatching) {
+      if (widget.enabled) {
+        _enableProtection();
       }
+      if (widget.keepScreenOn) {
+        _enableWakeLock();
+      }
+    }
+
+    if (widget.enabled) {
+      _setupIosListeners();
+    }
+
+    if (widget.tabIndex != null && Get.isRegistered<NavigationController>()) {
+      _navWorker = ever(Get.find<NavigationController>().currentIndex, (int index) {
+        if (index == widget.tabIndex) {
+          if (_isRouteActive) {
+            if (widget.enabled) _enableProtection();
+            if (widget.keepScreenOn) _enableWakeLock();
+          }
+        } else {
+          _disableProtection();
+          _disableWakeLock();
+        }
+      });
     }
   }
 
@@ -80,12 +99,27 @@ class _SecureScreenState extends State<SecureScreen>
 
   void _enableProtection() {
     _isRouteActive = true;
+    if (_hasActiveProtection || !widget.enabled) return;
+    _hasActiveProtection = true;
     ScreenProtectorService.enableProtection();
   }
 
   void _disableProtection() {
-    _isRouteActive = false;
+    if (!_hasActiveProtection) return;
+    _hasActiveProtection = false;
     ScreenProtectorService.disableProtection();
+  }
+
+  void _enableWakeLock() {
+    if (_hasActiveWakeLock || !widget.keepScreenOn) return;
+    _hasActiveWakeLock = true;
+    ScreenProtectorService.enableWakeLock();
+  }
+
+  void _disableWakeLock() {
+    if (!_hasActiveWakeLock) return;
+    _hasActiveWakeLock = false;
+    ScreenProtectorService.disableWakeLock();
   }
 
   void _setupIosListeners() {
@@ -121,16 +155,28 @@ class _SecureScreenState extends State<SecureScreen>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (!widget.enabled || !widget.protectInBackground) return;
-
     if (state == AppLifecycleState.paused ||
-        state == AppLifecycleState.inactive) {
-      if (!_isInBackground) {
+        state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.hidden) {
+      if (widget.enabled && widget.protectInBackground && !_isInBackground) {
         setState(() => _isInBackground = true);
+      }
+      if (_hasActiveWakeLock) {
+        _disableWakeLock();
+        _wasWakeLockPausedForLifecycle = true;
       }
     } else if (state == AppLifecycleState.resumed) {
       if (_isInBackground) {
         setState(() => _isInBackground = false);
+      }
+      if (_wasWakeLockPausedForLifecycle) {
+        _wasWakeLockPausedForLifecycle = false;
+        final bool isTabMatching = widget.tabIndex == null ||
+            (!Get.isRegistered<NavigationController>() ||
+                Get.find<NavigationController>().currentIndex.value == widget.tabIndex);
+        if (_isRouteActive && isTabMatching && widget.keepScreenOn) {
+          _enableWakeLock();
+        }
       }
     }
   }
@@ -138,16 +184,27 @@ class _SecureScreenState extends State<SecureScreen>
   // RouteAware: When another screen is pushed on top of this one
   @override
   void didPushNext() {
-    // Temporarily disable secure mode so the newly pushed screen can take screenshots
+    // Temporarily disable secure mode & wakelock so pushed screen can function normally
+    _isRouteActive = false;
     _disableProtection();
+    _disableWakeLock();
   }
 
   // RouteAware: When returning back to this screen from a pushed route
   @override
   void didPopNext() {
-    // Re-enable secure mode for this screen
-    if (widget.enabled) {
-      _enableProtection();
+    // Re-enable secure mode & wakelock for this screen
+    _isRouteActive = true;
+    final bool isTabMatching = widget.tabIndex == null ||
+        (!Get.isRegistered<NavigationController>() ||
+            Get.find<NavigationController>().currentIndex.value == widget.tabIndex);
+    if (isTabMatching) {
+      if (widget.enabled) {
+        _enableProtection();
+      }
+      if (widget.keepScreenOn) {
+        _enableWakeLock();
+      }
     }
   }
 
@@ -159,9 +216,8 @@ class _SecureScreenState extends State<SecureScreen>
     _captureSubscription?.cancel();
     _screenshotSubscription?.cancel();
 
-    if (widget.enabled) {
-      _disableProtection();
-    }
+    _disableWakeLock();
+    _disableProtection();
     super.dispose();
   }
 
