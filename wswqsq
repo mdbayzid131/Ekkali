@@ -1,740 +1,136 @@
-I/flutter (13202):
-I/flutter (13202): ┌ ➡️➡️➡️➡️ REQUEST ══════════════════════════════════════ ➡️➡️➡️➡️
-I/flutter (13202): │ GET https://nayem5001.binarybards.online/api/v1/jobs/my-rides?type=upcoming&limit=10
-I/flutter (13202): │ Headers: {Content-Type: application/json, Authorization: ***}
-I/flutter (13202): │ Query: {type: upcoming, limit: 10}
-I/flutter (13202): └ ➡️➡️➡️➡️ REQUEST ══════════════════════════════════════ ➡️➡️➡️➡️
-I/flutter (13202): 
-I/flutter (13202):
-I/flutter (13202): ┌ ✅✅✅✅ RESPONSE ══════════════════════════════════════ ✅✅✅✅
-I/flutter (13202): │ [ GET 200] https://nayem5001.binarybards.online/api/v1/jobs/my-rides?type=upcoming&limit=10
-I/flutter (13202): │ {
-I/flutter (13202): │   "success": true,
-I/flutter (13202): │   "message": "My rides retrieved successfully",
-I/flutter (13202): │   "cursor": {
-I/flutter (13202): │     "nextCursor": "eyJkYXRlIjoiMjAyNi0wOS0zMFQwMDowMDowMC4wMDBaIiwiX2lkIjoiNmFiMWZkYWU4NTFhZGM2YmY5NjA5YjUzIn0",
-I/flutter (13202): │     "hasMore": true,
-I/flutter (13202): │     "limit": 10
-I/flutter (13202): │   },
-I/flutter (13202): │   "data": [
-I/flutter (13202): │     {
-I/flutter (13202): │       "_id": "6ab33c63199a1d5b9e551a6c",
-I/flutter (13202): │       "jobCreatorId": "6ab1011fef1345b0d168de79",
-I/flutter (13202): │       "createdBy": {
-I/flutter (13202): │         "_id": "6ab1011fef1345b0d168de79",
-I/flutter (13202): │         "name": "Md Bayzid",
-I/flutter (13202): │         "email": "mdbayazid131@gmail.com",
-I/flutter (13202): │         "phone": "54854559",
-I/flutter (13202): │         "companyName": "STA",
-I/flutter (13202): │         "companyRole": "Chauffeur",
-I/flutter (13202): │         "profilePicture": "https://i.ibb.co/z5YHLV9/profile.png",
-I/flutter (13202): │         "selectedVehicle": {
-I/flutter (13202): │           "_id": "6ab10b8e1aa40c7b27b5513e",
-I/flutter (13202): │           "type": "SUV",
-I/flutter (13202): │           "makeAndModel": "GMC Yukon XL",
-I/flutter (13202): │           "year": 2021,
-I/flutter (13202): │           "licensePlate": "ASD"
-I/flutter (13202): │         },
-I/flutter (13202): │         "averageRating": 5,
-I/flutter (13202): │         "totalReviews": 2,
-I/flutter (13202): │         "nickname": "bayzid"
-I/flutter (13202): │       },
-I/flutter (13202): │       "jobType": "ONE WAY",
-I/flutter (13202): │       "pickup": "gjkncd",
-I/flutter (13202): │       "dropoff": "ghjvf",
-I/flutter (13202): │       "flightNumber": null,
-I/flutter (13202): │       "asap": true,
-I/flutter (13202): │       "date": null,
-I/flutter (13202): │       "time": null,
-I/flutter (13202): │       "vehicleType": "SUV",
-I/flutter (13202): │       "paymentAmount": 58,
-I/flutter (13202): │       "paymentType": "CREDIT CARD ON FILE",
-I/flutter (13202): │       "paymentStatus": "UNPAID",
-I/flutter (13202): │       "instruction": null,
-I/flutter (13202): │       "passengerName": "ghkm",
-I/flutter (13202): │       "passengerPhone": "86541856",
-I/flutter (13202): │       "status": "PENDING",
-I/flutter (13202): │       "rideStatus": null,
-I/flutter (13202): │       "applicantCount": 0,
-I/flutter (13202): │       "applicant": null,
-I/flutter (13202): │       "applicants": [],
-I/flutter (13202): │       "assignedTo": null,
-I/flutter (13202): │       "name": "Md Bayzid",
-I/flutter (13202): │       "nickname": "bayzid",
-I/flutter (13202): │       "company": null,
-I/flutter (13202): │       "companyRole": "Chauffeur",
-I/flutter (13202): │       "profilePicture": "https://i.ibb.co/z5YHLV9/profile.png",
-I/flutter (13202): │       "hasReview": false,
-I/flutter (13202): │       "isReviewedByDriver": false,
-I/flutter (13202): │       "isReviewedByCreator": false,
-I/flutter (13202): │       "createdAt": "2026-09-23T02:41:39.672Z",
-I/flutter (13202): │       "updatedAt": "2026-09-23T02:41:39.672Z"
-I/flutter (13202): │     },
-I/flutter (13202): │     {
-I/flutter (13202): │       "_id": "6ab7483238dc43eac63f80e3",
-I/flutter (13202): │       "jobCreatorId": "6ab1ebc2851adc6bf9608f6a",
-I/flutter (13202): │       "createdBy": {
-I/flutter (13202): │         "_id": "6ab1ebc2851adc6bf9608f6a",
-I/flutter (13202): │         "name": "Demo",
-I/flutter (13202): │         "email": "mdbayazid131.dev@gmail.com",
-I/flutter (13202): │         "phone": "5484646946",
-I/flutter (13202): │         "companyName": "STA",
-I/flutter (13202): │         "companyRole": "Chauffeur",
-I/flutter (13202): │         "profilePicture": "https://i.ibb.co/z5YHLV9/profile.png",
-I/flutter (13202): │         "selectedVehicle": {
-I/flutter (13202): │           "_id": "6ab1edad851adc6bf96090f6",
-I/flutter (13202): │           "type": "SUV",
-I/flutter (13202): │           "makeAndModel": "Chevrolet Suburban",
-I/flutter (13202): │           "year": 2021,
-I/flutter (13202): │           "licensePlate": "ABCD"
-I/flutter (13202): │         },
-I/flutter (13202): │         "averageRating": 5,
-I/flutter (13202): │         "totalReviews": 1
-I/flutter (13202): │       },
-I/flutter (13202): │       "jobType": "ONE WAY",
-I/flutter (13202): │       "pickup": "Hello how",
-I/flutter (13202): │       "dropoff": "okay thanks",
-I/flutter (13202): │       "flightNumber": "3488464",
-I/flutter (13202): │       "asap": true,
-I/flutter (13202): │       "date": null,
-I/flutter (13202): │       "time": null,
-I/flutter (13202): │       "vehicleType": "LIMO STRETCH",
-I/flutter (13202): │       "paymentAmount": 258,
-I/flutter (13202): │       "paymentType": "CREDIT CARD ON FILE",
-I/flutter (13202): │       "paymentStatus": "UNPAID",
-I/flutter (13202): │       "instruction": null,
-I/flutter (13202): │       "passengerName": null,
-I/flutter (13202): │       "passengerPhone": null,
-I/flutter (13202): │       "status": "PENDING",
-I/flutter (13202): │       "rideStatus": null,
-I/flutter (13202): │       "applicantCount": 1,
-I/flutter (13202): │       "applicant": {
-I/flutter (13202): │         "_id": "6ab1011fef1345b0d168de79",
-I/flutter (13202): │         "name": "Md Bayzid",
-I/flutter (13202): │         "email": "mdbayazid131@gmail.com",
-I/flutter (13202): │         "phone": "54854559",
-I/flutter (13202): │         "companyName": "STA",
-I/flutter (13202): │         "companyRole": "Chauffeur",
-I/flutter (13202): │         "profilePicture": "https://i.ibb.co/z5YHLV9/profile.png",
-I/flutter (13202): │         "selectedVehicle": {
-I/flutter (13202): │           "_id": "6ab10b8e1aa40c7b27b5513e",
-I/flutter (13202): │           "type": "SUV",
-I/flutter (13202): │           "makeAndModel": "GMC Yukon XL",
-I/flutter (13202): │           "year": 2021,
-I/flutter (13202): │           "licensePlate": "ASD"
-I/flutter (13202): │         },
-I/flutter (13202): │         "averageRating": 5,
-I/flutter (13202): │         "totalReviews": 2,
-I/flutter (13202): │         "nickname": "bayzid",
-I/flutter (13202): │         "driver": {
-I/flutter (13202): │           "_id": "6ab1011fef1345b0d168de79",
-I/flutter (13202): │           "name": "Md Bayzid",
-I/flutter (13202): │           "email": "mdbayazid131@gmail.com",
-I/flutter (13202): │           "phone": "54854559",
-I/flutter (13202): │           "companyName": "STA",
-I/flutter (13202): │           "companyRole": "Chauffeur",
-I/flutter (13202): │           "profilePicture": "https://i.ibb.co/z5YHLV9/profile.png",
-I/flutter (13202): │           "selectedVehicle": {
-I/flutter (13202): │             "_id": "6ab10b8e1aa40c7b27b5513e",
-I/flutter (13202): │             "type": "SUV",
-I/flutter (13202): │             "makeAndModel": "GMC Yukon XL",
-I/flutter (13202): │             "year": 2021,
-I/flutter (13202): │             "licensePlate": "ASD"
-I/flutter (13202): │           },
-I/flutter (13202): │           "averageRating": 5,
-I/flutter (13202): │           "totalReviews": 2,
-I/flutter (13202): │           "nickname": "bayzid"
-I/flutter (13202): │         }
-I/flutter (13202): │       },
-I/flutter (13202): │       "applicants": [
-I/flutter (13202): │         {
-I/flutter (13202): │           "_id": "6ab1011fef1345b0d168de79",
-I/flutter (13202): │           "name": "Md Bayzid",
-I/flutter (13202): │           "email": "mdbayazid131@gmail.com",
-I/flutter (13202): │           "phone": "54854559",
-I/flutter (13202): │           "companyName": "STA",
-I/flutter (13202): │           "companyRole": "Chauffeur",
-I/flutter (13202): │           "profilePicture": "https://i.ibb.co/z5YHLV9/profile.png",
-I/flutter (13202): │           "selectedVehicle": {
-I/flutter (13202): │             "_id": "6ab10b8e1aa40c7b27b5513e",
-I/flutter (13202): │             "type": "SUV",
-I/flutter (13202): │             "makeAndModel": "GMC Yukon XL",
-I/flutter (13202): │             "year": 2021,
-I/flutter (13202): │             "licensePlate": "ASD"
-I/flutter (13202): │           },
-I/flutter (13202): │           "averageRating": 5,
-I/flutter (13202): │           "totalReviews": 2,
-I/flutter (13202): │           "nickname": "bayzid",
-I/flutter (13202): │           "driver": {
-I/flutter (13202): │             "_id": "6ab1011fef1345b0d168de79",
-I/flutter (13202): │             "name": "Md Bayzid",
-I/flutter (13202): │             "email": "mdbayazid131@gmail.com",
-I/flutter (13202): │             "phone": "54854559",
-I/flutter (13202): │             "companyName": "STA",
-I/flutter (13202): │             "companyRole": "Chauffeur",
-I/flutter (13202): │             "profilePicture": "https://i.ibb.co/z5YHLV9/profile.png",
-I/flutter (13202): │             "selectedVehicle": {
-I/flutter (13202): │               "_id": "6ab10b8e1aa40c7b27b5513e",
-I/flutter (13202): │               "type": "SUV",
-I/flutter (13202): │               "makeAndModel": "GMC Yukon XL",
-I/flutter (13202): │               "year": 2021,
-I/flutter (13202): │               "licensePlate": "ASD"
-I/flutter (13202): │             },
-I/flutter (13202): │             "averageRating": 5,
-I/flutter (13202): │             "totalReviews": 2,
-I/flutter (13202): │             "nickname": "bayzid"
-I/flutter (13202): │           }
-I/flutter (13202): │         }
-I/flutter (13202): │       ],
-I/flutter (13202): │       "assignedTo": null,
-I/flutter (13202): │       "name": "Demo",
-I/flutter (13202): │       "nickname": null,
-I/flutter (13202): │       "company": null,
-I/flutter (13202): │       "companyRole": "Chauffeur",
-I/flutter (13202): │       "profilePicture": "https://i.ibb.co/z5YHLV9/profile.png",
-I/flutter (13202): │       "hasReview": false,
-I/flutter (13202): │       "isReviewedByDriver": false,
-I/flutter (13202): │       "isReviewedByCreator": false,
-I/flutter (13202): │       "createdAt": "2026-09-26T04:21:06.728Z",
-I/flutter (13202): │       "updatedAt": "2026-09-26T04:21:22.700Z"
-I/flutter (13202): │     },
-I/flutter (13202): │     {
-I/flutter (13202): │       "_id": "6ab74a3a38dc43eac63f8270",
-I/flutter (13202): │       "jobCreatorId": "6ab1011fef1345b0d168de79",
-I/flutter (13202): │       "createdBy": {
-I/flutter (13202): │         "_id": "6ab1011fef1345b0d168de79",
-I/flutter (13202): │         "name": "Md Bayzid",
-I/flutter (13202): │         "email": "mdbayazid131@gmail.com",
-I/flutter (13202): │         "phone": "54854559",
-I/flutter (13202): │         "companyName": "STA",
-I/flutter (13202): │         "companyRole": "Chauffeur",
-I/flutter (13202): │         "profilePicture": "https://i.ibb.co/z5YHLV9/profile.png",
-I/flutter (13202): │         "selectedVehicle": {
-I/flutter (13202): │           "_id": "6ab10b8e1aa40c7b27b5513e",
-I/flutter (13202): │           "type": "SUV",
-I/flutter (13202): │           "makeAndModel": "GMC Yukon XL",
-I/flutter (13202): │           "year": 2021,
-I/flutter (13202): │           "licensePlate": "ASD"
-I/flutter (13202): │         },
-I/flutter (13202): │         "averageRating": 5,
-I/flutter (13202): │         "totalReviews": 2,
-I/flutter (13202): │         "nickname": "bayzid"
-I/flutter (13202): │       },
-I/flutter (13202): │       "jobType": "ONE WAY",
-I/flutter (13202): │       "pickup": "dhaka",
-I/flutter (13202): │       "dropoff": "Bangladesh",
-I/flutter (13202): │       "flightNumber": "2458484",
-I/flutter (13202): │       "asap": true,
-I/flutter (13202): │       "date": null,
-I/flutter (13202): │       "time": null,
-I/flutter (13202): │       "vehicleType": "SPRINTER",
-I/flutter (13202): │       "paymentAmount": 58,
-I/flutter (13202): │       "paymentType": "COLLECT PAYMENT",
-I/flutter (13202): │       "paymentStatus": "UNPAID",
-I/flutter (13202): │       "instruction": null,
-I/flutter (13202): │       "passengerName": "Ebad Bhai",
-I/flutter (13202): │       "passengerPhone": "045848846864",
-I/flutter (13202): │       "status": "PENDING",
-I/flutter (13202): │       "rideStatus": null,
-I/flutter (13202): │       "applicantCount": 0,
-I/flutter (13202): │       "applicant": null,
-I/flutter (13202): │       "applicants": [],
-I/flutter (13202): │       "assignedTo": null,
-I/flutter (13202): │       "name": "Md Bayzid",
-I/flutter (13202): │       "nickname": "bayzid",
-I/flutter (13202): │       "company": null,
-I/flutter (13202): │       "companyRole": "Chauffeur",
-I/flutter (13202): │       "profilePicture": "https://i.ibb.co/z5YHLV9/profile.png",
-I/flutter (13202): │       "hasReview": false,
-I/flutter (13202): │       "isReviewedByDriver": false,
-I/flutter (13202): │       "isReviewedByCreator": false,
-I/flutter (13202): │       "createdAt": "2026-09-26T04:29:46.645Z",
-I/flutter (13202): │       "updatedAt": "2026-09-26T04:29:46.645Z"
-I/flutter (13202): │     },
-I/flutter (13202): │     {
-I/flutter (13202): │       "_id": "6ab74e6138dc43eac63f8503",
-I/flutter (13202): │       "jobCreatorId": "6ab1011fef1345b0d168de79",
-I/flutter (13202): │       "createdBy": {
-I/flutter (13202): │         "_id": "6ab1011fef1345b0d168de79",
-I/flutter (13202): │         "name": "Md Bayzid",
-I/flutter (13202): │         "email": "mdbayazid131@gmail.com",
-I/flutter (13202): │         "phone": "54854559",
-I/flutter (13202): │         "companyName": "STA",
-I/flutter (13202): │         "companyRole": "Chauffeur",
-I/flutter (13202): │         "profilePicture": "https://i.ibb.co/z5YHLV9/profile.png",
-I/flutter (13202): │         "selectedVehicle": {
-I/flutter (13202): │           "_id": "6ab10b8e1aa40c7b27b5513e",
-I/flutter (13202): │           "type": "SUV",
-I/flutter (13202): │           "makeAndModel": "GMC Yukon XL",
-I/flutter (13202): │           "year": 2021,
-I/flutter (13202): │           "licensePlate": "ASD"
-I/flutter (13202): │         },
-I/flutter (13202): │         "averageRating": 5,
-I/flutter (13202): │         "totalReviews": 2,
-I/flutter (13202): │         "nickname": "bayzid"
-I/flutter (13202): │       },
-I/flutter (13202): │       "jobType": "ONE WAY",
-I/flutter (13202): │       "pickup": "Dhak is the",
-I/flutter (13202): │       "dropoff": "hshs is the",
-I/flutter (13202): │       "flightNumber": "548848",
-I/flutter (13202): │       "asap": true,
-I/flutter (13202): │       "date": null,
-I/flutter (13202): │       "time": null,
-I/flutter (13202): │       "vehicleType": "SPRINTER",
-I/flutter (13202): │       "paymentAmount": 28,
-I/flutter (13202): │       "paymentType": "CREDIT CARD ON FILE",
-I/flutter (13202): │       "paymentStatus": "UNPAID",
-I/flutter (13202): │       "instruction": null,
-I/flutter (13202): │       "passengerName": "Anar",
-I/flutter (13202): │       "passengerPhone": "04648400484",
-I/flutter (13202): │       "status": "ASSIGNED",
-I/flutter (13202): │       "rideStatus": "PENDING",
-I/flutter (13202): │       "applicantCount": 0,
-I/flutter (13202): │       "applicant": null,
-I/flutter (13202): │       "applicants": [],
-I/flutter (13202): │       "assignedTo": {
-I/flutter (13202): │         "_id": "6ab1ebc2851adc6bf9608f6a",
-I/flutter (13202): │         "name": "Demo",
-I/flutter (13202): │         "email": "mdbayazid131.dev@gmail.com",
-I/flutter (13202): │         "phone": "5484646946",
-I/flutter (13202): │         "companyName": "STA",
-I/flutter (13202): │         "companyRole": "Chauffeur",
-I/flutter (13202): │         "profilePicture": "https://i.ibb.co/z5YHLV9/profile.png",
-I/flutter (13202): │         "selectedVehicle": {
-I/flutter (13202): │           "_id": "6ab1edad851adc6bf96090f6",
-I/flutter (13202): │           "type": "SUV",
-I/flutter (13202): │           "makeAndModel": "Chevrolet Suburban",
-I/flutter (13202): │           "year": 2021,
-I/flutter (13202): │           "licensePlate": "ABCD"
-I/flutter (13202): │         },
-I/flutter (13202): │         "averageRating": 5,
-I/flutter (13202): │         "totalReviews": 1
-I/flutter (13202): │       },
-I/flutter (13202): │       "name": "Md Bayzid",
-I/flutter (13202): │       "nickname": "bayzid",
-I/flutter (13202): │       "company": null,
-I/flutter (13202): │       "companyRole": "Chauffeur",
-I/flutter (13202): │       "profilePicture": "https://i.ibb.co/z5YHLV9/profile.png",
-I/flutter (13202): │       "hasReview": false,
-I/flutter (13202): │       "isReviewedByDriver": false,
-I/flutter (13202): │       "isReviewedByCreator": false,
-I/flutter (13202): │       "createdAt": "2026-09-26T04:47:29.762Z",
-I/flutter (13202): │       "updatedAt": "2026-09-26T05:22:21.307Z"
-I/flutter (13202): │     },
-I/flutter (13202): │     {
-I/flutter (13202): │       "_id": "6ab33cb8199a1d5b9e551aba",
-I/flutter (13202): │       "jobCreatorId": "6ab1011fef1345b0d168de79",
-I/flutter (13202): │       "createdBy": {
-I/flutter (13202): │         "_id": "6ab1011fef1345b0d168de79",
-I/flutter (13202): │         "name": "Md Bayzid",
-I/flutter (13202): │         "email": "mdbayazid131@gmail.com",
-I/flutter (13202): │         "phone": "54854559",
-I/flutter (13202): │         "companyName": "STA",
-I/flutter (13202): │         "companyRole": "Chauffeur",
-I/flutter (13202): │         "profilePicture": "https://i.ibb.co/z5YHLV9/profile.png",
-I/flutter (13202): │         "selectedVehicle": {
-I/flutter (13202): │           "_id": "6ab10b8e1aa40c7b27b5513e",
-I/flutter (13202): │           "type": "SUV",
-I/flutter (13202): │           "makeAndModel": "GMC Yukon XL",
-I/flutter (13202): │           "year": 2021,
-I/flutter (13202): │           "licensePlate": "ASD"
-I/flutter (13202): │         },
-I/flutter (13202): │         "averageRating": 5,
-I/flutter (13202): │         "totalReviews": 2,
-I/flutter (13202): │         "nickname": "bayzid"
-I/flutter (13202): │       },
-I/flutter (13202): │       "jobType": "ONE WAY",
-I/flutter (13202): │       "pickup": "banana",
-I/flutter (13202): │       "dropoff": "orange",
-I/flutter (13202): │       "flightNumber": null,
-I/flutter (13202): │       "asap": false,
-I/flutter (13202): │       "date": "2026-09-22T00:00:00.000Z",
-I/flutter (13202): │       "time": "22:42",
-I/flutter (13202): │       "vehicleType": "SUV",
-I/flutter (13202): │       "paymentAmount": 60,
-I/flutter (13202): │       "paymentType": "COLLECT PAYMENT",
-I/flutter (13202): │       "paymentStatus": "PAID",
-I/flutter (13202): │       "instruction": "child car seat",
-I/flutter (13202): │       "passengerName": "coco",
-I/flutter (13202): │       "passengerPhone": "866655",
-I/flutter (13202): │       "status": "PENDING",
-I/flutter (13202): │       "rideStatus": null,
-I/flutter (13202): │       "applicantCount": 0,
-I/flutter (13202): │       "applicant": null,
-I/flutter (13202): │       "applicants": [],
-I/flutter (13202): │       "assignedTo": null,
-I/flutter (13202): │       "name": "Md Bayzid",
-I/flutter (13202): │       "nickname": "bayzid",
-I/flutter (13202): │       "company": null,
-I/flutter (13202): │       "companyRole": "Chauffeur",
-I/flutter (13202): │       "profilePicture": "https://i.ibb.co/z5YHLV9/profile.png",
-I/flutter (13202): │       "hasReview": false,
-I/flutter (13202): │       "isReviewedByDriver": false,
-I/flutter (13202): │       "isReviewedByCreator": false,
-I/flutter (13202): │       "createdAt": "2026-09-23T02:43:04.368Z",
-I/flutter (13202): │       "updatedAt": "2026-09-23T02:43:13.991Z"
-I/flutter (13202): │     },
-I/flutter (13202): │     {
-I/flutter (13202): │       "_id": "6ab74ad738dc43eac63f8330",
-I/flutter (13202): │       "jobCreatorId": "6ab1011fef1345b0d168de79",
-I/flutter (13202): │       "createdBy": {
-I/flutter (13202): │         "_id": "6ab1011fef1345b0d168de79",
-I/flutter (13202): │         "name": "Md Bayzid",
-I/flutter (13202): │         "email": "mdbayazid131@gmail.com",
-I/flutter (13202): │         "phone": "54854559",
-I/flutter (13202): │         "companyName": "STA",
-I/flutter (13202): │         "companyRole": "Chauffeur",
-I/flutter (13202): │         "profilePicture": "https://i.ibb.co/z5YHLV9/profile.png",
-I/flutter (13202): │         "selectedVehicle": {
-I/flutter (13202): │           "_id": "6ab10b8e1aa40c7b27b5513e",
-I/flutter (13202): │           "type": "SUV",
-I/flutter (13202): │           "makeAndModel": "GMC Yukon XL",
-I/flutter (13202): │           "year": 2021,
-I/flutter (13202): │           "licensePlate": "ASD"
-I/flutter (13202): │         },
-I/flutter (13202): │         "averageRating": 5,
-I/flutter (13202): │         "totalReviews": 2,
-I/flutter (13202): │         "nickname": "bayzid"
-I/flutter (13202): │       },
-I/flutter (13202): │       "jobType": "ONE WAY",
-I/flutter (13202): │       "pickup": "dhaka",
-I/flutter (13202): │       "dropoff": "d banks",
-I/flutter (13202): │       "flightNumber": "h54848",
-I/flutter (13202): │       "asap": false,
-I/flutter (13202): │       "date": "2026-09-26T00:00:00.000Z",
-I/flutter (13202): │       "time": "22:32",
-I/flutter (13202): │       "vehicleType": "SPRINTER",
-I/flutter (13202): │       "paymentAmount": 25,
-I/flutter (13202): │       "paymentType": "CREDIT CARD ON FILE",
-I/flutter (13202): │       "paymentStatus": "PAID",
-I/flutter (13202): │       "instruction": "Okay sir thank you for your help",
-I/flutter (13202): │       "passengerName": "Anar",
-I/flutter (13202): │       "passengerPhone": "540646464",
-I/flutter (13202): │       "status": "PENDING",
-I/flutter (13202): │       "rideStatus": null,
-I/flutter (13202): │       "applicantCount": 0,
-I/flutter (13202): │       "applicant": null,
-I/flutter (13202): │       "applicants": [],
-I/flutter (13202): │       "assignedTo": null,
-I/flutter (13202): │       "name": "Md Bayzid",
-I/flutter (13202): │       "nickname": "bayzid",
-I/flutter (13202): │       "company": null,
-I/flutter (13202): │       "companyRole": "Chauffeur",
-I/flutter (13202): │       "profilePicture": "https://i.ibb.co/z5YHLV9/profile.png",
-I/flutter (13202): │       "hasReview": false,
-I/flutter (13202): │       "isReviewedByDriver": false,
-I/flutter (13202): │       "isReviewedByCreator": false,
-I/flutter (13202): │       "createdAt": "2026-09-26T04:32:23.354Z",
-I/flutter (13202): │       "updatedAt": "2026-09-27T04:05:58.511Z"
-I/flutter (13202): │     },
-I/flutter (13202): │     {
-I/flutter (13202): │       "_id": "6ab74f1b38dc43eac63f85c5",
-I/flutter (13202): │       "jobCreatorId": "6ab1011fef1345b0d168de79",
-I/flutter (13202): │       "createdBy": {
-I/flutter (13202): │         "_id": "6ab1011fef1345b0d168de79",
-I/flutter (13202): │         "name": "Md Bayzid",
-I/flutter (13202): │         "email": "mdbayazid131@gmail.com",
-I/flutter (13202): │         "phone": "54854559",
-I/flutter (13202): │         "companyName": "STA",
-I/flutter (13202): │         "companyRole": "Chauffeur",
-I/flutter (13202): │         "profilePicture": "https://i.ibb.co/z5YHLV9/profile.png",
-I/flutter (13202): │         "selectedVehicle": {
-I/flutter (13202): │           "_id": "6ab10b8e1aa40c7b27b5513e",
-I/flutter (13202): │           "type": "SUV",
-I/flutter (13202): │           "makeAndModel": "GMC Yukon XL",
-I/flutter (13202): │           "year": 2021,
-I/flutter (13202): │           "licensePlate": "ASD"
-I/flutter (13202): │         },
-I/flutter (13202): │         "averageRating": 5,
-I/flutter (13202): │         "totalReviews": 2,
-I/flutter (13202): │         "nickname": "bayzid"
-I/flutter (13202): │       },
-I/flutter (13202): │       "jobType": "ONE WAY",
-I/flutter (13202): │       "pickup": "dhaka chek",
-I/flutter (13202): │       "dropoff": "dhaka post",
-I/flutter (13202): │       "flightNumber": "5489494",
-I/flutter (13202): │       "asap": false,
-I/flutter (13202): │       "date": "2026-09-28T00:00:00.000Z",
-I/flutter (13202): │       "time": "10:50",
-I/flutter (13202): │       "vehicleType": "SUV",
-I/flutter (13202): │       "paymentAmount": 58,
-I/flutter (13202): │       "paymentType": "COLLECT PAYMENT",
-I/flutter (13202): │       "paymentStatus": "UNPAID",
-I/flutter (13202): │       "instruction": null,
-I/flutter (13202): │       "passengerName": "Anar",
-I/flutter (13202): │       "passengerPhone": "3489494",
-I/flutter (13202): │       "status": "PENDING",
-I/flutter (13202): │       "rideStatus": null,
-I/flutter (13202): │       "applicantCount": 0,
-I/flutter (13202): │       "applicant": null,
-I/flutter (13202): │       "applicants": [],
-I/flutter (13202): │       "assignedTo": null,
-I/flutter (13202): │       "name": "Md Bayzid",
-I/flutter (13202): │       "nickname": "bayzid",
-I/flutter (13202): │       "company": null,
-I/flutter (13202): │       "companyRole": "Chauffeur",
-I/flutter (13202): │       "profilePicture": "https://i.ibb.co/z5YHLV9/profile.png",
-I/flutter (13202): │       "hasReview": false,
-I/flutter (13202): │       "isReviewedByDriver": false,
-I/flutter (13202): │       "isReviewedByCreator": false,
-I/flutter (13202): │       "createdAt": "2026-09-26T04:50:35.150Z",
-I/flutter (13202): │       "updatedAt": "2026-09-26T04:50:35.150Z"
-I/flutter (13202): │     },
-I/flutter (13202): │     {
-I/flutter (13202): │       "_id": "6ab2a6fa199a1d5b9e54d781",
-I/flutter (13202): │       "jobCreatorId": "6ab1011fef1345b0d168de79",
-I/flutter (13202): │       "createdBy": {
-I/flutter (13202): │         "_id": "6ab1011fef1345b0d168de79",
-I/flutter (13202): │         "name": "Md Bayzid",
-I/flutter (13202): │         "email": "mdbayazid131@gmail.com",
-I/flutter (13202): │         "phone": "54854559",
-I/flutter (13202): │         "companyName": "STA",
-I/flutter (13202): │         "companyRole": "Chauffeur",
-I/flutter (13202): │         "profilePicture": "https://i.ibb.co/z5YHLV9/profile.png",
-I/flutter (13202): │         "selectedVehicle": {
-I/flutter (13202): │           "_id": "6ab10b8e1aa40c7b27b5513e",
-I/flutter (13202): │           "type": "SUV",
-I/flutter (13202): │           "makeAndModel": "GMC Yukon XL",
-I/flutter (13202): │           "year": 2021,
-I/flutter (13202): │           "licensePlate": "ASD"
-I/flutter (13202): │         },
-I/flutter (13202): │         "averageRating": 5,
-I/flutter (13202): │         "totalReviews": 2,
-I/flutter (13202): │         "nickname": "bayzid"
-I/flutter (13202): │       },
-I/flutter (13202): │       "jobType": "ONE WAY",
-I/flutter (13202): │       "pickup": "Jfk",
-I/flutter (13202): │       "dropoff": "manhattan",
-I/flutter (13202): │       "flightNumber": null,
-I/flutter (13202): │       "asap": false,
-I/flutter (13202): │       "date": "2026-09-29T00:00:00.000Z",
-I/flutter (13202): │       "time": "09:02",
-I/flutter (13202): │       "vehicleType": "SPRINTER",
-I/flutter (13202): │       "paymentAmount": 150,
-I/flutter (13202): │       "paymentType": "COLLECT PAYMENT",
-I/flutter (13202): │       "paymentStatus": "UNPAID",
-I/flutter (13202): │       "instruction": "5 passengers 4 suitcases",
-I/flutter (13202): │       "passengerName": "Karim",
-I/flutter (13202): │       "passengerPhone": "5614231222",
-I/flutter (13202): │       "status": "PENDING",
-I/flutter (13202): │       "rideStatus": null,
-I/flutter (13202): │       "applicantCount": 0,
-I/flutter (13202): │       "applicant": null,
-I/flutter (13202): │       "applicants": [],
-I/flutter (13202): │       "assignedTo": null,
-I/flutter (13202): │       "name": "Md Bayzid",
-I/flutter (13202): │       "nickname": "bayzid",
-I/flutter (13202): │       "company": null,
-I/flutter (13202): │       "companyRole": "Chauffeur",
-I/flutter (13202): │       "profilePicture": "https://i.ibb.co/z5YHLV9/profile.png",
-I/flutter (13202): │       "hasReview": false,
-I/flutter (13202): │       "isReviewedByDriver": false,
-I/flutter (13202): │       "isReviewedByCreator": false,
-I/flutter (13202): │       "createdAt": "2026-09-22T16:04:10.422Z",
-I/flutter (13202): │       "updatedAt": "2026-09-22T16:04:55.371Z"
-I/flutter (13202): │     },
-I/flutter (13202): │     {
-I/flutter (13202): │       "_id": "6ab1eec5851adc6bf96092ec",
-I/flutter (13202): │       "jobCreatorId": "6ab1ebc2851adc6bf9608f6a",
-I/flutter (13202): │       "createdBy": {
-I/flutter (13202): │         "_id": "6ab1ebc2851adc6bf9608f6a",
-I/flutter (13202): │         "name": "Demo",
-I/flutter (13202): │         "email": "mdbayazid131.dev@gmail.com",
-I/flutter (13202): │         "phone": "5484646946",
-I/flutter (13202): │         "companyName": "STA",
-I/flutter (13202): │         "companyRole": "Chauffeur",
-I/flutter (13202): │         "profilePicture": "https://i.ibb.co/z5YHLV9/profile.png",
-I/flutter (13202): │         "selectedVehicle": {
-I/flutter (13202): │           "_id": "6ab1edad851adc6bf96090f6",
-I/flutter (13202): │           "type": "SUV",
-I/flutter (13202): │           "makeAndModel": "Chevrolet Suburban",
-I/flutter (13202): │           "year": 2021,
-I/flutter (13202): │           "licensePlate": "ABCD"
-I/flutter (13202): │         },
-I/flutter (13202): │         "averageRating": 5,
-I/flutter (13202): │         "totalReviews": 1
-I/flutter (13202): │       },
-I/flutter (13202): │       "jobType": "BY THE HOUR",
-I/flutter (13202): │       "pickup": "Bdda",
-I/flutter (13202): │       "dropoff": "By the hour",
-I/flutter (13202): │       "flightNumber": null,
-I/flutter (13202): │       "asap": false,
-I/flutter (13202): │       "date": "2026-09-30T00:00:00.000Z",
-I/flutter (13202): │       "time": "08:58",
-I/flutter (13202): │       "vehicleType": "LIMO STRETCH",
-I/flutter (13202): │       "paymentAmount": 28,
-I/flutter (13202): │       "paymentType": "CREDIT CARD ON FILE",
-I/flutter (13202): │       "paymentStatus": "UNPAID",
-I/flutter (13202): │       "instruction": null,
-I/flutter (13202): │       "passengerName": null,
-I/flutter (13202): │       "passengerPhone": null,
-I/flutter (13202): │       "status": "PENDING",
-I/flutter (13202): │       "rideStatus": null,
-I/flutter (13202): │       "applicantCount": 1,
-I/flutter (13202): │       "applicant": {
-I/flutter (13202): │         "_id": "6ab1011fef1345b0d168de79",
-I/flutter (13202): │         "name": "Md Bayzid",
-I/flutter (13202): │         "email": "mdbayazid131@gmail.com",
-I/flutter (13202): │         "phone": "54854559",
-I/flutter (13202): │         "companyName": "STA",
-I/flutter (13202): │         "companyRole": "Chauffeur",
-I/flutter (13202): │         "profilePicture": "https://i.ibb.co/z5YHLV9/profile.png",
-I/flutter (13202): │         "selectedVehicle": {
-I/flutter (13202): │           "_id": "6ab10b8e1aa40c7b27b5513e",
-I/flutter (13202): │           "type": "SUV",
-I/flutter (13202): │           "makeAndModel": "GMC Yukon XL",
-I/flutter (13202): │           "year": 2021,
-I/flutter (13202): │           "licensePlate": "ASD"
-I/flutter (13202): │         },
-I/flutter (13202): │         "averageRating": 5,
-I/flutter (13202): │         "totalReviews": 2,
-I/flutter (13202): │         "nickname": "bayzid",
-I/flutter (13202): │         "driver": {
-I/flutter (13202): │           "_id": "6ab1011fef1345b0d168de79",
-I/flutter (13202): │           "name": "Md Bayzid",
-I/flutter (13202): │           "email": "mdbayazid131@gmail.com",
-I/flutter (13202): │           "phone": "54854559",
-I/flutter (13202): │           "companyName": "STA",
-I/flutter (13202): │           "companyRole": "Chauffeur",
-I/flutter (13202): │           "profilePicture": "https://i.ibb.co/z5YHLV9/profile.png",
-I/flutter (13202): │           "selectedVehicle": {
-I/flutter (13202): │             "_id": "6ab10b8e1aa40c7b27b5513e",
-I/flutter (13202): │             "type": "SUV",
-I/flutter (13202): │             "makeAndModel": "GMC Yukon XL",
-I/flutter (13202): │             "year": 2021,
-I/flutter (13202): │             "licensePlate": "ASD"
-I/flutter (13202): │           },
-I/flutter (13202): │           "averageRating": 5,
-I/flutter (13202): │           "totalReviews": 2,
-I/flutter (13202): │           "nickname": "bayzid"
-I/flutter (13202): │         }
-I/flutter (13202): │       },
-I/flutter (13202): │       "applicants": [
-I/flutter (13202): │         {
-I/flutter (13202): │           "_id": "6ab1011fef1345b0d168de79",
-I/flutter (13202): │           "name": "Md Bayzid",
-I/flutter (13202): │           "email": "mdbayazid131@gmail.com",
-I/flutter (13202): │           "phone": "54854559",
-I/flutter (13202): │           "companyName": "STA",
-I/flutter (13202): │           "companyRole": "Chauffeur",
-I/flutter (13202): │           "profilePicture": "https://i.ibb.co/z5YHLV9/profile.png",
-I/flutter (13202): │           "selectedVehicle": {
-I/flutter (13202): │             "_id": "6ab10b8e1aa40c7b27b5513e",
-I/flutter (13202): │             "type": "SUV",
-I/flutter (13202): │             "makeAndModel": "GMC Yukon XL",
-I/flutter (13202): │             "year": 2021,
-I/flutter (13202): │             "licensePlate": "ASD"
-I/flutter (13202): │           },
-I/flutter (13202): │           "averageRating": 5,
-I/flutter (13202): │           "totalReviews": 2,
-I/flutter (13202): │           "nickname": "bayzid",
-I/flutter (13202): │           "driver": {
-I/flutter (13202): │             "_id": "6ab1011fef1345b0d168de79",
-I/flutter (13202): │             "name": "Md Bayzid",
-I/flutter (13202): │             "email": "mdbayazid131@gmail.com",
-I/flutter (13202): │             "phone": "54854559",
-I/flutter (13202): │             "companyName": "STA",
-I/flutter (13202): │             "companyRole": "Chauffeur",
-I/flutter (13202): │             "profilePicture": "https://i.ibb.co/z5YHLV9/profile.png",
-I/flutter (13202): │             "selectedVehicle": {
-I/flutter (13202): │               "_id": "6ab10b8e1aa40c7b27b5513e",
-I/flutter (13202): │               "type": "SUV",
-I/flutter (13202): │               "makeAndModel": "GMC Yukon XL",
-I/flutter (13202): │               "year": 2021,
-I/flutter (13202): │               "licensePlate": "ASD"
-I/flutter (13202): │             },
-I/flutter (13202): │             "averageRating": 5,
-I/flutter (13202): │             "totalReviews": 2,
-I/flutter (13202): │             "nickname": "bayzid"
-I/flutter (13202): │           }
-I/flutter (13202): │         }
-I/flutter (13202): │       ],
-I/flutter (13202): │       "assignedTo": null,
-I/flutter (13202): │       "name": "Demo",
-I/flutter (13202): │       "nickname": null,
-I/flutter (13202): │       "company": null,
-I/flutter (13202): │       "companyRole": "Chauffeur",
-I/flutter (13202): │       "profilePicture": "https://i.ibb.co/z5YHLV9/profile.png",
-I/flutter (13202): │       "hasReview": false,
-I/flutter (13202): │       "isReviewedByDriver": false,
-I/flutter (13202): │       "isReviewedByCreator": false,
-I/flutter (13202): │       "createdAt": "2026-09-22T02:58:13.244Z",
-I/flutter (13202): │       "updatedAt": "2026-09-22T03:07:42.115Z"
-I/flutter (13202): │     },
-I/flutter (13202): │     {
-I/flutter (13202): │       "_id": "6ab1fdae851adc6bf9609b53",
-I/flutter (13202): │       "jobCreatorId": "6ab1011fef1345b0d168de79",
-I/flutter (13202): │       "createdBy": {
-I/flutter (13202): │         "_id": "6ab1011fef1345b0d168de79",
-I/flutter (13202): │         "name": "Md Bayzid",
-I/flutter (13202): │         "email": "mdbayazid131@gmail.com",
-I/flutter (13202): │         "phone": "54854559",
-I/flutter (13202): │         "companyName": "STA",
-I/flutter (13202): │         "companyRole": "Chauffeur",
-I/flutter (13202): │         "profilePicture": "https://i.ibb.co/z5YHLV9/profile.png",
-I/flutter (13202): │         "selectedVehicle": {
-I/flutter (13202): │           "_id": "6ab10b8e1aa40c7b27b5513e",
-I/flutter (13202): │           "type": "SUV",
-I/flutter (13202): │           "makeAndModel": "GMC Yukon XL",
-I/flutter (13202): │           "year": 2021,
-I/flutter (13202): │           "licensePlate": "ASD"
-I/flutter (13202): │         },
-I/flutter (13202): │         "averageRating": 5,
-I/flutter (13202): │         "totalReviews": 2,
-I/flutter (13202): │         "nickname": "bayzid"
-I/flutter (13202): │       },
-I/flutter (13202): │       "jobType": "BY THE HOUR",
-I/flutter (13202): │       "pickup": "gulisthan",
-I/flutter (13202): │       "dropoff": "By the hour (7)",
-I/flutter (13202): │       "flightNumber": null,
-I/flutter (13202): │       "asap": false,
-I/flutter (13202): │       "date": "2026-09-30T00:00:00.000Z",
-I/flutter (13202): │       "time": "10:01",
-I/flutter (13202): │       "vehicleType": "SUV",
-I/flutter (13202): │       "paymentAmount": 508,
-I/flutter (13202): │       "paymentType": "CREDIT CARD ON FILE",
-I/flutter (13202): │       "paymentStatus": "UNPAID",
-I/flutter (13202): │       "instruction": null,
-I/flutter (13202): │       "passengerName": null,
-I/flutter (13202): │       "passengerPhone": null,
-I/flutter (13202): │       "status": "ASSIGNED",
-I/flutter (13202): │       "rideStatus": "POB",
-I/flutter (13202): │       "applicantCount": 0,
-I/flutter (13202): │       "applicant": null,
-I/flutter (13202): │       "applicants": [],
-I/flutter (13202): │       "assignedTo": {
-I/flutter (13202): │         "_id": "6ab10172ef1345b0d168deac",
-I/flutter (13202): │         "name": "khaled",
-I/flutter (13202): │         "email": "khaledahmednayeem.dev@gmail.com",
-I/flutter (13202): │         "phone": "123456789",
-I/flutter (13202): │         "companyName": "Betopia",
-I/flutter (13202): │         "companyRole": "Company Manager",
-I/flutter (13202): │         "profilePicture": "https://i.ibb.co/z5YHLV9/profile.png",
-I/flutter (13202): │         "selectedVehicle": {
-I/flutter (13202): │           "_id": "6ab108691aa40c7b27b54d9e",
-I/flutter (13202): │           "type": "SUV",
-I/flutter (13202): │           "makeAndModel": "GMC Yukon XL",
-I/flutter (13202): │           "year": 2021,
-I/flutter (13202): │           "licensePlate": "ABC"
-I/flutter (13202): │         },
-I/flutter (13202): │         "averageRating": 0,
-I/flutter (13202): │         "totalReviews": 0
-I/flutter (13202): │       },
-I/flutter (13202): │       "name": "Md Bayzid",
-I/flutter (13202): │       "nickname": "bayzid",
-I/flutter (13202): │       "company": null,
-I/flutter (13202): │       "companyRole": "Chauffeur",
-I/flutter (13202): │       "profilePicture": "https://i.ibb.co/z5YHLV9/profile.png",
-I/flutter (13202): │       "hasReview": false,
-I/flutter (13202): │       "isReviewedByDriver": false,
-I/flutter (13202): │       "isReviewedByCreator": false,
-I/flutter (13202): │       "createdAt": "2026-09-22T04:01:50.876Z",
-I/flutter (13202): │       "updatedAt": "2026-09-22T05:27:34.673Z"
-I/flutter (13202): │     }
-I/flutter (13202): │   ]
-I/flutter (13202): │ }
-I/flutter (13202): └ ✅✅✅✅ RESPONSE ══════════════════════════════════════ ✅✅✅│
-I/flutter (13202):
-[GETX] OPEN BOTTOMSHEET 1058773093
-[GETX] CLOSE BOTTOMSHEET 1058773093
-W/WindowOnBackDispatcher(13202): sendCancelIfRunning: isInProgress=false callback=io.flutter.embedding.android.FlutterActivity$1@a11b957
+Searched for "NOTIFICATION"
+Searched for "NOTIFICATION_TYPE"
+Searched for "notification.model"
+Listed directory notification
+Viewed notification.interface.ts:1-48
+Viewed pushNotificationHelper.ts:1-79
+Viewed notification.service.ts:1-152
+Viewed notificationsHelper.ts:1-115
+Searched for "sendNotifications"
+Searched for "sendNotifications("
+Ran command: `Get-Content "c:\Users\Khaled\Khaled Dask\Backend\moeb26 - Copy\src\app\modules\job\job.service.ts" | Select-Object -Skip 460 -First 30`
+Searched for "type:\s*'MESSAGE'|type:\s*"MESSAGE"|type:\s*'CHAT'"
+Ran command: `Get-Content "c:\Users\Khaled\Khaled Dask\Backend\moeb26 - Copy\src\app\modules\support\support.service.ts" | Select-String -Pattern "sendNotifications" -Context 3, 10`
+Ran command: `Get-Content "c:\Users\Khaled\Khaled Dask\Backend\moeb26 - Copy\src\app\modules\job\job.service.ts" | Select-String -Pattern "sendNotifications" -Context 3, 10`
+Listed directory helpers
+Listed directory notification
+Viewed notification.types.ts:1-84
+Searched for "JOB_CREATED|CHAUFFEUR_ASSIGNED|RIDE_STATUS_UPDATE|NEW_CHAT_MESSAGE|SUPPORT_REPLY|JOB_APPLIED"
+Searched for "type:\s*['"][A-Z_]+['"]"
+Searched for "NotificationBuilder"
+Ran command: `Get-Content "c:\Users\Khaled\Khaled Dask\Backend\moeb26 - Copy\src\app\modules\message\message.service.ts" | Select-String -Pattern "NotificationBuilder" -Context 0, 10`
+Listed directory templates
+Ran command: `Get-Content "c:\Users\Khaled\Khaled Dask\Backend\moeb26 - Copy\src\helpers\notification\templates\*.ts"`
+Ran command: `Get-Content "c:\Users\Khaled\Khaled Dask\Backend\moeb26 - Copy\src\helpers\notification\templates\chauffeurApplied.ts"`
+
+Hello! Based on a deep-dive into your backend codebase (specifically `notification.service.ts`, `notificationsHelper.ts`, and the template system in `src/helpers/notification/templates`), here are the exact details for your push notification routing.
+
+### 1. Complete List of Notification Types
+The codebase utilizes two methods to send notifications: a dynamic `sendNotifications` function and a structured `NotificationBuilder` using templates. The possible values you will receive in the `type` field of the push data payload are:
+
+**From Templates (Builder):**
+*   `CHAUFFEUR_APPLIED`
+*   `JOB_ASSIGNED`
+*   `JOB_CANCELLED`
+*   `JOB_APPLICANT_REJECTED`
+*   `RIDE_STATUS_UPDATE`
+*   `TASK_COMPLETED`
+*   `NEW_MESSAGE` (Chat)
+*   `PAYMENT_RECEIVED`
+*   `PAYMENT_FAILED`
+*   `SYSTEM_ALERT`
+*   `WELCOME`
+
+**From Direct Services:**
+*   `JOB_INVITATION` (Targeted private ride offers)
+*   `MESSAGE` (Specifically used for Support Ticket replies)
+*   `ADMIN` (Internal admin alerts)
+*   `SYSTEM` (e.g., Vehicle verification alerts)
+
+---
+
+### 2. Payload Structure for Key Categories
+
+Your `pushNotificationHelper.ts` formats the data payload in two ways depending on how it's dispatched. 
+
+#### 🚗 Ride / Job Notifications
+For template-based job notifications, the identifier is usually `jobId`. For direct dispatches (like invitations), it uses generic `resourceId` and `referenceId`.
+
+*   **Chauffeur Applied:** `type: "CHAUFFEUR_APPLIED"`, `jobId`, `chauffeurId`, `action: "VIEW_JOB_APPLICATIONS"`
+*   **Job Assigned:** `type: "JOB_ASSIGNED"`, `jobId`, `action: "VIEW_RIDE"`
+*   **Ride Status Update:** `type: "RIDE_STATUS_UPDATE"`, `jobId`, `rideStatus` (distinguishes the status), `action: "VIEW_JOB"`
+*   **Job Invitation (Direct):** `type: "JOB_INVITATION"`, `resourceType: "JOB"`, `resourceId: "<job_id>"`
+
+#### 💬 Chat Notifications
+Sent via templates from `message.service.ts`.
+*   **Keys included:** `type: "NEW_MESSAGE"`, `chatId`, `senderId`, `action: "OPEN_CHAT"`
+
+#### 🛠 Support Notifications
+Sent directly from `support.service.ts` using generic fields.
+*   **Customer Reply:** `type: "MESSAGE"`, `resourceType: "SUPPORT_TICKET"`, `resourceId: "<ticket_id>"`
+*   *(Note: For support, the `resourceType` is strictly `"SUPPORT_TICKET"`, which allows you to differentiate a support message from a standard chat message `NEW_MESSAGE`)*
+
+#### 💰 Payment Notifications
+*   **Keys included:** `type: "PAYMENT_RECEIVED"` (or `PAYMENT_FAILED`), `paymentId`, `amount`, `currency`, `action: "VIEW_EARNINGS"`
+
+---
+
+### 3. Sample JSON Payloads for FCM
+
+Here are sample payloads for the mobile app to handle in Flutter. Note that FCM data payloads treat all values as strings.
+
+**Ride Status Update Example:**
+```json
+{
+  "notification": {
+    "title": "Ride Status Updated",
+    "body": "John Doe updated ride status to IN_PROGRESS"
+  },
+  "data": {
+    "type": "RIDE_STATUS_UPDATE",
+    "jobId": "65b2d7f8e8a93a1234567890",
+    "rideStatus": "IN_PROGRESS",
+    "action": "VIEW_JOB"
+  }
+}
+```
+
+**New Chat Message Example:**
+```json
+{
+  "notification": {
+    "title": "New Message from Alex",
+    "body": "Hey, I'm waiting outside."
+  },
+  "data": {
+    "type": "NEW_MESSAGE",
+    "chatId": "65c3b1e2f9d87b0987654321",
+    "senderId": "65a1c2d3e4f5a6b7c8d9e0f1",
+    "action": "OPEN_CHAT"
+  }
+}
+```
+
+**Support Reply Example (Direct Notification Method):**
+```json
+{
+  "notification": {
+    "title": "Support: Billing Issue",
+    "body": "We have refunded your trip."
+  },
+  "data": {
+    "type": "MESSAGE",
+    "resourceType": "SUPPORT_TICKET",
+    "resourceId": "65d4e5f6a7b8c9d0e1f2a3b4",
+    "referenceId": "65d4e5f6a7b8c9d0e1f2a3b4",
+    "title": "Support: Billing Issue",
+    "body": "We have refunded your trip."
+  }
+}
+```
+
+**To properly route in Flutter:**
+1. Check `data['type']`.
+2. If `type == 'NEW_MESSAGE'`, route to Chat using `data['chatId']`.
+3. If `type == 'MESSAGE'` **and** `data['resourceType'] == 'SUPPORT_TICKET'`, route to Support detail using `data['resourceId']`.
+4. If `type` is one of the job-related types (`RIDE_STATUS_UPDATE`, `JOB_ASSIGNED`, etc.), route to the Ride Details screen using `data['jobId']` (or `data['resourceId']` for `JOB_INVITATION`).

@@ -911,78 +911,7 @@ class RideDetailSheet extends StatelessWidget {
             SizedBox(height: 12.h),
             Divider(color: const Color(0xFF22222A), height: 1.h),
             SizedBox(height: 12.h),
-            Row(
-              children: [
-                Container(
-                  padding: EdgeInsets.all(8.r),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF1C1C1F),
-                    borderRadius: BorderRadius.circular(8.r),
-                    border: Border.all(
-                      color: const Color(0xFF2A2A32),
-                      width: 1,
-                    ),
-                  ),
-                  child: Icon(
-                    Icons.directions_car_outlined,
-                    color: Colors.white70,
-                    size: 20.sp,
-                  ),
-                ),
-                SizedBox(width: 12.w),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "VEHICLE",
-                        style: GoogleFonts.inter(
-                          color: const Color(0xFF94A3B8),
-                          fontSize: 9.sp,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1.0,
-                        ),
-                      ),
-                      SizedBox(height: 2.h),
-                      Text(
-                        ride.vehicleType.isNotEmpty ? ride.vehicleType : "Sedan",
-                        style: GoogleFonts.inter(
-                          color: Colors.white,
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-                if (selectedVehicleDetail.isNotEmpty) ...[
-                  SizedBox(width: 8.w),
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF1C1C1F),
-                      borderRadius: BorderRadius.circular(8.r),
-                      border: Border.all(
-                        color: const Color(0xFF2A2A32),
-                        width: 1,
-                      ),
-                    ),
-                    child: Text(
-                      selectedVehicleDetail,
-                      style: GoogleFonts.inter(
-                        color: const Color(0xFFFEDB9B),
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ],
-            ),
+            _buildVehicleSection(ride, selectedVehicleDetail),
           ],
         ),
       );
@@ -1133,10 +1062,69 @@ class RideDetailSheet extends StatelessWidget {
             SizedBox(height: 12.h),
             Divider(color: const Color(0xFF22222A), height: 1.h),
             SizedBox(height: 12.h),
-            Row(
-              children: [
+            _buildVehicleSection(ride, selectedVehicleDetail),
+          ],
+        ),
+      );
+    }
+  }
+
+  Widget _buildVehicleSection(RideData ride, String selectedVehicleDetail) {
+    final vehicleType =
+        ride.vehicleType.isNotEmpty ? ride.vehicleType : "Sedan";
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: EdgeInsets.all(9.r),
+          decoration: BoxDecoration(
+            color: const Color(0xFF1C1C1F),
+            borderRadius: BorderRadius.circular(10.r),
+            border: Border.all(
+              color: const Color(0xFF2A2A32),
+              width: 1,
+            ),
+          ),
+          child: Icon(
+            Icons.directions_car_outlined,
+            color: const Color(0xFFFEDB9B),
+            size: 20.sp,
+          ),
+        ),
+        SizedBox(width: 12.w),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                "VEHICLE",
+                style: GoogleFonts.inter(
+                  color: const Color(0xFF94A3B8),
+                  fontSize: 9.sp,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.0,
+                ),
+              ),
+              SizedBox(height: 3.h),
+              Text(
+                vehicleType,
+                style: GoogleFonts.inter(
+                  color: Colors.white,
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w600,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              if (selectedVehicleDetail.isNotEmpty) ...[
+                SizedBox(height: 6.h),
                 Container(
-                  padding: EdgeInsets.all(8.r),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 9.w,
+                    vertical: 4.h,
+                  ),
                   decoration: BoxDecoration(
                     color: const Color(0xFF1C1C1F),
                     borderRadius: BorderRadius.circular(8.r),
@@ -1145,70 +1133,36 @@ class RideDetailSheet extends StatelessWidget {
                       width: 1,
                     ),
                   ),
-                  child: Icon(
-                    Icons.directions_car_outlined,
-                    color: Colors.white70,
-                    size: 20.sp,
-                  ),
-                ),
-                SizedBox(width: 12.w),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
-                        "VEHICLE",
-                        style: GoogleFonts.inter(
-                          color: const Color(0xFF94A3B8),
-                          fontSize: 9.sp,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1.0,
-                        ),
+                      Icon(
+                        Icons.directions_car_rounded,
+                        color: const Color(0xFFFEDB9B),
+                        size: 13.sp,
                       ),
-                      SizedBox(height: 2.h),
-                      Text(
-                        ride.vehicleType.isNotEmpty ? ride.vehicleType : "Sedan",
-                        style: GoogleFonts.inter(
-                          color: Colors.white,
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w600,
+                      SizedBox(width: 6.w),
+                      Flexible(
+                        child: Text(
+                          selectedVehicleDetail,
+                          style: GoogleFonts.inter(
+                            color: const Color(0xFFFEDB9B),
+                            fontSize: 11.5.sp,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),
                 ),
-                if (selectedVehicleDetail.isNotEmpty) ...[
-                  SizedBox(width: 8.w),
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF1C1C1F),
-                      borderRadius: BorderRadius.circular(8.r),
-                      border: Border.all(
-                        color: const Color(0xFF2A2A32),
-                        width: 1,
-                      ),
-                    ),
-                    child: Text(
-                      selectedVehicleDetail,
-                      style: GoogleFonts.inter(
-                        color: const Color(0xFFFEDB9B),
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
               ],
-            ),
-          ],
+            ],
+          ),
         ),
-      );
-    }
+      ],
+    );
   }
 
   Widget _buildPassengerSection({

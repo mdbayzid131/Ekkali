@@ -57,13 +57,35 @@ class NotificationItem {
         'GENERAL';
     String iconPath = AppIcons.job_icon;
 
+    Map<String, dynamic>? rawData;
+    if (json['data'] is Map<String, dynamic>) {
+      rawData = json['data'] as Map<String, dynamic>;
+    } else if (json['payload'] is Map<String, dynamic>) {
+      rawData = json['payload'] as Map<String, dynamic>;
+    }
+
+    final String? resourceType = json['resourceType']?.toString() ??
+        rawData?['resourceType']?.toString();
+    final String? resourceId = json['resourceId']?.toString() ??
+        rawData?['resourceId']?.toString() ??
+        json['referenceId']?.toString() ??
+        rawData?['referenceId']?.toString();
+
     if (type.toUpperCase().contains('JOB') ||
         type.toUpperCase().contains('RIDE') ||
-        type.toUpperCase().contains('TASK')) {
+        type.toUpperCase().contains('TASK') ||
+        type.toUpperCase().contains('CHAUFFEUR') ||
+        resourceType?.toUpperCase() == 'JOB') {
       iconPath = AppIcons.job_icon;
+    } else if (resourceType?.toUpperCase() == 'SUPPORT_TICKET' ||
+        type.toUpperCase().contains('SUPPORT')) {
+      iconPath = AppIcons.message_icon;
     } else if (type.toUpperCase().contains('MESSAGE') ||
         type.toUpperCase().contains('CHAT')) {
       iconPath = AppIcons.message_icon;
+    } else if (type.toUpperCase().contains('PAYMENT') ||
+        type.toUpperCase().contains('INVOICE')) {
+      iconPath = AppIcons.deals_icon;
     } else if (type.toUpperCase().contains('REMINDER') ||
         type.toUpperCase().contains('OFFER') ||
         type.toUpperCase().contains('DEAL')) {
@@ -79,13 +101,6 @@ class NotificationItem {
       } catch (_) {}
     }
 
-    Map<String, dynamic>? rawData;
-    if (json['data'] is Map<String, dynamic>) {
-      rawData = json['data'] as Map<String, dynamic>;
-    } else if (json['payload'] is Map<String, dynamic>) {
-      rawData = json['payload'] as Map<String, dynamic>;
-    }
-
     final dynamic jobObj = (json['job'] is Map)
         ? json['job']
         : (rawData != null && rawData['job'] is Map ? rawData['job'] : null);
@@ -95,6 +110,7 @@ class NotificationItem {
 
     String? parsedJobId = json['jobId']?.toString() ??
         rawData?['jobId']?.toString() ??
+        (resourceType?.toUpperCase() == 'JOB' ? resourceId : null) ??
         rawData?['id']?.toString() ??
         rawData?['_id']?.toString() ??
         json['rideId']?.toString() ??

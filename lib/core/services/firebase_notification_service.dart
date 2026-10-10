@@ -322,16 +322,36 @@ class FirebaseNotificationService {
       }
     }
 
+    final String resourceType = (data?['resourceType']?.toString() ??
+            nestedData?['resourceType']?.toString() ??
+            '')
+        .trim()
+        .toUpperCase();
+
+    final String resourceId = (data?['resourceId']?.toString() ??
+            nestedData?['resourceId']?.toString() ??
+            data?['referenceId']?.toString() ??
+            nestedData?['referenceId']?.toString() ??
+            '')
+        .trim();
+
+    final String action = (data?['action']?.toString() ??
+            nestedData?['action']?.toString() ??
+            '')
+        .trim()
+        .toUpperCase();
+
     final String resolvedJobId = (jobId != null && jobId.isNotEmpty)
         ? jobId
         : (data?['jobId']?.toString() ??
             nestedData?['jobId']?.toString() ??
+            (resourceType == 'JOB' ? resourceId : null) ??
+            data?['rideId']?.toString() ??
+            nestedData?['rideId']?.toString() ??
             data?['id']?.toString() ??
             nestedData?['id']?.toString() ??
             data?['_id']?.toString() ??
             nestedData?['_id']?.toString() ??
-            data?['rideId']?.toString() ??
-            nestedData?['rideId']?.toString() ??
             (data != null && data['job'] is Map
                 ? data['job']['_id']?.toString() ??
                     data['job']['id']?.toString()
@@ -361,17 +381,51 @@ class FirebaseNotificationService {
     final String lowerSubtitle = (subtitle ?? '').toLowerCase();
 
     debugPrint(
-      '📍 Unified Notification Navigation: type=$upperType, jobId=$resolvedJobId, chatId=$resolvedChatId, title=$lowerTitle',
+      '📍 Unified Notification Navigation: type=$upperType, resourceType=$resourceType, resourceId=$resourceId, jobId=$resolvedJobId, chatId=$resolvedChatId, action=$action',
     );
 
-    // 1. CHAT RELATED NOTIFICATIONS: Always go to Chat list (Index 2), NEVER chat detail
+    // 1. SUPPORT TICKET NOTIFICATIONS (Checked first so type="MESSAGE" with resourceType="SUPPORT_TICKET" is NOT mistaken for Chat)
+    final bool isSupport = resourceType == 'SUPPORT_TICKET' ||
+        resourceType.contains('SUPPORT') ||
+        upperType == 'SUPPORT' ||
+        upperType == 'SUPPORT_MESSAGE' ||
+        upperType == 'SUPPORT_TICKET' ||
+        upperType == 'SUPPORT_REPLY' ||
+        (upperType == 'MESSAGE' && resourceType == 'SUPPORT_TICKET') ||
+        lowerTitle.contains('support:') ||
+        (lowerTitle.contains('support') && lowerSubtitle.contains('ticket'));
+
+    if (isSupport) {
+      final String resolvedTicketId = (data?['ticketId']?.toString() ??
+              nestedData?['ticketId']?.toString() ??
+              data?['id']?.toString() ??
+              nestedData?['id']?.toString() ??
+              resourceId)
+          .trim();
+
+      if (resolvedTicketId.isNotEmpty) {
+        Get.toNamed(
+          Routes.supportTicketDetailView,
+          arguments: {
+            'ticketId': resolvedTicketId,
+            'id': resolvedTicketId,
+          },
+        );
+      } else {
+        Get.toNamed(Routes.notificationsView);
+      }
+      return;
+    }
+
+    // 2. CHAT RELATED NOTIFICATIONS: Always go to Chat list (Index 2), NEVER chat detail
     final bool isChat = upperType == 'NEW_MESSAGE' ||
-        upperType == 'MESSAGE' ||
+        (upperType == 'MESSAGE' && resourceType != 'SUPPORT_TICKET') ||
         upperType == 'CHAT' ||
         upperType == 'COMMUNITY_MESSAGE' ||
         upperType == 'NEW_COMMUNITY_MESSAGE' ||
+        action == 'OPEN_CHAT' ||
         resolvedChatId.isNotEmpty ||
-        lowerTitle.contains('message') ||
+        lowerTitle.contains('new message') ||
         lowerTitle.contains('chat') ||
         lowerSubtitle.contains('message') ||
         lowerSubtitle.contains('chat');
@@ -381,14 +435,21 @@ class FirebaseNotificationService {
       return;
     }
 
-    // 2. JOB RELATED NOTIFICATIONS: Always open Ride page & Bottom Sheet, NEVER separate job details
-    final bool isJob = upperType == 'JOB_ASSIGNED' ||
-        upperType == 'JOB_APPLICATION_RECEIVED' ||
-        upperType == 'CHAUFFEUR_APPLIED' ||
+    // 3. JOB / RIDE RELATED NOTIFICATIONS: Always open Ride page & Bottom Sheet
+    final bool isJob = upperType == 'CHAUFFEUR_APPLIED' ||
+        upperType == 'JOB_ASSIGNED' ||
+        upperType == 'RIDE_STATUS_UPDATE' ||
+        upperType == 'JOB_INVITATION' ||
         upperType == 'JOB_CANCELLED' ||
-        upperType == 'JOB_REVIEWED' ||
         upperType == 'JOB_APPLICANT_REJECTED' ||
+        upperType == 'TASK_COMPLETED' ||
+        upperType == 'JOB_APPLICATION_RECEIVED' ||
+        upperType == 'JOB_REVIEWED' ||
         upperType == 'TASK' ||
+        resourceType == 'JOB' ||
+        action == 'VIEW_JOB' ||
+        action == 'VIEW_RIDE' ||
+        action == 'VIEW_JOB_APPLICATIONS' ||
         upperType.contains('JOB') ||
         upperType.contains('RIDE') ||
         resolvedJobId.isNotEmpty ||
@@ -411,30 +472,21 @@ class FirebaseNotificationService {
       return;
     }
 
-    // 3. SUPPORT TICKET
-    if (upperType == 'SUPPORT' ||
-        upperType == 'SUPPORT_MESSAGE' ||
-        upperType == 'SUPPORT_TICKET' ||
-        lowerTitle.contains('support') ||
-        lowerSubtitle.contains('ticket')) {
-      final String? ticketId = data?['ticketId']?.toString() ??
-          data?['id']?.toString() ??
-          data?['_id']?.toString();
-      if (ticketId != null && ticketId.isNotEmpty) {
-        Get.toNamed(
-          Routes.supportTicketDetailView,
-          arguments: {
-            'ticketId': ticketId,
-            'id': ticketId,
-          },
-        );
-      } else {
-        Get.toNamed(Routes.notificationsView);
-      }
+    // 4. INVOICES & PAYMENTS
+    if (upperType == 'PAYMENT_RECEIVED' ||
+        upperType == 'PAYMENT_FAILED' ||
+        upperType.contains('PAYMENT') ||
+        upperType.contains('INVOICE') ||
+        action == 'VIEW_EARNINGS' ||
+        lowerTitle.contains('invoice') ||
+        lowerTitle.contains('payment') ||
+        lowerSubtitle.contains('invoice') ||
+        lowerSubtitle.contains('payment')) {
+      Get.toNamed(Routes.invoiceHistoryView);
       return;
     }
 
-    // 4. DEALS & OFFERS
+    // 5. DEALS & OFFERS
     if (upperType == 'REMINDER' ||
         upperType == 'DEAL' ||
         upperType == 'OFFER' ||
@@ -447,18 +499,16 @@ class FirebaseNotificationService {
       return;
     }
 
-    // 5. INVOICES & PAYMENTS
-    if (upperType.contains('INVOICE') ||
-        upperType.contains('PAYMENT') ||
-        lowerTitle.contains('invoice') ||
-        lowerTitle.contains('payment') ||
-        lowerSubtitle.contains('invoice') ||
-        lowerSubtitle.contains('payment')) {
-      Get.toNamed(Routes.invoiceHistoryView);
+    // 6. VEHICLE VERIFICATION & SYSTEM ALERTS
+    if (resourceType == 'VEHICLE' ||
+        (upperType == 'SYSTEM' &&
+            (lowerTitle.contains('vehicle') ||
+                lowerSubtitle.contains('vehicle')))) {
+      Get.toNamed(Routes.allVehicleView);
       return;
     }
 
-    // 6. MARKETPLACE / ITEMS
+    // 7. MARKETPLACE / ITEMS
     if (lowerTitle.contains('item') ||
         lowerTitle.contains('market') ||
         lowerSubtitle.contains('item') ||
@@ -467,7 +517,7 @@ class FirebaseNotificationService {
       return;
     }
 
-    // 7. DEFAULT FALLBACK
+    // 8. DEFAULT FALLBACK
     if (Get.currentRoute == Routes.notificationsView) {
       Get.offAllNamed(Routes.bottomNabbarView, arguments: 0);
     } else {
