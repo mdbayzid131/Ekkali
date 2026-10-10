@@ -257,7 +257,9 @@ class RideDetailSheet extends StatelessWidget {
 
         final chat = await socketRepo.createChat(participantId);
         if (chat != null) {
-          Get.back();
+          if (Get.isBottomSheetOpen == true) {
+            Get.back();
+          }
           Get.toNamed(Routes.chatDetailView, arguments: chat);
           return;
         }
@@ -858,17 +860,7 @@ class RideDetailSheet extends StatelessWidget {
                 if (driverId.isNotEmpty && !isPast) ...[
                   SizedBox(width: 8.w),
                   GestureDetector(
-                    onTap: () {
-                      final driverPhone = chauffeur?.phone?.trim() ?? '';
-                      if (driverPhone.isNotEmpty) {
-                        _sendTextMessage(driverPhone);
-                      } else {
-                        Helpers.showCustomSnackBar(
-                          'Phone number not available for this chauffeur.',
-                          isError: true,
-                        );
-                      }
-                    },
+                    onTap: () => _openChat(driverId),
                     child: Container(
                       padding: EdgeInsets.all(10.r),
                       decoration: BoxDecoration(
@@ -1090,17 +1082,7 @@ class RideDetailSheet extends StatelessWidget {
                 if (!isPast && posterId.isNotEmpty) ...[
                   SizedBox(width: 8.w),
                   GestureDetector(
-                    onTap: () {
-                      final posterPhone = _getPosterPhone(ride);
-                      if (posterPhone.isNotEmpty) {
-                        _sendTextMessage(posterPhone);
-                      } else {
-                        Helpers.showCustomSnackBar(
-                          'Phone number not available for this job poster.',
-                          isError: true,
-                        );
-                      }
-                    },
+                    onTap: () => _openChat(posterId),
                     child: Container(
                       padding: EdgeInsets.all(10.r),
                       decoration: BoxDecoration(
