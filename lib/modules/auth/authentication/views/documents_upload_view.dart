@@ -8,6 +8,7 @@ import '../../../../core/widgets/CustomText.dart';
 import '../../../../core/widgets/CustomTextGary.dart';
 import '../controllers/signup_controller.dart';
 import 'package:moeb_26/core/widgets/custom_sub_appbar.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class DocumentsuploadView extends StatefulWidget {
   const DocumentsuploadView({super.key});
@@ -82,14 +83,8 @@ class _DocumentsuploadViewState extends State<DocumentsuploadView> {
                   expireController: controller.localPermitExpireController,
                 ),
 
-                // 4. Profile Picture Card
-                _buildUnifiedDocumentCard(
-                  context: context,
-                  title: "Profile Picture",
-                  isRequired: true,
-                  fileRx: controller.profilePictureFile,
-                  onlyCamera: true,
-                ),
+                // 4. Standout Unique Profile Picture Section with Crop Workflow
+                _buildUniqueProfilePictureSection(context),
 
                 SizedBox(height: 10.h),
                 Container(
@@ -143,6 +138,310 @@ class _DocumentsuploadViewState extends State<DocumentsuploadView> {
       ),
     );
   }
+
+  // --- Unique Standout Profile Picture Section ---
+  Widget _buildUniqueProfilePictureSection(BuildContext context) {
+    return Obx(() {
+      final file = controller.profilePictureFile.value;
+      final bool hasPhoto = file != null;
+      final bool hasError = controller.showErrors.value && !hasPhoto;
+
+      return Container(
+        margin: EdgeInsets.only(bottom: 22.h),
+        padding: EdgeInsets.all(18.w),
+        decoration: BoxDecoration(
+          color: const Color(0xFF141417),
+          borderRadius: BorderRadius.circular(20.r),
+          border: Border.all(
+            color: hasError
+                ? Colors.redAccent
+                : hasPhoto
+                    ? const Color(0xFFFEDB9B).withValues(alpha: 0.6)
+                    : const Color(0xFF26262E),
+            width: hasPhoto || hasError ? 1.5 : 1.2,
+          ),
+          boxShadow: hasPhoto
+              ? [
+                  BoxShadow(
+                    color: const Color(0xFFD08700).withValues(alpha: 0.08),
+                    blurRadius: 16,
+                    offset: const Offset(0, 4),
+                  )
+                ]
+              : null,
+        ),
+        child: Column(
+          children: [
+            // Header Row: Section Label + Status Badge
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(6.r),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFEDB9B).withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(8.r),
+                      ),
+                      child: Icon(
+                        Icons.account_box_rounded,
+                        color: const Color(0xFFFEDB9B),
+                        size: 16.sp,
+                      ),
+                    ),
+                    SizedBox(width: 8.w),
+                    CustomText(
+                      text: "PROFILE PHOTO",
+                      fontWeight: FontWeight.w700,
+                      fontSize: 12.sp,
+                    ),
+                    const Text(
+                      " *",
+                      style: TextStyle(
+                        color: Colors.red,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                Container(
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                  decoration: BoxDecoration(
+                    color: hasPhoto
+                        ? const Color(0xFF10B981).withValues(alpha: 0.15)
+                        : const Color(0xFFD08700).withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(20.r),
+                    border: Border.all(
+                      color: hasPhoto
+                          ? const Color(0xFF10B981).withValues(alpha: 0.4)
+                          : const Color(0xFFD08700).withValues(alpha: 0.3),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        hasPhoto
+                            ? Icons.check_circle_rounded
+                            : Icons.camera_alt_outlined,
+                        color: hasPhoto
+                            ? const Color(0xFF10B981)
+                            : const Color(0xFFFEDB9B),
+                        size: 12.sp,
+                      ),
+                      SizedBox(width: 4.w),
+                      Text(
+                        hasPhoto ? "Ready" : "Required",
+                        style: GoogleFonts.inter(
+                          color: hasPhoto
+                              ? const Color(0xFF10B981)
+                              : const Color(0xFFFEDB9B),
+                          fontSize: 11.sp,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 16.h),
+
+            // Center: Circular Avatar Showcase
+            Center(
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      if (hasPhoto) {
+                        _previewLocalImage(context, file, "Profile Photo");
+                      } else {
+                        controller.captureAndCropProfilePicture();
+                      }
+                    },
+                    child: Container(
+                      width: 110.r,
+                      height: 110.r,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: const Color(0xFF1C1C22),
+                        border: Border.all(
+                          color: hasPhoto
+                              ? const Color(0xFFFEDB9B)
+                              : const Color(0xFF383842),
+                          width: hasPhoto ? 3.0 : 2.0,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: hasPhoto
+                                ? const Color(0xFFFEDB9B).withValues(alpha: 0.25)
+                                : Colors.black.withValues(alpha: 0.3),
+                            blurRadius: 18,
+                            spreadRadius: 2,
+                          ),
+                        ],
+                      ),
+                      child: ClipOval(
+                        child: hasPhoto
+                            ? Image.file(
+                                file,
+                                width: 110.r,
+                                height: 110.r,
+                                fit: BoxFit.cover,
+                              )
+                            : Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.person_rounded,
+                                    color: const Color(0xFFFEDB9B)
+                                        .withValues(alpha: 0.6),
+                                    size: 48.sp,
+                                  ),
+                                  SizedBox(height: 2.h),
+                                  Text(
+                                    "Tap to take",
+                                    style: GoogleFonts.inter(
+                                      color: Colors.white54,
+                                      fontSize: 10.sp,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                      ),
+                    ),
+                  ),
+
+                  // Floating Camera Badge on bottom right of circle
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: GestureDetector(
+                      onTap: () {
+                        controller.captureAndCropProfilePicture();
+                      },
+                      child: Container(
+                        padding: EdgeInsets.all(8.r),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFEDB9B),
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: Colors.black,
+                            width: 2.5,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.4),
+                              blurRadius: 6,
+                            ),
+                          ],
+                        ),
+                        child: const Icon(
+                          Icons.camera_alt_rounded,
+                          color: Colors.black,
+                          size: 16,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: 14.h),
+
+            // Dress Code Requirement Badge
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+              decoration: BoxDecoration(
+                color: const Color(0xFF0D0D10),
+                borderRadius: BorderRadius.circular(10.r),
+                border: Border.all(color: const Color(0xFF222228)),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.check_circle_outline_rounded,
+                    color: const Color(0xFFFEDB9B),
+                    size: 16.sp,
+                  ),
+                  SizedBox(width: 8.w),
+                  Expanded(
+                    child: RichText(
+                      text: TextSpan(
+                        style: GoogleFonts.inter(
+                          color: Colors.white70,
+                          fontSize: 11.sp,
+                        ),
+                        children: [
+                          const TextSpan(
+                            text: "Dress Code: ",
+                            style: TextStyle(
+                              color: Color(0xFFFEDB9B),
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const TextSpan(
+                            text:
+                                "Black suit, white shirt, tie & white background",
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Camera capture action button (shown only when no photo has been taken yet)
+            if (!hasPhoto) ...[
+              SizedBox(height: 14.h),
+              CustomButton(
+                text: "Take Photo with Camera",
+                icon: const Icon(
+                  Icons.camera_alt_rounded,
+                  color: Colors.black,
+                  size: 18,
+                ),
+                padding: EdgeInsets.symmetric(vertical: 12.h),
+                onPressed: () => controller.captureAndCropProfilePicture(),
+              ),
+            ],
+
+            // Validation Error message if submitted without photo
+            if (hasError)
+              Padding(
+                padding: EdgeInsets.only(top: 10.h),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.error_outline,
+                      color: Colors.redAccent,
+                      size: 14,
+                    ),
+                    SizedBox(width: 6.w),
+                    Text(
+                      "Please take or upload your required Profile Photo",
+                      style: GoogleFonts.inter(
+                        color: Colors.redAccent,
+                        fontSize: 11.sp,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          ],
+        ),
+      );
+    });
+  }
+
+
 
   // --- Unified Document & Expiry Card ---
   Widget _buildUnifiedDocumentCard({
@@ -292,38 +591,63 @@ class _DocumentsuploadViewState extends State<DocumentsuploadView> {
   }
 
   void _previewLocalImage(BuildContext context, File file, String title) {
+    final isProfilePhoto = title == "Profile Photo";
     Get.dialog(
       Dialog(
         backgroundColor: const Color(0xFF1E1E1E),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16.r),
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            AppBar(
-              title: Text(title, style: const TextStyle(color: Colors.white)),
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-              leading: IconButton(
-                icon: const Icon(Icons.close, color: Colors.white),
-                onPressed: () => Get.back(),
+        child: Padding(
+          padding: EdgeInsets.only(bottom: isProfilePhoto ? 16.h : 8.h),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              AppBar(
+                title: Text(
+                  title,
+                  style: GoogleFonts.inter(
+                    color: Colors.white,
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                backgroundColor: Colors.transparent,
+                elevation: 0,
+                leading: IconButton(
+                  icon: const Icon(Icons.close, color: Colors.white),
+                  onPressed: () => Get.back(),
+                ),
+                actions: isProfilePhoto
+                    ? [
+                        IconButton(
+                          icon: const Icon(
+                            Icons.camera_alt_rounded,
+                            color: Color(0xFFFEDB9B),
+                          ),
+                          tooltip: "Retake Photo",
+                          onPressed: () {
+                            Get.back();
+                            controller.captureAndCropProfilePicture();
+                          },
+                        ),
+                      ]
+                    : null,
               ),
-            ),
-            Padding(
-              padding: EdgeInsets.all(16.w),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(12.r),
-                child: file.path.toLowerCase().endsWith('.pdf')
-                    ? Container(
-                        padding: EdgeInsets.all(24.w),
-                        color: const Color(0xFF141414),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(
-                              Icons.picture_as_pdf,
-                              color: Colors.red,
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12.r),
+                  child: file.path.toLowerCase().endsWith('.pdf')
+                      ? Container(
+                          padding: EdgeInsets.all(24.w),
+                          color: const Color(0xFF141414),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.picture_as_pdf,
+                                color: Colors.red,
                               size: 48,
                             ),
                             SizedBox(height: 12.h),
@@ -335,10 +659,33 @@ class _DocumentsuploadViewState extends State<DocumentsuploadView> {
                           ],
                         ),
                       )
-                    : Image.file(file, fit: BoxFit.contain),
+                    : ConstrainedBox(
+                        constraints: BoxConstraints(
+                          maxHeight: 320.h,
+                        ),
+                        child: Image.file(file, fit: BoxFit.contain),
+                      ),
+                ),
               ),
-            ),
-          ],
+              if (isProfilePhoto)
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+                  child: CustomButton(
+                    text: "Adjust Crop",
+                    icon: const Icon(
+                      Icons.crop_rounded,
+                      color: Colors.black,
+                      size: 18,
+                    ),
+                    padding: EdgeInsets.symmetric(vertical: 12.h),
+                    onPressed: () {
+                      Get.back();
+                      controller.recropProfilePicture();
+                    },
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );

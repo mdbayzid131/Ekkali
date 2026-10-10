@@ -11,6 +11,7 @@ import 'package:moeb_26/core/utils/helpers.dart';
 import 'package:moeb_26/data/models/vehicle_model.dart';
 import 'package:moeb_26/modules/service_Area/controllers/serviceController.dart';
 import 'package:moeb_26/core/services/auth_service.dart';
+import 'package:moeb_26/core/widgets/profile_photo_cropper_view.dart';
 
 class SignupController extends GetxController {
   final AuthService _authService = Get.find<AuthService>();
@@ -107,6 +108,7 @@ class SignupController extends GetxController {
   final Rx<File?> localPermitFile = Rx<File?>(null);
   final Rx<File?> headshotFile = Rx<File?>(null);
   final Rx<File?> profilePictureFile = Rx<File?>(null);
+  File? rawProfilePictureFile;
 
   final licensePlateExpireController = TextEditingController();
   final hackLicenseExpireController = TextEditingController();
@@ -146,6 +148,72 @@ class SignupController extends GetxController {
   }
 
   bool _isPicking = false;
+
+  Future<void> captureAndCropProfilePicture() async {
+    if (_isPicking) return;
+    _isPicking = true;
+    try {
+      final XFile? image = await _imagePicker.pickImage(
+        source: ImageSource.camera,
+        imageQuality: 90,
+      );
+      if (image != null) {
+        final rawFile = File(image.path);
+        rawProfilePictureFile = rawFile;
+        final croppedFile = await Get.to<File?>(
+          () => ProfilePhotoCropperView(
+            imageFile: rawFile,
+            title: "Crop Profile Picture",
+            subtitle: "Black suit, white shirt, tie & white background",
+          ),
+          fullscreenDialog: true,
+          transition: Transition.fadeIn,
+        );
+
+        if (croppedFile != null) {
+          final compressed = await Helpers.compressImage(croppedFile);
+          profilePictureFile.value = compressed;
+        }
+      }
+    } catch (e) {
+      Helpers.error('Error in camera profile picture crop: $e');
+      Helpers.showCustomSnackBar(
+        'Could not complete camera capture. Please check camera permissions.',
+        isError: true,
+      );
+    } finally {
+      _isPicking = false;
+    }
+  }
+
+  Future<void> pickAndCropProfilePicture({bool fromCamera = true}) =>
+      captureAndCropProfilePicture();
+
+  Future<void> recropProfilePicture() async {
+    final fileToCrop = rawProfilePictureFile ?? profilePictureFile.value;
+    if (fileToCrop == null) return;
+    try {
+      final croppedFile = await Get.to<File?>(
+        () => ProfilePhotoCropperView(
+          imageFile: fileToCrop,
+          title: "Adjust Crop",
+          subtitle: "Position your face neatly inside the circular frame",
+        ),
+        fullscreenDialog: true,
+        transition: Transition.fadeIn,
+      );
+      if (croppedFile != null) {
+        final compressed = await Helpers.compressImage(croppedFile);
+        profilePictureFile.value = compressed;
+      }
+    } catch (e) {
+      debugPrint("Error recropping profile picture: $e");
+    }
+  }
+
+  void removeProfilePicture() {
+    profilePictureFile.value = null;
+  }
 
   Future<void> pickFromCamera(Rx<File?> target) async {
     if (_isPicking) return;
