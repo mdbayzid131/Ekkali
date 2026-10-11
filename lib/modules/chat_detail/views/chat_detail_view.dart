@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:moeb_26/config/constants/icon_paths.dart';
+import 'package:moeb_26/core/widgets/clickable_message_text.dart';
 import 'package:moeb_26/modules/preferred_drivers/controllers/preferred_drivers_controller.dart';
 import '../controllers/chat_detail_controller.dart';
 import '../../../data/models/chat_message_model.dart';
@@ -352,7 +353,7 @@ class ChatDetailView extends StatelessWidget {
                                 margin: EdgeInsets.only(bottom: 6.h),
                                 padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
                                 decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.06),
+                                  color: Colors.white.withValues(alpha: 0.06),
                                   borderRadius: BorderRadius.circular(6.r),
                                   border: const Border(
                                     left: BorderSide(
@@ -388,9 +389,9 @@ class ChatDetailView extends StatelessWidget {
                                 ),
                               ),
                             if (parsed.messageText.trim().isNotEmpty)
-                              Text(
-                                parsed.messageText,
-                                style: GoogleFonts.inter(
+                              ClickableMessageText(
+                                text: parsed.messageText,
+                                textStyle: GoogleFonts.inter(
                                   color: Colors.white,
                                   fontSize: 14.sp,
                                   height: 1.4,
@@ -437,7 +438,7 @@ class ChatDetailView extends StatelessWidget {
             border: Border.all(color: const Color(0xFF24242A), width: 1.5),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.5),
+                color: Colors.black.withValues(alpha: 0.5),
                 blurRadius: 15,
                 spreadRadius: 2,
               ),

@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:moeb_26/config/constants/icon_paths.dart';
+import 'package:moeb_26/core/widgets/clickable_message_text.dart';
 import '../controllers/chat_support_detail_controller.dart';
 import '../../../data/models/chat_message_model.dart';
 
@@ -128,9 +129,9 @@ class SupportChatDetailView extends StatelessWidget {
                   ),
                   border: Border.all(color: const Color(0xff333333)),
                 ),
-                child: Text(
-                  message.text,
-                  style: GoogleFonts.inter(
+                child: ClickableMessageText(
+                  text: message.text,
+                  textStyle: GoogleFonts.inter(
                     color: Colors.white,
                     fontSize: 14.sp,
                     height: 1.4,

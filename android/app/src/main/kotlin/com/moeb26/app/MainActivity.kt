@@ -25,6 +25,18 @@ class MainActivity : FlutterActivity() {
                     }
                     result.success(true)
                 }
+                "enableWakeLock" -> {
+                    runOnUiThread {
+                        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                    }
+                    result.success(true)
+                }
+                "disableWakeLock" -> {
+                    runOnUiThread {
+                        window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                    }
+                    result.success(true)
+                }
                 else -> result.notImplemented()
             }
         }

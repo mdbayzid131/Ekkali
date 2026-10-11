@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:moeb_26/config/constants/icon_paths.dart';
+import 'package:moeb_26/core/widgets/clickable_message_text.dart';
 import 'package:moeb_26/data/models/chat_community_model.dart';
 import 'package:moeb_26/modules/chat_community/controllers/chat_community_detail_controller.dart';
 import 'package:moeb_26/modules/preferred_drivers/controllers/preferred_drivers_controller.dart';
@@ -386,7 +387,7 @@ class ChatCommunityDetailView extends StatelessWidget {
                                 vertical: 4.h,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.06),
+                                color: Colors.white.withValues(alpha: 0.06),
                                 borderRadius: BorderRadius.circular(6.r),
                                 border: const Border(
                                   left: BorderSide(
@@ -422,9 +423,9 @@ class ChatCommunityDetailView extends StatelessWidget {
                               ),
                             ),
                           if (parsed.messageText.isNotEmpty)
-                            Text(
-                              parsed.messageText,
-                              style: GoogleFonts.inter(
+                            ClickableMessageText(
+                              text: parsed.messageText,
+                              textStyle: GoogleFonts.inter(
                                 color: Colors.white,
                                 fontSize: 14.sp,
                                 height: 1.4,
@@ -464,7 +465,7 @@ class ChatCommunityDetailView extends StatelessWidget {
             border: Border.all(color: const Color(0xFF24242A), width: 1.5),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.5),
+                color: Colors.black.withValues(alpha: 0.5),
                 blurRadius: 15,
                 spreadRadius: 2,
               ),

@@ -22,6 +22,16 @@ import UIKit
           } else {
             result(false)
           }
+        case "enableWakeLock":
+          DispatchQueue.main.async {
+            UIApplication.shared.isIdleTimerDisabled = true
+          }
+          result(true)
+        case "disableWakeLock":
+          DispatchQueue.main.async {
+            UIApplication.shared.isIdleTimerDisabled = false
+          }
+          result(true)
         default:
           result(FlutterMethodNotImplemented)
         }

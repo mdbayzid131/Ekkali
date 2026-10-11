@@ -187,7 +187,7 @@ class _SecureScreenState extends State<SecureScreen>
     // Temporarily disable secure mode & wakelock so pushed screen can function normally
     _isRouteActive = false;
     _disableProtection();
-    _disableWakeLock();
+    // Keep wakelock active so opening dialogs/bottom sheets does not cause screen to sleep
   }
 
   // RouteAware: When returning back to this screen from a pushed route

@@ -100,11 +100,21 @@ class ScreenProtectorService {
 
     if (!_isWakeLockActive && _activeWakeLockCount > 0) {
       _isWakeLockActive = true;
+
+      // 1. Flutter Wakelock Plus
       try {
         await WakelockPlus.enable();
-        debugPrint('💡 ScreenProtector: Screen keep-awake ENABLED (no sleep)');
+        debugPrint('💡 ScreenProtector: WakelockPlus keep-awake ENABLED');
       } catch (e) {
-        debugPrint('⚠️ ScreenProtector: Error enabling wakelock: $e');
+        debugPrint('⚠️ ScreenProtector: WakelockPlus enable error: $e');
+      }
+
+      // 2. Hardware Native Window Keep-Awake (FLAG_KEEP_SCREEN_ON on Android / isIdleTimerDisabled on iOS)
+      try {
+        await _channel.invokeMethod('enableWakeLock');
+        debugPrint('💡 ScreenProtector: Native window keep-awake ENABLED (no sleep)');
+      } catch (e) {
+        debugPrint('⚠️ ScreenProtector: Native wakelock enable error: $e');
       }
     }
   }
@@ -118,11 +128,21 @@ class ScreenProtectorService {
     if (_isWakeLockActive && _activeWakeLockCount <= 0) {
       _isWakeLockActive = false;
       _activeWakeLockCount = 0;
+
+      // 1. Flutter Wakelock Plus
       try {
         await WakelockPlus.disable();
-        debugPrint('🌙 ScreenProtector: Screen keep-awake DISABLED (sleep restored)');
+        debugPrint('🌙 ScreenProtector: WakelockPlus keep-awake DISABLED');
       } catch (e) {
-        debugPrint('⚠️ ScreenProtector: Error disabling wakelock: $e');
+        debugPrint('⚠️ ScreenProtector: WakelockPlus disable error: $e');
+      }
+
+      // 2. Hardware Native Window Keep-Awake
+      try {
+        await _channel.invokeMethod('disableWakeLock');
+        debugPrint('🌙 ScreenProtector: Native window keep-awake DISABLED (sleep restored)');
+      } catch (e) {
+        debugPrint('⚠️ ScreenProtector: Native wakelock disable error: $e');
       }
     }
   }

@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:moeb_26/config/constants/icon_paths.dart';
 import 'package:moeb_26/config/themes/app_theme.dart';
+import 'package:moeb_26/core/widgets/clickable_message_text.dart';
 import 'package:moeb_26/data/models/support_ticket_model.dart';
 import '../controllers/support_ticket_detail_controller.dart';
 
@@ -306,10 +307,10 @@ class SupportTicketDetailView extends GetView<SupportTicketDetailController> {
                       : CrossAxisAlignment.start,
                   children: [
                     if (message.text.trim().isNotEmpty)
-                      Text(
-                        message.text,
+                      ClickableMessageText(
+                        text: message.text,
                         textAlign: isMe ? TextAlign.right : TextAlign.left,
-                        style: GoogleFonts.inter(
+                        textStyle: GoogleFonts.inter(
                           color: Colors.white,
                           fontSize: 14.sp,
                           height: 1.4,
