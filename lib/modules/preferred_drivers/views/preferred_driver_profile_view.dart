@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:moeb_26/config/themes/app_theme.dart';
 import 'package:moeb_26/core/widgets/CustomButton.dart';
+import 'package:moeb_26/core/widgets/ImagePreviewPopup.dart';
 import '../controllers/preferred_drivers_controller.dart';
 
 class PreferredDriverProfileView extends StatefulWidget {
@@ -172,7 +173,8 @@ class _PreferredDriverProfileViewState
                       ? Image.network(
                           chauffeur.imageUrl,
                           fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => const Center(
+                          errorBuilder: (context, error, stackTrace) =>
+                              const Center(
                             child: Icon(Icons.person,
                                 color: Colors.white54, size: 40),
                           ),
@@ -624,21 +626,11 @@ class _PreferredDriverProfileViewState
             ),
           )
         else
-          Container(
-            padding: EdgeInsets.all(14.w),
-            decoration: BoxDecoration(
-              color: const Color(0xFF161618),
-              borderRadius: BorderRadius.circular(16.r),
-              border: Border.all(color: const Color(0xFF27272A), width: 1),
-            ),
-            child: Column(
-              children: [
-                for (int i = 0; i < vehicles.length; i++) ...[
-                  if (i > 0) _buildDivider(),
-                  _buildVehicleItem(vehicles[i]),
-                ],
-              ],
-            ),
+          Column(
+            children: [
+              for (int i = 0; i < vehicles.length; i++)
+                _buildVehicleItem(vehicles[i]),
+            ],
           ),
       ],
     );
@@ -650,87 +642,258 @@ class _PreferredDriverProfileViewState
         ? Icons.directions_car_rounded
         : Icons.local_taxi_rounded;
 
-    return Row(
-      children: [
-        // Vehicle Icon
-        Container(
-          width: 40.w,
-          height: 40.w,
-          decoration: BoxDecoration(
-            color: const Color(0xFF222226),
-            borderRadius: BorderRadius.circular(10.r),
-            border: Border.all(
-              color: const Color(0xFF2E2E33),
-              width: 0.8,
-            ),
-          ),
-          child: Center(
-            child: Icon(
-              vehicleIcon,
-              color: AppColors.primaryColor,
-              size: 20.sp,
-            ),
-          ),
-        ),
-        SizedBox(width: 12.w),
+    final displayName = vehicle.year > 0
+        ? "${vehicle.year} ${vehicle.makeAndModel}"
+        : (vehicle.makeAndModel.isNotEmpty
+            ? vehicle.makeAndModel
+            : 'Fleet Vehicle');
 
-        // Make & Model + License Plate (if available)
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
+    final photos = vehicle.photosList;
+
+    return Container(
+      margin: EdgeInsets.only(bottom: 12.h),
+      padding: EdgeInsets.all(14.w),
+      decoration: BoxDecoration(
+        color: const Color(0xFF161618),
+        borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(color: const Color(0xFF27272A), width: 1),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Top Row: Icon + Make & Model + Vehicle Type Pill
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text(
-                vehicle.makeAndModel.isNotEmpty
-                    ? vehicle.makeAndModel
-                    : 'Unknown Model',
-                style: GoogleFonts.inter(
-                  color: Colors.white,
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w600,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              if (vehicle.licensePlate.isNotEmpty || vehicle.year > 0) ...[
-                SizedBox(height: 3.h),
-                Text(
-                  [
-                    if (vehicle.year > 0) '${vehicle.year}',
-                    if (vehicle.licensePlate.isNotEmpty) vehicle.licensePlate,
-                  ].join(' • '),
-                  style: GoogleFonts.inter(
-                    color: const Color(0xFFD5C4AB),
-                    fontSize: 11.sp,
-                    fontWeight: FontWeight.w400,
+              Container(
+                width: 38.w,
+                height: 38.w,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF222226),
+                  borderRadius: BorderRadius.circular(10.r),
+                  border: Border.all(
+                    color: const Color(0xFF2E2E33),
+                    width: 0.8,
                   ),
                 ),
-              ],
+                child: Center(
+                  child: Icon(
+                    vehicleIcon,
+                    color: AppColors.primaryColor,
+                    size: 20.sp,
+                  ),
+                ),
+              ),
+              SizedBox(width: 12.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      displayName,
+                      style: GoogleFonts.inter(
+                        color: Colors.white,
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(width: 8.w),
+              if (vehicle.type.isNotEmpty)
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 9.w, vertical: 4.h),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF27272A),
+                    borderRadius: BorderRadius.circular(8.r),
+                    border: Border.all(
+                      color: const Color(0xFF3F3F46),
+                      width: 0.8,
+                    ),
+                  ),
+                  child: Text(
+                    vehicle.type.toUpperCase(),
+                    style: GoogleFonts.inter(
+                      color: const Color(0xFFFEDB9B),
+                      fontSize: 10.sp,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.4,
+                    ),
+                  ),
+                ),
             ],
           ),
-        ),
-        SizedBox(width: 8.w),
 
-        // Vehicle Type Pill Badge
-        Container(
-          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-          decoration: BoxDecoration(
-            color: const Color(0xFF27272A),
-            borderRadius: BorderRadius.circular(8.r),
-            border: Border.all(
-              color: const Color(0xFF3F3F46),
-              width: 0.8,
+          // Specs Badges Row (Plate & Color)
+          if (vehicle.licensePlate.isNotEmpty || vehicle.color.isNotEmpty) ...[
+            SizedBox(height: 12.h),
+            Wrap(
+              spacing: 8.w,
+              runSpacing: 6.h,
+              children: [
+                if (vehicle.licensePlate.isNotEmpty)
+                  _buildVehicleSpecBadge(
+                    icon: Icons.tag,
+                    label: 'License Plate: ${vehicle.licensePlate}',
+                  ),
+                if (vehicle.color.isNotEmpty)
+                  _buildVehicleSpecBadge(
+                    icon: Icons.palette_outlined,
+                    label: 'Color: ${vehicle.color}',
+                  ),
+              ],
             ),
-          ),
-          child: Text(
-            vehicle.type.toUpperCase(),
+          ],
+
+          // Vehicle 3 Photos Gallery (Front, Rear, Interior)
+          if (photos.isNotEmpty) ...[
+            SizedBox(height: 14.h),
+            Text(
+              "VEHICLE PHOTOS",
+              style: GoogleFonts.inter(
+                color: const Color(0xFF8E8E93),
+                fontSize: 10.sp,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.8,
+              ),
+            ),
+            SizedBox(height: 8.h),
+            Row(
+              children: photos.map((p) {
+                return Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 4.w),
+                    child: _buildVehiclePhotoTile(
+                      vehicleTitle: displayName,
+                      photoTitle: p['title'] ?? 'Photo',
+                      imageUrl: p['url'] ?? '',
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildVehicleSpecBadge({
+    required IconData icon,
+    required String label,
+  }) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.5.h),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1E1E22),
+        borderRadius: BorderRadius.circular(6.r),
+        border: Border.all(color: const Color(0xFF2C2C32), width: 0.8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 12.sp, color: const Color(0xFFFEDB9B)),
+          SizedBox(width: 4.w),
+          Text(
+            label,
             style: GoogleFonts.inter(
-              color: const Color(0xFFFEDB9B),
+              color: const Color(0xFFD5C4AB),
               fontSize: 11.sp,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 0.4,
+              fontWeight: FontWeight.w500,
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildVehiclePhotoTile({
+    required String vehicleTitle,
+    required String photoTitle,
+    required String imageUrl,
+  }) {
+    final hasPhoto = imageUrl.trim().isNotEmpty;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        GestureDetector(
+          onTap: hasPhoto
+              ? () {
+                  Get.dialog(
+                    ImagePreviewPopup(
+                      imageUrl: imageUrl,
+                      title: "$vehicleTitle - $photoTitle",
+                    ),
+                  );
+                }
+              : null,
+          child: Container(
+            height: 70.h,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: const Color(0xFF202024),
+              borderRadius: BorderRadius.circular(8.r),
+              border: Border.all(color: const Color(0xFF2C2C32), width: 1),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: hasPhoto
+                ? Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      Image.network(
+                        imageUrl,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) =>
+                            const Center(
+                          child: Icon(
+                            Icons.broken_image_outlined,
+                            color: Color(0xFF666666),
+                            size: 20,
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        right: 4,
+                        bottom: 4,
+                        child: Container(
+                          padding: const EdgeInsets.all(2.5),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withValues(alpha: 0.65),
+                            borderRadius: BorderRadius.circular(4.r),
+                          ),
+                          child: Icon(
+                            Icons.fullscreen,
+                            color: Colors.white,
+                            size: 13.sp,
+                          ),
+                        ),
+                      ),
+                    ],
+                  )
+                : Center(
+                    child: Icon(
+                      Icons.directions_car_outlined,
+                      color: const Color(0xFF555555),
+                      size: 22.sp,
+                    ),
+                  ),
+          ),
+        ),
+        SizedBox(height: 4.h),
+        Text(
+          photoTitle,
+          style: GoogleFonts.inter(
+            color: const Color(0xFF9E9EA8),
+            fontSize: 10.sp,
+            fontWeight: FontWeight.w500,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          textAlign: TextAlign.center,
         ),
       ],
     );
@@ -981,7 +1144,8 @@ class _PreferredDriverProfileViewState
                       EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
                   itemCount: controller.reviewsList.length +
                       (controller.isMoreReviewsLoading.value ? 1 : 0),
-                  separatorBuilder: (_, __) => SizedBox(height: 14.h),
+                  separatorBuilder: (context, index) =>
+                      SizedBox(height: 14.h),
                   itemBuilder: (context, index) {
                     if (index == controller.reviewsList.length) {
                       return Padding(

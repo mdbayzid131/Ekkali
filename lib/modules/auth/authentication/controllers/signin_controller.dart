@@ -88,26 +88,44 @@ class SigninController extends GetxController {
         final authData = response.data?['data'] ?? {};
         final bool isApproved = authData['isApproved'] == true;
         final bool isOnboard = authData['isOnboard'] == true;
+        final bool isRestricted = authData['isRestricted'] == true;
         final String appState = (authData['appState'] ?? '')
             .toString()
             .toUpperCase();
         final String rejectionReason =
             authData['rejectionReason']?.toString() ?? '';
+        final String blockReason =
+            authData['blockReason']?.toString() ?? '';
 
-        if (appState == 'REJECTED') {
+        if (isRestricted || appState == 'REJECTED') {
+          await StorageService.setBool(StorageConstants.isApproved, false);
+
+          final String reason = blockReason.isNotEmpty
+              ? blockReason
+              : (rejectionReason.isNotEmpty
+                  ? rejectionReason
+                  : (isRestricted
+                      ? 'Account suspended due to compliance/policy review'
+                      : 'Incomplete documents or vehicle not meeting standards'));
+
           Helpers.showCustomSnackBar(
-            'Your application has been rejected',
+            isRestricted
+                ? (blockReason.isNotEmpty
+                    ? blockReason
+                    : 'Your account is restricted')
+                : 'Your application has been rejected',
             isError: true,
           );
           Get.offAllNamed(
             Routes.applicationNotApprovedView,
             arguments: {
-              'reason': rejectionReason.isNotEmpty
-                  ? rejectionReason
-                  : 'Incomplete documents or vehicle not meeting standards',
-              'title': 'Application Not Approved',
-              'description':
-                  "Unfortunately, we couldn't approve your application at this time.",
+              'reason': reason,
+              'title': isRestricted
+                  ? 'Account Restricted'
+                  : 'Application Not Approved',
+              'description': isRestricted
+                  ? "Your account access has been restricted."
+                  : "Unfortunately, we couldn't approve your application at this time.",
             },
           );
         } else if (isApproved) {

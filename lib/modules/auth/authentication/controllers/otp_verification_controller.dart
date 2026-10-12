@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:moeb_26/config/constants/storage_constants.dart';
 import 'package:moeb_26/config/routes/app_pages.dart';
 import 'package:moeb_26/core/services/auth_service.dart';
+import 'package:moeb_26/core/services/storege_service.dart';
 import 'package:moeb_26/core/utils/helpers.dart';
 
 class OtpController extends GetxController {
@@ -107,21 +109,35 @@ class OtpController extends GetxController {
             rawData is Map<String, dynamic> ? rawData : {};
         final bool isApproved = authData['isApproved'] == true;
         final bool isOnboard = authData['isOnboard'] == true;
+        final bool isRestricted = authData['isRestricted'] == true;
         final String appState =
             (authData['appState'] ?? '').toString().toUpperCase();
         final String rejectionReason =
             authData['rejectionReason']?.toString() ?? '';
+        final String blockReason =
+            authData['blockReason']?.toString() ?? '';
 
-        if (appState == 'REJECTED') {
+        if (isRestricted || appState == 'REJECTED') {
+          await StorageService.setBool(StorageConstants.isApproved, false);
+
+          final String reason = blockReason.isNotEmpty
+              ? blockReason
+              : (rejectionReason.isNotEmpty
+                  ? rejectionReason
+                  : (isRestricted
+                      ? 'Account suspended due to compliance/policy review'
+                      : 'Incomplete documents or vehicle not meeting standards'));
+
           Get.offAllNamed(
             Routes.applicationNotApprovedView,
             arguments: {
-              'reason': rejectionReason.isNotEmpty
-                  ? rejectionReason
-                  : 'Incomplete documents or vehicle not meeting standards',
-              'title': 'Application Not Approved',
-              'description':
-                  "Unfortunately, we couldn't approve your application at this time.",
+              'reason': reason,
+              'title': isRestricted
+                  ? 'Account Restricted'
+                  : 'Application Not Approved',
+              'description': isRestricted
+                  ? "Your account access has been restricted."
+                  : "Unfortunately, we couldn't approve your application at this time.",
             },
           );
         } else if (isApproved) {

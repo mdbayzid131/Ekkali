@@ -66,28 +66,117 @@ class ChauffeurReview {
 }
 
 class ChauffeurVehicle {
+  final String id;
   final String type;
+  final String make;
+  final String model;
   final String makeAndModel;
   final String licensePlate;
   final int year;
+  final String color;
+  final String colorOutside;
+  final String colorInside;
+  final String status;
+  final String? vehiclePhotoFront;
+  final String? vehiclePhotoRear;
+  final String? vehiclePhotoInterior;
 
   ChauffeurVehicle({
+    this.id = '',
     required this.type,
+    this.make = '',
+    this.model = '',
     required this.makeAndModel,
     this.licensePlate = '',
     this.year = 0,
+    this.color = '',
+    this.colorOutside = '',
+    this.colorInside = '',
+    this.status = 'APPROVED',
+    this.vehiclePhotoFront,
+    this.vehiclePhotoRear,
+    this.vehiclePhotoInterior,
   });
 
   factory ChauffeurVehicle.fromJson(Map<String, dynamic> json) {
+    final rawMakeAndModel = json['makeAndModel']?.toString() ??
+        '${json['make'] ?? ''} ${json['model'] ?? ''}'.trim();
+    final make = json['make']?.toString() ?? '';
+    final model = json['model']?.toString() ?? '';
+
+    // Color parsing
+    final colorOut = json['colorOutside']?.toString() ??
+        json['color']?.toString() ??
+        '';
+    final colorIn = json['colorInside']?.toString() ?? '';
+    final colorDisplay = colorOut.isNotEmpty
+        ? (colorIn.isNotEmpty ? '$colorOut / $colorIn' : colorOut)
+        : colorIn;
+
+    // Photos parsing (support nested photos: { frontView, rearView, interiorView } or direct keys)
+    String? front;
+    String? rear;
+    String? interior;
+
+    if (json['photos'] is Map) {
+      final p = json['photos'] as Map;
+      front = p['frontView']?.toString() ?? p['front']?.toString();
+      rear = p['rearView']?.toString() ?? p['rear']?.toString();
+      interior = p['interiorView']?.toString() ?? p['interior']?.toString();
+    } else if (json['photos'] is List) {
+      final list = json['photos'] as List;
+      if (list.isNotEmpty) front = list[0]?.toString();
+      if (list.length > 1) rear = list[1]?.toString();
+      if (list.length > 2) interior = list[2]?.toString();
+    }
+
+    front ??= json['vehiclePhotoFront']?.toString() ??
+        json['frontView']?.toString() ??
+        json['frontImage']?.toString();
+    rear ??= json['vehiclePhotoRear']?.toString() ??
+        json['rearView']?.toString() ??
+        json['rearImage']?.toString();
+    interior ??= json['vehiclePhotoInterior']?.toString() ??
+        json['interiorView']?.toString() ??
+        json['interiorImage']?.toString();
+
     return ChauffeurVehicle(
+      id: json['_id']?.toString() ?? json['id']?.toString() ?? '',
       type: json['type']?.toString() ?? json['carType']?.toString() ?? 'Vehicle',
-      makeAndModel: json['makeAndModel']?.toString() ??
-          '${json['make'] ?? ''} ${json['model'] ?? ''}'.trim(),
-      licensePlate: json['licensePlate']?.toString() ?? '',
+      make: make,
+      model: model,
+      makeAndModel: rawMakeAndModel.isNotEmpty
+          ? rawMakeAndModel
+          : '$make $model'.trim(),
+      licensePlate: json['licensePlate']?.toString() ??
+          json['licensePlateRaw']?.toString() ??
+          '',
       year: json['year'] is int
           ? json['year']
           : int.tryParse(json['year']?.toString() ?? '') ?? 0,
+      color: colorDisplay,
+      colorOutside: colorOut,
+      colorInside: colorIn,
+      status: json['status']?.toString() ?? 'APPROVED',
+      vehiclePhotoFront: Helpers.resolveImageUrl(front),
+      vehiclePhotoRear: Helpers.resolveImageUrl(rear),
+      vehiclePhotoInterior: Helpers.resolveImageUrl(interior),
     );
+  }
+
+  /// Non-empty vehicle photos list with labels
+  List<Map<String, String>> get photosList {
+    final list = <Map<String, String>>[];
+    if (vehiclePhotoFront != null && vehiclePhotoFront!.isNotEmpty) {
+      list.add({'title': 'Front View', 'url': vehiclePhotoFront!});
+    }
+    if (vehiclePhotoRear != null && vehiclePhotoRear!.isNotEmpty) {
+      list.add({'title': 'Rear View', 'url': vehiclePhotoRear!});
+    }
+    if (vehiclePhotoInterior != null && vehiclePhotoInterior!.isNotEmpty) {
+      list.add({'title': 'Interior View', 'url': vehiclePhotoInterior!});
+    }
+    return list;
   }
 }
 
@@ -169,12 +258,13 @@ class FavoriteChauffeur {
     final List<ChauffeurVehicle> vehiclesList = [];
     if (json['vehicles'] is List) {
       for (var v in json['vehicles']) {
-        if (v is Map<String, dynamic>) {
-          vehiclesList.add(ChauffeurVehicle.fromJson(v));
-        } else if (v is Map) {
-          vehiclesList.add(
-            ChauffeurVehicle.fromJson(Map<String, dynamic>.from(v)),
-          );
+        if (v is Map) {
+          final parsed =
+              ChauffeurVehicle.fromJson(Map<String, dynamic>.from(v));
+          final st = parsed.status.toUpperCase();
+          if (st.isEmpty || st == 'APPROVED' || st == 'ACTIVE') {
+            vehiclesList.add(parsed);
+          }
         }
       }
     }

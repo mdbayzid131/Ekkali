@@ -195,7 +195,8 @@ class AuthService extends GetxService {
       if (authData is! Map<String, dynamic>) return;
 
       final String? accessToken = authData['accessToken'] ?? authData['token'];
-      final bool isApproved = authData['isApproved'] == true;
+      final bool isRestricted = authData['isRestricted'] == true;
+      final bool isApproved = !isRestricted && authData['isApproved'] == true;
       final bool isOnboard = authData['isOnboard'] == true;
 
       // 1. Save Token
