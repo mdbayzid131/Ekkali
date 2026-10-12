@@ -7,7 +7,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
 import 'package:moeb_26/config/themes/app_theme.dart';
 import 'package:moeb_26/core/services/screen_protector_service.dart';
-import 'package:moeb_26/core/utils/helpers.dart';
 import 'package:moeb_26/modules/bottom_nab_bar/controllers/bottom_nabbar_controller.dart';
 
 /// A reusable security wrapper that protects sensitive screens from:
@@ -145,11 +144,99 @@ class _SecureScreenState extends State<SecureScreen>
         ScreenProtectorService.onScreenshotTaken.listen((_) {
       if (mounted && _isRouteActive && widget.enabled) {
         widget.onScreenshotAttempted?.call();
-        Helpers.showCustomSnackBar(
-          "⚠️ The app does not allow screenshots on this screen to protect confidential data.",
-          isError: true,
-        );
+        _hasPendingScreenshotWarning = true;
+        _showScreenshotWarningDialog();
       }
+    });
+  }
+
+  bool _isWarningDialogShowing = false;
+  bool _hasPendingScreenshotWarning = false;
+
+  void _showScreenshotWarningDialog() {
+    if (!mounted || _isWarningDialogShowing || !_isRouteActive) return;
+    _isWarningDialogShowing = true;
+    _hasPendingScreenshotWarning = false;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext ctx) {
+        return Dialog(
+          backgroundColor: const Color(0xFF141416),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16.r),
+            side: const BorderSide(color: Color(0xFF2E2E38), width: 1),
+          ),
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 24.h),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 56.r,
+                  height: 56.r,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE53935).withValues(alpha: 0.15),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.no_photography_outlined,
+                    color: const Color(0xFFE53935),
+                    size: 28.sp,
+                  ),
+                ),
+                SizedBox(height: 16.h),
+                Text(
+                  "Screenshots Not Allowed",
+                  style: GoogleFonts.inter(
+                    color: Colors.white,
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 10.h),
+                Text(
+                  "The app does not allow screenshots on this screen to protect confidential job offer details.",
+                  style: GoogleFonts.inter(
+                    color: const Color(0xFF9E9EA8),
+                    fontSize: 13.sp,
+                    height: 1.4,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 20.h),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primaryColor,
+                      foregroundColor: Colors.black,
+                      padding: EdgeInsets.symmetric(vertical: 12.h),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.r),
+                      ),
+                    ),
+                    onPressed: () {
+                      Navigator.of(ctx).pop();
+                    },
+                    child: Text(
+                      "Understood",
+                      style: GoogleFonts.inter(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    ).then((_) {
+      _isWarningDialogShowing = false;
     });
   }
 
@@ -168,6 +255,11 @@ class _SecureScreenState extends State<SecureScreen>
     } else if (state == AppLifecycleState.resumed) {
       if (_isInBackground) {
         setState(() => _isInBackground = false);
+      }
+      if (_hasPendingScreenshotWarning) {
+        Future.delayed(const Duration(milliseconds: 250), () {
+          _showScreenshotWarningDialog();
+        });
       }
       if (_wasWakeLockPausedForLifecycle) {
         _wasWakeLockPausedForLifecycle = false;

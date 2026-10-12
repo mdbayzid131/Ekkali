@@ -156,12 +156,14 @@ class ScreenProtectorService {
         debugPrint('⚠️ ScreenProtector: WakelockPlus enable error: $e');
       }
 
-      // 2. Hardware Native Window Keep-Awake (FLAG_KEEP_SCREEN_ON on Android / isIdleTimerDisabled on iOS)
-      try {
-        await _channel.invokeMethod('enableWakeLock');
-        debugPrint('💡 ScreenProtector: Native window keep-awake ENABLED (no sleep)');
-      } catch (e) {
-        debugPrint('⚠️ ScreenProtector: Native wakelock enable error: $e');
+      // 2. Hardware Native Window Keep-Awake (FLAG_KEEP_SCREEN_ON on Android)
+      if (Platform.isAndroid) {
+        try {
+          await _channel.invokeMethod('enableWakeLock');
+          debugPrint('💡 ScreenProtector: Native Android window keep-awake ENABLED (no sleep)');
+        } catch (e) {
+          debugPrint('⚠️ ScreenProtector: Native wakelock enable error: $e');
+        }
       }
     }
   }
@@ -184,12 +186,14 @@ class ScreenProtectorService {
         debugPrint('⚠️ ScreenProtector: WakelockPlus disable error: $e');
       }
 
-      // 2. Hardware Native Window Keep-Awake
-      try {
-        await _channel.invokeMethod('disableWakeLock');
-        debugPrint('🌙 ScreenProtector: Native window keep-awake DISABLED (sleep restored)');
-      } catch (e) {
-        debugPrint('⚠️ ScreenProtector: Native wakelock disable error: $e');
+      // 2. Hardware Native Window Keep-Awake (FLAG_KEEP_SCREEN_ON on Android)
+      if (Platform.isAndroid) {
+        try {
+          await _channel.invokeMethod('disableWakeLock');
+          debugPrint('🌙 ScreenProtector: Native Android window keep-awake DISABLED (sleep restored)');
+        } catch (e) {
+          debugPrint('⚠️ ScreenProtector: Native wakelock disable error: $e');
+        }
       }
     }
   }
