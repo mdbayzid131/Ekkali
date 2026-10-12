@@ -146,7 +146,7 @@ class _SecureScreenState extends State<SecureScreen>
       if (mounted && _isRouteActive && widget.enabled) {
         widget.onScreenshotAttempted?.call();
         Helpers.showCustomSnackBar(
-          "⚠️ Screenshots are restricted on this screen to protect confidential data.",
+          "⚠️ The app does not allow screenshots on this screen to protect confidential data.",
           isError: true,
         );
       }

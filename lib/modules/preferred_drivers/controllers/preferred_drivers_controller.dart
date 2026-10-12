@@ -22,7 +22,13 @@ class ChauffeurReviewer {
     return ChauffeurReviewer(
       id: json['_id']?.toString() ?? json['id']?.toString() ?? '',
       name: json['name']?.toString() ?? 'Client',
-      profilePicture: json['profilePicture']?.toString() ?? '',
+      profilePicture: Helpers.resolveImageUrl(
+        json['profilePicture']?.toString() ??
+            json['profileImage']?.toString() ??
+            json['avatar']?.toString() ??
+            json['image']?.toString() ??
+            json['profile']?.toString(),
+      ),
     );
   }
 }
@@ -244,7 +250,14 @@ class FavoriteChauffeur {
           json['companyName']?.toString() ??
           'Elite Services',
       companyRole: json['companyRole']?.toString() ?? 'Chauffeur',
-      imageUrl: json['profilePicture']?.toString() ?? '',
+      imageUrl: Helpers.resolveImageUrl(
+        json['profilePicture']?.toString() ??
+            json['profileImage']?.toString() ??
+            json['avatar']?.toString() ??
+            json['image']?.toString() ??
+            json['profile']?.toString() ??
+            json['imageUrl']?.toString(),
+      ),
       rating: ratingVal,
       ratingCount: '($reviewsVal)',
       isFavorite: json['isFavorite'] == true,

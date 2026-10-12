@@ -1,3 +1,4 @@
+import 'package:moeb_26/core/utils/helpers.dart';
 import 'package:moeb_26/data/models/my_jobs_model.dart' as jm;
 import 'package:moeb_26/data/models/user_profile_model.dart';
 
@@ -383,12 +384,18 @@ class RideData {
           ? (json['applicantCount'] as num).toInt()
           : int.tryParse(json['applicantCount']?.toString() ?? ''),
       name: json['name']?.toString(),
-      nickname: json['nickname']?.toString(),
+      nickname: json['nickname']?.toString() ?? json['nickName']?.toString(),
       company: json['company']?.toString(),
       companyName:
           json['companyName']?.toString() ?? json['company']?.toString(),
       companyRole: json['companyRole']?.toString(),
-      profilePicture: json['profilePicture']?.toString(),
+      profilePicture: Helpers.resolveImageUrl(
+        json['profilePicture']?.toString() ??
+            json['profileImage']?.toString() ??
+            json['avatar']?.toString() ??
+            json['image']?.toString() ??
+            json['profile']?.toString(),
+      ),
       hasReview: json['hasReview'] == true,
       isReviewedByDriver: json['isReviewedByDriver'] == true,
       isReviewedByCreator: json['isReviewedByCreator'] == true,
@@ -400,11 +407,18 @@ class RideData {
               ? DriverData(
                   id: creatorId,
                   name: json['name']?.toString() ?? '',
-                  nickname: json['nickname']?.toString(),
+                  nickname:
+                      json['nickname']?.toString() ?? json['nickName']?.toString(),
                   email: json['email']?.toString() ?? '',
                   phone: json['phone']?.toString() ?? '',
                   company: json['company']?.toString(),
-                  profilePicture: json['profilePicture']?.toString() ?? '',
+                  profilePicture: Helpers.resolveImageUrl(
+                    json['profilePicture']?.toString() ??
+                        json['profileImage']?.toString() ??
+                        json['avatar']?.toString() ??
+                        json['image']?.toString() ??
+                        json['profile']?.toString(),
+                  ),
                 )
               : null),
       assignedTo: parseDriver(json['assignedTo']),
@@ -519,12 +533,18 @@ class DriverData {
     return DriverData(
       id: json['_id']?.toString() ?? json['id']?.toString() ?? '',
       name: json['name']?.toString() ?? '',
-      nickname: json['nickname']?.toString(),
+      nickname: json['nickname']?.toString() ?? json['nickName']?.toString(),
       email: json['email']?.toString() ?? '',
       phone: json['phone']?.toString() ?? '',
       company: json['company']?.toString() ?? json['companyName']?.toString(),
       companyRole: json['companyRole']?.toString(),
-      profilePicture: json['profilePicture']?.toString() ?? '',
+      profilePicture: Helpers.resolveImageUrl(
+        json['profilePicture']?.toString() ??
+            json['profileImage']?.toString() ??
+            json['avatar']?.toString() ??
+            json['image']?.toString() ??
+            json['profile']?.toString(),
+      ),
       selectedVehicle: selectedVehicleId,
       selectedVehicleData: parsedSelectedVehicle,
       averageRating: json['averageRating'] is num

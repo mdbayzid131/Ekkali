@@ -1,3 +1,5 @@
+import 'package:moeb_26/core/utils/helpers.dart';
+
 class UserProfileModel {
   final String id;
   final String name;
@@ -74,7 +76,13 @@ class UserProfileModel {
       experience: json['experience'] is int ? json['experience'] : 0,
       company: json['company']?.toString() ?? '',
       companyRole: json['companyRole']?.toString() ?? '',
-      profilePicture: json['profilePicture']?.toString() ?? '',
+      profilePicture: Helpers.resolveImageUrl(
+        json['profilePicture']?.toString() ??
+            json['profileImage']?.toString() ??
+            json['avatar']?.toString() ??
+            json['image']?.toString() ??
+            json['profile']?.toString(),
+      ),
       status: json['status']?.toString() ?? '',
       verified: json['verified'] ?? false,
       badges: badgesList,
@@ -97,7 +105,7 @@ class UserProfileModel {
           ? (json['selectedVehicle']['id']?.toString() ??
               json['selectedVehicle']['_id']?.toString())
           : json['selectedVehicle']?.toString(),
-      nickname: json['nickname']?.toString(),
+      nickname: json['nickname']?.toString() ?? json['nickName']?.toString(),
       uid: json['uid']?.toString(),
     );
   }

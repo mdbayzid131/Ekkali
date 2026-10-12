@@ -1,3 +1,5 @@
+import 'package:moeb_26/core/utils/helpers.dart';
+
 class ChatParticipant {
   final String id;
   final String name;
@@ -16,7 +18,13 @@ class ChatParticipant {
       id: json['_id']?.toString() ?? json['id']?.toString() ?? '',
       name: json['name'] ?? '',
       email: json['email'],
-      profilePicture: json['profilePicture'],
+      profilePicture: Helpers.resolveImageUrl(
+        json['profilePicture']?.toString() ??
+            json['profileImage']?.toString() ??
+            json['avatar']?.toString() ??
+            json['image']?.toString() ??
+            json['profile']?.toString(),
+      ),
     );
   }
 

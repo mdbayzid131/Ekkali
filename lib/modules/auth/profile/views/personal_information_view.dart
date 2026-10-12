@@ -41,9 +41,7 @@ class _PersonalInformationViewState extends State<PersonalInformationView> {
         child: Obx(() {
           if (controller.isLoading.value) {
             return const Center(
-              child: CircularProgressIndicator(
-                color: AppColors.primaryColor,
-              ),
+              child: CircularProgressIndicator(color: AppColors.primaryColor),
             );
           }
 
@@ -52,194 +50,201 @@ class _PersonalInformationViewState extends State<PersonalInformationView> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-              // Avatar & Camera Picker
-              Obx(
-                () => Stack(
-                  children: [
-                    Container(
-                      width: 100.w,
-                      height: 100.w,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: AppColors.primaryColor,
-                          width: 2.w,
+                // Avatar & Camera Picker
+                Obx(
+                  () => Stack(
+                    children: [
+                      Container(
+                        width: 100.w,
+                        height: 100.w,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: AppColors.primaryColor,
+                            width: 2.w,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.primaryColor.withValues(
+                                alpha: 0.2,
+                              ),
+                              blurRadius: 15,
+                              spreadRadius: 2,
+                            ),
+                          ],
                         ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.primaryColor.withValues(alpha: 0.2),
-                            blurRadius: 15,
-                            spreadRadius: 2,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(50.w),
+                          child: controller.pickedImage.value != null
+                              ? Image.file(
+                                  controller.pickedImage.value!,
+                                  fit: BoxFit.cover,
+                                )
+                              : (controller.profilePicture.value.isNotEmpty
+                                    ? Image.network(
+                                        controller.profilePicture.value,
+                                        fit: BoxFit.cover,
+                                        errorBuilder:
+                                            (context, error, stackTrace) =>
+                                                Image.asset(
+                                                  AppImages.sadat_image,
+                                                  fit: BoxFit.cover,
+                                                ),
+                                      )
+                                    : Image.asset(
+                                        AppImages.sadat_image,
+                                        fit: BoxFit.cover,
+                                      )),
+                        ),
+                      ),
+                      // Camera icon removed - photo cannot be changed
+                      // Positioned(
+                      //   bottom: 0,
+                      //   right: 2.w,
+                      //   child: GestureDetector(
+                      //     onTap: () => controller.pickImage(context),
+                      //     child: Container(
+                      //       padding: EdgeInsets.all(6.r),
+                      //       decoration: const BoxDecoration(
+                      //         color: AppColors.primaryColor,
+                      //         shape: BoxShape.circle,
+                      //       ),
+                      //       child: Icon(
+                      //         Icons.camera_alt,
+                      //         color: Colors.black,
+                      //         size: 14.sp,
+                      //       ),
+                      //     ),
+                      //   ),
+                      // ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 12.h),
+
+                // Verified Chauffeur Badge
+                Obx(() {
+                  final isVerified =
+                      controller.userProfile.value?.verified ?? false;
+                  if (!isVerified) return const SizedBox.shrink();
+
+                  return Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.verified,
+                            color: AppColors.primaryColor,
+                            size: 15.sp,
+                          ),
+                          SizedBox(width: 4.w),
+                          Text(
+                            'Verified Professional Chauffeur',
+                            style: GoogleFonts.inter(
+                              color: const Color(0xFFD5C4AB),
+                              fontSize: 12.sp,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
                         ],
                       ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(50.w),
-                        child: controller.pickedImage.value != null
-                            ? Image.file(
-                                controller.pickedImage.value!,
-                                fit: BoxFit.cover,
-                              )
-                            : (controller.profilePicture.value.isNotEmpty
-                                ? Image.network(
-                                    controller.profilePicture.value,
-                                    fit: BoxFit.cover,
-                                  )
-                                : Image.asset(
-                                    AppImages.sadat_image,
-                                    fit: BoxFit.cover,
-                                  )),
-                      ),
+                      SizedBox(height: 12.h),
+                    ],
+                  );
+                }),
+                SizedBox(height: 12.h),
+
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Edit Personal Details',
+                    style: GoogleFonts.inter(
+                      color: const Color(0xFFD5C4AB),
+                      fontSize: 15.sp,
+                      fontWeight: FontWeight.w600,
                     ),
-                    // Camera icon removed - photo cannot be changed
-                    // Positioned(
-                    //   bottom: 0,
-                    //   right: 2.w,
-                    //   child: GestureDetector(
-                    //     onTap: () => controller.pickImage(context),
-                    //     child: Container(
-                    //       padding: EdgeInsets.all(6.r),
-                    //       decoration: const BoxDecoration(
-                    //         color: AppColors.primaryColor,
-                    //         shape: BoxShape.circle,
-                    //       ),
-                    //       child: Icon(
-                    //         Icons.camera_alt,
-                    //         color: Colors.black,
-                    //         size: 14.sp,
-                    //       ),
-                    //     ),
-                    //   ),
-                    // ),
-                  ],
-                ),
-              ),
-              SizedBox(height: 12.h),
-
-              // Verified Chauffeur Badge
-              Obx(() {
-                final isVerified =
-                    controller.userProfile.value?.verified ?? false;
-                if (!isVerified) return const SizedBox.shrink();
-
-                return Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.verified,
-                          color: AppColors.primaryColor,
-                          size: 15.sp,
-                        ),
-                        SizedBox(width: 4.w),
-                        Text(
-                          'Verified Professional Chauffeur',
-                          style: GoogleFonts.inter(
-                            color: const Color(0xFFD5C4AB),
-                            fontSize: 12.sp,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 12.h),
-                  ],
-                );
-              }),
-              SizedBox(height: 12.h),
-
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'Edit Personal Details',
-                  style: GoogleFonts.inter(
-                    color: const Color(0xFFD5C4AB),
-                    fontSize: 15.sp,
-                    fontWeight: FontWeight.w600,
                   ),
                 ),
-              ),
-              SizedBox(height: 16.h),
+                SizedBox(height: 16.h),
 
-              // Full Name (ReadOnly)
-              _buildInputField(
-                label: 'Full Name',
-                controller: controller.nameController,
-                readOnly: true,
-                icon: Icons.person_outline,
-                suffixIcon: Icon(
-                  Icons.lock_outline,
-                  color: const Color(0xFF71717A),
-                  size: 18.sp,
+                // Full Name (ReadOnly)
+                _buildInputField(
+                  label: 'Full Name',
+                  controller: controller.nameController,
+                  readOnly: true,
+                  icon: Icons.person_outline,
+                  suffixIcon: Icon(
+                    Icons.lock_outline,
+                    color: const Color(0xFF71717A),
+                    size: 18.sp,
+                  ),
                 ),
-              ),
 
-              // Email (ReadOnly)
-              _buildInputField(
-                label: 'Email',
-                controller: controller.emailController,
-                readOnly: true,
-                icon: Icons.email_outlined,
-                suffixIcon: Icon(
-                  Icons.lock_outline,
-                  color: const Color(0xFF71717A),
-                  size: 18.sp,
+                // Email (ReadOnly)
+                _buildInputField(
+                  label: 'Email',
+                  controller: controller.emailController,
+                  readOnly: true,
+                  icon: Icons.email_outlined,
+                  suffixIcon: Icon(
+                    Icons.lock_outline,
+                    color: const Color(0xFF71717A),
+                    size: 18.sp,
+                  ),
                 ),
-              ),
 
-              // Phone Number (ReadOnly)
-              _buildInputField(
-                label: 'Phone Number',
-                controller: controller.phoneController,
-                readOnly: true,
-                icon: Icons.phone_outlined,
-                keyboardType: TextInputType.phone,
-                suffixIcon: Icon(
-                  Icons.lock_outline,
-                  color: const Color(0xFF71717A),
-                  size: 18.sp,
+                // Phone Number (ReadOnly)
+                _buildInputField(
+                  label: 'Phone Number',
+                  controller: controller.phoneController,
+                  readOnly: true,
+                  icon: Icons.phone_outlined,
+                  keyboardType: TextInputType.phone,
+                  suffixIcon: Icon(
+                    Icons.lock_outline,
+                    color: const Color(0xFF71717A),
+                    size: 18.sp,
+                  ),
                 ),
-              ),
 
-              // Company Name (ReadOnly)
-              _buildInputField(
-                label: 'Company Name',
-                controller: controller.companyController,
-                readOnly: true,
-                icon: Icons.business_outlined,
-                suffixIcon: Icon(
-                  Icons.lock_outline,
-                  color: const Color(0xFF71717A),
-                  size: 18.sp,
+                // Company Name (ReadOnly)
+                _buildInputField(
+                  label: 'Company Name',
+                  controller: controller.companyController,
+                  readOnly: true,
+                  icon: Icons.business_outlined,
+                  suffixIcon: Icon(
+                    Icons.lock_outline,
+                    color: const Color(0xFF71717A),
+                    size: 18.sp,
+                  ),
                 ),
-              ),
 
-              // Service Area (Locked like Email)
-              _buildInputField(
-                label: 'Service Area',
-                controller: controller.serviceAreaController,
-                readOnly: true,
-                icon: Icons.map_outlined,
-                suffixIcon: Icon(
-                  Icons.lock_outline,
-                  color: const Color(0xFF71717A),
-                  size: 18.sp,
+                // Service Area (Locked like Email)
+                _buildInputField(
+                  label: 'Service Area',
+                  controller: controller.serviceAreaController,
+                  readOnly: true,
+                  icon: Icons.map_outlined,
+                  suffixIcon: Icon(
+                    Icons.lock_outline,
+                    color: const Color(0xFF71717A),
+                    size: 18.sp,
+                  ),
                 ),
-              ),
 
+                // Nick Name
+                _buildInputField(
+                  label: 'Nick Name',
+                  controller: controller.nickNameController,
+                  icon: Icons.badge_outlined,
+                ),
 
-
-              // Nick Name
-              _buildInputField(
-                label: 'Nick Name',
-                controller: controller.nickNameController,
-                icon: Icons.badge_outlined,
-              ),
-
-              SizedBox(height: 24.h),
-            ],)
+                SizedBox(height: 24.h),
+              ],
+            ),
           );
         }),
       ),

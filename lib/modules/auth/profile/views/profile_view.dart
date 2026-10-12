@@ -68,6 +68,11 @@ class ProfileView extends StatelessWidget {
                           ? Image.network(
                               controller.profilePicture.value,
                               fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  Image.asset(
+                                AppImages.sadat_image,
+                                fit: BoxFit.cover,
+                              ),
                             )
                           : Image.asset(
                               AppImages.sadat_image,

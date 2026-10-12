@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image/image.dart' as img;
+import 'package:moeb_26/config/constants/api_constants.dart';
 
 enum SnackBarType { success, error, info, warning, secondary }
 
@@ -467,5 +468,20 @@ class Helpers {
       Helpers.error('Error compressing image: $e');
     }
     return file;
+  }
+
+  /// Resolves relative image URL (e.g. /uploads/...) to a full absolute URL
+  static String resolveImageUrl(String? url) {
+    if (url == null || url.trim().isEmpty) return '';
+    final trimmed = url.trim();
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+      return trimmed;
+    }
+    if (trimmed.startsWith('assets/')) {
+      return trimmed;
+    }
+    final serverBase = ApiConstants.baseUrl.replaceAll('/api/v1', '');
+    final cleanPath = trimmed.startsWith('/') ? trimmed : '/$trimmed';
+    return '$serverBase$cleanPath';
   }
 }

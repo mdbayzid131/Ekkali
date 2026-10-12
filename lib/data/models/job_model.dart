@@ -1,3 +1,6 @@
+import 'package:flutter/foundation.dart';
+import 'package:moeb_26/core/utils/helpers.dart';
+
 class JobResponse {
   final bool success;
   final String message;
@@ -24,8 +27,8 @@ class JobResponse {
                   try {
                     return Job.fromJson(x);
                   } catch (e, stacktrace) {
-                    print("Error parsing an individual job: $e");
-                    print(stacktrace);
+                    debugPrint("Error parsing an individual job: $e");
+                    debugPrint(stacktrace.toString());
                     return null;
                   }
                 })
@@ -175,8 +178,15 @@ class CreatedBy {
       name: json['name']?.toString() ?? '',
       email: json['email']?.toString() ?? '',
       phone: json['phone']?.toString() ?? '',
-      profilePicture: json['profilePicture']?.toString() ?? '',
-      nickname: json['nickname']?.toString() ?? '',
+      profilePicture: Helpers.resolveImageUrl(
+        json['profilePicture']?.toString() ??
+            json['profileImage']?.toString() ??
+            json['avatar']?.toString() ??
+            json['image']?.toString() ??
+            json['profile']?.toString(),
+      ),
+      nickname:
+          json['nickname']?.toString() ?? json['nickName']?.toString() ?? '',
       company: compName,
       companyRole: json['companyRole']?.toString(),
       selectedVehicle: json['selectedVehicle'],

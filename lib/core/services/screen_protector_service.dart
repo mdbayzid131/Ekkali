@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:screen_protector/screen_protector.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 class ScreenProtectorService {
@@ -53,9 +54,23 @@ class ScreenProtectorService {
           break;
       }
     });
+
+    if (Platform.isIOS) {
+      try {
+        ScreenProtector.addListener(() {
+          _screenshotTakenController.add(null);
+          debugPrint('📸 ScreenProtector library: screenshot detected');
+        }, (isRecording) {
+          _screenCapturedController.add(isRecording);
+          debugPrint('🛡️ ScreenProtector library: screen capture changed: $isRecording');
+        });
+      } catch (e) {
+        debugPrint('⚠️ ScreenProtector addListener error: $e');
+      }
+    }
   }
 
-  /// Enables screenshot & screen recording protection (FLAG_SECURE on Android)
+  /// Enables screenshot & screen recording protection (FLAG_SECURE on Android & iOS ScreenProtector)
   static Future<void> enableProtection() async {
     initialize();
     _activeProtectorCount++;
@@ -65,10 +80,26 @@ class ScreenProtectorService {
       try {
         if (Platform.isAndroid) {
           await _channel.invokeMethod('enableSecure');
-          debugPrint('🔒 ScreenProtector: Android FLAG_SECURE ENABLED');
+          debugPrint('🔒 ScreenProtector: Android native FLAG_SECURE ENABLED');
         }
       } catch (e) {
-        debugPrint('⚠️ ScreenProtector: Error enabling protection: $e');
+        debugPrint('⚠️ ScreenProtector: Error enabling Android native protection: $e');
+      }
+
+      try {
+        await ScreenProtector.preventScreenshotOn();
+        debugPrint('🔒 ScreenProtector: preventScreenshotOn ENABLED (Android & iOS)');
+      } catch (e) {
+        debugPrint('⚠️ ScreenProtector: preventScreenshotOn error: $e');
+      }
+
+      try {
+        if (Platform.isIOS) {
+          await ScreenProtector.protectDataLeakageWithBlur();
+          debugPrint('🛡️ ScreenProtector: iOS app-switcher blur ENABLED');
+        }
+      } catch (e) {
+        debugPrint('⚠️ ScreenProtector: protectDataLeakage error: $e');
       }
     }
   }
@@ -86,10 +117,26 @@ class ScreenProtectorService {
       try {
         if (Platform.isAndroid) {
           await _channel.invokeMethod('disableSecure');
-          debugPrint('🔓 ScreenProtector: Android FLAG_SECURE DISABLED');
+          debugPrint('🔓 ScreenProtector: Android native FLAG_SECURE DISABLED');
         }
       } catch (e) {
-        debugPrint('⚠️ ScreenProtector: Error disabling protection: $e');
+        debugPrint('⚠️ ScreenProtector: Error disabling Android native protection: $e');
+      }
+
+      try {
+        await ScreenProtector.preventScreenshotOff();
+        debugPrint('🔓 ScreenProtector: preventScreenshotOff DISABLED');
+      } catch (e) {
+        debugPrint('⚠️ ScreenProtector: preventScreenshotOff error: $e');
+      }
+
+      try {
+        if (Platform.isIOS) {
+          await ScreenProtector.protectDataLeakageOff();
+          debugPrint('🛡️ ScreenProtector: iOS app-switcher blur DISABLED');
+        }
+      } catch (e) {
+        debugPrint('⚠️ ScreenProtector: protectDataLeakageOff error: $e');
       }
     }
   }

@@ -1,3 +1,5 @@
+import 'package:moeb_26/core/utils/helpers.dart';
+
 class MyJobsModel {
   bool? success;
   String? message;
@@ -253,8 +255,14 @@ class Driver {
       phone: json['phone'],
       company: comp,
       companyRole: json['companyRole'],
-      profilePicture: json['profilePicture'],
-      nickname: json['nickname'],
+      profilePicture: Helpers.resolveImageUrl(
+        json['profilePicture']?.toString() ??
+            json['profileImage']?.toString() ??
+            json['avatar']?.toString() ??
+            json['image']?.toString() ??
+            json['profile']?.toString(),
+      ),
+      nickname: json['nickname']?.toString() ?? json['nickName']?.toString(),
       selectedVehicle: json['selectedVehicle'],
       averageRating: (json['averageRating'] is num)
           ? (json['averageRating'] as num).toDouble()

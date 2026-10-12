@@ -1,3 +1,5 @@
+import 'package:moeb_26/core/utils/helpers.dart';
+
 class RatingsModel {
   final ReviewSummary reviewSummary;
   final List<Review> reviews;
@@ -60,7 +62,13 @@ class Review {
           : int.tryParse(json['rating']?.toString() ?? '5') ?? 5,
       comment: json['comment']?.toString() ?? '',
       reviewerName: json['reviewer']?['name']?.toString() ?? 'User',
-      reviewerImage: json['reviewer']?['profilePicture']?.toString() ?? '',
+      reviewerImage: Helpers.resolveImageUrl(
+        json['reviewer']?['profilePicture']?.toString() ??
+            json['reviewer']?['profileImage']?.toString() ??
+            json['reviewer']?['avatar']?.toString() ??
+            json['reviewer']?['image']?.toString() ??
+            json['reviewer']?['profile']?.toString(),
+      ),
       createdAt: json['reviewedAt'] != null
           ? DateTime.tryParse(json['reviewedAt'].toString()) ?? DateTime.now()
           : DateTime.now(),

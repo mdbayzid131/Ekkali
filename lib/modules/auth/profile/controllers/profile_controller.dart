@@ -85,8 +85,7 @@ class ProfileController extends GetxController {
       if (response.statusCode == 200 || response.statusCode == 201) {
         var rawData = response.data['data'];
         if (rawData is List) {
-          vehiclesList.value =
-              rawData.map((e) => Vehicle.fromJson(e)).toList();
+          vehiclesList.value = rawData.map((e) => Vehicle.fromJson(e)).toList();
         }
       }
     } catch (e) {
@@ -118,10 +117,7 @@ class ProfileController extends GetxController {
     } catch (e) {
       Get.back();
       debugPrint("Error deleting vehicle: $e");
-      Helpers.showCustomSnackBar(
-        "Failed to delete vehicle",
-        isError: true,
-      );
+      Helpers.showCustomSnackBar("Failed to delete vehicle", isError: true);
     } finally {
       isUpdating.value = false;
     }
@@ -144,23 +140,19 @@ class ProfileController extends GetxController {
       if (response.statusCode == 200 && response.data != null) {
         var rawData = response.data['data'];
         if (rawData is List) {
-          legalPages.value = rawData
-              .map(
-                (item) {
-                  final title = item['title']?.toString() ?? '';
-                  final slug = (item['slug'] != null &&
-                          item['slug'].toString().isNotEmpty)
-                      ? item['slug'].toString()
-                      : (item['_id']?.toString() ??
-                          title.toLowerCase().replaceAll(' ', '-'));
-                  return {
-                    'id': item['_id']?.toString() ?? '',
-                    'slug': slug,
-                    'title': title,
-                  };
-                },
-              )
-              .toList();
+          legalPages.value = rawData.map((item) {
+            final title = item['title']?.toString() ?? '';
+            final slug =
+                (item['slug'] != null && item['slug'].toString().isNotEmpty)
+                ? item['slug'].toString()
+                : (item['_id']?.toString() ??
+                      title.toLowerCase().replaceAll(' ', '-'));
+            return {
+              'id': item['_id']?.toString() ?? '',
+              'slug': slug,
+              'title': title,
+            };
+          }).toList();
         }
       }
     } catch (e) {
@@ -178,12 +170,15 @@ class ProfileController extends GetxController {
         final dataList = response.data['data'] as List?;
         if (dataList != null) {
           serviceAreas.value = dataList
-              .map((item) => (item is Map
-                      ? (item['areaName']?.toString() ??
-                          item['name']?.toString() ??
-                          '')
-                      : item.toString())
-                  .trim())
+              .map(
+                (item) =>
+                    (item is Map
+                            ? (item['areaName']?.toString() ??
+                                  item['name']?.toString() ??
+                                  '')
+                            : item.toString())
+                        .trim(),
+              )
               .where((name) => name.isNotEmpty)
               .toSet()
               .toList();
@@ -219,20 +214,23 @@ class ProfileController extends GetxController {
     email.value = data['email']?.toString() ?? "";
     phone.value = data['phone']?.toString() ?? "";
     serviceArea.value = data['serviceArea']?.toString() ?? "";
-    nickName.value = data['nickname']?.toString() ?? "";
-    profilePicture.value = data['profilePicture']?.toString() ??
-        data['uploadedHeadshot']?.toString() ??
-        "";
+    nickName.value =
+        data['nickname']?.toString() ?? data['nickName']?.toString() ?? "";
+    final rawPic =
+        data['profilePicture']?.toString() ??
+        data['profileImage']?.toString() ??
+        data['avatar']?.toString() ??
+        data['image']?.toString() ??
+        data['profile']?.toString() ??
+        data['uploadedHeadshot']?.toString();
+    profilePicture.value = Helpers.resolveImageUrl(rawPic);
     rating.value = (data['averageRating'] is num)
         ? (data['averageRating'] as num).toDouble()
         : 5.0;
     ecn.value = data['uid']?.toString() ?? "";
 
-    company.value = data['companyName']?.toString() ??
-        data['company']?.toString() ??
-        "";
-
-
+    company.value =
+        data['companyName']?.toString() ?? data['company']?.toString() ?? "";
 
     final pm = data['paymentMethods'];
     if (pm is Map) {
@@ -288,7 +286,8 @@ class ProfileController extends GetxController {
         var data = response.data['data'];
         String? newSelectedVehicleId;
         if (data != null && data is Map && data['selectedVehicle'] != null) {
-          newSelectedVehicleId = data['selectedVehicle']['_id']?.toString() ??
+          newSelectedVehicleId =
+              data['selectedVehicle']['_id']?.toString() ??
               data['selectedVehicle']['id']?.toString() ??
               data['selectedVehicle'].toString();
         } else {
@@ -349,19 +348,13 @@ class ProfileController extends GetxController {
     try {
       Map<String, dynamic> body = {
         "paymentMethods": {
-          "zelle": {
-            "email": zelleController.text.trim(),
-          },
-          "venmo": {
-            "username": venmoController.text.trim(),
-          },
-          "cashApp": {
-            "cashtag": cashAppController.text.trim(),
-          },
+          "zelle": {"email": zelleController.text.trim()},
+          "venmo": {"username": venmoController.text.trim()},
+          "cashApp": {"cashtag": cashAppController.text.trim()},
           "cardPayment": {
             "status": cardPaymentAccepted.value ? "ACCEPTED" : "NOT_ACCEPTED",
-          }
-        }
+          },
+        },
       };
 
       var response = await _profileService.patchProfile(body);
