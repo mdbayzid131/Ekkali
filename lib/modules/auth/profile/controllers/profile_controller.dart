@@ -212,7 +212,8 @@ class ProfileController extends GetxController {
 
     fullName.value = data['name']?.toString() ?? "";
     email.value = data['email']?.toString() ?? "";
-    phone.value = data['phone']?.toString() ?? "";
+    phone.value =
+        Helpers.formatPhoneNumber(data['phone']?.toString() ?? "");
     serviceArea.value = data['serviceArea']?.toString() ?? "";
     nickName.value =
         data['nickname']?.toString() ?? data['nickName']?.toString() ?? "";

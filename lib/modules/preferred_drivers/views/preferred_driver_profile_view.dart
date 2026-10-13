@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:moeb_26/config/themes/app_theme.dart';
+import 'package:moeb_26/core/utils/helpers.dart';
 import 'package:moeb_26/core/widgets/CustomButton.dart';
 import 'package:moeb_26/core/widgets/ImagePreviewPopup.dart';
 import '../controllers/preferred_drivers_controller.dart';
@@ -493,8 +495,11 @@ class _PreferredDriverProfileViewState
               _buildCompactInfoRow(
                 icon: Icons.phone_outlined,
                 title: 'Phone',
-                value:
-                    chauffeur.phone.trim().isNotEmpty ? chauffeur.phone : 'N/A',
+                value: chauffeur.phone.trim().isNotEmpty
+                    ? Helpers.formatPhoneNumber(chauffeur.phone)
+                    : 'N/A',
+                copyValue: Helpers.formatPhoneNumber(chauffeur.phone),
+                isCopyable: true,
               ),
               _buildDivider(),
               _buildCompactInfoRow(
@@ -502,6 +507,8 @@ class _PreferredDriverProfileViewState
                 title: 'Email',
                 value:
                     chauffeur.email.trim().isNotEmpty ? chauffeur.email : 'N/A',
+                copyValue: chauffeur.email.trim(),
+                isCopyable: true,
               ),
               _buildDivider(),
               _buildCompactInfoRow(
@@ -901,6 +908,17 @@ class _PreferredDriverProfileViewState
 
   // ===================== TAB 2: PAYMENTS =====================
   Widget _buildPaymentsTab(FavoriteChauffeur chauffeur) {
+    final String zelleText = chauffeur.zelle.trim();
+    final String venmoText = chauffeur.venmo.trim();
+    final String cashAppText = chauffeur.cashApp.trim();
+
+    final String venmoDisplay = venmoText.isNotEmpty
+        ? (venmoText.startsWith('@') ? venmoText : '@$venmoText')
+        : 'N/A';
+    final String cashAppDisplay = cashAppText.isNotEmpty
+        ? (cashAppText.startsWith('\$') ? cashAppText : '\$$cashAppText')
+        : 'N/A';
+
     return Container(
       key: const ValueKey('tab_payments'),
       padding: EdgeInsets.all(16.w),
@@ -914,28 +932,25 @@ class _PreferredDriverProfileViewState
           _buildCompactInfoRow(
             icon: Icons.account_balance_wallet_outlined,
             title: 'Zelle',
-            value:
-                chauffeur.zelle.trim().isNotEmpty ? chauffeur.zelle : 'N/A',
+            value: zelleText.isNotEmpty ? zelleText : 'N/A',
+            copyValue: zelleText,
+            isCopyable: true,
           ),
           _buildDivider(),
           _buildCompactInfoRow(
             icon: Icons.payment_outlined,
             title: 'Venmo',
-            value: chauffeur.venmo.trim().isNotEmpty
-                ? (chauffeur.venmo.startsWith('@')
-                    ? chauffeur.venmo
-                    : '@${chauffeur.venmo}')
-                : 'N/A',
+            value: venmoDisplay,
+            copyValue: venmoDisplay,
+            isCopyable: true,
           ),
           _buildDivider(),
           _buildCompactInfoRow(
             icon: Icons.monetization_on_outlined,
             title: 'Cash App',
-            value: chauffeur.cashApp.trim().isNotEmpty
-                ? (chauffeur.cashApp.startsWith('\$')
-                    ? chauffeur.cashApp
-                    : '\$${chauffeur.cashApp}')
-                : 'N/A',
+            value: cashAppDisplay,
+            copyValue: cashAppDisplay,
+            isCopyable: true,
           ),
           _buildDivider(),
           _buildCompactInfoRow(
@@ -944,6 +959,7 @@ class _PreferredDriverProfileViewState
             value: chauffeur.cardPaymentAccepted
                 ? 'Accepted ✅'
                 : 'Not Accepted ❌',
+            isCopyable: false,
           ),
         ],
       ),
@@ -1283,45 +1299,106 @@ class _PreferredDriverProfileViewState
     required IconData icon,
     required String title,
     required String value,
+    String? copyValue,
+    bool isCopyable = false,
   }) {
-    return Row(
-      children: [
-        Container(
-          width: 36.w,
-          height: 36.w,
-          decoration: BoxDecoration(
-            color: const Color(0xFF222226),
-            borderRadius: BorderRadius.circular(8.r),
-          ),
-          child: Icon(icon, color: const Color(0xFFD5C4AB), size: 18.sp),
-        ),
-        SizedBox(width: 12.w),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
+    final bool canCopy =
+        isCopyable && value.trim().isNotEmpty && value.trim() != 'N/A';
+    final String textToCopy = copyValue ?? value;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: canCopy
+            ? () {
+                HapticFeedback.lightImpact();
+                Clipboard.setData(ClipboardData(text: textToCopy));
+                Helpers.showCustomSnackBar(
+                  '$title copied to clipboard: $textToCopy',
+                  isError: false,
+                );
+              }
+            : null,
+        borderRadius: BorderRadius.circular(10.r),
+        splashColor: AppColors.primaryColor.withValues(alpha: 0.12),
+        highlightColor: Colors.white.withValues(alpha: 0.05),
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: 4.h, horizontal: 2.w),
+          child: Row(
             children: [
-              Text(
-                title,
-                style: GoogleFonts.inter(
-                  color: const Color(0xFFD5C4AB),
-                  fontSize: 11.sp,
-                  fontWeight: FontWeight.w400,
+              Container(
+                width: 36.w,
+                height: 36.w,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF222226),
+                  borderRadius: BorderRadius.circular(8.r),
+                ),
+                child: Icon(icon, color: const Color(0xFFD5C4AB), size: 18.sp),
+              ),
+              SizedBox(width: 12.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      title,
+                      style: GoogleFonts.inter(
+                        color: const Color(0xFFD5C4AB),
+                        fontSize: 11.sp,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                    SizedBox(height: 3.h),
+                    Text(
+                      value,
+                      style: GoogleFonts.inter(
+                        color: Colors.white,
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              SizedBox(height: 3.h),
-              Text(
-                value,
-                style: GoogleFonts.inter(
-                  color: Colors.white,
-                  fontSize: 13.sp,
-                  fontWeight: FontWeight.w600,
+              if (canCopy) ...[
+                SizedBox(width: 8.w),
+                Container(
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.5.h),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF222226),
+                    borderRadius: BorderRadius.circular(8.r),
+                    border: Border.all(
+                      color: const Color(0xFF2E2E33),
+                      width: 0.8,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.copy_rounded,
+                        color: AppColors.primaryColor,
+                        size: 13.sp,
+                      ),
+                      SizedBox(width: 4.w),
+                      Text(
+                        'Copy',
+                        style: GoogleFonts.inter(
+                          color: const Color(0xFFFEDB9B),
+                          fontSize: 11.sp,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
+              ],
             ],
           ),
         ),
-      ],
+      ),
     );
   }
 }

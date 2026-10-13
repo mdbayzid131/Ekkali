@@ -369,7 +369,7 @@ class InvoiceController extends GetxController {
     clientNameController.text = client.name;
     clientBusinessNameController.text = client.businessName;
     clientEmailController.text = client.email;
-    clientPhoneController.text = client.phone;
+    clientPhoneController.text = Helpers.formatPhoneNumber(client.phone);
     clientStreetAddressController.text = client.streetAddress;
     clientCityController.text = client.city;
     clientStateController.text = client.state;
@@ -756,7 +756,8 @@ class InvoiceController extends GetxController {
             businessEmailController.text = profile.email!;
           }
           if (profile.phoneNumber != null && profile.phoneNumber!.isNotEmpty) {
-            businessPhoneController.text = profile.phoneNumber!;
+            businessPhoneController.text =
+                Helpers.formatPhoneNumber(profile.phoneNumber!);
           }
           if (profile.website != null && profile.website!.isNotEmpty) {
             businessWebsiteController.text = profile.website!;
@@ -856,7 +857,8 @@ class InvoiceController extends GetxController {
     selectedCurrency.value = matchingCurrency;
 
     clientBusinessNameController.text = record.clientBusinessName;
-    clientPhoneController.text = record.clientPhone;
+    clientPhoneController.text =
+        Helpers.formatPhoneNumber(record.clientPhone);
     clientStreetAddressController.text = record.clientStreetAddress;
     clientCityController.text = record.clientCity;
     clientStateController.text = record.clientState;
@@ -868,7 +870,8 @@ class InvoiceController extends GetxController {
 
     businessNameController.text = record.businessName;
     businessEmailController.text = record.businessEmail;
-    businessPhoneController.text = record.businessPhone;
+    businessPhoneController.text =
+        Helpers.formatPhoneNumber(record.businessPhone);
     businessWebsiteController.text = record.businessWebsite;
     businessAddressController.text = record.businessAddress;
     businessLogoPath.value = record.businessLogoPath;

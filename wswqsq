@@ -1,136 +1,811 @@
-Searched for "NOTIFICATION"
-Searched for "NOTIFICATION_TYPE"
-Searched for "notification.model"
-Listed directory notification
-Viewed notification.interface.ts:1-48
-Viewed pushNotificationHelper.ts:1-79
-Viewed notification.service.ts:1-152
-Viewed notificationsHelper.ts:1-115
-Searched for "sendNotifications"
-Searched for "sendNotifications("
-Ran command: `Get-Content "c:\Users\Khaled\Khaled Dask\Backend\moeb26 - Copy\src\app\modules\job\job.service.ts" | Select-Object -Skip 460 -First 30`
-Searched for "type:\s*'MESSAGE'|type:\s*"MESSAGE"|type:\s*'CHAT'"
-Ran command: `Get-Content "c:\Users\Khaled\Khaled Dask\Backend\moeb26 - Copy\src\app\modules\support\support.service.ts" | Select-String -Pattern "sendNotifications" -Context 3, 10`
-Ran command: `Get-Content "c:\Users\Khaled\Khaled Dask\Backend\moeb26 - Copy\src\app\modules\job\job.service.ts" | Select-String -Pattern "sendNotifications" -Context 3, 10`
-Listed directory helpers
-Listed directory notification
-Viewed notification.types.ts:1-84
-Searched for "JOB_CREATED|CHAUFFEUR_ASSIGNED|RIDE_STATUS_UPDATE|NEW_CHAT_MESSAGE|SUPPORT_REPLY|JOB_APPLIED"
-Searched for "type:\s*['"][A-Z_]+['"]"
-Searched for "NotificationBuilder"
-Ran command: `Get-Content "c:\Users\Khaled\Khaled Dask\Backend\moeb26 - Copy\src\app\modules\message\message.service.ts" | Select-String -Pattern "NotificationBuilder" -Context 0, 10`
-Listed directory templates
-Ran command: `Get-Content "c:\Users\Khaled\Khaled Dask\Backend\moeb26 - Copy\src\helpers\notification\templates\*.ts"`
-Ran command: `Get-Content "c:\Users\Khaled\Khaled Dask\Backend\moeb26 - Copy\src\helpers\notification\templates\chauffeurApplied.ts"`
+    Khaled Nayeem
+    02:29
+    So…
+    Mohamed El bakkali
+    Mohamed El bakkali
+    02:31
+    Arghum Salam.
+    Khaled Nayeem
+    Khaled Nayeem
+    02:33
+    How are you?
+    Mohamed El bakkali
+    Mohamed El bakkali
+    02:35
+    Good, buddy, how are you?
+    Khaled Nayeem
+    Khaled Nayeem
+    02:37
+    Yeah, I'm fine. So… did you have any kind of feedback, or any kind of…
+    You want to tell us?
+    Mohamed El bakkali
+    Mohamed El bakkali
+    02:45
+    Yes.
+    Khaled Nayeem
+    Khaled Nayeem
+    02:46
+    Okay.
+    Mohamed El bakkali
+    Mohamed El bakkali
+    02:49
+    Can I share my screen for a second?
+    Khaled Nayeem
+    Khaled Nayeem
+    02:51
+    Obviously, sir, you can.
+    Mohamed El bakkali
+    Mohamed El bakkali
+    02:55
+    Okay. By the way… You didn't send me the, like, the dashboard,
+    Khaled Nayeem
+    Khaled Nayeem
+    03:01
+    Oh.
+    Mohamed El bakkali
+    Mohamed El bakkali
+    03:03
+    Hmm, that's okay.
+    Khaled Nayeem
+    Khaled Nayeem
+    03:07
+    Sorry, sir.
+    Mohamed El bakkali
+    Mohamed El bakkali
+    03:11
+    That's fine.
+    All right.
+    Do you see my screen?
+    Khaled Nayeem
+    Khaled Nayeem
+    03:29
+    Yes, sir.
+    Take care.
+    Mohamed El bakkali
+    Mohamed El bakkali
+    03:32
+    Yeah. Just, first thing, like, I took a…
+    I apply for this job, you remember yesterday Bayesit posted?
+    Okay, if you can see here, like, the vehicle, you see what it shows?
+    Hello?
+    Khaled Nayeem
+    Khaled Nayeem
+    03:54
+    Hello? Yeah, yeah, I can see, can you just…
+    Repeat this question again.
+    Mohamed El bakkali
+    Mohamed El bakkali
+    04:01
+    I said… The, the, the, you see the vehicle.
+    Like a job poster.
+    Is BayZit correct?
+    Khaled Nayeem
+    Khaled Nayeem
+    04:12
+    Hmm.
+    Mohamed El bakkali
+    Mohamed El bakkali
+    04:13
+    But the vehicle, which vehicle is this one?
+    Khaled Nayeem
+    Khaled Nayeem
+    04:17
+    The, the vehicle one… The SUV… this one?
+    Bayzid
+    Bayzid
+    04:22
+    Yes, sir.
+    Mohamed El bakkali
+    Mohamed El bakkali
+    04:23
+    Yes.
+    Bayzid
+    Bayzid
+    04:23
+    Yeah, so… This is the selected vehicle.
+    Mohamed El bakkali
+    Mohamed El bakkali
+    04:29
+    That's your fleet vehicle?
+    Khaled Nayeem
+    Khaled Nayeem
+    04:32
+    That sees selected vehicle.
+    Bayzid
+    Bayzid
+    04:36
+    Okay.
+    Mohamed El bakkali
+    Mohamed El bakkali
+    04:38
+    No, because look, I'm gonna click on job on MomBay's profile.
+    Bayzid
+    Bayzid
+    04:42
+    profile.
+    Mohamed El bakkali
+    Mohamed El bakkali
+    04:44
+    Okay. You see which vehicle…
+    Bayzid
+    Bayzid
+    04:47
+    Okay.
+    Mohamed El bakkali
+    Mohamed El bakkali
+    04:48
+    Bayes it has?
+    Yeah.
+    Bayzid
+    Bayzid
+    04:53
+    Yeah.
+    Mohamed El bakkali
+    Mohamed El bakkali
+    04:55
+    Even… myself…
+    Which vehicle is this one?
+    Khaled Nayeem
+    Khaled Nayeem
+    05:07
+    Okay, this is your song.
+    Mohamed El bakkali
+    Mohamed El bakkali
+    05:11
+    This is something I don't know from where it came.
+    Okay, and anyway…
+    Khaled Nayeem
+    Khaled Nayeem
+    05:17
+    the.
+    Mohamed El bakkali
+    Mohamed El bakkali
+    05:18
+    Job poster, we don't need to have, like, a vehicle section.
+    Khaled Nayeem
+    Khaled Nayeem
+    05:23
+    On the job poster?
+    Mohamed El bakkali
+    Mohamed El bakkali
+    05:24
+    Yeah, I mean, like, here, I don't know if… where… how can I…
+    Khaled Nayeem
+    Khaled Nayeem
+    05:29
+    Okay.
+    Mohamed El bakkali
+    Mohamed El bakkali
+    05:29
+    Okay, this part… This part, we should not have… No need. No need.
+    Khaled Nayeem
+    Khaled Nayeem
+    05:37
+    Okay.
+    Mohamed El bakkali
+    Mohamed El bakkali
+    05:38
+    Okay.
+    The only person who can see this, he's, like.
+    Okay.
+    The job poster… like, the job poster doesn't need to see this. Like, I applied for it… No, like, the…
+    The chauffeur who's gonna do the job, he doesn't need to see this.
+    But Bayes it because he's the job poster, he need to see my profile and my picture and my vehicles, you know?
+    Khaled Nayeem
+    Khaled Nayeem
+    06:10
+    Yeah, I understand. So, you basically tell that, suppose, two person, Bayzid will post a job, and you, as a chopper, so…
+    whenever you, as a chopper, see these pages at that time, vehicle-related information is no need, you just simply apply it, and whenever Bayzid got your application at that time, Bayzid will see the selected vehicle from your side, on the job post, suppose, he's…
+    Mohamed El bakkali
+    Mohamed El bakkali
+    06:40
+    Possible, if it's possible. If not, he doesn't need to see it, because Bayes, he can just click on applicant, or whatever, profile.
+    And he gonna see me, you know?
+    Khaled Nayeem
+    Khaled Nayeem
+    06:54
+    Okay, okay, okay, yeah.
+    Mohamed El bakkali
+    Mohamed El bakkali
+    06:56
+    You know?
+    Khaled Nayeem
+    Khaled Nayeem
+    06:57
+    Mmhm.
+    Mohamed El bakkali
+    Mohamed El bakkali
+    06:58
+    That's it. Another thing, another thing, Khaled, you remember I spoke to you, like, you see this form?
+    Offer.
+    Of, the numbers, the phone number.
+    Khaled Nayeem
+    Khaled Nayeem
+    07:13
+    1.
+    Mohamed El bakkali
+    Mohamed El bakkali
+    07:14
+    Because United States has, like, a form of numbers.
+    Can we, can we, for example, implement it? Like, I asked you that before. Where is my information? For example, this one.
+    You see the phone number, how it looks here?
+    3, 6, 5, 8 is not like a… Let me see something.
+    Let me see, like, phone number.
+    Khaled Nayeem
+    Khaled Nayeem
+    07:58
+    Did you talk about the country croats, something like that, whenever…
+    Mohamed El bakkali
+    Mohamed El bakkali
+    08:01
+    Yes, yeah, yes.
+    as.
+    Khaled Nayeem
+    Khaled Nayeem
+    08:05
+    So this answer should be Bayesit will giving vector. So Bayesit.
+    Mohamed El bakkali
+    Mohamed El bakkali
+    08:12
+    Hello?
+    Bayzid
+    Bayzid
+    08:12
+    Hello?
+    Yeah, sir, do you need, with country code?
+    Mohamed El bakkali
+    Mohamed El bakkali
+    08:21
+    No, no need with country code, we need just a…
+    The phone should be like this.
+    Bayzid
+    Bayzid
+    08:27
+    Yes.
+    or.
+    Mohamed El bakkali
+    Mohamed El bakkali
+    08:29
+    6th month,
+    Bayzid
+    Bayzid
+    08:31
+    Oh…
+    Mohamed El bakkali
+    Mohamed El bakkali
+    08:34
+    area code…
+    Bayzid
+    Bayzid
+    08:35
+    Oh.
+    Mohamed El bakkali
+    Mohamed El bakkali
+    08:36
+    Because the three first number are the area code, then there is, like.
+    Bayzid
+    Bayzid
+    08:39
+    3 other number…
+    Mohamed El bakkali
+    Mohamed El bakkali
+    08:42
+    Then… 4 numbers.
+    Bayzid
+    Bayzid
+    08:45
+    Okay…
+    Mohamed El bakkali
+    Mohamed El bakkali
+    08:48
+    Okay. This is how, how…
+    Bayzid
+    Bayzid
+    08:50
+    Okay, got it.
+    Mohamed El bakkali
+    Mohamed El bakkali
+    08:52
+    You know what I mean?
+    Bayzid
+    Bayzid
+    08:54
+    Yeah.
+    Mohamed El bakkali
+    Mohamed El bakkali
+    08:55
+    Yeah, that's, that's how, it's supposed to be.
+    Bayzid
+    Bayzid
+    08:59
+    Oxygen.
+    There we go.
+    See that moment.
+    Mohamed El bakkali
+    Mohamed El bakkali
+    09:04
+    Okay.
+    Bayzid
+    Bayzid
+    09:04
+    Okay.
+    Mohamed El bakkali
+    Mohamed El bakkali
+    09:06
+    And Bayesid, another thing, my friend.
+    Bayzid
+    Bayzid
+    09:08
+    Here, can I… can I… can…
+    Mohamed El bakkali
+    Mohamed El bakkali
+    09:11
+    Okay.
+    Bayzid
+    Bayzid
+    09:12
+    Oh, no, that's fine.
+    Yes.
+    Mohamed El bakkali
+    Mohamed El bakkali
+    09:15
+    Let me see.
+    For example, basic job poster payment.
+    Can I click on, like, the…
+    information and copy it, or Venmo, or Cash App, you know?
+    Bayzid
+    Bayzid
+    09:28
+    No.
+    Hmm, yeah.
+    Mohamed El bakkali
+    Mohamed El bakkali
+    09:30
+    You know what I mean?
+    Bayzid
+    Bayzid
+    09:31
+    Yeah.
+    Mohamed El bakkali
+    Mohamed El bakkali
+    09:32
+    But click on.
+    Bayzid
+    Bayzid
+    09:33
+    it.
+    Mohamed El bakkali
+    Mohamed El bakkali
+    09:34
+    And copy it, and then, like, I go to my bank account, or whatever, and then paste it.
+    Bayzid
+    Bayzid
+    09:40
+    Okay.
+    Mohamed El bakkali
+    Mohamed El bakkali
+    09:42
+    Okay.
+    Bayzid
+    Bayzid
+    09:44
+    Okay.
+    Mohamed El bakkali
+    Mohamed El bakkali
+    09:45
+    Alright, what else?
+    Hotels, hotels, hotels.
+    Oh, Harriet, this question is for you.
+    Khaled Nayeem
+    Khaled Nayeem
+    10:03
+    Yes, sir.
+    Mohamed El bakkali
+    Mohamed El bakkali
+    10:04
+    Is when someone is suspended.
+    Khaled Nayeem
+    Khaled Nayeem
+    10:07
+    Mmhm.
+    Mohamed El bakkali
+    Mohamed El bakkali
+    10:08
+    Can he access the app or not?
+    Khaled Nayeem
+    Khaled Nayeem
+    10:11
+    No, sir, he didn't.
+    Mohamed El bakkali
+    Mohamed El bakkali
+    10:13
+    Is… he's not gonna be able even to see his schedule?
+    Khaled Nayeem
+    Khaled Nayeem
+    10:19
+    That, that's so actually, me and Bayjit talked, previous day, previous day during, the testing, so we decided to actually suppose if
+    Anyone has a… suppose he already created job, the job… job is already listing on our job offer page, or he's already doing some, buying, selling stuff on the… our item.
+    And also suppose if he if he have some suppose my schedule or something like that at that time whenever.
+    You, as an admin, go to block him or suspend him at that time, you will see the thing that he already has some of
+    the suppose he already have running jobs on the job offer, so at that time, you will be aware, okay, he will already doing something on my platform, so I need to send him an email or something like that, so that
+    From you said you can.
+    Mohamed El bakkali
+    Mohamed El bakkali
+    11:15
+    2…
+    Khaled Nayeem
+    Khaled Nayeem
+    11:16
+    Communicate with him.
+    Mohamed El bakkali
+    Mohamed El bakkali
+    11:17
+    To make it easy.
+    There is any way we can just, like, block and suspend him just from seeing job offer…
+    Like, the job offer, and the chat. You cannot have, like, access to chat and job offer.
+    Khaled Nayeem
+    Khaled Nayeem
+    11:34
+    This should be actually completely complicated in the, actually, execution process. It's not be easy that much, but…
+    Okay, okay, I will try, no worry.
+    Mohamed El bakkali
+    Mohamed El bakkali
+    11:49
+    You know what?
+    Khaled Nayeem
+    Khaled Nayeem
+    11:50
+    Yeah, yeah. So suppose he didn't see the Jobo first, then he did not see the Chuck.
+    Mohamed El bakkali
+    Mohamed El bakkali
+    11:56
+    He cannot communicate. He's gonna have just, like…
+    his schedule, like, his invoices, if he has invoices, his expenses, you know, because those things, like, his pay… it's part of his payment.
+    Khaled Nayeem
+    Khaled Nayeem
+    12:14
+    Okay, okay.
+    Mohamed El bakkali
+    Mohamed El bakkali
+    12:16
+    Okay.
+    Khaled Nayeem
+    Khaled Nayeem
+    12:17
+    Yeah, I got it, I got it.
+    Mohamed El bakkali
+    Mohamed El bakkali
+    12:20
+    Yeah.
+    What else? I saw on support that, like, when I…
+    When I create this, this is good.
+    Khaled Nayeem
+    Khaled Nayeem
+    12:34
+    You're.
+    Mohamed El bakkali
+    Mohamed El bakkali
+    12:34
+    Fix that, right?
+    Khaled Nayeem
+    Khaled Nayeem
+    12:36
+    Yes.
+    Mohamed El bakkali
+    Mohamed El bakkali
+    12:37
+    Perfect.
+    Oh.
+    What else?
+    I think that's it.
+    Khaled Nayeem
+    Khaled Nayeem
+    12:54
+    Okay, sir.
+    Then, after we… yeah, can you…
+    Mohamed El bakkali
+    Mohamed El bakkali
+    12:58
+    You too.
+    Can you show me the… the dashboard?
+    Khaled Nayeem
+    Khaled Nayeem
+    13:03
+    I already give it to you on the, what did it say? Zoom chat.
+    You can check it on the Zoom chat.
+    Mohamed El bakkali
+    Mohamed El bakkali
+    13:12
+    Okay.
+    Fine.
+    Khaled Nayeem
+    Khaled Nayeem
+    13:19
+    Okay.
+    Mohamed El bakkali
+    Mohamed El bakkali
+    13:20
+    Oh yeah, one thing Khaled.
+    Khaled Nayeem
+    Khaled Nayeem
+    13:22
+    Yeah, yes.
+    Mohamed El bakkali
+    Mohamed El bakkali
+    13:23
+    You remember I told you, like, when someone, like, first thing, when he create his…
+    His applica- his application.
+    Not for the job, like he create account.
+    For the name, for the name, can we start with the capital letter automatically?
+    Khaled Nayeem
+    Khaled Nayeem
+    13:44
+    For only the name?
+    Mohamed El bakkali
+    Mohamed El bakkali
+    13:47
+    Let me… Let me see, let me log out.
+    Let me share my screen with you and see how we can do it.
+    Okay, you see John Smith?
+    Khaled Nayeem
+    Khaled Nayeem
+    14:18
+    Yeah.
+    Mohamed El bakkali
+    Mohamed El bakkali
+    14:20
+    That's, like, how I want, like, J with the capital and Smith with S capital.
+    Khaled Nayeem
+    Khaled Nayeem
+    14:26
+    Okay, okay, sir, I got it now.
+    Mohamed El bakkali
+    Mohamed El bakkali
+    14:28
+    Okay? Yeah. And the phone number, Bayzid.
+    Like, three digits?
+    Bayzid
+    Bayzid
+    14:35
+    Parentheses.
+    Mohamed El bakkali
+    Mohamed El bakkali
+    14:38
+    Like, another 3 digits?
+    Bayzid
+    Bayzid
+    14:40
+    Okay.
+    Mohamed El bakkali
+    Mohamed El bakkali
+    14:41
+    And then the… Where is it? There isn't…
+    The the the the score, I don't know how the hyphen or whatever they call it, and then the 4 digit.
+    Okay.
+    Bayzid
+    Bayzid
+    14:54
+    Okay, sir.
+    Mohamed El bakkali
+    Mohamed El bakkali
+    14:56
+    US format, please.
+    Bayzid
+    Bayzid
+    14:59
+    Okay.
+    Mohamed El bakkali
+    Mohamed El bakkali
+    15:06
+    Okay.
+    That's it.
+    So far, yeah.
+    Khaled Nayeem
+    Khaled Nayeem
+    15:11
+    Okay, sir, then… We need to fix those things, and
+    After then, we will… we will meeting… we will do another meeting on tomorrow, and
+    Okay, sir? You should be okay?
+    Mohamed El bakkali
+    Mohamed El bakkali
+    15:27
+    Okay, perfect. How did the the the service area?
+    Like, the chat area.
+    Any, like, can we do something, or…
+    Khaled Nayeem
+    Khaled Nayeem
+    15:38
+    I actually try my best. As you know that whenever you tell me something at that time, I try my best. Most of the thing is doneable, but at that time, if I introduce this thing newly, so at that time, there are a lot of things should be broken.
+    it's not… it is not that I didn't add it, but it's actually, need to adjust my database once again, so that's why at that time, whenever we actually very much near and there.
+    to finish this app at that time, you will edit this, so it should be a little bit complicated, okay? So…
+    I think for the first, we need to publish it, how it's right now.
+    Then, whenever, if the user will frequently ask to update this thing based on the
+    Proposal you send, then we need to think about it, but right now, it's a little bit complicated to do.
+    Mohamed El bakkali
+    Mohamed El bakkali
+    16:41
+    Really?
+    Khaled Nayeem
+    Khaled Nayeem
+    16:42
+    Yeah, obviously.
+    Mohamed El bakkali
+    Mohamed El bakkali
+    16:45
+    Okay.
+    Okay.
+    Khaled Nayeem
+    Khaled Nayeem
+    16:50
+    you said?
+    Mohamed El bakkali
+    Mohamed El bakkali
+    16:52
+    Huh?
+    Khaled Nayeem
+    Khaled Nayeem
+    16:53
+    Are you sick?
+    Mohamed El bakkali
+    Mohamed El bakkali
+    16:54
+    Oh, well, it's, I don't know how they're gonna take it because
+    There's gonna be so many chat areas, live chat areas, you know.
+    Instead of having only, like, 50 as 50 states, Probably…
+    I need to, like, as long as… as much as I have the service area, if I have 200, that means they're gonna have 200,
+    200, Live chat.
+    Right?
+    Khaled Nayeem
+    Khaled Nayeem
+    17:31
+    Yeah, yeah, I understand.
+    Mohamed El bakkali
+    Mohamed El bakkali
+    17:35
+    Because, my thought was, like, the chart is completely separate from the service area.
+    Khaled Nayeem
+    Khaled Nayeem
+    17:44
+    If you actually tell me in the beginning of that, I definitely can do it, not a big issue, but right now, it's a little bit compact to the database, to others' modules, so it's…
+    Actually, technical terms, okay, is tightly compiled with each and every… everyone, so at that time, if I want to update, or if I.
+    Mohamed El bakkali
+    Mohamed El bakkali
+    18:06
+    going.
+    Khaled Nayeem
+    Khaled Nayeem
+    18:07
+    So, adjust something, so… it's actually very much possible to break some of the parts, and we need to fix it out there, so it takes some, more time, so…
+    Because it's actually correlated to the service area, okay, so.
+    That's the thing, actually, so…
+    Mohamed El bakkali
+    Mohamed El bakkali
+    18:28
+    Khaled, another thing, I want to ask you something for future features.
+    Can we add, like, if… I need to add.
+    Tracking, like a life tracking.
+    Yeah, we can.
+    Khaled Nayeem
+    Khaled Nayeem
+    18:44
+    Yeah, is it possible? But live tracking is itself costly also. Suppose if you want to implement or integrate a live tracking system at that time, it's also increase your, server cost too. So, it's totally depend on you. If the business was running properly, and the live tracking was needed.
+    Okay.
+    We can implement it based on… suppose we need to calculate, is that profitable for our business or not, so…
+    You know?
+    Mohamed El bakkali
+    Mohamed El bakkali
+    19:17
+    Because,
+    Khaled Nayeem
+    Khaled Nayeem
+    19:19
+    Yeah.
+    Mohamed El bakkali
+    Mohamed El bakkali
+    19:20
+    Because in in a lot of a lot of people.
+    They, they… they rather have, like, live tracking of the driver, but at the time… it's not all the time, not for me, but, like, between them, once the… the… the job poster post, and he accept… he accept the chauffeur.
+    They they request like to have life tracking during the.
+    During the.
+    Khaled Nayeem
+    Khaled Nayeem
+    19:56
+    Yeah, I understand it. In future, if any kind of, need or requirement does come from the
+    User perspective at that time, we… we can add… we can add this kind of functionality, so…
+    But… The, in general, thing is that everything.
+    Mohamed El bakkali
+    Mohamed El bakkali
+    20:17
+    Hello?
+    Khaled Nayeem
+    Khaled Nayeem
+    20:17
+    take time to for testing the whole thing properly okay so that's actually main fact.
+    Mohamed El bakkali
+    Mohamed El bakkali
+    20:22
+    So sorry, my friend, I left, like, for some reason.
+    What did you say?
+    Khaled Nayeem
+    Khaled Nayeem
+    20:28
+    I said that, yeah, it's definitely doable in future if the requirement is came from the chauffeur or the.
+    The job poster, if they frequently ask for this, so in future, we will add it.
+    Mohamed El bakkali
+    Mohamed El bakkali
+    20:42
+    I need just, I'm gonna show you something.
+    Khaled Nayeem
+    Khaled Nayeem
+    20:46
+    Yeah.
+    Mohamed El bakkali
+    Mohamed El bakkali
+    20:53
+    Can you see my screen?
+    Khaled Nayeem
+    Khaled Nayeem
+    20:56
+    No.
+    Yeah, right now I can see your screen.
+    Mohamed El bakkali
+    Mohamed El bakkali
+    21:08
+    Okay.
+    Look, for example… alright, you see this job? Efficient taxi dispatch, blah blah blah.
+    Khaled Nayeem
+    Khaled Nayeem
+    21:17
+    Yeah?
+    Mohamed El bakkali
+    Mohamed El bakkali
+    21:17
+    Okay, they posted job Zelle after drop-off, nowhere in any car, booking, blah blah, 5pm.
+    You see on the on the bottom must respectful driver, a driver, clean car, no smell, body odor, blah blah and plus live location.
+    You see how is it?
+    They ask for live location, and here, too, like.
+    Trip number 1J blah blah LaGuardia. Where is that? Please text number and on the bottom, like share your live location for 1 hour.
+    Where is it, like… they ask, like, many times…
+    But this is gonna be future, not now.
+    Khaled Nayeem
+    Khaled Nayeem
+    22:01
+    Yeah, okay, okay, okay, definitely we can.
+    Mohamed El bakkali
+    Mohamed El bakkali
+    22:04
+    Okay.
+    Khaled Nayeem
+    Khaled Nayeem
+    22:05
+    Okay, sir.
+    Mohamed El bakkali
+    Mohamed El bakkali
+    22:06
+    Well… Thank you so much.
+    Just let's fix those things.
+    And that's it.
+    Khaled Nayeem
+    Khaled Nayeem
+    22:16
+    Okay, sir.
+    Mohamed El bakkali
+    Mohamed El bakkali
+    22:18
+    Okay.
+    Khaled Nayeem
+    Khaled Nayeem
+    22:19
+    Have a great day, sir.
+    Mohamed El bakkali
+    Mohamed El bakkali
+    22:20
+    You… you too.
+    Khaled Nayeem
+    Khaled Nayeem
+    22:22
+    Settle in.
+    Mohamed El bakkali
+    Mohamed El bakkali
+    I'm still on the way.
 
-Hello! Based on a deep-dive into your backend codebase (specifically `notification.service.ts`, `notificationsHelper.ts`, and the template system in `src/helpers/notification/templates`), here are the exact details for your push notification routing.
-
-### 1. Complete List of Notification Types
-The codebase utilizes two methods to send notifications: a dynamic `sendNotifications` function and a structured `NotificationBuilder` using templates. The possible values you will receive in the `type` field of the push data payload are:
-
-**From Templates (Builder):**
-*   `CHAUFFEUR_APPLIED`
-*   `JOB_ASSIGNED`
-*   `JOB_CANCELLED`
-*   `JOB_APPLICANT_REJECTED`
-*   `RIDE_STATUS_UPDATE`
-*   `TASK_COMPLETED`
-*   `NEW_MESSAGE` (Chat)
-*   `PAYMENT_RECEIVED`
-*   `PAYMENT_FAILED`
-*   `SYSTEM_ALERT`
-*   `WELCOME`
-
-**From Direct Services:**
-*   `JOB_INVITATION` (Targeted private ride offers)
-*   `MESSAGE` (Specifically used for Support Ticket replies)
-*   `ADMIN` (Internal admin alerts)
-*   `SYSTEM` (e.g., Vehicle verification alerts)
-
----
-
-### 2. Payload Structure for Key Categories
-
-Your `pushNotificationHelper.ts` formats the data payload in two ways depending on how it's dispatched. 
-
-#### 🚗 Ride / Job Notifications
-For template-based job notifications, the identifier is usually `jobId`. For direct dispatches (like invitations), it uses generic `resourceId` and `referenceId`.
-
-*   **Chauffeur Applied:** `type: "CHAUFFEUR_APPLIED"`, `jobId`, `chauffeurId`, `action: "VIEW_JOB_APPLICATIONS"`
-*   **Job Assigned:** `type: "JOB_ASSIGNED"`, `jobId`, `action: "VIEW_RIDE"`
-*   **Ride Status Update:** `type: "RIDE_STATUS_UPDATE"`, `jobId`, `rideStatus` (distinguishes the status), `action: "VIEW_JOB"`
-*   **Job Invitation (Direct):** `type: "JOB_INVITATION"`, `resourceType: "JOB"`, `resourceId: "<job_id>"`
-
-#### 💬 Chat Notifications
-Sent via templates from `message.service.ts`.
-*   **Keys included:** `type: "NEW_MESSAGE"`, `chatId`, `senderId`, `action: "OPEN_CHAT"`
-
-#### 🛠 Support Notifications
-Sent directly from `support.service.ts` using generic fields.
-*   **Customer Reply:** `type: "MESSAGE"`, `resourceType: "SUPPORT_TICKET"`, `resourceId: "<ticket_id>"`
-*   *(Note: For support, the `resourceType` is strictly `"SUPPORT_TICKET"`, which allows you to differentiate a support message from a standard chat message `NEW_MESSAGE`)*
-
-#### 💰 Payment Notifications
-*   **Keys included:** `type: "PAYMENT_RECEIVED"` (or `PAYMENT_FAILED`), `paymentId`, `amount`, `currency`, `action: "VIEW_EARNINGS"`
-
----
-
-### 3. Sample JSON Payloads for FCM
-
-Here are sample payloads for the mobile app to handle in Flutter. Note that FCM data payloads treat all values as strings.
-
-**Ride Status Update Example:**
-```json
-{
-  "notification": {
-    "title": "Ride Status Updated",
-    "body": "John Doe updated ride status to IN_PROGRESS"
-  },
-  "data": {
-    "type": "RIDE_STATUS_UPDATE",
-    "jobId": "65b2d7f8e8a93a1234567890",
-    "rideStatus": "IN_PROGRESS",
-    "action": "VIEW_JOB"
-  }
-}
-```
-
-**New Chat Message Example:**
-```json
-{
-  "notification": {
-    "title": "New Message from Alex",
-    "body": "Hey, I'm waiting outside."
-  },
-  "data": {
-    "type": "NEW_MESSAGE",
-    "chatId": "65c3b1e2f9d87b0987654321",
-    "senderId": "65a1c2d3e4f5a6b7c8d9e0f1",
-    "action": "OPEN_CHAT"
-  }
-}
-```
-
-**Support Reply Example (Direct Notification Method):**
-```json
-{
-  "notification": {
-    "title": "Support: Billing Issue",
-    "body": "We have refunded your trip."
-  },
-  "data": {
-    "type": "MESSAGE",
-    "resourceType": "SUPPORT_TICKET",
-    "resourceId": "65d4e5f6a7b8c9d0e1f2a3b4",
-    "referenceId": "65d4e5f6a7b8c9d0e1f2a3b4",
-    "title": "Support: Billing Issue",
-    "body": "We have refunded your trip."
-  }
-}
-```
-
-**To properly route in Flutter:**
-1. Check `data['type']`.
-2. If `type == 'NEW_MESSAGE'`, route to Chat using `data['chatId']`.
-3. If `type == 'MESSAGE'` **and** `data['resourceType'] == 'SUPPORT_TICKET'`, route to Support detail using `data['resourceId']`.
-4. If `type` is one of the job-related types (`RIDE_STATUS_UPDATE`, `JOB_ASSIGNED`, etc.), route to the Ride Details screen using `data['jobId']` (or `data['resourceId']` for `JOB_INVITATION`).

@@ -5,9 +5,11 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:moeb_26/config/constants/icon_paths.dart';
 import 'package:moeb_26/config/themes/app_theme.dart';
+import 'package:flutter/services.dart';
 import 'package:moeb_26/core/utils/helpers.dart';
 import 'package:moeb_26/core/utils/validators.dart';
 import 'package:moeb_26/core/widgets/CustomButton.dart';
+import 'package:moeb_26/core/widgets/CustomTextField.dart';
 import '../controllers/invoice_controller.dart';
 
 class SavedClientsView extends GetView<InvoiceController> {
@@ -214,7 +216,10 @@ class SavedClientsView extends GetView<InvoiceController> {
             _buildInfoRow(Icons.email_outlined, client.email),
           if (client.phone.isNotEmpty) ...[
             SizedBox(height: 6.h),
-            _buildInfoRow(Icons.phone_outlined, client.phone),
+            _buildInfoRow(
+              Icons.phone_outlined,
+              Helpers.formatPhoneNumber(client.phone),
+            ),
           ],
           if (client.streetAddress.isNotEmpty || client.city.isNotEmpty) ...[
             SizedBox(height: 6.h),
@@ -263,7 +268,9 @@ class SavedClientsView extends GetView<InvoiceController> {
       text: client?.businessName ?? '',
     );
     final emailController = TextEditingController(text: client?.email ?? '');
-    final phoneController = TextEditingController(text: client?.phone ?? '');
+    final phoneController = TextEditingController(
+      text: Helpers.formatPhoneNumber(client?.phone),
+    );
     final streetController = TextEditingController(
       text: client?.streetAddress ?? '',
     );
@@ -366,8 +373,11 @@ class SavedClientsView extends GetView<InvoiceController> {
                     _buildModalFieldLabel('Phone Number (Optional)'),
                     _buildModalInput(
                       phoneController,
-                      'e.g. 555-000-0000',
+                      '(555) 000-0000',
                       keyboardType: TextInputType.phone,
+                      inputFormatters: const [
+                        UsPhoneInputFormatter(),
+                      ],
                       errorText: phoneError,
                     ),
                     SizedBox(height: 12.h),
@@ -591,6 +601,7 @@ class SavedClientsView extends GetView<InvoiceController> {
     TextEditingController ctrl,
     String hint, {
     TextInputType? keyboardType,
+    List<TextInputFormatter>? inputFormatters,
     RxString? errorText,
   }) {
     return Column(
@@ -599,6 +610,7 @@ class SavedClientsView extends GetView<InvoiceController> {
         TextField(
           controller: ctrl,
           keyboardType: keyboardType,
+          inputFormatters: inputFormatters,
           style: GoogleFonts.inter(color: Colors.white, fontSize: 14.sp),
           decoration: InputDecoration(
             hintText: hint,

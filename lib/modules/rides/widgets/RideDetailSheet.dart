@@ -1234,7 +1234,7 @@ class RideDetailSheet extends StatelessWidget {
         : "N/A";
     final String pPhone =
         (ride.passengerPhone != null && ride.passengerPhone!.trim().isNotEmpty)
-        ? ride.passengerPhone!.trim()
+        ? Helpers.formatPhoneNumber(ride.passengerPhone!.trim())
         : "N/A";
 
     return Column(

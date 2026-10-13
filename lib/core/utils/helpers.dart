@@ -484,4 +484,28 @@ class Helpers {
     final cleanPath = trimmed.startsWith('/') ? trimmed : '/$trimmed';
     return '$serverBase$cleanPath';
   }
+
+  /// Formats any phone number into standard US format: (XXX) XXX-XXXX
+  /// Examples:
+  /// "3658569525" -> "(365) 856-9525"
+  /// "+13658569525" -> "(365) 856-9525"
+  /// "13658569525" -> "(365) 856-9525"
+  static String formatPhoneNumber(String? phone) {
+    if (phone == null || phone.trim().isEmpty) return '';
+    final trimmed = phone.trim();
+    if (trimmed == 'N/A') return 'N/A';
+
+    String digits = trimmed.replaceAll(RegExp(r'\D'), '');
+    if (digits.length == 11 && digits.startsWith('1')) {
+      digits = digits.substring(1);
+    }
+
+    if (digits.length == 10) {
+      return '(${digits.substring(0, 3)}) ${digits.substring(3, 6)}-${digits.substring(6, 10)}';
+    } else if (digits.length == 7) {
+      return '${digits.substring(0, 3)}-${digits.substring(3, 7)}';
+    }
+
+    return trimmed;
+  }
 }

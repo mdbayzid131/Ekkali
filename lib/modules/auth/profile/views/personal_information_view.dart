@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter/services.dart';
 import 'package:moeb_26/config/constants/image_paths.dart';
 import 'package:moeb_26/config/themes/app_theme.dart';
 import 'package:moeb_26/core/widgets/Custom_AppBar.dart';
 import 'package:moeb_26/core/widgets/CustomButton.dart';
+import 'package:moeb_26/core/widgets/CustomTextField.dart';
 import 'package:moeb_26/modules/auth/profile/controllers/profile_controller.dart';
 
 class PersonalInformationView extends StatefulWidget {
@@ -202,6 +204,9 @@ class _PersonalInformationViewState extends State<PersonalInformationView> {
                   readOnly: true,
                   icon: Icons.phone_outlined,
                   keyboardType: TextInputType.phone,
+                  inputFormatters: const [
+                    UsPhoneInputFormatter(),
+                  ],
                   suffixIcon: Icon(
                     Icons.lock_outline,
                     color: const Color(0xFF71717A),
@@ -285,6 +290,7 @@ class _PersonalInformationViewState extends State<PersonalInformationView> {
     bool readOnly = false,
     Widget? suffixIcon,
     TextInputType? keyboardType,
+    List<TextInputFormatter>? inputFormatters,
   }) {
     return Padding(
       padding: EdgeInsets.only(bottom: 18.h),
@@ -304,6 +310,7 @@ class _PersonalInformationViewState extends State<PersonalInformationView> {
             controller: controller,
             readOnly: readOnly,
             keyboardType: keyboardType,
+            inputFormatters: inputFormatters,
             style: GoogleFonts.inter(
               color: readOnly ? const Color(0xFF71717A) : Colors.white,
               fontSize: 14.sp,

@@ -6,7 +6,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:moeb_26/config/constants/icon_paths.dart';
 import 'package:moeb_26/config/themes/app_theme.dart';
+import 'package:flutter/services.dart';
 import 'package:moeb_26/core/widgets/CustomText.dart';
+import 'package:moeb_26/core/widgets/CustomTextField.dart';
 import 'package:moeb_26/core/widgets/CustomText_Field_Hight.dart';
 import 'package:moeb_26/core/widgets/Custom_Job_Button.dart';
 import 'package:moeb_26/core/utils/helpers.dart';
@@ -59,13 +61,16 @@ class OnewayScreen extends StatelessWidget {
             _buildFieldWithLabel(
               "Client Phone Number (Optional)",
               clientPhoneController,
-              "e.g., +1 234 567 8900",
+              "(555) 000-0000",
               const Icon(
                 Icons.phone_outlined,
                 size: 20,
                 color: Colors.white,
               ),
               textInputType: TextInputType.phone,
+              inputFormatters: const [
+                UsPhoneInputFormatter(),
+              ],
               isRequired: false,
             ),
             _buildFieldWithLabel(
@@ -406,6 +411,7 @@ class OnewayScreen extends StatelessWidget {
     String? Function(String?)? validator,
     TextInputType textInputType = TextInputType.text,
     TextCapitalization textCapitalization = TextCapitalization.none,
+    List<TextInputFormatter>? inputFormatters,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -432,6 +438,7 @@ class OnewayScreen extends StatelessWidget {
           textInputType: textInputType,
           validator: validator,
           textCapitalization: textCapitalization,
+          inputFormatters: inputFormatters,
         ),
         SizedBox(height: 16.h),
       ],

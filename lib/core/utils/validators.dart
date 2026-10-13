@@ -106,7 +106,7 @@ class Validators {
     return null;
   }
 
-  /// Validates phone number (allows digits, +, (, ), -, and spaces).
+  /// Validates phone number (enforces 10-digit US phone format: (XXX) XXX-XXXX).
   static String? phone(String? value, {String? message}) {
     if (value == null || value.trim().isEmpty) {
       return message ?? 'Phone number is required';
@@ -120,10 +120,12 @@ class Validators {
       return 'Enter a valid phone number';
     }
 
-    // Count digits only for length validation (usually 8-15 digits)
-    final digitsOnly = phone.replaceAll(RegExp(r'[^0-9]'), '');
-    if (digitsOnly.length < 7 || digitsOnly.length > 15) {
-      return 'Phone number must be between 7 and 15 digits';
+    String digitsOnly = phone.replaceAll(RegExp(r'[^0-9]'), '');
+    if (digitsOnly.length == 11 && digitsOnly.startsWith('1')) {
+      digitsOnly = digitsOnly.substring(1);
+    }
+    if (digitsOnly.length != 10) {
+      return 'Enter a valid 10-digit phone number';
     }
 
     return null;

@@ -6,7 +6,10 @@ import 'package:intl/intl.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:moeb_26/config/constants/icon_paths.dart';
 import 'package:moeb_26/config/themes/app_theme.dart';
+import 'package:flutter/services.dart';
 import 'package:moeb_26/core/utils/helpers.dart';
+import 'package:moeb_26/core/utils/validators.dart';
+import 'package:moeb_26/core/widgets/CustomTextField.dart';
 import 'package:moeb_26/core/widgets/CustomText_Field_Hight.dart';
 import 'package:moeb_26/core/widgets/custom_sub_appbar.dart';
 import 'package:moeb_26/core/widgets/CustomButton.dart';
@@ -69,7 +72,9 @@ class _AddScheduleJobSheetState extends State<AddScheduleJobSheet> {
     _selectedJobType = isByHour ? 'BY THE HOUR' : 'ONE WAY';
 
     _nameController = TextEditingController(text: job?.clientName ?? '');
-    _phoneController = TextEditingController(text: job?.clientPhone ?? '');
+    _phoneController = TextEditingController(
+      text: Helpers.formatPhoneNumber(job?.clientPhone),
+    );
     _pickupController = TextEditingController(text: job?.pickupLocation ?? '');
     _dropoffController = TextEditingController(
       text: isByHour ? '' : existingDropoff,
@@ -371,12 +376,13 @@ class _AddScheduleJobSheetState extends State<AddScheduleJobSheet> {
               _buildFieldWithLabel(
                 "Client Phone Number",
                 _phoneController,
-                "e.g. +1 (555) 019-2834",
+                "(555) 000-0000",
                 Icon(Icons.phone_outlined, size: 20.sp, color: Colors.white),
                 textInputType: TextInputType.phone,
-                validator: (v) => v == null || v.trim().isEmpty
-                    ? "Phone number required"
-                    : null,
+                inputFormatters: const [
+                  UsPhoneInputFormatter(),
+                ],
+                validator: (v) => Validators.phone(v),
               ),
 
               // Date & Time Row (Matching JobPost Screen)
@@ -774,6 +780,7 @@ class _AddScheduleJobSheetState extends State<AddScheduleJobSheet> {
     bool isRequired = true,
     String? Function(String?)? validator,
     TextInputType textInputType = TextInputType.text,
+    List<TextInputFormatter>? inputFormatters,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -797,6 +804,7 @@ class _AddScheduleJobSheetState extends State<AddScheduleJobSheet> {
           hintText: hint,
           obscureText: false,
           textInputType: textInputType,
+          inputFormatters: inputFormatters,
           validator: validator,
         ),
         SizedBox(height: 16.h),

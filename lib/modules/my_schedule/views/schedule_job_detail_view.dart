@@ -387,7 +387,7 @@ class ScheduleJobDetailView extends StatelessWidget {
                                     ),
                                     SizedBox(height: 2.h),
                                     Text(
-                                      currentJob.clientPhone,
+                                      Helpers.formatPhoneNumber(currentJob.clientPhone),
                                       style: GoogleFonts.inter(
                                         fontSize: 13.sp,
                                         color: AppColors.gray100,

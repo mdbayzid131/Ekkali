@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter/services.dart';
 import 'package:moeb_26/config/themes/app_theme.dart';
 import 'package:moeb_26/core/widgets/CustomButton.dart';
+import 'package:moeb_26/core/widgets/CustomTextField.dart';
 import '../controllers/invoice_controller.dart';
 
 class InvoiceProfileSettingsView extends GetView<InvoiceController> {
@@ -211,9 +213,12 @@ class InvoiceProfileSettingsView extends GetView<InvoiceController> {
                     _buildProfileInputField(
                       title: 'Phone number (optional)',
                       controller: controller.businessPhoneController,
-                      hint: 'Enter Phone Number',
-                      maxLength: 30,
+                      hint: '(555) 000-0000',
+                      maxLength: 14,
                       keyboardType: TextInputType.phone,
+                      inputFormatters: const [
+                        UsPhoneInputFormatter(),
+                      ],
                     ),
                     SizedBox(height: 16.h),
 
@@ -268,6 +273,7 @@ class InvoiceProfileSettingsView extends GetView<InvoiceController> {
     required String hint,
     required int maxLength,
     TextInputType keyboardType = TextInputType.text,
+    List<TextInputFormatter>? inputFormatters,
   }) {
     return Container(
       padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 8.h),
@@ -303,6 +309,7 @@ class InvoiceProfileSettingsView extends GetView<InvoiceController> {
           TextField(
             controller: controller,
             keyboardType: keyboardType,
+            inputFormatters: inputFormatters,
             style: GoogleFonts.inter(
               color: Colors.white,
               fontSize: 15.sp,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:moeb_26/config/themes/app_theme.dart';
 
@@ -11,6 +12,7 @@ class CustomtextFieldHight extends StatelessWidget {
   final TextInputType? textInputType;
   final String? Function(String?)? validator;
   final TextCapitalization textCapitalization;
+  final List<TextInputFormatter>? inputFormatters;
 
   const CustomtextFieldHight({super.key, 
     required this.controller,
@@ -22,6 +24,7 @@ class CustomtextFieldHight extends StatelessWidget {
     this.validator,
     this.readOnly = false,
     this.textCapitalization = TextCapitalization.none,
+    this.inputFormatters,
   });
 
   final bool readOnly;
@@ -37,6 +40,7 @@ class CustomtextFieldHight extends StatelessWidget {
         keyboardType: textInputType,
         validator: validator,
         textCapitalization: textCapitalization,
+        inputFormatters: inputFormatters,
         style: TextStyle(color: Colors.white),
         maxLines: 5, // Max lines the field can expand to
         minLines: 1, // Min lines

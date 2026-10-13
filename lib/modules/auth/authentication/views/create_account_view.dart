@@ -92,6 +92,10 @@ class _CreateAccountViewState extends State<CreateAccountView> {
                       hintText: "John Smith",
                       obscureText: false,
                       textInputType: TextInputType.name,
+                      textCapitalization: TextCapitalization.words,
+                      inputFormatters: const [
+                        CapitalizeWordsInputFormatter(),
+                      ],
                       validator: (value) => Validators.name(value),
                     ),
                   ),
@@ -102,14 +106,12 @@ class _CreateAccountViewState extends State<CreateAccountView> {
                     isRequired: true,
                     child: Customtextfield(
                       controller: controller.phoneController,
-                      hintText: "Enter your phone number",
+                      hintText: "(555) 000-0000",
                       obscureText: false,
                       textInputType: TextInputType.phone,
                       validator: (value) => Validators.phone(value),
-                      inputFormatters: [
-                        FilteringTextInputFormatter.allow(
-                          RegExp(r'[0-9+()\s-]'),
-                        ),
+                      inputFormatters: const [
+                        UsPhoneInputFormatter(),
                       ],
                     ),
                   ),
@@ -167,6 +169,7 @@ class _CreateAccountViewState extends State<CreateAccountView> {
                       hintText: "Example Limo Company LLC",
                       obscureText: false,
                       textInputType: TextInputType.name,
+                      textCapitalization: TextCapitalization.words,
                       validator: (value) => Validators.required(
                         value,
                         message: "Enter your company name",
