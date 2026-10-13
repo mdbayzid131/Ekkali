@@ -12,9 +12,7 @@ import 'package:moeb_26/core/services/user_service.dart';
 import 'package:moeb_26/core/utils/helpers.dart';
 import 'package:moeb_26/core/widgets/CustomButton.dart';
 import 'package:moeb_26/data/models/my_rides_model.dart';
-import 'package:moeb_26/data/models/user_profile_model.dart';
 import 'package:moeb_26/data/repositories/socket_repository.dart';
-import 'package:moeb_26/modules/auth/profile/controllers/profile_controller.dart';
 import 'package:moeb_26/modules/preferred_drivers/controllers/preferred_drivers_controller.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -151,58 +149,19 @@ class RideDetailSheet extends StatelessWidget {
     required bool isCreatedByMe,
     required DriverData? chauffeur,
   }) {
-    if (isCreatedByMe) {
-      // 1. My Created Job: Check applicant / assigned chauffeur's selected vehicle
-      final v = chauffeur?.effectiveVehicle;
-      if (v != null) {
-        final title = v.makeAndModel.isNotEmpty
-            ? v.makeAndModel
-            : "${v.make} ${v.model}".trim();
-        if (title.isNotEmpty) {
-          return v.year > 0 ? "${v.year} $title" : title;
-        }
+    if (!isCreatedByMe) return "";
+
+    // My Created Job: Check applicant / assigned chauffeur's selected vehicle
+    final v = chauffeur?.effectiveVehicle;
+    if (v != null) {
+      final title = v.makeAndModel.isNotEmpty
+          ? v.makeAndModel
+          : "${v.make} ${v.model}".trim();
+      if (title.isNotEmpty) {
+        return v.year > 0 ? "${v.year} $title" : title;
       }
-      return "";
-    } else {
-      // 2. Other's Job (Driver Mode): Check my applied / assigned vehicle
-      final v = ride.assignedTo?.effectiveVehicle ??
-          ride.applicant?.driver?.effectiveVehicle;
-      if (v != null) {
-        final title = v.makeAndModel.isNotEmpty
-            ? v.makeAndModel
-            : "${v.make} ${v.model}".trim();
-        if (title.isNotEmpty) {
-          return v.year > 0 ? "${v.year} $title" : title;
-        }
-      }
-      // Fallback to current logged-in driver's selected vehicle
-      try {
-        if (Get.isRegistered<ProfileController>()) {
-          final pCtrl = Get.find<ProfileController>();
-          final profile = pCtrl.userProfile.value;
-          final selectedId = profile?.selectedVehicle;
-          Vehicle? myV;
-          if (selectedId != null && selectedId.isNotEmpty) {
-            myV = pCtrl.vehiclesList.firstWhereOrNull((item) => item.id == selectedId) ??
-                profile?.vehicles.firstWhereOrNull((item) => item.id == selectedId);
-          }
-          myV ??= pCtrl.vehiclesList.isNotEmpty
-              ? pCtrl.vehiclesList.first
-              : (profile?.vehicles.isNotEmpty == true
-                  ? profile!.vehicles.first
-                  : null);
-          if (myV != null) {
-            final title = myV.makeAndModel.isNotEmpty
-                ? myV.makeAndModel
-                : "${myV.make} ${myV.model}".trim();
-            if (title.isNotEmpty) {
-              return myV.year > 0 ? "${myV.year} $title" : title;
-            }
-          }
-        }
-      } catch (_) {}
-      return "";
     }
+    return "";
   }
 
   Future<void> _makePhoneCall(String phoneNumber) async {
@@ -908,10 +867,12 @@ class RideDetailSheet extends StatelessWidget {
                 ],
               ],
             ),
-            SizedBox(height: 12.h),
-            Divider(color: const Color(0xFF22222A), height: 1.h),
-            SizedBox(height: 12.h),
-            _buildVehicleSection(ride, selectedVehicleDetail),
+            if (hasApplicant || chauffeur != null) ...[
+              SizedBox(height: 12.h),
+              Divider(color: const Color(0xFF22222A), height: 1.h),
+              SizedBox(height: 12.h),
+              _buildVehicleSection(ride, selectedVehicleDetail),
+            ],
           ],
         ),
       );
@@ -1059,10 +1020,6 @@ class RideDetailSheet extends StatelessWidget {
                 ],
               ],
             ),
-            SizedBox(height: 12.h),
-            Divider(color: const Color(0xFF22222A), height: 1.h),
-            SizedBox(height: 12.h),
-            _buildVehicleSection(ride, selectedVehicleDetail),
           ],
         ),
       );
