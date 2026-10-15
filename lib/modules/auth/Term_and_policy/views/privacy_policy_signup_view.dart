@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:moeb_26/config/routes/app_pages.dart';
 import 'package:moeb_26/config/themes/app_theme.dart';
 import 'package:moeb_26/core/utils/helpers.dart';
 import 'package:moeb_26/core/widgets/CustomButton.dart';
@@ -44,6 +43,7 @@ class _PrivacyPolicySignUpViewState extends State<PrivacyPolicySignUpView> {
 
   // Reactive section index tracking
   final RxInt currentSectionIndex = 0.obs;
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -51,6 +51,12 @@ class _PrivacyPolicySignUpViewState extends State<PrivacyPolicySignUpView> {
     controller = Get.isRegistered<SignupController>()
         ? Get.find<SignupController>()
         : Get.put(SignupController(), permanent: true);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   final List<TermSection> originalSections = [
@@ -247,17 +253,6 @@ class _PrivacyPolicySignUpViewState extends State<PrivacyPolicySignUpView> {
     return true;
   }
 
-  void _checkAndAutoAdvance(TermStep activeStep) {
-    // 300ms delay for smooth visual feedback before advancing
-    Future.delayed(const Duration(milliseconds: 300), () {
-      if (_isAllStepChecked(activeStep)) {
-        if (currentSectionIndex.value < steps.length - 1) {
-          currentSectionIndex.value++;
-        }
-      }
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -297,6 +292,7 @@ class _PrivacyPolicySignUpViewState extends State<PrivacyPolicySignUpView> {
                 // Active step and its subsections
                 Expanded(
                   child: SingleChildScrollView(
+                    controller: _scrollController,
                     physics: const ClampingScrollPhysics(),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -326,7 +322,6 @@ class _PrivacyPolicySignUpViewState extends State<PrivacyPolicySignUpView> {
                           (i) => _item(
                             section.startIndex + i,
                             section.items[i],
-                            activeStep,
                           ),
                         ),
                         SizedBox(height: 20.h),
@@ -351,6 +346,9 @@ class _PrivacyPolicySignUpViewState extends State<PrivacyPolicySignUpView> {
                             borderColor: const Color(0xFF364153),
                             onPressed: () {
                               currentSectionIndex.value--;
+                              if (_scrollController.hasClients) {
+                                _scrollController.jumpTo(0);
+                              }
                             },
                           ),
                         ),
@@ -377,6 +375,9 @@ class _PrivacyPolicySignUpViewState extends State<PrivacyPolicySignUpView> {
 
                             if (currentSectionIndex.value < steps.length - 1) {
                               currentSectionIndex.value++;
+                              if (_scrollController.hasClients) {
+                                _scrollController.jumpTo(0);
+                              }
                             } else {
                               controller.submitTermsAndContinue();
                             }
@@ -430,10 +431,6 @@ class _PrivacyPolicySignUpViewState extends State<PrivacyPolicySignUpView> {
         ),
         onPressed: () {
           _toggleAllInSection(section, !allChecked);
-          if (!allChecked) {
-            final activeStep = steps.firstWhere((step) => step.subsections.contains(section));
-            _checkAndAutoAdvance(activeStep);
-          }
         },
         icon: Icon(
           allChecked ? Icons.check_box_rounded : Icons.check_box_outline_blank_rounded,
@@ -452,13 +449,12 @@ class _PrivacyPolicySignUpViewState extends State<PrivacyPolicySignUpView> {
     });
   }
 
-  Widget _item(int index, String text, TermStep activeStep) {
+  Widget _item(int index, String text) {
     return Padding(
       padding: EdgeInsets.only(bottom: 12.h),
       child: GestureDetector(
         onTap: () {
           controller.toggleTermCheck(index);
-          _checkAndAutoAdvance(activeStep);
         },
         child: Container(
           width: double.infinity,
