@@ -19,8 +19,14 @@ class VehicleDetailsView extends StatefulWidget {
 }
 
 class _VehicleDetailsViewState extends State<VehicleDetailsView> {
-  final UserProfileService _profileService = Get.find<UserProfileService>();
-  final ProfileController _profileController = Get.find<ProfileController>();
+  late final UserProfileService _profileService =
+      Get.isRegistered<UserProfileService>()
+          ? Get.find<UserProfileService>()
+          : Get.put(UserProfileService(userProfileRepo: Get.find()));
+  late final ProfileController _profileController =
+      Get.isRegistered<ProfileController>()
+          ? Get.find<ProfileController>()
+          : Get.put(ProfileController());
 
   late String vehicleId;
   Vehicle? cachedVehicle;

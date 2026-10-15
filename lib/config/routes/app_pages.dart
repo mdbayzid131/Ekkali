@@ -348,16 +348,19 @@ class Routes {
       name: allVehicleView,
       page: () => AllVehicleView(),
       transition: Transition.noTransition,
+      binding: ProfileBinding(),
     ),
     GetPage(
       name: addNewVehicleView,
       page: () => const AddNewVehicleView(),
       transition: Transition.noTransition,
+      binding: ProfileBinding(),
     ),
     GetPage(
       name: vehicleDetailsView,
       page: () => const VehicleDetailsView(),
       transition: Transition.noTransition,
+      binding: ProfileBinding(),
     ),
     GetPage(
       name: personalDocumentView,

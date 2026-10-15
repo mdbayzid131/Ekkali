@@ -71,24 +71,43 @@ class NotificationItem {
         json['referenceId']?.toString() ??
         rawData?['referenceId']?.toString();
 
-    if (type.toUpperCase().contains('JOB') ||
-        type.toUpperCase().contains('RIDE') ||
-        type.toUpperCase().contains('TASK') ||
-        type.toUpperCase().contains('CHAUFFEUR') ||
-        resourceType?.toUpperCase() == 'JOB') {
+    final String titleUpper = (json['title']?.toString() ?? json['heading']?.toString() ?? '').toUpperCase();
+    final String textUpper = (json['text']?.toString() ?? json['message']?.toString() ?? json['body']?.toString() ?? '').toUpperCase();
+    final String resUpper = (resourceType ?? '').toUpperCase();
+    final String typeUpper = type.toUpperCase();
+
+    if (resUpper == 'DOCUMENT' ||
+        typeUpper.contains('DOCUMENT') ||
+        titleUpper.contains('DOCUMENT') ||
+        textUpper.contains('DOCUMENT') ||
+        titleUpper.contains('LICENSE') ||
+        textUpper.contains('LICENSE') ||
+        titleUpper.contains('PERMIT') ||
+        textUpper.contains('PERMIT')) {
+      iconPath = AppIcons.contact_icon;
+    } else if (resUpper == 'VEHICLE' ||
+        typeUpper.contains('VEHICLE') ||
+        titleUpper.contains('VEHICLE') ||
+        textUpper.contains('VEHICLE')) {
+      iconPath = AppIcons.vechile_car_icon;
+    } else if (typeUpper.contains('JOB') ||
+        typeUpper.contains('RIDE') ||
+        typeUpper.contains('TASK') ||
+        typeUpper.contains('CHAUFFEUR') ||
+        resUpper == 'JOB') {
       iconPath = AppIcons.job_icon;
-    } else if (resourceType?.toUpperCase() == 'SUPPORT_TICKET' ||
-        type.toUpperCase().contains('SUPPORT')) {
+    } else if (resUpper == 'SUPPORT_TICKET' ||
+        typeUpper.contains('SUPPORT')) {
       iconPath = AppIcons.message_icon;
-    } else if (type.toUpperCase().contains('MESSAGE') ||
-        type.toUpperCase().contains('CHAT')) {
+    } else if (typeUpper.contains('MESSAGE') ||
+        typeUpper.contains('CHAT')) {
       iconPath = AppIcons.message_icon;
-    } else if (type.toUpperCase().contains('PAYMENT') ||
-        type.toUpperCase().contains('INVOICE')) {
+    } else if (typeUpper.contains('PAYMENT') ||
+        typeUpper.contains('INVOICE')) {
       iconPath = AppIcons.deals_icon;
-    } else if (type.toUpperCase().contains('REMINDER') ||
-        type.toUpperCase().contains('OFFER') ||
-        type.toUpperCase().contains('DEAL')) {
+    } else if (typeUpper.contains('REMINDER') ||
+        typeUpper.contains('OFFER') ||
+        typeUpper.contains('DEAL')) {
       iconPath = AppIcons.deals_icon;
     } else {
       iconPath = AppIcons.job_icon;
@@ -110,11 +129,9 @@ class NotificationItem {
 
     String? parsedJobId = json['jobId']?.toString() ??
         rawData?['jobId']?.toString() ??
-        (resourceType?.toUpperCase() == 'JOB' ? resourceId : null) ??
-        rawData?['id']?.toString() ??
-        rawData?['_id']?.toString() ??
         json['rideId']?.toString() ??
-        rawData?['rideId']?.toString();
+        rawData?['rideId']?.toString() ??
+        (resUpper == 'JOB' ? resourceId : null);
 
     if (parsedJobId == null && jobObj is Map) {
       parsedJobId = jobObj['_id']?.toString() ?? jobObj['id']?.toString();
@@ -126,6 +143,12 @@ class NotificationItem {
     if (parsedChatId == null && chatObj is Map) {
       parsedChatId = chatObj['_id']?.toString() ?? chatObj['id']?.toString();
     }
+
+    // Preserve full payload so navigation routes never miss resourceType or referenceId
+    final Map<String, dynamic> combinedData = {
+      ...json,
+      ...?rawData,
+    };
 
     return NotificationItem(
       id: json['_id']?.toString() ?? json['id']?.toString() ?? '',
@@ -145,7 +168,7 @@ class NotificationItem {
       icon: iconPath,
       jobId: parsedJobId,
       chatId: parsedChatId,
-      data: rawData ?? (json['data'] is Map ? Map<String, dynamic>.from(json['data']) : null),
+      data: combinedData,
     );
   }
 

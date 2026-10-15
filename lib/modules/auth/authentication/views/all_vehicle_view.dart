@@ -11,7 +11,9 @@ import 'package:moeb_26/core/widgets/custom_sub_appbar.dart';
 class AllVehicleView extends StatelessWidget {
   AllVehicleView({super.key});
 
-  final ProfileController controller = Get.find<ProfileController>();
+  final ProfileController controller = Get.isRegistered<ProfileController>()
+      ? Get.find<ProfileController>()
+      : Get.put(ProfileController());
 
   @override
   Widget build(BuildContext context) {

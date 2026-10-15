@@ -8,6 +8,8 @@ import 'package:moeb_26/config/routes/app_pages.dart';
 import 'package:moeb_26/config/constants/app_constants.dart';
 import 'package:moeb_26/config/constants/storage_constants.dart';
 import 'package:moeb_26/core/services/notifications_service.dart';
+import 'package:moeb_26/modules/auth/authentication/controllers/personal_document_controller.dart';
+import 'package:moeb_26/modules/auth/profile/controllers/profile_controller.dart';
 import 'package:moeb_26/modules/notifications/controllers/notifications_controller.dart';
 import 'package:moeb_26/core/services/socket_service.dart';
 import 'package:moeb_26/core/services/storege_service.dart';
@@ -345,13 +347,9 @@ class FirebaseNotificationService {
         ? jobId
         : (data?['jobId']?.toString() ??
             nestedData?['jobId']?.toString() ??
-            (resourceType == 'JOB' ? resourceId : null) ??
             data?['rideId']?.toString() ??
             nestedData?['rideId']?.toString() ??
-            data?['id']?.toString() ??
-            nestedData?['id']?.toString() ??
-            data?['_id']?.toString() ??
-            nestedData?['_id']?.toString() ??
+            (resourceType == 'JOB' ? resourceId : null) ??
             (data != null && data['job'] is Map
                 ? data['job']['_id']?.toString() ??
                     data['job']['id']?.toString()
@@ -384,6 +382,13 @@ class FirebaseNotificationService {
       '📍 Unified Notification Navigation: type=$upperType, resourceType=$resourceType, resourceId=$resourceId, jobId=$resolvedJobId, chatId=$resolvedChatId, action=$action',
     );
 
+    if (Get.isBottomSheetOpen == true) {
+      Get.back();
+    }
+    if (Get.isDialogOpen == true) {
+      Get.back();
+    }
+
     // 1. SUPPORT TICKET NOTIFICATIONS (Checked first so type="MESSAGE" with resourceType="SUPPORT_TICKET" is NOT mistaken for Chat)
     final bool isSupport = resourceType == 'SUPPORT_TICKET' ||
         resourceType.contains('SUPPORT') ||
@@ -398,8 +403,6 @@ class FirebaseNotificationService {
     if (isSupport) {
       final String resolvedTicketId = (data?['ticketId']?.toString() ??
               nestedData?['ticketId']?.toString() ??
-              data?['id']?.toString() ??
-              nestedData?['id']?.toString() ??
               resourceId)
           .trim();
 
@@ -417,50 +420,138 @@ class FirebaseNotificationService {
       return;
     }
 
-    // 2. CHAT RELATED NOTIFICATIONS: Always go to Chat list (Index 2), NEVER chat detail
-    final bool isChat = upperType == 'NEW_MESSAGE' ||
-        (upperType == 'MESSAGE' && resourceType != 'SUPPORT_TICKET') ||
-        upperType == 'CHAT' ||
-        upperType == 'COMMUNITY_MESSAGE' ||
-        upperType == 'NEW_COMMUNITY_MESSAGE' ||
-        action == 'OPEN_CHAT' ||
-        resolvedChatId.isNotEmpty ||
-        lowerTitle.contains('new message') ||
-        lowerTitle.contains('chat') ||
-        lowerSubtitle.contains('message') ||
-        lowerSubtitle.contains('chat');
+    // 2. VEHICLE NOTIFICATIONS: Always route directly to All Vehicles page
+    final bool isVehicle = resourceType == 'VEHICLE' ||
+        resourceType.contains('VEHICLE') ||
+        action == 'VIEW_VEHICLE' ||
+        action == 'VIEW_VEHICLES' ||
+        upperType == 'VEHICLE' ||
+        upperType == 'VEHICLE_APPROVED' ||
+        upperType == 'VEHICLE_REJECTED' ||
+        upperType.contains('VEHICLE') ||
+        lowerTitle.contains('vehicle') ||
+        lowerSubtitle.contains('vehicle') ||
+        (upperType == 'SYSTEM' &&
+            (lowerTitle.contains('vehicle') || lowerSubtitle.contains('vehicle')));
+
+    if (isVehicle) {
+      if (Get.isRegistered<ProfileController>()) {
+        try {
+          Get.find<ProfileController>().fetchVehicles();
+        } catch (_) {}
+      } else {
+        Get.put(ProfileController());
+      }
+      Get.toNamed(Routes.allVehicleView);
+      return;
+    }
+
+    // 3. DOCUMENT / COMPLIANCE NOTIFICATIONS: Always route directly to Documents page
+    final bool isDocument = resourceType == 'DOCUMENT' ||
+        resourceType.contains('DOCUMENT') ||
+        action == 'VIEW_DOCUMENT' ||
+        action == 'VIEW_DOCUMENTS' ||
+        upperType == 'DOCUMENT' ||
+        upperType == 'DOCUMENT_APPROVED' ||
+        upperType == 'DOCUMENT_REJECTED' ||
+        upperType.contains('DOCUMENT') ||
+        lowerTitle.contains('document') ||
+        lowerSubtitle.contains('document') ||
+        lowerTitle.contains('license') ||
+        lowerSubtitle.contains('license') ||
+        lowerTitle.contains('permit') ||
+        lowerSubtitle.contains('permit') ||
+        (upperType == 'SYSTEM' &&
+            (lowerTitle.contains('document') ||
+                lowerSubtitle.contains('document') ||
+                lowerTitle.contains('license') ||
+                lowerSubtitle.contains('license') ||
+                lowerTitle.contains('permit') ||
+                lowerSubtitle.contains('permit') ||
+                lowerTitle.contains('profile picture') ||
+                lowerSubtitle.contains('profile picture')));
+
+    if (isDocument) {
+      if (Get.isRegistered<PersonalDocumentController>()) {
+        try {
+          Get.find<PersonalDocumentController>().fetchDocuments();
+        } catch (_) {}
+      } else {
+        Get.put(PersonalDocumentController());
+      }
+
+      final String docType = (data?['documentType']?.toString() ??
+              nestedData?['documentType']?.toString() ??
+              '')
+          .trim()
+          .toUpperCase();
+
+      if (docType == 'DRIVING_LICENSE' ||
+          docType == 'HACK_LICENSE' ||
+          docType == 'LOCAL_PERMIT') {
+        Get.toNamed(
+          Routes.personalDocumentDetailView,
+          arguments: {'documentType': docType},
+        );
+      } else {
+        Get.toNamed(Routes.personalDocumentView);
+      }
+      return;
+    }
+
+    // 4. CHAT RELATED NOTIFICATIONS: Always go to Chat list (Index 2), NEVER chat detail
+    final bool isChat = (upperType == 'NEW_MESSAGE' ||
+            (upperType == 'MESSAGE' &&
+                resourceType != 'SUPPORT_TICKET' &&
+                resourceType != 'DOCUMENT' &&
+                resourceType != 'VEHICLE') ||
+            upperType == 'CHAT' ||
+            upperType == 'COMMUNITY_MESSAGE' ||
+            upperType == 'NEW_COMMUNITY_MESSAGE' ||
+            action == 'OPEN_CHAT' ||
+            resolvedChatId.isNotEmpty ||
+            lowerTitle.contains('new message') ||
+            lowerTitle.contains('chat') ||
+            lowerSubtitle.contains('message') ||
+            lowerSubtitle.contains('chat')) &&
+        !isVehicle &&
+        !isDocument &&
+        !isSupport;
 
     if (isChat) {
       navigateToChatList();
       return;
     }
 
-    // 3. JOB / RIDE RELATED NOTIFICATIONS: Always open Ride page & Bottom Sheet
-    final bool isJob = upperType == 'CHAUFFEUR_APPLIED' ||
-        upperType == 'JOB_ASSIGNED' ||
-        upperType == 'RIDE_STATUS_UPDATE' ||
-        upperType == 'JOB_INVITATION' ||
-        upperType == 'JOB_CANCELLED' ||
-        upperType == 'JOB_APPLICANT_REJECTED' ||
-        upperType == 'TASK_COMPLETED' ||
-        upperType == 'JOB_APPLICATION_RECEIVED' ||
-        upperType == 'JOB_REVIEWED' ||
-        upperType == 'TASK' ||
-        resourceType == 'JOB' ||
-        action == 'VIEW_JOB' ||
-        action == 'VIEW_RIDE' ||
-        action == 'VIEW_JOB_APPLICATIONS' ||
-        upperType.contains('JOB') ||
-        upperType.contains('RIDE') ||
-        resolvedJobId.isNotEmpty ||
-        lowerTitle.contains('job') ||
-        lowerTitle.contains('ride') ||
-        lowerTitle.contains('applicant') ||
-        lowerTitle.contains('chauffeur') ||
-        lowerTitle.contains('assigned') ||
-        lowerTitle.contains('acceptance') ||
-        lowerSubtitle.contains('job') ||
-        lowerSubtitle.contains('ride');
+    // 5. JOB / RIDE RELATED NOTIFICATIONS: Always open Ride page & Bottom Sheet
+    final bool isJob = !isVehicle &&
+        !isDocument &&
+        !isSupport &&
+        (upperType == 'CHAUFFEUR_APPLIED' ||
+            upperType == 'JOB_ASSIGNED' ||
+            upperType == 'RIDE_STATUS_UPDATE' ||
+            upperType == 'JOB_INVITATION' ||
+            upperType == 'JOB_CANCELLED' ||
+            upperType == 'JOB_APPLICANT_REJECTED' ||
+            upperType == 'TASK_COMPLETED' ||
+            upperType == 'JOB_APPLICATION_RECEIVED' ||
+            upperType == 'JOB_REVIEWED' ||
+            upperType == 'TASK' ||
+            resourceType == 'JOB' ||
+            action == 'VIEW_JOB' ||
+            action == 'VIEW_RIDE' ||
+            action == 'VIEW_JOB_APPLICATIONS' ||
+            upperType.contains('JOB') ||
+            upperType.contains('RIDE') ||
+            resolvedJobId.isNotEmpty ||
+            lowerTitle.contains('job') ||
+            lowerTitle.contains('ride') ||
+            lowerTitle.contains('applicant') ||
+            lowerTitle.contains('chauffeur') ||
+            lowerTitle.contains('assigned') ||
+            lowerTitle.contains('acceptance') ||
+            lowerSubtitle.contains('job') ||
+            lowerSubtitle.contains('ride'));
 
     if (isJob) {
       if (upperType == 'JOB_APPLICANT_REJECTED' && resolvedJobId.isEmpty) {
@@ -472,7 +563,7 @@ class FirebaseNotificationService {
       return;
     }
 
-    // 4. INVOICES & PAYMENTS
+    // 6. INVOICES & PAYMENTS
     if (upperType == 'PAYMENT_RECEIVED' ||
         upperType == 'PAYMENT_FAILED' ||
         upperType.contains('PAYMENT') ||
@@ -486,7 +577,7 @@ class FirebaseNotificationService {
       return;
     }
 
-    // 5. DEALS & OFFERS
+    // 7. DEALS & OFFERS
     if (upperType == 'REMINDER' ||
         upperType == 'DEAL' ||
         upperType == 'OFFER' ||
@@ -499,16 +590,7 @@ class FirebaseNotificationService {
       return;
     }
 
-    // 6. VEHICLE VERIFICATION & SYSTEM ALERTS
-    if (resourceType == 'VEHICLE' ||
-        (upperType == 'SYSTEM' &&
-            (lowerTitle.contains('vehicle') ||
-                lowerSubtitle.contains('vehicle')))) {
-      Get.toNamed(Routes.allVehicleView);
-      return;
-    }
-
-    // 7. MARKETPLACE / ITEMS
+    // 8. MARKETPLACE / ITEMS
     if (lowerTitle.contains('item') ||
         lowerTitle.contains('market') ||
         lowerSubtitle.contains('item') ||
@@ -517,7 +599,7 @@ class FirebaseNotificationService {
       return;
     }
 
-    // 8. DEFAULT FALLBACK
+    // 9. DEFAULT FALLBACK
     if (Get.currentRoute == Routes.notificationsView) {
       Get.offAllNamed(Routes.bottomNabbarView, arguments: 0);
     } else {
@@ -530,7 +612,7 @@ class FirebaseNotificationService {
     final Map<String, dynamic> data = message.data;
     final String type = (data['type'] ?? data['notificationType'] ?? '')
         .toString();
-    final String? jobId = data['jobId']?.toString() ?? data['id']?.toString();
+    final String? jobId = data['jobId']?.toString() ?? data['rideId']?.toString();
     final String? chatId = data['chatId']?.toString();
     final String title = message.notification?.title ??
         data['title']?.toString() ??
