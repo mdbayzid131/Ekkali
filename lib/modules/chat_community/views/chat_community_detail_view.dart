@@ -138,7 +138,7 @@ class ChatCommunityDetailView extends StatelessWidget {
           actions: [
             Obx(
               () => DropdownButtonHideUnderline(
-                child: DropdownButton2<String>(
+                child: DropdownButton2<CommunityRoom>(
                   customButton: Container(
                     margin: EdgeInsets.only(right: 16.w),
                     padding: EdgeInsets.symmetric(
@@ -155,7 +155,7 @@ class ChatCommunityDetailView extends StatelessWidget {
                         ConstrainedBox(
                           constraints: BoxConstraints(maxWidth: 130.w),
                           child: Text(
-                            controller.selectedState.value,
+                            controller.selectedGroup.value?.name ?? 'Select Group',
                             style: GoogleFonts.inter(
                               color: const Color(0xFFD5C4AB),
                               fontSize: 13.sp,
@@ -181,16 +181,18 @@ class ChatCommunityDetailView extends StatelessWidget {
                       border: Border.all(color: const Color(0xFF27272A)),
                     ),
                     maxHeight: 320.h,
-                    width: 210.w,
+                    width: 220.w,
                   ),
-                  items: (controller.states.isNotEmpty
-                          ? controller.states
-                          : [controller.selectedState.value])
-                      .map((state) {
-                    return DropdownMenuItem(
-                      value: state,
+                  items: (controller.groups.isNotEmpty
+                          ? controller.groups
+                          : (controller.selectedGroup.value != null
+                              ? [controller.selectedGroup.value!]
+                              : <CommunityRoom>[]))
+                      .map((grp) {
+                    return DropdownMenuItem<CommunityRoom>(
+                      value: grp,
                       child: Text(
-                        state,
+                        grp.name,
                         style: GoogleFonts.inter(
                           color: Colors.white,
                           fontSize: 13.sp,
@@ -202,7 +204,7 @@ class ChatCommunityDetailView extends StatelessWidget {
                   }).toList(),
                   onChanged: (val) {
                     if (val != null) {
-                      controller.changeState(val);
+                      controller.changeGroup(val);
                     }
                   },
                 ),

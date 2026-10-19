@@ -312,17 +312,17 @@ class SocketService extends GetxService with WidgetsBindingObserver {
           if (data.containsKey('data')) {
             actualData = data['data'];
           } else if (data.containsKey('message') && data['message'] is Map) {
-            actualData = data['message'];
+            actualData = Map<String, dynamic>.from(data['message']);
+            if ((actualData['chatId'] == null ||
+                    actualData['chatId'].toString().isEmpty) &&
+                data['chatId'] != null) {
+              actualData['chatId'] = data['chatId'];
+            }
           }
         }
 
-        // Check if this is a community message sent via generic message event
-        if (actualData is Map &&
-            (actualData.containsKey('serviceArea') ||
-                (actualData['chatId'] == null ||
-                    actualData['chatId'].toString().isEmpty))) {
-          lastReceivedCommunityMessage.value = actualData;
-        }
+        // Broadcast to community/group stream as well
+        lastReceivedCommunityMessage.value = actualData;
 
         final newMessage = ChatMessage.fromJson(actualData);
         lastReceivedMessage.value = newMessage;
