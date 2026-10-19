@@ -14,6 +14,7 @@ import 'package:moeb_26/core/services/subscription_service.dart';
 import 'package:moeb_26/core/widgets/premium_lock_widget.dart';
 import 'package:moeb_26/core/widgets/premium_required_dialog.dart';
 import 'package:moeb_26/core/widgets/secure_screen.dart';
+import 'package:moeb_26/core/widgets/account_suspended_widget.dart';
 import 'package:moeb_26/core/services/user_service.dart';
 import '../../../core/widgets/Custom_AppBar.dart';
 import '../../jobs_posts/views/job_post_sheet_tabbar_view.dart';
@@ -39,51 +40,6 @@ class JobOfferView extends StatelessWidget {
         child: Column(
           children: [
             SizedBox(height: 15.h),
-
-            // Suspended Member Warning Banner
-            Obx(() {
-              final isRestricted = Get.isRegistered<UserService>() &&
-                  Get.find<UserService>().rxIsRestricted.value;
-              if (!isRestricted) return const SizedBox.shrink();
-
-              return Container(
-                margin: EdgeInsets.only(bottom: 15.h),
-                padding: EdgeInsets.symmetric(
-                  horizontal: 14.w,
-                  vertical: 10.h,
-                ),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF2A1C0A),
-                  borderRadius: BorderRadius.circular(12.r),
-                  border: Border.all(
-                    color: const Color(0xFFD97706),
-                    width: 1.2,
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.warning_amber_rounded,
-                      color: const Color(0xFFFBBF24),
-                      size: 22.sp,
-                    ),
-                    SizedBox(width: 10.w),
-                    Expanded(
-                      child: Text(
-                        "Account Suspended: You cannot request or post jobs. You still have full access to your schedule, invoices, and expenses.",
-                        style: GoogleFonts.inter(
-                          color: const Color(0xFFFDE68A),
-                          fontSize: 12.sp,
-                          height: 1.35,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            }),
-
             // Top Action Buttons Header
             CustomJobButton(
               text: "New Job",
@@ -168,6 +124,23 @@ class JobOfferView extends StatelessWidget {
                     child: CircularProgressIndicator(
                       color: AppColors.primaryColor,
                     ),
+                  );
+                }
+
+                final bool isRestrictedUser = (Get.isRegistered<UserService>() &&
+                        Get.find<UserService>().rxIsRestricted.value) ||
+                    controller.errorMessage.value
+                        .toLowerCase()
+                        .contains('restrict') ||
+                    controller.errorMessage.value
+                        .toLowerCase()
+                        .contains('suspend');
+
+                if (isRestrictedUser && controller.jobOffers.isEmpty) {
+                  return const AccountSuspendedWidget(
+                    title: "Account Suspended",
+                    message:
+                        "You cannot request or post jobs. You still have full access to your schedule, invoices, and expenses.",
                   );
                 }
 

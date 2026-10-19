@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -7,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:moeb_26/config/themes/app_theme.dart';
 import 'package:moeb_26/core/utils/media_picker_helper.dart';
 import 'package:moeb_26/core/services/marketplace_service.dart';
+import 'package:moeb_26/core/services/user_service.dart';
 import 'package:moeb_26/core/utils/helpers.dart';
 import 'package:moeb_26/data/models/market_place_model.dart';
 import 'package:moeb_26/modules/my_items/controllers/my_items_controller.dart'
@@ -19,6 +21,7 @@ class MarketplaceController extends GetxController {
   var filteredItems = <ItemData>[].obs;
   var isLoading = false.obs;
   var isLoadMore = false.obs;
+  var errorMessage = ''.obs;
 
   // Strict Cursor Pagination
   String? nextCursor;
@@ -77,6 +80,7 @@ class MarketplaceController extends GetxController {
   Future<void> fetchItems({String? query, String? condition}) async {
     try {
       isLoading.value = true;
+      errorMessage.value = '';
       nextCursor = null;
       hasMore = true;
       currentQuery = query ?? currentQuery;
@@ -97,10 +101,33 @@ class MarketplaceController extends GetxController {
 
         allItems.assignAll(items);
         filteredItems.assignAll(items);
+      } else {
+        final serverMsg = response.data?['message']?.toString() ?? "Failed to fetch marketplace items";
+        if (response.statusCode == 403 &&
+            (serverMsg.toLowerCase().contains('restrict') ||
+                serverMsg.toLowerCase().contains('suspend'))) {
+          if (Get.isRegistered<UserService>()) {
+            Get.find<UserService>().isRestricted = true;
+          }
+        }
+        errorMessage.value = serverMsg;
       }
+    } on DioException catch (e) {
+      final statusCode = e.response?.statusCode;
+      final serverMsg = e.response?.data?['message']?.toString() ?? '';
+      if (statusCode == 403 &&
+          (serverMsg.toLowerCase().contains('restrict') ||
+              serverMsg.toLowerCase().contains('suspend'))) {
+        if (Get.isRegistered<UserService>()) {
+          Get.find<UserService>().isRestricted = true;
+        }
+      }
+      errorMessage.value =
+          serverMsg.isNotEmpty ? serverMsg : "Failed to fetch marketplace items";
+      debugPrint("Dio error fetching items: $e");
     } catch (e) {
-      print("Error fetching items: $e");
-      Helpers.showCustomSnackBar("Failed to fetch marketplace items", isError: true);
+      debugPrint("Error fetching items: $e");
+      errorMessage.value = "Failed to fetch marketplace items";
     } finally {
       isLoading.value = false;
     }
@@ -131,7 +158,7 @@ class MarketplaceController extends GetxController {
         filteredItems.assignAll(allItems);
       }
     } catch (e) {
-      print("Error loading more items: $e");
+      debugPrint("Error loading more items: $e");
     } finally {
       isLoadMore.value = false;
     }
@@ -370,7 +397,7 @@ class MarketplaceController extends GetxController {
         );
       }
     } catch (e) {
-      print("Error processing item: $e");
+      debugPrint("Error processing item: $e");
       Helpers.showCustomSnackBar(
         "An error occurred while ${editItemId == null ? 'listing' : 'updating'} the item",
         isError: true,
