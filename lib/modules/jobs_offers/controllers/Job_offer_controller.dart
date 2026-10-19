@@ -169,12 +169,29 @@ class JobOfferController extends GetxController {
         jobOffers.assignAll(items);
         _groupOffersByDate(items);
       } else {
-        errorMessage.value =
+        final serverMsg =
             response.data?['message']?.toString() ?? 'Failed to load offers.';
+        if (response.statusCode == 403 &&
+            (serverMsg.toLowerCase().contains('restrict') ||
+                serverMsg.toLowerCase().contains('suspend'))) {
+          if (Get.isRegistered<UserService>()) {
+            Get.find<UserService>().isRestricted = true;
+          }
+        }
+        errorMessage.value = serverMsg;
       }
     } on DioException catch (e) {
+      final statusCode = e.response?.statusCode;
+      final serverMsg = e.response?.data?['message']?.toString() ?? '';
+      if (statusCode == 403 &&
+          (serverMsg.toLowerCase().contains('restrict') ||
+              serverMsg.toLowerCase().contains('suspend'))) {
+        if (Get.isRegistered<UserService>()) {
+          Get.find<UserService>().isRestricted = true;
+        }
+      }
       errorMessage.value =
-          e.response?.data?['message']?.toString() ?? 'Failed to load offers.';
+          serverMsg.isNotEmpty ? serverMsg : 'Failed to load offers.';
       debugPrint("Dio error fetching job offers: $e");
     } catch (e) {
       errorMessage.value = 'Something went wrong while loading offers.';
@@ -234,6 +251,17 @@ class JobOfferController extends GetxController {
   }
 
   Future<void> applyToJob(JobOfferModel job) async {
+    final userService =
+        Get.isRegistered<UserService>() ? Get.find<UserService>() : null;
+    if (userService != null && userService.isRestricted) {
+      Get.back();
+      Helpers.showCustomSnackBar(
+        'Your account is currently suspended. You cannot apply for jobs.',
+        isError: true,
+      );
+      return;
+    }
+
     try {
       isApplying.value = true;
 

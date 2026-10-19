@@ -14,6 +14,7 @@ class UserService extends GetxService {
   final RxString _userEmail = "".obs;
   final RxString _userName = "".obs;
   final RxString _userNickName = "".obs;
+  final RxBool _isRestricted = false.obs;
 
   String get userId => _userId.value;
   set userId(String value) => _userId.value = value;
@@ -26,6 +27,10 @@ class UserService extends GetxService {
 
   String get userNickName => _userNickName.value;
   set userNickName(String value) => _userNickName.value = value;
+
+  bool get isRestricted => _isRestricted.value;
+  set isRestricted(bool value) => _isRestricted.value = value;
+  RxBool get rxIsRestricted => _isRestricted;
 
   @override
   void onInit() {
@@ -53,7 +58,16 @@ class UserService extends GetxService {
         final nickname =
             user['nickName']?.toString() ?? user['nickname']?.toString();
         if (nickname != null) _userNickName.value = nickname;
+        final bool isRestrictedVal =
+            user['isRestricted'] == true || user['isSuspended'] == true;
+        _isRestricted.value = isRestrictedVal;
       } catch (_) {}
+    }
+
+    final bool? savedRestricted =
+        await StorageService.getBool(StorageConstants.isRestricted);
+    if (savedRestricted != null) {
+      _isRestricted.value = savedRestricted;
     }
 
     final token = await StorageService.getString(StorageConstants.bearerToken);
@@ -98,6 +112,14 @@ class UserService extends GetxService {
           final nickname =
               rawData['nickName']?.toString() ?? rawData['nickname']?.toString();
           if (nickname != null) _userNickName.value = nickname;
+
+          final bool isRestrictedVal =
+              rawData['isRestricted'] == true || rawData['isSuspended'] == true;
+          _isRestricted.value = isRestrictedVal;
+          await StorageService.setBool(
+            StorageConstants.isRestricted,
+            isRestrictedVal,
+          );
         }
       }
     } catch (e) {

@@ -1,11 +1,3 @@
-### 1. Separate Live Chat from Service Area (Group/Channels)
-- *Requirement:* Decouple the chat system completely from the geographic "Service Area".
-- *Functionality:* 
-  - Admin must be able to create and name custom chat channels/groups directly from the Admin Dashboard (e.g., state/city-based groups like Miami, Fort Lauderdale, Palm Beach).
-  - Works like a WhatsApp/Messenger group for drivers.
-
-
-
 Searched for "community"
 Searched for "chat"
 Listed directory Khaled%20Dask

@@ -14,6 +14,8 @@ import 'package:moeb_26/core/services/subscription_service.dart';
 import 'package:moeb_26/core/widgets/premium_lock_widget.dart';
 import 'package:moeb_26/core/widgets/premium_required_dialog.dart';
 import 'package:moeb_26/core/widgets/secure_screen.dart';
+import 'package:moeb_26/core/widgets/account_suspended_widget.dart';
+import 'package:moeb_26/core/services/user_service.dart';
 import '../../../core/widgets/Custom_AppBar.dart';
 import '../../jobs_posts/views/job_post_sheet_tabbar_view.dart';
 
@@ -43,6 +45,16 @@ class JobOfferView extends StatelessWidget {
               text: "New Job",
               padding: EdgeInsets.symmetric(vertical: 14.h, horizontal: 8.w),
               onPressed: () {
+                final isRestricted = Get.isRegistered<UserService>() &&
+                    Get.find<UserService>().isRestricted;
+                if (isRestricted) {
+                  Helpers.showCustomSnackBar(
+                    'Your account is currently suspended. You cannot post or request jobs.',
+                    isError: true,
+                  );
+                  return;
+                }
+
                 final isPrem = Get.isRegistered<SubscriptionService>()
                     ? Get.find<SubscriptionService>().isPremium.value
                     : false;
@@ -112,6 +124,23 @@ class JobOfferView extends StatelessWidget {
                     child: CircularProgressIndicator(
                       color: AppColors.primaryColor,
                     ),
+                  );
+                }
+
+                final bool isRestrictedUser = (Get.isRegistered<UserService>() &&
+                        Get.find<UserService>().rxIsRestricted.value) ||
+                    controller.errorMessage.value
+                        .toLowerCase()
+                        .contains('restrict') ||
+                    controller.errorMessage.value
+                        .toLowerCase()
+                        .contains('suspend');
+
+                if (isRestrictedUser && controller.jobOffers.isEmpty) {
+                  return const AccountSuspendedWidget(
+                    title: "Account Suspended",
+                    message:
+                        "You cannot request or post jobs. You still have full access to your schedule, invoices, and expenses.",
                   );
                 }
 

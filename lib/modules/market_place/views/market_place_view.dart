@@ -4,6 +4,9 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:moeb_26/config/themes/app_theme.dart';
 import 'package:moeb_26/config/routes/app_pages.dart';
+import 'package:moeb_26/core/services/user_service.dart';
+import 'package:moeb_26/core/utils/helpers.dart';
+import 'package:moeb_26/core/widgets/account_suspended_widget.dart';
 import '../../../core/widgets/Custom_Job_Button.dart';
 import '../controllers/market_place_controller.dart';
 import '../../../core/widgets/SellItemBottomSheet.dart';
@@ -68,6 +71,15 @@ class MarketPlaceView extends StatelessWidget {
                         horizontal: 8.w,
                       ),
                       onPressed: () {
+                        final isRestricted = Get.isRegistered<UserService>() &&
+                            Get.find<UserService>().isRestricted;
+                        if (isRestricted) {
+                          Helpers.showCustomSnackBar(
+                            'Your account is currently suspended. You cannot list items.',
+                            isError: true,
+                          );
+                          return;
+                        }
                         controller.clearFields();
                         Get.bottomSheet(
                           SellItemBottomSheet(),
@@ -144,6 +156,23 @@ class MarketPlaceView extends StatelessWidget {
                       ),
                     );
                   }
+                  final bool isRestrictedUser = (Get.isRegistered<UserService>() &&
+                          Get.find<UserService>().rxIsRestricted.value) ||
+                      controller.errorMessage.value
+                          .toLowerCase()
+                          .contains('restrict') ||
+                      controller.errorMessage.value
+                          .toLowerCase()
+                          .contains('suspend');
+
+                  if (isRestrictedUser && controller.filteredItems.isEmpty) {
+                    return const AccountSuspendedWidget(
+                      title: "Account Suspended",
+                      message:
+                          "Marketplace access is restricted while your account is suspended. You still have full access to your schedule, invoices, and expenses.",
+                    );
+                  }
+
                   if (controller.filteredItems.isEmpty) {
                     return ListView(
                       physics: const AlwaysScrollableScrollPhysics(),
@@ -152,7 +181,9 @@ class MarketPlaceView extends StatelessWidget {
                           padding: EdgeInsets.only(top: 50.h),
                           child: Center(
                             child: Text(
-                              "No items found",
+                              controller.errorMessage.isNotEmpty
+                                  ? controller.errorMessage.value
+                                  : "No items found",
                               style: GoogleFonts.inter(color: Colors.white),
                             ),
                           ),
