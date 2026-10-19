@@ -7,6 +7,61 @@ class CommunityRepo {
   final ApiClient apiClient;
   CommunityRepo({required this.apiClient});
 
+  /// Get all admin-created chat groups (channels)
+  Future<Response> getChatGroups() async {
+    return await apiClient.getData(ApiConstants.chatGroups);
+  }
+
+  /// Get messages for a specific chat group by chatId
+  Future<Response> getGroupMessages(
+    String chatId, {
+    int? page,
+    int limit = 50,
+    String? cursor,
+  }) async {
+    final query = <String, dynamic>{'limit': limit, 'sort': '-createdAt'};
+    if (page != null) query['page'] = page;
+    if (cursor != null && cursor.isNotEmpty) query['cursor'] = cursor;
+    return await apiClient.getData('/messages/$chatId', query: query);
+  }
+
+  /// Send message to a specific chat group by chatId
+  Future<Response> sendGroupMessage(
+    String chatId, {
+    required String text,
+    List<File>? attachments,
+    String? replyTo,
+  }) async {
+    final url = '/messages/$chatId';
+    if (attachments != null && attachments.isNotEmpty) {
+      final formData = FormData();
+      if (text.isNotEmpty) {
+        formData.fields.add(MapEntry('text', text));
+      }
+      if (replyTo != null && replyTo.isNotEmpty) {
+        formData.fields.add(MapEntry('replyTo', replyTo));
+      }
+      for (var file in attachments) {
+        formData.files.add(
+          MapEntry(
+            'attachments',
+            await MultipartFile.fromFile(
+              file.path,
+              filename: file.path.split('/').last,
+            ),
+          ),
+        );
+      }
+      return await apiClient.postData(url, formData);
+    } else {
+      final body = <String, dynamic>{'text': text};
+      if (replyTo != null && replyTo.isNotEmpty) {
+        body['replyTo'] = replyTo;
+      }
+      return await apiClient.postData(url, body);
+    }
+  }
+
   Future<Response> getCommunityRoom({String? serviceArea}) async {
     final query = <String, dynamic>{};
     if (serviceArea != null && serviceArea.isNotEmpty) {

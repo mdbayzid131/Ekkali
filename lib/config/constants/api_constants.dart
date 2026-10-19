@@ -54,6 +54,7 @@ class ApiConstants {
   //socket_io endpoints
   static const String chats = '/chats';
   static const String chatsId = '/chats/{{chatId}}';
+  static const String chatGroups = '/chats/groups';
   static const String messages = '/messages/{{chatId}}';
   static const String jobReview = '/jobs/{jobId}/review';
   //Notifications

@@ -16,7 +16,10 @@ class SocketRepository {
       final response = await apiClient.getData(ApiConstants.chats);
       if (response.statusCode == 200) {
         final List data = response.data['data'] ?? [];
-        return data.map((json) => ChatPreview.fromJson(json)).toList();
+        return data
+            .map((json) => ChatPreview.fromJson(json))
+            .where((chat) => !chat.isGroup)
+            .toList();
       }
     } catch (e) {
       rethrow;

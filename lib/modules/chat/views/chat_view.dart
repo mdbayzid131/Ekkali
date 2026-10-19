@@ -109,7 +109,7 @@ class ChatView extends StatelessWidget {
                     child: RefreshIndicator(
                       onRefresh: () async {
                         await controller.fetchChats();
-                        await controller.fetchCommunityRoom();
+                        await controller.fetchChatGroups();
                       },
                       color: AppColors.primaryColor,
                       backgroundColor: const Color(0xff1A1A1A),
@@ -126,29 +126,29 @@ class ChatView extends StatelessWidget {
                           itemCount:
                               controller.filteredChats.length +
                               (communityRoom != null ? 1 : 0),
-                        itemBuilder: (context, index) {
-                          if (communityRoom != null && index == 0) {
-                            return _buildCommunityChatTile(communityRoom);
-                          }
+                          itemBuilder: (context, index) {
+                            if (communityRoom != null && index == 0) {
+                              return _buildCommunityChatTile(communityRoom);
+                            }
 
-                          final chatIndex = communityRoom != null
-                              ? index - 1
-                              : index;
-                          final chat = controller.filteredChats[chatIndex];
-                          return _buildChatTile(chat);
-                        },
-                      );
-                    }),
+                            final chatIndex = communityRoom != null
+                                ? index - 1
+                                : index;
+                            final chat = controller.filteredChats[chatIndex];
+                            return _buildChatTile(chat);
+                          },
+                        );
+                      }),
+                    ),
                   ),
-                ),
-              ],
-            );
-          }),
+                ],
+              );
+            }),
+          ),
         ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   /// ── Community Chat Tile ──
   Widget _buildCommunityChatTile(CommunityRoom room) {
@@ -224,7 +224,8 @@ class ChatView extends StatelessWidget {
                     children: [
                       Expanded(
                         child: Obx(() {
-                          final draft = ChatDraftService.drafts['community_${room.id}'];
+                          final draft =
+                              ChatDraftService.drafts['community_${room.id}'];
                           if (draft != null && draft.trim().isNotEmpty) {
                             return RichText(
                               maxLines: 1,

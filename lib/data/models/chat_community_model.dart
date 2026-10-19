@@ -4,6 +4,7 @@ class CommunityRoom {
   final String? _id;
   final String name;
   final String serviceArea;
+  final String status;
   final int totalMembers;
   final String? lastMessage;
   final String? lastMessageAt;
@@ -17,7 +18,8 @@ class CommunityRoom {
   CommunityRoom({
     String? id,
     required this.name,
-    required this.serviceArea,
+    this.serviceArea = '',
+    this.status = 'ACTIVE',
     this.totalMembers = 0,
     this.lastMessage,
     this.lastMessageAt,
@@ -34,26 +36,38 @@ class CommunityRoom {
         : (unread == 0);
 
     return CommunityRoom(
-      id: json['id']?.toString() ?? json['_id']?.toString(),
-      name: json['name'] ?? '',
+      id: json['_id']?.toString() ?? json['id']?.toString(),
+      name: json['name']?.toString() ?? '',
       serviceArea: json['serviceArea'] is Map
           ? (json['serviceArea']['areaName']?.toString() ??
               json['serviceArea']['name']?.toString() ??
               '')
           : (json['serviceArea']?.toString() ?? ''),
+      status: json['status']?.toString() ?? 'ACTIVE',
       totalMembers: json['totalMembers'] is int
           ? json['totalMembers'] as int
           : int.tryParse(json['totalMembers']?.toString() ?? '0') ?? 0,
-      lastMessage: json['lastMessage'],
-      lastMessageAt: json['lastMessageAt'],
+      lastMessage: json['lastMessage']?.toString(),
+      lastMessageAt: json['lastMessageAt']?.toString(),
       unreadCount: unread,
       isRead: isReadVal,
     );
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CommunityRoom &&
+          runtimeType == other.runtimeType &&
+          id == other.id;
+
+  @override
+  int get hashCode => id.hashCode;
 }
 
 class CommunityMessage {
   final String id;
+  final String? chatId;
   final String serviceArea;
   final ChatParticipant sender;
   final String text;
@@ -65,7 +79,8 @@ class CommunityMessage {
 
   CommunityMessage({
     required this.id,
-    required this.serviceArea,
+    this.chatId,
+    this.serviceArea = '',
     required this.sender,
     required this.text,
     required this.attachments,
@@ -96,15 +111,23 @@ class CommunityMessage {
       replyToId = replyToData;
     }
 
+    final String parsedChatId = json['chatId']?.toString() ??
+        (json['chat'] is Map ? json['chat']['_id']?.toString() ?? '' : json['chat']?.toString() ?? '');
+    final String parsedServiceArea = json['serviceArea'] is Map
+        ? (json['serviceArea']['areaName']?.toString() ??
+            json['serviceArea']['name']?.toString() ??
+            '')
+        : (json['serviceArea']?.toString() ?? '');
+
     return CommunityMessage(
       id: json['_id']?.toString() ?? json['id']?.toString() ?? '',
-      serviceArea: json['serviceArea'] is Map
-          ? (json['serviceArea']['areaName']?.toString() ??
-              json['serviceArea']['name']?.toString() ??
-              '')
-          : (json['serviceArea']?.toString() ?? ''),
+      chatId: parsedChatId.isNotEmpty ? parsedChatId : null,
+      serviceArea: parsedServiceArea,
       sender: senderObj,
-      text: json['text']?.toString() ?? '',
+      text: json['text']?.toString() ??
+          json['message']?.toString() ??
+          json['content']?.toString() ??
+          '',
       attachments: json['attachments'] != null
           ? List<String>.from(json['attachments'])
           : [],

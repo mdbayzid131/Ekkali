@@ -72,6 +72,8 @@ class ChatItem {
 
 class ChatPreview {
   final String id;
+  final bool isGroup;
+  final String? name;
   final List<ChatParticipant> participants;
   final ChatItem? item;
   final String? jobId;
@@ -85,6 +87,8 @@ class ChatPreview {
 
   ChatPreview({
     required this.id,
+    this.isGroup = false,
+    this.name,
     this.participants = const [],
     this.item,
     this.jobId,
@@ -132,6 +136,8 @@ class ChatPreview {
 
     return ChatPreview(
       id: json['_id']?.toString() ?? json['id']?.toString() ?? '',
+      isGroup: json['isGroup'] == true,
+      name: json['name']?.toString(),
       participants: json['participants'] != null
           ? (json['participants'] as List)
                 .map((p) => ChatParticipant.fromJson(p))

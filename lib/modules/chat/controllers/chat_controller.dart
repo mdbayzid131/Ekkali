@@ -17,16 +17,25 @@ class ChatController extends GetxController {
   final UserService userService = Get.find();
 
   var chats = <ChatPreview>[].obs;
+  var chatGroups = <CommunityRoom>[].obs;
   var communityRoom = Rxn<CommunityRoom>();
   var searchController = "".obs;
   var isLoading = false.obs;
+  var isGroupsLoading = false.obs;
+  var selectedTab = 0.obs; // 0: Direct Chats, 1: Chat Groups
   var selectedChatIdForDelete = "".obs;
 
   /// Returns count of distinct conversations that have unread messages (Users + Live Chat)
+  int get unreadDirectChatsCount =>
+      chats.where((c) => (c.unreadCount > 0) || !c.isRead).length;
+
+  int get unreadGroupsCount =>
+      chatGroups.where((g) => (g.unreadCount > 0) || !g.isRead).length;
+
   int get unreadUsersCount {
-    int userCount = chats.where((c) => (c.unreadCount > 0) || !c.isRead).length;
+    int userCount = unreadDirectChatsCount;
     final comm = communityRoom.value;
-    if (comm != null && ((comm.unreadCount > 0) || !comm.isRead)) {
+    if (comm != null && ((comm.unreadCount > 0) || !comm.isRead || unreadGroupsCount > 0)) {
       userCount += 1;
     }
     return userCount;
@@ -44,45 +53,50 @@ class ChatController extends GetxController {
     selectedChatIdForDelete.value = "";
   }
 
+  void changeTab(int index) {
+    selectedTab.value = index;
+  }
+
   @override
   void onInit() {
     super.onInit();
     fetchChats();
-    fetchCommunityRoom();
+    fetchChatGroups();
     setupRealtimeUpdates();
   }
 
-  Future<void> fetchCommunityRoom({String? serviceArea}) async {
+  Future<void> fetchChatGroups() async {
     try {
-      final String targetArea = serviceArea ??
-          await StorageService.getString('selected_community_service_area');
-      final response = await communityService.getCommunityRoom(
-        serviceArea: targetArea.isNotEmpty ? targetArea : null,
-      );
+      isGroupsLoading.value = true;
+      final response = await communityService.getChatGroups();
       if (response.statusCode == 200 && response.data != null) {
-        communityRoom.value = CommunityRoom.fromJson(response.data['data']);
-        final actualArea = communityRoom.value?.serviceArea ?? targetArea;
-        if (actualArea.isNotEmpty) {
-          socketService.joinCommunity(actualArea);
+        final List list = response.data['data'] ?? [];
+        final groups = list
+            .map((item) => CommunityRoom.fromJson(item as Map<String, dynamic>))
+            .toList();
+        chatGroups.assignAll(groups);
+        if (groups.isNotEmpty) {
+          String savedGroupId = await StorageService.getString('selected_chat_group_id');
+          if (savedGroupId.isEmpty) {
+            savedGroupId = await StorageService.getString('selected_community_service_area');
+          }
+          final match = groups.firstWhereOrNull((g) => g.id == savedGroupId);
+          communityRoom.value = match ?? groups.first;
         }
-        if (communityRoom.value != null) {
-          ChatDraftService.loadDraft('community_${communityRoom.value!.id}');
+        for (final g in groups) {
+          ChatDraftService.loadDraft('community_${g.id}');
         }
         return;
       }
     } catch (e) {
-      debugPrint('Error fetching community room: $e');
+      debugPrint('Error fetching chat groups: $e');
+    } finally {
+      isGroupsLoading.value = false;
     }
+  }
 
-    // Default Live Chat tile info
-    final String fallbackArea = serviceArea ?? "Global";
-    communityRoom.value = CommunityRoom(
-      name: "Live Chat",
-      serviceArea: fallbackArea,
-      lastMessage: "Welcome to the live chat room!",
-      lastMessageAt: null,
-    );
-    socketService.joinCommunity(fallbackArea);
+  Future<void> fetchCommunityRoom() async {
+    await fetchChatGroups();
   }
 
   void markChatAsRead(String chatId) {
@@ -94,12 +108,34 @@ class ChatController extends GetxController {
     }
   }
 
+  void markGroupAsRead(String groupId) {
+    int index = chatGroups.indexWhere((g) => g.id == groupId);
+    if (index != -1) {
+      final current = chatGroups[index];
+      chatGroups[index] = CommunityRoom(
+        id: current.id,
+        name: current.name,
+        status: current.status,
+        totalMembers: current.totalMembers,
+        lastMessage: current.lastMessage,
+        lastMessageAt: current.lastMessageAt,
+        unreadCount: 0,
+        isRead: true,
+      );
+      chatGroups.refresh();
+    }
+    if (communityRoom.value?.id == groupId) {
+      markCommunityAsRead();
+    }
+  }
+
   void markCommunityAsRead() {
     if (communityRoom.value != null) {
       final current = communityRoom.value!;
       communityRoom.value = CommunityRoom(
+        id: current.id,
         name: current.name,
-        serviceArea: current.serviceArea,
+        status: current.status,
         totalMembers: current.totalMembers,
         lastMessage: current.lastMessage,
         lastMessageAt: current.lastMessageAt,
@@ -142,8 +178,41 @@ class ChatController extends GetxController {
           chats.insert(0, updatedChat);
           chats.refresh();
         } else {
-          // If it's a new chat not in list, fetch all again
-          fetchChats();
+          int groupIndex =
+              chatGroups.indexWhere((g) => g.id == newMessage.chatId);
+          if (groupIndex != -1) {
+            final grp = chatGroups[groupIndex];
+            String displayMsg = newMessage.text.trim();
+            if (displayMsg.isEmpty && newMessage.attachments.isNotEmpty) {
+              displayMsg = "Attachment";
+            }
+            final bool isCurrentlyViewing =
+                socketService.activeChatId == newMessage.chatId;
+            final bool isFromOther = newMessage.sender?.id != null &&
+                newMessage.sender!.id != userService.userId;
+            final updatedGroup = CommunityRoom(
+              id: grp.id,
+              name: grp.name,
+              status: grp.status,
+              totalMembers: grp.totalMembers,
+              lastMessage: displayMsg.isNotEmpty ? displayMsg : "Attachment",
+              lastMessageAt: newMessage.createdAt,
+              unreadCount: isCurrentlyViewing
+                  ? 0
+                  : (isFromOther ? grp.unreadCount + 1 : grp.unreadCount),
+              isRead: isCurrentlyViewing
+                  ? true
+                  : (isFromOther ? false : grp.isRead),
+            );
+            chatGroups.removeAt(groupIndex);
+            chatGroups.insert(0, updatedGroup);
+            chatGroups.refresh();
+            communityRoom.value = updatedGroup;
+            communityRoom.refresh();
+          } else {
+            // If it's a new chat not in list, fetch all again
+            fetchChats();
+          }
         }
       }
     });
@@ -189,15 +258,14 @@ class ChatController extends GetxController {
           final currentRoom = communityRoom.value ??
               CommunityRoom(
                 name: "Live Chat",
-                serviceArea: "Global",
               );
           final isFromOther =
               senderId != null && senderId != userService.userId;
           final isCurrentlyViewingCommunity = socketService.isCommunityActive;
 
           communityRoom.value = CommunityRoom(
+            id: currentRoom.id,
             name: currentRoom.name.isNotEmpty ? currentRoom.name : "Live Chat",
-            serviceArea: currentRoom.serviceArea,
             totalMembers: currentRoom.totalMembers,
             lastMessage: text,
             lastMessageAt: createdAt ?? DateTime.now().toIso8601String(),
@@ -238,6 +306,17 @@ class ChatController extends GetxController {
     return chats.where((chat) {
       final other = chat.getOtherParticipant(currentUserId);
       return other?.name.toLowerCase().contains(query) ?? false;
+    }).toList();
+  }
+
+  List<CommunityRoom> get filteredGroups {
+    final query = searchController.value.trim().toLowerCase();
+    if (query.isEmpty) return chatGroups;
+    return chatGroups.where((group) {
+      final nameMatches = group.name.toLowerCase().contains(query);
+      final messageMatches =
+          (group.lastMessage ?? '').toLowerCase().contains(query);
+      return nameMatches || messageMatches;
     }).toList();
   }
 
