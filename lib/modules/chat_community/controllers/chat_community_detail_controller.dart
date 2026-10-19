@@ -4,25 +4,23 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:moeb_26/core/services/storege_service.dart';
-import 'package:moeb_26/core/services/user_profile_service.dart';
 import 'package:moeb_26/core/services/community_service.dart';
 import 'package:moeb_26/core/utils/media_picker_helper.dart';
 import 'package:moeb_26/core/services/socket_service.dart';
 import 'package:moeb_26/core/services/user_service.dart';
 import 'package:moeb_26/core/utils/helpers.dart';
 import 'package:moeb_26/data/models/chat_community_model.dart';
+import 'package:moeb_26/data/models/chat_message_model.dart';
 import 'package:moeb_26/data/models/chat_model.dart';
 import 'package:moeb_26/core/services/chat_draft_service.dart';
 import 'package:moeb_26/modules/chat/controllers/chat_controller.dart';
 
 class CommunityChatDetailController extends GetxController {
-  static const String _kSelectedCommunityServiceArea =
-      'selected_community_service_area';
+  static const String _kSelectedChatGroupId = 'selected_chat_group_id';
 
   final UserService userService = Get.find<UserService>();
   final SocketService socketService = Get.find<SocketService>();
   final CommunityService communityService = Get.find<CommunityService>();
-  final UserProfileService _profileService = Get.find<UserProfileService>();
 
   final RxList<CommunityMessage> messages = <CommunityMessage>[].obs;
   final TextEditingController messageController = TextEditingController();
@@ -37,27 +35,39 @@ class CommunityChatDetailController extends GetxController {
   Worker? _commWorker;
 
   late CommunityRoom room;
-  var selectedState = ''.obs;
-  final RxList<String> states = <String>[].obs;
-  final RxBool isServiceAreasLoading = false.obs;
+  final Rxn<CommunityRoom> selectedGroup = Rxn<CommunityRoom>();
+  final RxList<CommunityRoom> groups = <CommunityRoom>[].obs;
+  final RxBool isGroupsLoading = false.obs;
+  Worker? _msgWorker;
 
   @override
   void onInit() {
     super.onInit();
-    room = Get.arguments;
+    if (Get.arguments is CommunityRoom) {
+      room = Get.arguments as CommunityRoom;
+      selectedGroup.value = room;
+    } else {
+      room = CommunityRoom(name: "Live Chat");
+      selectedGroup.value = room;
+    }
     socketService.isCommunityActive = true;
     _initDraft();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (Get.isRegistered<ChatController>()) {
-        Get.find<ChatController>().markCommunityAsRead();
+        Get.find<ChatController>().markGroupAsRead(room.id);
       }
     });
     scrollController.addListener(_onScroll);
-    _initServiceAreaAndMessages();
+    _initGroupsAndMessages();
   }
 
   void _initDraft() {
-    final draftKey = 'community_${room.id}';
+    _loadDraftForGroup(room.id);
+    messageController.addListener(_onMessageChanged);
+  }
+
+  void _loadDraftForGroup(String groupId) {
+    final draftKey = 'community_$groupId';
     final cached = ChatDraftService.getDraft(draftKey);
     if (cached.isNotEmpty) {
       messageController.text = cached;
@@ -71,100 +81,15 @@ class CommunityChatDetailController extends GetxController {
           messageController.selection = TextSelection.fromPosition(
             TextPosition(offset: saved.length),
           );
+        } else if (saved.isEmpty) {
+          messageController.clear();
         }
       });
     }
-    messageController.addListener(_onMessageChanged);
   }
 
   void _onMessageChanged() {
     ChatDraftService.saveDraft('community_${room.id}', messageController.text);
-  }
-
-  Future<void> _initServiceAreaAndMessages() async {
-    // 1. Check local storage first (if user manually switched before)
-    final savedArea =
-        await StorageService.getString(_kSelectedCommunityServiceArea);
-    if (savedArea.isNotEmpty) {
-      selectedState.value = savedArea;
-    } else if (room.serviceArea.isNotEmpty) {
-      selectedState.value = room.serviceArea;
-    }
-
-    // 2. Fetch User Profile to get user's current serviceArea from API if still not set
-    if (selectedState.value.isEmpty) {
-      try {
-        final profileRes = await _profileService.getUserProfile();
-        if (profileRes.statusCode == 200 && profileRes.data?['data'] != null) {
-          final userArea = profileRes.data['data']['serviceArea']?.toString();
-          if (userArea != null && userArea.isNotEmpty) {
-            selectedState.value = userArea;
-          }
-        }
-      } catch (e) {
-        debugPrint("Error fetching user profile service area: $e");
-      }
-    }
-
-    // 3. Fallback default if still empty
-    if (selectedState.value.isEmpty) {
-      selectedState.value = 'New York Metro';
-    }
-
-    await fetchServiceAreas();
-    fetchMessages();
-    setupSocket();
-  }
-
-  Future<void> fetchServiceAreas() async {
-    isServiceAreasLoading.value = true;
-    try {
-      final response = await _profileService.getServiceAreas(limit: 100);
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        final data = response.data['data'];
-        if (data is List) {
-          final List<String> loadedAreas = data
-              .map((item) {
-                if (item is Map) {
-                  return item['areaName']?.toString() ??
-                      item['name']?.toString() ??
-                      '';
-                }
-                return item.toString();
-              })
-              .map((e) => e.trim())
-              .where((name) => name.isNotEmpty)
-              .toSet()
-              .toList();
-
-          if (loadedAreas.isNotEmpty) {
-            states.value = loadedAreas;
-
-            // Sync selected state with dynamic list
-            if (selectedState.value.isNotEmpty) {
-              final String areaLower = selectedState.value.toLowerCase();
-              final matched = states.firstWhereOrNull(
-                (s) =>
-                    s.toLowerCase() == areaLower ||
-                    areaLower.contains(s.toLowerCase()) ||
-                    s.toLowerCase().contains(areaLower),
-              );
-              if (matched != null) {
-                selectedState.value = matched;
-              } else if (!states.contains(selectedState.value)) {
-                selectedState.value = states.first;
-              }
-            } else {
-              selectedState.value = states.first;
-            }
-          }
-        }
-      }
-    } catch (e) {
-      debugPrint("Error fetching dynamic service areas for live chat: $e");
-    } finally {
-      isServiceAreasLoading.value = false;
-    }
   }
 
   void _onScroll() {
@@ -179,22 +104,94 @@ class CommunityChatDetailController extends GetxController {
     }
   }
 
-  void changeState(String newState) {
-    if (selectedState.value == newState) return;
-    selectedState.value = newState;
-    StorageService.setString(_kSelectedCommunityServiceArea, newState);
-    socketService.joinCommunity(newState);
+  Future<void> _initGroupsAndMessages() async {
+    await fetchGroups();
     fetchMessages();
-    if (Get.isRegistered<ChatController>()) {
-      Get.find<ChatController>().fetchCommunityRoom(serviceArea: newState);
+    setupSocket();
+  }
+
+  Future<void> fetchGroups() async {
+    isGroupsLoading.value = true;
+    try {
+      final response = await communityService.getChatGroups();
+      if (response.statusCode == 200 && response.data != null) {
+        final List list = response.data['data'] ?? [];
+        final loaded = list
+            .map((item) => CommunityRoom.fromJson(item as Map<String, dynamic>))
+            .toList();
+
+        if (loaded.isNotEmpty) {
+          groups.value = loaded;
+
+          // Check if user previously selected a group from storage
+          String savedGroupId =
+              await StorageService.getString(_kSelectedChatGroupId);
+          if (savedGroupId.isEmpty) {
+            savedGroupId =
+                await StorageService.getString('selected_community_service_area');
+          }
+
+          CommunityRoom? target;
+          if (savedGroupId.isNotEmpty) {
+            target = loaded.firstWhereOrNull((g) => g.id == savedGroupId);
+          }
+          target ??= loaded.firstWhereOrNull((g) => g.id == room.id);
+          target ??= loaded.first;
+
+          if (target.id != room.id) {
+            room = target;
+            selectedGroup.value = target;
+            _switchGroup(target, isInitial: true);
+          } else {
+            selectedGroup.value = target;
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint("Error fetching chat groups for live chat: $e");
+    } finally {
+      isGroupsLoading.value = false;
     }
   }
 
-  void setupSocket() {
-    final String currentArea = selectedState.value;
-    debugPrint('🔄 CommunityChatDetailController: Joining community: $currentArea');
-    socketService.joinCommunity(currentArea);
+  void changeGroup(CommunityRoom newGroup) {
+    if (selectedGroup.value?.id == newGroup.id) return;
+    _switchGroup(newGroup);
+  }
 
+  void _switchGroup(CommunityRoom newGroup, {bool isInitial = false}) {
+    if (!isInitial && selectedGroup.value != null) {
+      ChatDraftService.saveDraft('community_${selectedGroup.value!.id}', messageController.text);
+      socketService.leaveChat(selectedGroup.value!.id);
+    }
+
+    selectedGroup.value = newGroup;
+    room = newGroup;
+    StorageService.setString(_kSelectedChatGroupId, newGroup.id);
+
+    _loadDraftForGroup(newGroup.id);
+
+    if (Get.isRegistered<ChatController>()) {
+      Get.find<ChatController>().markGroupAsRead(newGroup.id);
+    }
+
+    messages.clear();
+    socketService.joinChat(newGroup.id);
+    fetchMessages();
+  }
+
+  void setupSocket() {
+    debugPrint('🔄 CommunityChatDetailController: Joining group chat: ${room.id}');
+    socketService.joinChat(room.id);
+
+    // 1. Listen for new messages via lastReceivedMessage
+    _msgWorker = ever(socketService.lastReceivedMessage, (chatMsg) {
+      if (chatMsg != null && chatMsg.chatId == room.id) {
+        _handleIncomingChatMessage(chatMsg);
+      }
+    });
+
+    // 2. Listen for community/broadcast events fallback
     _commWorker = ever(socketService.lastReceivedCommunityMessage, (data) {
       if (data != null) {
         try {
@@ -203,19 +200,60 @@ class CommunityChatDetailController extends GetxController {
             msgData = data['message'];
           }
           if (msgData is Map<String, dynamic>) {
-            final newMsg = CommunityMessage.fromJson(msgData);
-            int tempIndex = messages.indexWhere((m) => m.id.startsWith('cmsg_user_'));
-            if (tempIndex != -1 && newMsg.sender.id == userService.userId) {
-              messages[tempIndex] = newMsg;
-            } else if (!messages.any((m) => m.id == newMsg.id)) {
-              messages.insert(0, newMsg);
+            final String msgChatId = msgData['chatId']?.toString() ??
+                (msgData['chat'] is Map ? msgData['chat']['_id']?.toString() ?? '' : msgData['chat']?.toString() ?? '');
+            if (msgChatId == room.id || msgChatId.isEmpty) {
+              final newMsg = CommunityMessage.fromJson(msgData);
+              _insertOrUpdateMessage(newMsg);
             }
           }
         } catch (e) {
-          debugPrint('Error parsing real-time community message: $e');
+          debugPrint('Error parsing real-time group message: $e');
         }
       }
     });
+  }
+
+  void _handleIncomingChatMessage(ChatMessage chatMsg) {
+    final commMsg = CommunityMessage(
+      id: chatMsg.id,
+      chatId: room.id,
+      sender: chatMsg.sender ??
+          ChatParticipant(
+            id: chatMsg.senderId ?? '',
+            name: '',
+          ),
+      text: chatMsg.text,
+      attachments: chatMsg.attachments,
+      replyTo: chatMsg.replyTo,
+      replyToMessage: chatMsg.replyToMessage != null
+          ? CommunityMessage(
+              id: chatMsg.replyToMessage!.id,
+              chatId: room.id,
+              sender: chatMsg.replyToMessage!.sender ??
+                  ChatParticipant(
+                    id: chatMsg.replyToMessage!.senderId ?? '',
+                    name: '',
+                  ),
+              text: chatMsg.replyToMessage!.text,
+              attachments: chatMsg.replyToMessage!.attachments,
+              createdAt: chatMsg.replyToMessage!.createdAt,
+              updatedAt: chatMsg.replyToMessage!.updatedAt,
+            )
+          : null,
+      createdAt: chatMsg.createdAt,
+      updatedAt: chatMsg.updatedAt,
+    );
+    _insertOrUpdateMessage(commMsg);
+  }
+
+  void _insertOrUpdateMessage(CommunityMessage newMsg) {
+    int tempIndex = messages.indexWhere((m) => m.id.startsWith('cmsg_user_'));
+    if (tempIndex != -1 && newMsg.sender.id == userService.userId) {
+      messages[tempIndex] = newMsg;
+    } else if (!messages.any((m) => m.id == newMsg.id)) {
+      messages.insert(0, newMsg);
+    }
   }
 
   Future<void> fetchMessages() async {
@@ -223,9 +261,9 @@ class CommunityChatDetailController extends GetxController {
       isLoading.value = true;
       hasMore.value = true;
       nextCursor.value = '';
-      final response = await communityService.getCommunityMessages(
-        serviceArea: selectedState.value,
-        limit: 40,
+      final response = await communityService.getGroupMessages(
+        room.id,
+        limit: 50,
       );
       if (response.statusCode == 200 && response.data != null) {
         final List list = response.data['data'] ?? [];
@@ -255,7 +293,7 @@ class CommunityChatDetailController extends GetxController {
         }
       }
     } catch (e) {
-      debugPrint('Error fetching community messages: $e');
+      debugPrint('Error fetching group messages: $e');
     } finally {
       isLoading.value = false;
     }
@@ -265,10 +303,10 @@ class CommunityChatDetailController extends GetxController {
     if (!hasMore.value || isLoadingMore.value || nextCursor.value.isEmpty) return;
     try {
       isLoadingMore.value = true;
-      final response = await communityService.getCommunityMessages(
-        serviceArea: selectedState.value,
+      final response = await communityService.getGroupMessages(
+        room.id,
         cursor: nextCursor.value,
-        limit: 40,
+        limit: 50,
       );
       if (response.statusCode == 200 && response.data != null) {
         final List list = response.data['data'] ?? [];
@@ -381,7 +419,7 @@ class CommunityChatDetailController extends GetxController {
 
     final tempMsg = CommunityMessage(
       id: tempId,
-      serviceArea: selectedState.value,
+      chatId: room.id,
       sender: ChatParticipant(
         id: currentUserId,
         name: 'You',
@@ -402,11 +440,11 @@ class CommunityChatDetailController extends GetxController {
     ChatDraftService.clearDraft('community_${room.id}');
 
     try {
-      final response = await communityService.sendCommunityMessage(
+      final response = await communityService.sendGroupMessage(
+        room.id,
         text: text,
         attachments: imagesToSend,
         replyTo: replyToId,
-        serviceArea: selectedState.value,
       );
       if (response.statusCode == 200 || response.statusCode == 201) {
         if (response.data != null && response.data['data'] != null) {
@@ -418,24 +456,27 @@ class CommunityChatDetailController extends GetxController {
         }
       }
     } catch (e) {
-      debugPrint('Error sending community message: $e');
+      debugPrint('Error sending group message: $e');
       messages.removeWhere((m) => m.id == tempId);
       selectedImages.addAll(imagesToSend);
       messageController.text = text;
       ChatDraftService.saveDraft('community_${room.id}', text);
-      Helpers.showCustomSnackBar('Failed to send broadcast message', isError: true);
+      Helpers.showCustomSnackBar('Failed to send group message', isError: true);
     }
   }
 
   @override
   void onClose() {
     socketService.isCommunityActive = false;
+    socketService.leaveChat(room.id);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (Get.isRegistered<ChatController>()) {
-        Get.find<ChatController>().markCommunityAsRead();
+        Get.find<ChatController>().markGroupAsRead(room.id);
       }
     });
+    scrollController.removeListener(_onScroll);
     scrollController.dispose();
+    _msgWorker?.dispose();
     _commWorker?.dispose();
     messageController.removeListener(_onMessageChanged);
     ChatDraftService.saveDraft('community_${room.id}', messageController.text);
