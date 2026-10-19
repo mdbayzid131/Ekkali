@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:moeb_26/core/widgets/custom_swipe_button.dart';
 import 'package:moeb_26/core/widgets/secure_screen.dart';
+import 'package:moeb_26/core/services/user_service.dart';
 
 class JobOfferDetailSheet extends StatelessWidget {
   final String title;
@@ -437,14 +438,59 @@ class JobOfferDetailSheet extends StatelessWidget {
 
               SizedBox(height: 20.h),
 
-              // Action Button: Swipe to Apply
-              CustomSwipeButton(
-                text: actionButtonText == "Apply to Job"
-                    ? "Swipe to Apply"
-                    : actionButtonText,
-                onSwipeComplete: () {
-                  Get.back();
-                  onApplyPressed();
+              // Action Button: Swipe to Apply OR Suspended Notice
+              Builder(
+                builder: (context) {
+                  final isRestricted = Get.isRegistered<UserService>() &&
+                      Get.find<UserService>().isRestricted;
+
+                  if (isRestricted) {
+                    return Container(
+                      width: double.infinity,
+                      padding: EdgeInsets.symmetric(
+                        vertical: 14.h,
+                        horizontal: 16.w,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF2E1515),
+                        borderRadius: BorderRadius.circular(14.r),
+                        border: Border.all(
+                          color: const Color(0xFFEF4444).withValues(alpha: 0.6),
+                          width: 1.2,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.block_rounded,
+                            color: const Color(0xFFEF4444),
+                            size: 20.sp,
+                          ),
+                          SizedBox(width: 12.w),
+                          Expanded(
+                            child: Text(
+                              "Account Suspended: Job requests are disabled.",
+                              style: GoogleFonts.inter(
+                                color: const Color(0xFFFCA5A5),
+                                fontSize: 13.sp,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  return CustomSwipeButton(
+                    text: actionButtonText == "Apply to Job"
+                        ? "Swipe to Apply"
+                        : actionButtonText,
+                    onSwipeComplete: () {
+                      Get.back();
+                      onApplyPressed();
+                    },
+                  );
                 },
               ),
             ],

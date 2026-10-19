@@ -195,8 +195,9 @@ class AuthService extends GetxService {
       if (authData is! Map<String, dynamic>) return;
 
       final String? accessToken = authData['accessToken'] ?? authData['token'];
-      final bool isRestricted = authData['isRestricted'] == true;
-      final bool isApproved = !isRestricted && authData['isApproved'] == true;
+      final bool isRestricted =
+          authData['isRestricted'] == true || authData['isSuspended'] == true;
+      final bool isApproved = authData['isApproved'] == true;
       final bool isOnboard = authData['isOnboard'] == true;
 
       // 1. Save Token
@@ -220,6 +221,7 @@ class AuthService extends GetxService {
 
       // 2. Save Status Flags
       await StorageService.setBool(StorageConstants.isApproved, isApproved);
+      await StorageService.setBool(StorageConstants.isRestricted, isRestricted);
       await StorageService.setBool(StorageConstants.isOnboard, isOnboard);
       await StorageService.setBool(
         StorageConstants.isOnboardingCompleted,
@@ -235,6 +237,7 @@ class AuthService extends GetxService {
         );
         if (Get.isRegistered<UserService>()) {
           final userService = Get.find<UserService>();
+          userService.isRestricted = isRestricted;
           final id = user['_id'] ?? user['id'];
           if (id != null) userService.userId = id.toString();
           final email = user['email']?.toString();
@@ -267,6 +270,7 @@ class AuthService extends GetxService {
     await StorageService.remove(StorageConstants.refreshToken);
     await StorageService.remove(StorageConstants.userData);
     await StorageService.remove(StorageConstants.isApproved);
+    await StorageService.remove(StorageConstants.isRestricted);
     await StorageService.remove(StorageConstants.isOnboard);
     await StorageService.remove(StorageConstants.isOnboardingCompleted);
 

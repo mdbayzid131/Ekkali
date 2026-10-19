@@ -234,6 +234,17 @@ class JobOfferController extends GetxController {
   }
 
   Future<void> applyToJob(JobOfferModel job) async {
+    final userService =
+        Get.isRegistered<UserService>() ? Get.find<UserService>() : null;
+    if (userService != null && userService.isRestricted) {
+      Get.back();
+      Helpers.showCustomSnackBar(
+        'Your account is currently suspended. You cannot apply for jobs.',
+        isError: true,
+      );
+      return;
+    }
+
     try {
       isApplying.value = true;
 

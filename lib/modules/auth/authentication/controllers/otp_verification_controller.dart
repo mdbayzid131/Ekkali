@@ -109,7 +109,8 @@ class OtpController extends GetxController {
             rawData is Map<String, dynamic> ? rawData : {};
         final bool isApproved = authData['isApproved'] == true;
         final bool isOnboard = authData['isOnboard'] == true;
-        final bool isRestricted = authData['isRestricted'] == true;
+        final bool isRestricted =
+            authData['isRestricted'] == true || authData['isSuspended'] == true;
         final String appState =
             (authData['appState'] ?? '').toString().toUpperCase();
         final String rejectionReason =
@@ -117,30 +118,31 @@ class OtpController extends GetxController {
         final String blockReason =
             authData['blockReason']?.toString() ?? '';
 
-        if (isRestricted || appState == 'REJECTED') {
+        if (appState == 'REJECTED') {
           await StorageService.setBool(StorageConstants.isApproved, false);
 
-          final String reason = blockReason.isNotEmpty
-              ? blockReason
-              : (rejectionReason.isNotEmpty
-                  ? rejectionReason
-                  : (isRestricted
-                      ? 'Account suspended due to compliance/policy review'
-                      : 'Incomplete documents or vehicle not meeting standards'));
+          final String reason = rejectionReason.isNotEmpty
+              ? rejectionReason
+              : 'Incomplete documents or vehicle not meeting standards';
 
           Get.offAllNamed(
             Routes.applicationNotApprovedView,
             arguments: {
               'reason': reason,
-              'title': isRestricted
-                  ? 'Account Restricted'
-                  : 'Application Not Approved',
-              'description': isRestricted
-                  ? "Your account access has been restricted."
-                  : "Unfortunately, we couldn't approve your application at this time.",
+              'title': 'Application Not Approved',
+              'description':
+                  "Unfortunately, we couldn't approve your application at this time.",
             },
           );
         } else if (isApproved) {
+          if (isRestricted) {
+            Helpers.showCustomSnackBar(
+              blockReason.isNotEmpty
+                  ? blockReason
+                  : 'Account suspended: You can view schedule, invoices & expenses, but cannot request new jobs.',
+              isError: true,
+            );
+          }
           Get.offAllNamed(Routes.bottomNabbarView);
         } else if (!isOnboard) {
           Get.offAllNamed(Routes.vehicleinformationView);
