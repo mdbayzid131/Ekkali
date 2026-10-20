@@ -8,14 +8,15 @@ import 'package:moeb_26/core/services/firebase_notification_service.dart';
 import 'package:moeb_26/core/widgets/custom_sub_appbar.dart';
 import 'package:moeb_26/data/models/notifications_model.dart';
 import '../controllers/notifications_controller.dart';
+import '../widgets/broadcast_notification_card.dart';
 
 class NotificationsView extends StatelessWidget {
   NotificationsView({super.key});
 
   final NotificationController controller =
       Get.isRegistered<NotificationController>()
-          ? Get.find<NotificationController>()
-          : Get.put(NotificationController());
+      ? Get.find<NotificationController>()
+      : Get.put(NotificationController());
 
   @override
   Widget build(BuildContext context) {
@@ -220,137 +221,140 @@ class NotificationsView extends StatelessWidget {
             ],
           ),
         ),
-        child: Container(
-          decoration: BoxDecoration(
-            color: currentNoti.isRead
-                ? const Color(0xFF111114)
-                : const Color(0xFF16161B),
-            borderRadius: BorderRadius.circular(14.r),
-            border: Border.all(
-              color: currentNoti.isRead
-                  ? const Color(0xFF1E1E24)
-                  : const Color(0xFF2B2B36),
-            ),
-          ),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              borderRadius: BorderRadius.circular(14.r),
-              onTap: () => _handleNotificationTap(currentNoti),
-              child: Padding(
-                padding: EdgeInsets.all(14.w),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Leading Icon Container
-                    Container(
-                      width: 40.w,
-                      height: 40.w,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF1F1F26),
-                        borderRadius: BorderRadius.circular(10.r),
-                        border: Border.all(
-                          color: const Color(0xFF2B2B38),
-                        ),
-                      ),
-                      padding: EdgeInsets.all(10.w),
-                      child: SvgPicture.asset(
-                        currentNoti.icon,
-                        colorFilter: ColorFilter.mode(
-                          currentNoti.isRead
-                              ? const Color(0xFF94A3B8)
-                              : Colors.white,
-                          BlendMode.srcIn,
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: 12.w),
-
-                    // Content
-                    Expanded(
-                      child: Column(
+        child: currentNoti.isBroadcast
+            ? BroadcastNotificationCard(notification: currentNoti)
+            : Container(
+                decoration: BoxDecoration(
+                  color: currentNoti.isRead
+                      ? const Color(0xFF111114)
+                      : const Color(0xFF16161B),
+                  borderRadius: BorderRadius.circular(14.r),
+                  border: Border.all(
+                    color: currentNoti.isRead
+                        ? const Color(0xFF1E1E24)
+                        : const Color(0xFF2B2B36),
+                  ),
+                ),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(14.r),
+                    onTap: () => _handleNotificationTap(currentNoti),
+                    child: Padding(
+                      padding: EdgeInsets.all(14.w),
+                      child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  currentNoti.title,
-                                  style: GoogleFonts.inter(
-                                    fontSize: 14.5.sp,
-                                    fontWeight: currentNoti.isRead
-                                        ? FontWeight.w500
-                                        : FontWeight.w600,
-                                    color: currentNoti.isRead
-                                        ? const Color(0xFFE2E8F0)
-                                        : Colors.white,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
+                          // Leading Icon Container
+                          Container(
+                            width: 40.w,
+                            height: 40.w,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF1F1F26),
+                              borderRadius: BorderRadius.circular(10.r),
+                              border: Border.all(
+                                color: const Color(0xFF2B2B38),
                               ),
-                              if (!currentNoti.isRead) ...[
-                                SizedBox(width: 8.w),
-                                Container(
-                                  width: 7.w,
-                                  height: 7.w,
-                                  decoration: const BoxDecoration(
-                                    color: AppColors.primaryColor,
-                                    shape: BoxShape.circle,
+                            ),
+                            padding: EdgeInsets.all(10.w),
+                            child: SvgPicture.asset(
+                              currentNoti.icon,
+                              colorFilter: ColorFilter.mode(
+                                currentNoti.isRead
+                                    ? const Color(0xFF94A3B8)
+                                    : Colors.white,
+                                BlendMode.srcIn,
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: 12.w),
+
+                          // Content
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        currentNoti.title,
+                                        style: GoogleFonts.inter(
+                                          fontSize: 14.5.sp,
+                                          fontWeight: currentNoti.isRead
+                                              ? FontWeight.w500
+                                              : FontWeight.w600,
+                                          color: currentNoti.isRead
+                                              ? const Color(0xFFE2E8F0)
+                                              : Colors.white,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                    if (!currentNoti.isRead) ...[
+                                      SizedBox(width: 8.w),
+                                      Container(
+                                        width: 7.w,
+                                        height: 7.w,
+                                        decoration: const BoxDecoration(
+                                          color: AppColors.primaryColor,
+                                          shape: BoxShape.circle,
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                                if (currentNoti.subtitle.isNotEmpty) ...[
+                                  SizedBox(height: 4.h),
+                                  Text(
+                                    currentNoti.subtitle,
+                                    style: GoogleFonts.inter(
+                                      fontSize: 12.5.sp,
+                                      fontWeight: FontWeight.w400,
+                                      color: currentNoti.isRead
+                                          ? const Color(0xFF64748B)
+                                          : const Color(0xFF94A3B8),
+                                      height: 1.35,
+                                    ),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
+                                ],
+                                SizedBox(height: 8.h),
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.access_time_rounded,
+                                      size: 12.sp,
+                                      color: const Color(0xFF64748B),
+                                    ),
+                                    SizedBox(width: 4.w),
+                                    Text(
+                                      currentNoti.timeAgo,
+                                      style: GoogleFonts.inter(
+                                        fontSize: 11.sp,
+                                        color: const Color(0xFF64748B),
+                                        fontWeight: FontWeight.w400,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ],
-                            ],
-                          ),
-                          if (currentNoti.subtitle.isNotEmpty) ...[
-                            SizedBox(height: 4.h),
-                            Text(
-                              currentNoti.subtitle,
-                              style: GoogleFonts.inter(
-                                fontSize: 12.5.sp,
-                                fontWeight: FontWeight.w400,
-                                color: currentNoti.isRead
-                                    ? const Color(0xFF64748B)
-                                    : const Color(0xFF94A3B8),
-                                height: 1.35,
-                              ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
                             ),
-                          ],
-                          SizedBox(height: 8.h),
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.access_time_rounded,
-                                size: 12.sp,
-                                color: const Color(0xFF64748B),
-                              ),
-                              SizedBox(width: 4.w),
-                              Text(
-                                currentNoti.timeAgo,
-                                style: GoogleFonts.inter(
-                                  fontSize: 11.sp,
-                                  color: const Color(0xFF64748B),
-                                  fontWeight: FontWeight.w400,
-                                ),
-                              ),
-                            ],
                           ),
                         ],
                       ),
                     ),
-                  ],
+                  ),
                 ),
               ),
-            ),
-          ),
-        ),
       );
     });
   }
 
   void _handleNotificationTap(NotificationItem currentNoti) {
+    if (currentNoti.isBroadcast) return;
     if (!currentNoti.isRead) {
       controller.markAsRead(currentNoti.id);
     }

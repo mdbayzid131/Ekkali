@@ -1,4 +1,5 @@
 import 'account_status_sync.dart';
+import 'package:moeb_26/data/models/notification_payload.dart';
 import 'dart:convert';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -117,7 +118,11 @@ class FirebaseNotificationService {
     RemoteMessage? initialMessage = await _messaging.getInitialMessage();
     if (initialMessage != null) {
       debugPrint('🚀 App opened from notification: ${initialMessage.data}');
-      pendingInitialMessage = initialMessage;
+      // Broadcasts use the normal startup route instead of a deep link.
+      pendingInitialMessage =
+          NotificationPayload.isBroadcast(initialMessage.data)
+          ? null
+          : initialMessage;
     }
   }
 
@@ -324,6 +329,8 @@ class FirebaseNotificationService {
     String? subtitle,
     Map<String, dynamic>? data,
   }) {
+    // Return before dismissing overlays, resolving IDs, or routing by keywords.
+    if (NotificationPayload.isBroadcast(data, type: type)) return;
     Map<String, dynamic>? nestedData;
     if (data != null && data.containsKey('data')) {
       if (data['data'] is Map<String, dynamic>) {

@@ -1,4 +1,5 @@
 import 'package:moeb_26/config/constants/icon_paths.dart';
+import 'notification_payload.dart';
 
 class NotificationItem {
   final String id;
@@ -11,6 +12,8 @@ class NotificationItem {
   final String? jobId;
   final String? chatId;
   final Map<String, dynamic>? data;
+  final bool isBroadcast;
+  final String? imageUrl;
 
   NotificationItem({
     required this.id,
@@ -23,6 +26,8 @@ class NotificationItem {
     this.jobId,
     this.chatId,
     this.data,
+    this.isBroadcast = false,
+    this.imageUrl,
   });
 
   NotificationItem copyWith({
@@ -36,6 +41,8 @@ class NotificationItem {
     String? jobId,
     String? chatId,
     Map<String, dynamic>? data,
+    bool? isBroadcast,
+    String? imageUrl,
   }) {
     return NotificationItem(
       id: id ?? this.id,
@@ -48,11 +55,14 @@ class NotificationItem {
       jobId: jobId ?? this.jobId,
       chatId: chatId ?? this.chatId,
       data: data ?? this.data,
+      isBroadcast: isBroadcast ?? this.isBroadcast,
+      imageUrl: imageUrl ?? this.imageUrl,
     );
   }
 
   factory NotificationItem.fromJson(Map<String, dynamic> json) {
-    String type = json['type']?.toString() ??
+    String type =
+        json['type']?.toString() ??
         json['notificationType']?.toString() ??
         'GENERAL';
     String iconPath = AppIcons.job_icon;
@@ -64,15 +74,24 @@ class NotificationItem {
       rawData = json['payload'] as Map<String, dynamic>;
     }
 
-    final String? resourceType = json['resourceType']?.toString() ??
+    final String? resourceType =
+        json['resourceType']?.toString() ??
         rawData?['resourceType']?.toString();
-    final String? resourceId = json['resourceId']?.toString() ??
+    final String? resourceId =
+        json['resourceId']?.toString() ??
         rawData?['resourceId']?.toString() ??
         json['referenceId']?.toString() ??
         rawData?['referenceId']?.toString();
 
-    final String titleUpper = (json['title']?.toString() ?? json['heading']?.toString() ?? '').toUpperCase();
-    final String textUpper = (json['text']?.toString() ?? json['message']?.toString() ?? json['body']?.toString() ?? '').toUpperCase();
+    final String titleUpper =
+        (json['title']?.toString() ?? json['heading']?.toString() ?? '')
+            .toUpperCase();
+    final String textUpper =
+        (json['text']?.toString() ??
+                json['message']?.toString() ??
+                json['body']?.toString() ??
+                '')
+            .toUpperCase();
     final String resUpper = (resourceType ?? '').toUpperCase();
     final String typeUpper = type.toUpperCase();
 
@@ -96,14 +115,11 @@ class NotificationItem {
         typeUpper.contains('CHAUFFEUR') ||
         resUpper == 'JOB') {
       iconPath = AppIcons.job_icon;
-    } else if (resUpper == 'SUPPORT_TICKET' ||
-        typeUpper.contains('SUPPORT')) {
+    } else if (resUpper == 'SUPPORT_TICKET' || typeUpper.contains('SUPPORT')) {
       iconPath = AppIcons.message_icon;
-    } else if (typeUpper.contains('MESSAGE') ||
-        typeUpper.contains('CHAT')) {
+    } else if (typeUpper.contains('MESSAGE') || typeUpper.contains('CHAT')) {
       iconPath = AppIcons.message_icon;
-    } else if (typeUpper.contains('PAYMENT') ||
-        typeUpper.contains('INVOICE')) {
+    } else if (typeUpper.contains('PAYMENT') || typeUpper.contains('INVOICE')) {
       iconPath = AppIcons.deals_icon;
     } else if (typeUpper.contains('REMINDER') ||
         typeUpper.contains('OFFER') ||
@@ -127,7 +143,8 @@ class NotificationItem {
         ? json['chat']
         : (rawData != null && rawData['chat'] is Map ? rawData['chat'] : null);
 
-    String? parsedJobId = json['jobId']?.toString() ??
+    String? parsedJobId =
+        json['jobId']?.toString() ??
         rawData?['jobId']?.toString() ??
         json['rideId']?.toString() ??
         rawData?['rideId']?.toString() ??
@@ -137,31 +154,44 @@ class NotificationItem {
       parsedJobId = jobObj['_id']?.toString() ?? jobObj['id']?.toString();
     }
 
-    String? parsedChatId = json['chatId']?.toString() ??
-        rawData?['chatId']?.toString();
+    String? parsedChatId =
+        json['chatId']?.toString() ?? rawData?['chatId']?.toString();
 
     if (parsedChatId == null && chatObj is Map) {
       parsedChatId = chatObj['_id']?.toString() ?? chatObj['id']?.toString();
     }
 
     // Preserve full payload so navigation routes never miss resourceType or referenceId
-    final Map<String, dynamic> combinedData = {
-      ...json,
-      ...?rawData,
-    };
+    final Map<String, dynamic> combinedData = {...json, ...?rawData};
+    final broadcast = NotificationPayload.isBroadcast(combinedData, type: type);
 
     return NotificationItem(
       id: json['_id']?.toString() ?? json['id']?.toString() ?? '',
-      title: json['title']?.toString() ??
+      title:
+          (broadcast
+              ? NotificationPayload.text(combinedData, ['title', 'heading'])
+              : null) ??
+          json['title']?.toString() ??
           json['heading']?.toString() ??
           'Notification',
-      subtitle: json['message']?.toString() ??
+      subtitle:
+          (broadcast
+              ? NotificationPayload.text(combinedData, [
+                  'description',
+                  'text',
+                  'body',
+                  'message',
+                  'subtitle',
+                ])
+              : null) ??
+          json['message']?.toString() ??
           json['text']?.toString() ??
           json['body']?.toString() ??
           json['subtitle']?.toString() ??
           '',
       type: type,
-      isRead: json['isRead'] == true ||
+      isRead:
+          json['isRead'] == true ||
           json['read'] == true ||
           json['status']?.toString().toUpperCase() == 'READ',
       createdAt: parsedDate,
@@ -169,6 +199,8 @@ class NotificationItem {
       jobId: parsedJobId,
       chatId: parsedChatId,
       data: combinedData,
+      isBroadcast: broadcast,
+      imageUrl: broadcast ? NotificationPayload.imageUrl(combinedData) : null,
     );
   }
 
