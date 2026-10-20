@@ -155,11 +155,11 @@ class ChatView extends StatelessWidget {
     final isUnread = !room.isRead || room.unreadCount > 0;
 
     return InkWell(
-      onTap: () {
+      onTap: () async {
         controller.markCommunityAsRead();
-        Get.toNamed(Routes.chatCommunityDetailView, arguments: room)?.then((_) {
-          controller.markCommunityAsRead();
-        });
+        await Get.toNamed(Routes.chatCommunityDetailView, arguments: room);
+        await controller.syncSelectedGroupFromStorage();
+        controller.markCommunityAsRead();
       },
       borderRadius: BorderRadius.circular(12.r),
       child: Padding(

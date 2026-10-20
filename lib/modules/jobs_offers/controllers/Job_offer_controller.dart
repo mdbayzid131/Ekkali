@@ -1,3 +1,4 @@
+import 'package:moeb_26/data/models/account_status.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -20,6 +21,7 @@ class JobOfferController extends GetxController {
   final RxBool isLoading = false.obs;
   final RxBool isApplying = false.obs;
   final RxString errorMessage = ''.obs;
+  int _feedRequestVersion = 0;
 
   final List<Worker> _socketWorkers = [];
 
@@ -134,6 +136,16 @@ class JobOfferController extends GetxController {
   }
 
   Future<void> fetchJobOffers({bool isRefresh = false}) async {
+    final requestVersion = ++_feedRequestVersion;
+    final user = Get.isRegistered<UserService>()
+        ? Get.find<UserService>()
+        : null;
+    final restrictionRevision = user?.restrictionRevision;
+    bool isCurrent() =>
+        !isClosed &&
+        requestVersion == _feedRequestVersion &&
+        restrictionRevision == user?.restrictionRevision;
+
     if (!isRefresh) {
       isLoading.value = true;
     }
@@ -141,6 +153,7 @@ class JobOfferController extends GetxController {
 
     try {
       final response = await _jobService.getAllJobOffers();
+      if (!isCurrent()) return;
       if (response.statusCode == 200 || response.statusCode == 201) {
         final dynamic rawData = response.data?['data'];
         final List<dynamic> list = (rawData is List) ? rawData : [];
@@ -172,8 +185,7 @@ class JobOfferController extends GetxController {
         final serverMsg =
             response.data?['message']?.toString() ?? 'Failed to load offers.';
         if (response.statusCode == 403 &&
-            (serverMsg.toLowerCase().contains('restrict') ||
-                serverMsg.toLowerCase().contains('suspend'))) {
+            AccountStatus.isSuspensionError({'message': serverMsg})) {
           if (Get.isRegistered<UserService>()) {
             Get.find<UserService>().isRestricted = true;
           }
@@ -181,23 +193,26 @@ class JobOfferController extends GetxController {
         errorMessage.value = serverMsg;
       }
     } on DioException catch (e) {
+      if (!isCurrent()) return;
       final statusCode = e.response?.statusCode;
       final serverMsg = e.response?.data?['message']?.toString() ?? '';
       if (statusCode == 403 &&
-          (serverMsg.toLowerCase().contains('restrict') ||
-              serverMsg.toLowerCase().contains('suspend'))) {
+          AccountStatus.isSuspensionError({'message': serverMsg})) {
         if (Get.isRegistered<UserService>()) {
           Get.find<UserService>().isRestricted = true;
         }
       }
-      errorMessage.value =
-          serverMsg.isNotEmpty ? serverMsg : 'Failed to load offers.';
+      errorMessage.value = serverMsg.isNotEmpty
+          ? serverMsg
+          : 'Failed to load offers.';
       debugPrint("Dio error fetching job offers: $e");
     } catch (e) {
       errorMessage.value = 'Something went wrong while loading offers.';
       debugPrint("Error fetching job offers: $e");
     } finally {
-      isLoading.value = false;
+      if (!isClosed && requestVersion == _feedRequestVersion) {
+        isLoading.value = false;
+      }
     }
   }
 
@@ -251,8 +266,9 @@ class JobOfferController extends GetxController {
   }
 
   Future<void> applyToJob(JobOfferModel job) async {
-    final userService =
-        Get.isRegistered<UserService>() ? Get.find<UserService>() : null;
+    final userService = Get.isRegistered<UserService>()
+        ? Get.find<UserService>()
+        : null;
     if (userService != null && userService.isRestricted) {
       Get.back();
       Helpers.showCustomSnackBar(

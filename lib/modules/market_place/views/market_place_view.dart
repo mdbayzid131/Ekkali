@@ -148,6 +148,17 @@ class MarketPlaceView extends StatelessWidget {
 
               Expanded(
                 child: Obx(() {
+                  final bool isRestrictedUser = (Get.isRegistered<UserService>() &&
+                          Get.find<UserService>().rxIsRestricted.value);
+
+                  if (isRestrictedUser) {
+                    return const AccountSuspendedWidget(
+                      title: "Account Suspended",
+                      message:
+                          "Marketplace access is restricted while your account is suspended. You still have full access to your schedule, invoices, and expenses.",
+                    );
+                  }
+
                   if (controller.isLoading.value &&
                       controller.filteredItems.isEmpty) {
                     return const Center(
@@ -156,23 +167,6 @@ class MarketPlaceView extends StatelessWidget {
                       ),
                     );
                   }
-                  final bool isRestrictedUser = (Get.isRegistered<UserService>() &&
-                          Get.find<UserService>().rxIsRestricted.value) ||
-                      controller.errorMessage.value
-                          .toLowerCase()
-                          .contains('restrict') ||
-                      controller.errorMessage.value
-                          .toLowerCase()
-                          .contains('suspend');
-
-                  if (isRestrictedUser && controller.filteredItems.isEmpty) {
-                    return const AccountSuspendedWidget(
-                      title: "Account Suspended",
-                      message:
-                          "Marketplace access is restricted while your account is suspended. You still have full access to your schedule, invoices, and expenses.",
-                    );
-                  }
-
                   if (controller.filteredItems.isEmpty) {
                     return ListView(
                       physics: const AlwaysScrollableScrollPhysics(),

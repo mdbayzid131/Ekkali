@@ -1,3 +1,4 @@
+import 'package:moeb_26/data/models/account_status.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'package:dio/dio.dart';
@@ -15,6 +16,18 @@ class UserService extends GetxService {
   final RxString _userName = "".obs;
   final RxString _userNickName = "".obs;
   final RxBool _isRestricted = false.obs;
+  int _restrictionRevision = 0;
+  bool _hasRealtimeRestriction = false;
+
+  int get restrictionRevision => _restrictionRevision;
+
+  bool applyRealtimeRestriction(bool value) {
+    final changed = !_hasRealtimeRestriction || isRestricted != value;
+    _hasRealtimeRestriction = true;
+    if (changed) _restrictionRevision++;
+    _isRestricted.value = value;
+    return changed;
+  }
 
   String get userId => _userId.value;
   set userId(String value) => _userId.value = value;
@@ -29,7 +42,11 @@ class UserService extends GetxService {
   set userNickName(String value) => _userNickName.value = value;
 
   bool get isRestricted => _isRestricted.value;
-  set isRestricted(bool value) => _isRestricted.value = value;
+  set isRestricted(bool value) {
+    if (_isRestricted.value != value) _restrictionRevision++;
+    _isRestricted.value = value;
+  }
+
   RxBool get rxIsRestricted => _isRestricted;
 
   @override
@@ -58,20 +75,24 @@ class UserService extends GetxService {
         final nickname =
             user['nickName']?.toString() ?? user['nickname']?.toString();
         if (nickname != null) _userNickName.value = nickname;
-        final bool isRestrictedVal =
-            user['isRestricted'] == true || user['isSuspended'] == true;
-        _isRestricted.value = isRestrictedVal;
+        final cachedRestriction = AccountStatus.restrictionFrom(user);
+        if (!_hasRealtimeRestriction && cachedRestriction != null) {
+          _isRestricted.value = cachedRestriction;
+        }
       } catch (_) {}
     }
 
-    final bool? savedRestricted =
-        await StorageService.getBool(StorageConstants.isRestricted);
-    if (savedRestricted != null) {
+    final bool? savedRestricted = await StorageService.getBool(
+      StorageConstants.isRestricted,
+    );
+    if (!_hasRealtimeRestriction && savedRestricted != null) {
       _isRestricted.value = savedRestricted;
     }
 
     final token = await StorageService.getString(StorageConstants.bearerToken);
-    final isApproved = await StorageService.getBool(StorageConstants.isApproved);
+    final isApproved = await StorageService.getBool(
+      StorageConstants.isApproved,
+    );
 
     // Fetch latest profile from API if authenticated
     if (token.isNotEmpty && isApproved == true) {
@@ -81,11 +102,14 @@ class UserService extends GetxService {
 
   /// Fetch user profile and store the ID and user details
   Future<void> fetchUserId() async {
+    final restrictionRevision = _restrictionRevision;
     try {
       final token = await StorageService.getString(
         StorageConstants.bearerToken,
       );
-      final isApproved = await StorageService.getBool(StorageConstants.isApproved);
+      final isApproved = await StorageService.getBool(
+        StorageConstants.isApproved,
+      );
       if (token.isEmpty || isApproved != true) return;
 
       final profileService = Get.find<UserProfileService>();
@@ -98,8 +122,7 @@ class UserService extends GetxService {
             json.encode(rawData),
           );
 
-          final id =
-              rawData['_id']?.toString() ?? rawData['id']?.toString();
+          final id = rawData['_id']?.toString() ?? rawData['id']?.toString();
           if (id != null) {
             _userId.value = id;
             debugPrint("✅ UserService: Set userId from profile API: $id");
@@ -110,16 +133,19 @@ class UserService extends GetxService {
               rawData['name']?.toString() ?? rawData['fullName']?.toString();
           if (name != null) _userName.value = name;
           final nickname =
-              rawData['nickName']?.toString() ?? rawData['nickname']?.toString();
+              rawData['nickName']?.toString() ??
+              rawData['nickname']?.toString();
           if (nickname != null) _userNickName.value = nickname;
 
-          final bool isRestrictedVal =
-              rawData['isRestricted'] == true || rawData['isSuspended'] == true;
-          _isRestricted.value = isRestrictedVal;
-          await StorageService.setBool(
-            StorageConstants.isRestricted,
-            isRestrictedVal,
-          );
+          final profileRestriction = AccountStatus.restrictionFrom(rawData);
+          if (_restrictionRevision == restrictionRevision &&
+              profileRestriction != null) {
+            isRestricted = profileRestriction;
+            await StorageService.setBool(
+              StorageConstants.isRestricted,
+              profileRestriction,
+            );
+          }
         }
       }
     } catch (e) {

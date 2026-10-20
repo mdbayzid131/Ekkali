@@ -35,20 +35,48 @@ class CommunityRoom {
         ? json['isRead'] as bool
         : (unread == 0);
 
+    String? lastMsg;
+    String? lastMsgAt;
+    if (json['lastMessage'] != null) {
+      if (json['lastMessage'] is Map) {
+        lastMsg =
+            json['lastMessage']['text']?.toString() ??
+            json['lastMessage']['message']?.toString() ??
+            json['lastMessage']['content']?.toString();
+        if ((lastMsg == null || lastMsg.trim().isEmpty) &&
+            json['lastMessage']['attachments'] is List &&
+            (json['lastMessage']['attachments'] as List).isNotEmpty) {
+          lastMsg = 'Attachment';
+        }
+        lastMsgAt = json['lastMessage']['createdAt']?.toString();
+      } else {
+        lastMsg = json['lastMessage']?.toString();
+      }
+    }
+
+    if (lastMsg == null || lastMsg.trim().isEmpty) {
+      if (json['attachments'] is List &&
+          (json['attachments'] as List).isNotEmpty) {
+        lastMsg = 'Attachment';
+      }
+    }
+
+    lastMsgAt ??= json['lastMessageAt']?.toString();
+
     return CommunityRoom(
       id: json['_id']?.toString() ?? json['id']?.toString(),
       name: json['name']?.toString() ?? '',
       serviceArea: json['serviceArea'] is Map
           ? (json['serviceArea']['areaName']?.toString() ??
-              json['serviceArea']['name']?.toString() ??
-              '')
+                json['serviceArea']['name']?.toString() ??
+                '')
           : (json['serviceArea']?.toString() ?? ''),
       status: json['status']?.toString() ?? 'ACTIVE',
       totalMembers: json['totalMembers'] is int
           ? json['totalMembers'] as int
           : int.tryParse(json['totalMembers']?.toString() ?? '0') ?? 0,
-      lastMessage: json['lastMessage']?.toString(),
-      lastMessageAt: json['lastMessageAt']?.toString(),
+      lastMessage: lastMsg,
+      lastMessageAt: lastMsgAt,
       unreadCount: unread,
       isRead: isReadVal,
     );
@@ -59,13 +87,58 @@ class CommunityRoom {
       identical(this, other) ||
       other is CommunityRoom &&
           runtimeType == other.runtimeType &&
-          id == other.id;
+          id == other.id &&
+          name == other.name &&
+          serviceArea == other.serviceArea &&
+          status == other.status &&
+          totalMembers == other.totalMembers &&
+          lastMessage == other.lastMessage &&
+          lastMessageAt == other.lastMessageAt &&
+          unreadCount == other.unreadCount &&
+          isRead == other.isRead;
 
   @override
   int get hashCode => id.hashCode;
+
+  CommunityRoom copyWith({
+    String? lastMessage,
+    String? lastMessageAt,
+    int? unreadCount,
+    bool? isRead,
+  }) => CommunityRoom(
+    id: id,
+    name: name,
+    serviceArea: serviceArea,
+    status: status,
+    totalMembers: totalMembers,
+    lastMessage: lastMessage ?? this.lastMessage,
+    lastMessageAt: lastMessageAt ?? this.lastMessageAt,
+    unreadCount: unreadCount ?? this.unreadCount,
+    isRead: isRead ?? this.isRead,
+  );
 }
 
 class CommunityMessage {
+  /// Both socket streams use this normalizer. Preserve the room on envelopes.
+  static Map<String, dynamic>? eventPayload(dynamic event) {
+    if (event is! Map) return null;
+    var payload = Map<String, dynamic>.from(event);
+    for (var depth = 0; depth < 4; depth++) {
+      final nested = payload['data'] is Map
+          ? payload['data']
+          : (payload['message'] is Map ? payload['message'] : null);
+      if (nested is! Map) break;
+      payload.remove('data');
+      if (payload['message'] is Map) payload.remove('message');
+      payload = {...payload, ...Map<String, dynamic>.from(nested)};
+    }
+    final chat = payload['chatId'] ?? payload['chat'] ?? payload['groupId'];
+    payload['chatId'] = chat is Map
+        ? (chat['_id'] ?? chat['id'])?.toString() ?? ''
+        : chat?.toString() ?? '';
+    return payload;
+  }
+
   final String id;
   final String? chatId;
   final String serviceArea;
@@ -111,12 +184,15 @@ class CommunityMessage {
       replyToId = replyToData;
     }
 
-    final String parsedChatId = json['chatId']?.toString() ??
-        (json['chat'] is Map ? json['chat']['_id']?.toString() ?? '' : json['chat']?.toString() ?? '');
+    final String parsedChatId =
+        json['chatId']?.toString() ??
+        (json['chat'] is Map
+            ? json['chat']['_id']?.toString() ?? ''
+            : json['chat']?.toString() ?? '');
     final String parsedServiceArea = json['serviceArea'] is Map
         ? (json['serviceArea']['areaName']?.toString() ??
-            json['serviceArea']['name']?.toString() ??
-            '')
+              json['serviceArea']['name']?.toString() ??
+              '')
         : (json['serviceArea']?.toString() ?? '');
 
     return CommunityMessage(
@@ -124,7 +200,8 @@ class CommunityMessage {
       chatId: parsedChatId.isNotEmpty ? parsedChatId : null,
       serviceArea: parsedServiceArea,
       sender: senderObj,
-      text: json['text']?.toString() ??
+      text:
+          json['text']?.toString() ??
           json['message']?.toString() ??
           json['content']?.toString() ??
           '',

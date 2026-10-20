@@ -117,6 +117,16 @@ class JobOfferView extends StatelessWidget {
                         "Join Ekkali Premium to discover job opportunities posted by fellow chauffeurs, review trip details, and connect directly with trusted members of the network.",
                   );
                 }
+                final bool isRestrictedUser = (Get.isRegistered<UserService>() &&
+                        Get.find<UserService>().rxIsRestricted.value);
+
+                if (isRestrictedUser) {
+                  return const AccountSuspendedWidget(
+                    title: "Account Suspended",
+                    message:
+                        "You cannot request or post jobs. You still have full access to your schedule, invoices, and expenses.",
+                  );
+                }
 
                 if (controller.isLoading.value &&
                     controller.jobOffers.isEmpty) {
@@ -124,23 +134,6 @@ class JobOfferView extends StatelessWidget {
                     child: CircularProgressIndicator(
                       color: AppColors.primaryColor,
                     ),
-                  );
-                }
-
-                final bool isRestrictedUser = (Get.isRegistered<UserService>() &&
-                        Get.find<UserService>().rxIsRestricted.value) ||
-                    controller.errorMessage.value
-                        .toLowerCase()
-                        .contains('restrict') ||
-                    controller.errorMessage.value
-                        .toLowerCase()
-                        .contains('suspend');
-
-                if (isRestrictedUser && controller.jobOffers.isEmpty) {
-                  return const AccountSuspendedWidget(
-                    title: "Account Suspended",
-                    message:
-                        "You cannot request or post jobs. You still have full access to your schedule, invoices, and expenses.",
                   );
                 }
 

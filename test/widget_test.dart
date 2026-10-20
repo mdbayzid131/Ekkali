@@ -1,30 +1,55 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:moeb_26/app.dart';
-
+import 'package:moeb_26/data/models/chat_community_model.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
-
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
-
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
-
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+  test('group summaries accept string and populated lastMessage values', () {
+    final string = CommunityRoom.fromJson({
+      '_id': 'a',
+      'name': 'A',
+      'lastMessage': 'Ok',
+    });
+    final populated = CommunityRoom.fromJson({
+      '_id': 'b',
+      'name': 'B',
+      'lastMessage': {'text': 'Hi', 'createdAt': '2026-10-20T09:00:00Z'},
+    });
+    expect(string.lastMessage, 'Ok');
+    expect(populated.lastMessage, 'Hi');
+    expect(populated.lastMessageAt, '2026-10-20T09:00:00Z');
   });
+
+  test('group metadata update time is not treated as last message time', () {
+    final room = CommunityRoom.fromJson({
+      '_id': 'a',
+      'name': 'A',
+      'updatedAt': '2026-10-20T09:00:00Z',
+    });
+    expect(room.lastMessageAt, isNull);
+  });
+
+  test(
+    'nested socket envelopes preserve group identity and attachment preview',
+    () {
+      final payload = CommunityMessage.eventPayload({
+        'chatId': 'a',
+        'data': {
+          'message': {
+            '_id': 'm',
+            'attachments': ['image.jpg'],
+            'sender': 'other',
+          },
+        },
+      });
+      expect(payload?['chatId'], 'a');
+      expect(CommunityMessage.fromJson(payload!).attachments, ['image.jpg']);
+      final group = CommunityRoom.fromJson({
+        '_id': 'a',
+        'name': 'A',
+        'lastMessage': {
+          'attachments': ['image.jpg'],
+        },
+      });
+      expect(group.lastMessage, 'Attachment');
+    },
+  );
 }

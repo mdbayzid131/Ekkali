@@ -1,3 +1,4 @@
+import 'package:moeb_26/data/models/account_status.dart';
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -15,13 +16,17 @@ import 'package:moeb_26/modules/my_items/controllers/my_items_controller.dart'
     as my_items;
 
 class MarketplaceController extends GetxController {
-  final MarketplaceService _marketplaceService = Get.put(MarketplaceService());
+  final MarketplaceService _marketplaceService =
+      Get.isRegistered<MarketplaceService>()
+      ? Get.find<MarketplaceService>()
+      : Get.put(MarketplaceService());
 
   var allItems = <ItemData>[].obs;
   var filteredItems = <ItemData>[].obs;
   var isLoading = false.obs;
   var isLoadMore = false.obs;
   var errorMessage = ''.obs;
+  int _feedRequestVersion = 0;
 
   // Strict Cursor Pagination
   String? nextCursor;
@@ -33,11 +38,7 @@ class MarketplaceController extends GetxController {
 
   // Sell Item Form States
   final RxString selectedCondition = "".obs;
-  final List<String> conditions = [
-    "New",
-    "Used",
-    "Refurbished",
-  ];
+  final List<String> conditions = ["New", "Used", "Refurbished"];
 
   final TextEditingController titleController = TextEditingController();
   final TextEditingController priceController = TextEditingController();
@@ -78,13 +79,28 @@ class MarketplaceController extends GetxController {
   }
 
   Future<void> fetchItems({String? query, String? condition}) async {
+    final requestVersion = ++_feedRequestVersion;
+    final user = Get.isRegistered<UserService>()
+        ? Get.find<UserService>()
+        : null;
+    final restrictionRevision = user?.restrictionRevision;
+    bool isCurrent() =>
+        !isClosed &&
+        requestVersion == _feedRequestVersion &&
+        restrictionRevision == user?.restrictionRevision;
+
     try {
+      isLoadMore.value = false;
       isLoading.value = true;
       errorMessage.value = '';
       nextCursor = null;
       hasMore = true;
       currentQuery = query ?? currentQuery;
-      final cond = condition ?? (selectedFilterCondition.value.isNotEmpty ? selectedFilterCondition.value : null);
+      final cond =
+          condition ??
+          (selectedFilterCondition.value.isNotEmpty
+              ? selectedFilterCondition.value
+              : null);
 
       final response = await _marketplaceService.getAllItems(
         searchTerm: currentQuery.isNotEmpty ? currentQuery : null,
@@ -92,20 +108,24 @@ class MarketplaceController extends GetxController {
         limit: 10,
       );
 
+      if (!isCurrent()) return;
       if (response.statusCode == 200 || response.statusCode == 201) {
         final marketplaceModel = MarketplaceModel.fromJson(response.data);
         final items = marketplaceModel.data ?? [];
 
         nextCursor = marketplaceModel.cursor?.nextCursor;
-        hasMore = marketplaceModel.cursor?.hasMore ?? (nextCursor != null && nextCursor!.isNotEmpty);
+        hasMore =
+            marketplaceModel.cursor?.hasMore ??
+            (nextCursor != null && nextCursor!.isNotEmpty);
 
         allItems.assignAll(items);
         filteredItems.assignAll(items);
       } else {
-        final serverMsg = response.data?['message']?.toString() ?? "Failed to fetch marketplace items";
+        final serverMsg =
+            response.data?['message']?.toString() ??
+            "Failed to fetch marketplace items";
         if (response.statusCode == 403 &&
-            (serverMsg.toLowerCase().contains('restrict') ||
-                serverMsg.toLowerCase().contains('suspend'))) {
+            AccountStatus.isSuspensionError({'message': serverMsg})) {
           if (Get.isRegistered<UserService>()) {
             Get.find<UserService>().isRestricted = true;
           }
@@ -113,32 +133,48 @@ class MarketplaceController extends GetxController {
         errorMessage.value = serverMsg;
       }
     } on DioException catch (e) {
+      if (!isCurrent()) return;
       final statusCode = e.response?.statusCode;
       final serverMsg = e.response?.data?['message']?.toString() ?? '';
       if (statusCode == 403 &&
-          (serverMsg.toLowerCase().contains('restrict') ||
-              serverMsg.toLowerCase().contains('suspend'))) {
+          AccountStatus.isSuspensionError({'message': serverMsg})) {
         if (Get.isRegistered<UserService>()) {
           Get.find<UserService>().isRestricted = true;
         }
       }
-      errorMessage.value =
-          serverMsg.isNotEmpty ? serverMsg : "Failed to fetch marketplace items";
+      errorMessage.value = serverMsg.isNotEmpty
+          ? serverMsg
+          : "Failed to fetch marketplace items";
       debugPrint("Dio error fetching items: $e");
     } catch (e) {
+      if (!isCurrent()) return;
       debugPrint("Error fetching items: $e");
       errorMessage.value = "Failed to fetch marketplace items";
     } finally {
-      isLoading.value = false;
+      if (!isClosed && requestVersion == _feedRequestVersion) {
+        isLoading.value = false;
+      }
     }
   }
 
   Future<void> loadMoreItems() async {
-    if (!hasMore || isLoadMore.value || nextCursor == null || nextCursor!.isEmpty) return;
+    if (!hasMore ||
+        isLoadMore.value ||
+        nextCursor == null ||
+        nextCursor!.isEmpty) {
+      return;
+    }
 
+    final requestVersion = _feedRequestVersion;
+    final user = Get.isRegistered<UserService>()
+        ? Get.find<UserService>()
+        : null;
+    final restrictionRevision = user?.restrictionRevision;
     try {
       isLoadMore.value = true;
-      final cond = selectedFilterCondition.value.isNotEmpty ? selectedFilterCondition.value : null;
+      final cond = selectedFilterCondition.value.isNotEmpty
+          ? selectedFilterCondition.value
+          : null;
 
       final response = await _marketplaceService.getAllItems(
         searchTerm: currentQuery.isNotEmpty ? currentQuery : null,
@@ -147,12 +183,19 @@ class MarketplaceController extends GetxController {
         limit: 10,
       );
 
+      if (isClosed ||
+          requestVersion != _feedRequestVersion ||
+          restrictionRevision != user?.restrictionRevision) {
+        return;
+      }
       if (response.statusCode == 200 || response.statusCode == 201) {
         final marketplaceModel = MarketplaceModel.fromJson(response.data);
         final items = marketplaceModel.data ?? [];
 
         nextCursor = marketplaceModel.cursor?.nextCursor;
-        hasMore = marketplaceModel.cursor?.hasMore ?? (nextCursor != null && nextCursor!.isNotEmpty);
+        hasMore =
+            marketplaceModel.cursor?.hasMore ??
+            (nextCursor != null && nextCursor!.isNotEmpty);
 
         allItems.addAll(items);
         filteredItems.assignAll(allItems);
@@ -160,7 +203,9 @@ class MarketplaceController extends GetxController {
     } catch (e) {
       debugPrint("Error loading more items: $e");
     } finally {
-      isLoadMore.value = false;
+      if (!isClosed && requestVersion == _feedRequestVersion) {
+        isLoadMore.value = false;
+      }
     }
   }
 
@@ -175,7 +220,11 @@ class MarketplaceController extends GetxController {
     } else {
       selectedFilterCondition.value = condition;
     }
-    fetchItems(condition: selectedFilterCondition.value.isNotEmpty ? selectedFilterCondition.value : null);
+    fetchItems(
+      condition: selectedFilterCondition.value.isNotEmpty
+          ? selectedFilterCondition.value
+          : null,
+    );
   }
 
   Future<void> pickImages(BuildContext context) async {
@@ -338,7 +387,10 @@ class MarketplaceController extends GetxController {
     if (titleController.text.trim().isEmpty ||
         priceController.text.trim().isEmpty ||
         locationController.text.trim().isEmpty) {
-      Helpers.showCustomSnackBar("Please fill title, price, and location", isError: true);
+      Helpers.showCustomSnackBar(
+        "Please fill title, price, and location",
+        isError: true,
+      );
       return;
     }
 

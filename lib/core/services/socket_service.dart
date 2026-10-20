@@ -1,3 +1,5 @@
+import 'package:moeb_26/data/models/chat_community_model.dart';
+import 'account_status_sync.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:moeb_26/config/constants/api_constants.dart';
@@ -155,7 +157,9 @@ class SocketService extends GetxService with WidgetsBindingObserver {
     ];
     for (var event in commEvents) {
       socket.on(event, (data) {
-        debugPrint('📥 SocketService: Received community event [$event]: $data');
+        debugPrint(
+          '📥 SocketService: Received community event [$event]: $data',
+        );
         lastReceivedCommunityMessage.value = data;
       });
     }
@@ -266,6 +270,21 @@ class SocketService extends GetxService with WidgetsBindingObserver {
       });
     }
 
+    // 10. Real-time Account Suspension & Reactivation State Sync
+    final List<String> userStatusEvents = [
+      'USER_STATUS_UPDATED',
+      'user_status_updated',
+      'userStatusUpdated',
+    ];
+    for (var event in userStatusEvents) {
+      socket.on(event, (data) {
+        debugPrint(
+          '🛡️ SocketService: Received user status event [$event]: $data',
+        );
+        AccountStatusSync.apply(data);
+      });
+    }
+
     // Reconnection events for debugging
     socket.onReconnect((_) => debugPrint('🔄 SocketService: Reconnected'));
     socket.onReconnectAttempt(
@@ -280,7 +299,8 @@ class SocketService extends GetxService with WidgetsBindingObserver {
   bool _isDuplicateEvent(String eventName, dynamic data) {
     String? id;
     if (data is Map) {
-      id = data['jobId']?.toString() ??
+      id =
+          data['jobId']?.toString() ??
           data['id']?.toString() ??
           data['_id']?.toString() ??
           data['chatId']?.toString();
@@ -306,20 +326,8 @@ class SocketService extends GetxService with WidgetsBindingObserver {
 
     if (data != null) {
       try {
-        dynamic actualData = data;
-
-        if (data is Map) {
-          if (data.containsKey('data')) {
-            actualData = data['data'];
-          } else if (data.containsKey('message') && data['message'] is Map) {
-            actualData = Map<String, dynamic>.from(data['message']);
-            if ((actualData['chatId'] == null ||
-                    actualData['chatId'].toString().isEmpty) &&
-                data['chatId'] != null) {
-              actualData['chatId'] = data['chatId'];
-            }
-          }
-        }
+        final actualData = CommunityMessage.eventPayload(data);
+        if (actualData == null) return;
 
         // Broadcast to community/group stream as well
         lastReceivedCommunityMessage.value = actualData;
@@ -380,7 +388,9 @@ class SocketService extends GetxService with WidgetsBindingObserver {
       leaveRoom('community::$currentCommunityArea');
     }
     currentCommunityArea = serviceArea;
-    debugPrint('➡️ SocketService: Joining community room: community::$serviceArea');
+    debugPrint(
+      '➡️ SocketService: Joining community room: community::$serviceArea',
+    );
     emit('JOIN_COMMUNITY', {'serviceArea': serviceArea});
     joinRoom('community::$serviceArea');
   }
@@ -388,7 +398,9 @@ class SocketService extends GetxService with WidgetsBindingObserver {
   /// Leave a community room
   void leaveCommunity(String serviceArea) {
     if (serviceArea.isEmpty) return;
-    debugPrint('⬅️ SocketService: Leaving community room: community::$serviceArea');
+    debugPrint(
+      '⬅️ SocketService: Leaving community room: community::$serviceArea',
+    );
     emit('LEAVE_COMMUNITY', {'serviceArea': serviceArea});
     leaveRoom('community::$serviceArea');
     if (currentCommunityArea == serviceArea) {

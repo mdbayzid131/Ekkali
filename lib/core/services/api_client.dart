@@ -1,3 +1,4 @@
+import 'package:moeb_26/data/models/account_status.dart';
 import 'package:get/get.dart' hide Response, FormData, MultipartFile;
 import 'dart:io';
 import 'dart:async';
@@ -9,6 +10,7 @@ import 'package:moeb_26/core/services/storege_service.dart';
 import 'package:moeb_26/core/services/subscription_service.dart';
 import 'package:moeb_26/core/utils/helpers.dart';
 import 'package:moeb_26/core/utils/logger.dart';
+import 'package:moeb_26/core/services/user_service.dart';
 
 /// ===================== API CLIENT =====================
 /// Centralized HTTP client built on Dio with:
@@ -76,6 +78,10 @@ class ApiClient extends GetxService {
       options.headers['Authorization'] = 'Bearer $tokenToUse';
     }
 
+    if (Get.isRegistered<UserService>()) {
+      options.extra['restrictionRevision'] =
+          Get.find<UserService>().restrictionRevision;
+    }
     AppLogger.request(options);
     return handler.next(options);
   }
@@ -129,6 +135,19 @@ class ApiClient extends GetxService {
       } else {
         _forceLogout();
         return handler.next(e);
+      }
+    }
+
+    // A response started before a realtime status change cannot override it.
+    if (e.response?.statusCode == 403 &&
+        AccountStatus.isSuspensionError(e.response?.data)) {
+      if (Get.isRegistered<UserService>()) {
+        final user = Get.find<UserService>();
+        if (e.requestOptions.extra['restrictionRevision'] ==
+            user.restrictionRevision) {
+          user.isRestricted = true;
+          await StorageService.setBool(StorageConstants.isRestricted, true);
+        }
       }
     }
 

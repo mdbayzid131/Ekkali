@@ -1,3 +1,4 @@
+import 'account_status_sync.dart';
 import 'dart:convert';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -97,8 +98,10 @@ class FirebaseNotificationService {
     // Listen to foreground messages
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       debugPrint('📨 Foreground Message: ${message.notification?.title}');
+      _checkUserStatusNotification(message.data);
       _showLocalNotification(message);
-      if (Get.isRegistered<NotificationController>()) {
+      if (!_isUserStatusNotification(message.data) &&
+          Get.isRegistered<NotificationController>()) {
         Get.find<NotificationController>().fetchNotifications();
       }
     });
@@ -106,6 +109,7 @@ class FirebaseNotificationService {
     // Listen to notification taps when app is in background
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
       debugPrint('🔔 Notification Tapped: ${message.data}');
+      // A tapped notification can be historical; only live events set status.
       _handleNotificationTap(message);
     });
 
@@ -114,6 +118,20 @@ class FirebaseNotificationService {
     if (initialMessage != null) {
       debugPrint('🚀 App opened from notification: ${initialMessage.data}');
       pendingInitialMessage = initialMessage;
+    }
+  }
+
+  static bool _isUserStatusNotification(Map<String, dynamic> data) =>
+      (data['eventType'] ?? data['type'])?.toString().toUpperCase() ==
+      'USER_STATUS_UPDATED';
+
+  static void _checkUserStatusNotification(Map<String, dynamic> data) {
+    try {
+      if (_isUserStatusNotification(data)) {
+        AccountStatusSync.apply(data);
+      }
+    } catch (e) {
+      debugPrint('❌ Error parsing USER_STATUS_UPDATED from push: $e');
     }
   }
 
@@ -248,11 +266,7 @@ class FirebaseNotificationService {
           presentList: true,
         ),
       ),
-      payload: jsonEncode({
-        ...message.data,
-        'title': title,
-        'body': body,
-      }),
+      payload: jsonEncode({...message.data, 'title': title, 'body': body}),
     );
   }
 
@@ -273,10 +287,10 @@ class FirebaseNotificationService {
         nav.navigateToRidesTab(targetJobId: jobId);
       }
     } else {
-      Get.offAllNamed(Routes.bottomNabbarView, arguments: {
-        'bottomIndex': 1,
-        'targetJobId': jobId,
-      });
+      Get.offAllNamed(
+        Routes.bottomNabbarView,
+        arguments: {'bottomIndex': 1, 'targetJobId': jobId},
+      );
     }
   }
 
@@ -324,55 +338,56 @@ class FirebaseNotificationService {
       }
     }
 
-    final String resourceType = (data?['resourceType']?.toString() ??
-            nestedData?['resourceType']?.toString() ??
-            '')
-        .trim()
-        .toUpperCase();
+    final String resourceType =
+        (data?['resourceType']?.toString() ??
+                nestedData?['resourceType']?.toString() ??
+                '')
+            .trim()
+            .toUpperCase();
 
-    final String resourceId = (data?['resourceId']?.toString() ??
-            nestedData?['resourceId']?.toString() ??
-            data?['referenceId']?.toString() ??
-            nestedData?['referenceId']?.toString() ??
-            '')
-        .trim();
+    final String resourceId =
+        (data?['resourceId']?.toString() ??
+                nestedData?['resourceId']?.toString() ??
+                data?['referenceId']?.toString() ??
+                nestedData?['referenceId']?.toString() ??
+                '')
+            .trim();
 
-    final String action = (data?['action']?.toString() ??
-            nestedData?['action']?.toString() ??
-            '')
-        .trim()
-        .toUpperCase();
+    final String action =
+        (data?['action']?.toString() ?? nestedData?['action']?.toString() ?? '')
+            .trim()
+            .toUpperCase();
 
     final String resolvedJobId = (jobId != null && jobId.isNotEmpty)
         ? jobId
         : (data?['jobId']?.toString() ??
-            nestedData?['jobId']?.toString() ??
-            data?['rideId']?.toString() ??
-            nestedData?['rideId']?.toString() ??
-            (resourceType == 'JOB' ? resourceId : null) ??
-            (data != null && data['job'] is Map
-                ? data['job']['_id']?.toString() ??
-                    data['job']['id']?.toString()
-                : null) ??
-            (nestedData != null && nestedData['job'] is Map
-                ? nestedData['job']['_id']?.toString() ??
-                    nestedData['job']['id']?.toString()
-                : null) ??
-            (data != null && data['ride'] is Map
-                ? data['ride']['_id']?.toString() ??
-                    data['ride']['id']?.toString()
-                : null) ??
-            (nestedData != null && nestedData['ride'] is Map
-                ? nestedData['ride']['_id']?.toString() ??
-                    nestedData['ride']['id']?.toString()
-                : null) ??
-            '');
+              nestedData?['jobId']?.toString() ??
+              data?['rideId']?.toString() ??
+              nestedData?['rideId']?.toString() ??
+              (resourceType == 'JOB' ? resourceId : null) ??
+              (data != null && data['job'] is Map
+                  ? data['job']['_id']?.toString() ??
+                        data['job']['id']?.toString()
+                  : null) ??
+              (nestedData != null && nestedData['job'] is Map
+                  ? nestedData['job']['_id']?.toString() ??
+                        nestedData['job']['id']?.toString()
+                  : null) ??
+              (data != null && data['ride'] is Map
+                  ? data['ride']['_id']?.toString() ??
+                        data['ride']['id']?.toString()
+                  : null) ??
+              (nestedData != null && nestedData['ride'] is Map
+                  ? nestedData['ride']['_id']?.toString() ??
+                        nestedData['ride']['id']?.toString()
+                  : null) ??
+              '');
 
     final String resolvedChatId = (chatId != null && chatId.isNotEmpty)
         ? chatId
         : (data?['chatId']?.toString() ??
-            nestedData?['chatId']?.toString() ??
-            '');
+              nestedData?['chatId']?.toString() ??
+              '');
 
     final String upperType = type.trim().toUpperCase();
     final String lowerTitle = (title ?? '').toLowerCase();
@@ -390,7 +405,8 @@ class FirebaseNotificationService {
     }
 
     // 1. SUPPORT TICKET NOTIFICATIONS (Checked first so type="MESSAGE" with resourceType="SUPPORT_TICKET" is NOT mistaken for Chat)
-    final bool isSupport = resourceType == 'SUPPORT_TICKET' ||
+    final bool isSupport =
+        resourceType == 'SUPPORT_TICKET' ||
         resourceType.contains('SUPPORT') ||
         upperType == 'SUPPORT' ||
         upperType == 'SUPPORT_MESSAGE' ||
@@ -401,18 +417,16 @@ class FirebaseNotificationService {
         (lowerTitle.contains('support') && lowerSubtitle.contains('ticket'));
 
     if (isSupport) {
-      final String resolvedTicketId = (data?['ticketId']?.toString() ??
-              nestedData?['ticketId']?.toString() ??
-              resourceId)
-          .trim();
+      final String resolvedTicketId =
+          (data?['ticketId']?.toString() ??
+                  nestedData?['ticketId']?.toString() ??
+                  resourceId)
+              .trim();
 
       if (resolvedTicketId.isNotEmpty) {
         Get.toNamed(
           Routes.supportTicketDetailView,
-          arguments: {
-            'ticketId': resolvedTicketId,
-            'id': resolvedTicketId,
-          },
+          arguments: {'ticketId': resolvedTicketId, 'id': resolvedTicketId},
         );
       } else {
         Get.toNamed(Routes.notificationsView);
@@ -421,7 +435,8 @@ class FirebaseNotificationService {
     }
 
     // 2. VEHICLE NOTIFICATIONS: Always route directly to All Vehicles page
-    final bool isVehicle = resourceType == 'VEHICLE' ||
+    final bool isVehicle =
+        resourceType == 'VEHICLE' ||
         resourceType.contains('VEHICLE') ||
         action == 'VIEW_VEHICLE' ||
         action == 'VIEW_VEHICLES' ||
@@ -432,7 +447,8 @@ class FirebaseNotificationService {
         lowerTitle.contains('vehicle') ||
         lowerSubtitle.contains('vehicle') ||
         (upperType == 'SYSTEM' &&
-            (lowerTitle.contains('vehicle') || lowerSubtitle.contains('vehicle')));
+            (lowerTitle.contains('vehicle') ||
+                lowerSubtitle.contains('vehicle')));
 
     if (isVehicle) {
       if (Get.isRegistered<ProfileController>()) {
@@ -447,7 +463,8 @@ class FirebaseNotificationService {
     }
 
     // 3. DOCUMENT / COMPLIANCE NOTIFICATIONS: Always route directly to Documents page
-    final bool isDocument = resourceType == 'DOCUMENT' ||
+    final bool isDocument =
+        resourceType == 'DOCUMENT' ||
         resourceType.contains('DOCUMENT') ||
         action == 'VIEW_DOCUMENT' ||
         action == 'VIEW_DOCUMENTS' ||
@@ -480,11 +497,12 @@ class FirebaseNotificationService {
         Get.put(PersonalDocumentController());
       }
 
-      final String docType = (data?['documentType']?.toString() ??
-              nestedData?['documentType']?.toString() ??
-              '')
-          .trim()
-          .toUpperCase();
+      final String docType =
+          (data?['documentType']?.toString() ??
+                  nestedData?['documentType']?.toString() ??
+                  '')
+              .trim()
+              .toUpperCase();
 
       if (docType == 'DRIVING_LICENSE' ||
           docType == 'HACK_LICENSE' ||
@@ -500,7 +518,8 @@ class FirebaseNotificationService {
     }
 
     // 4. CHAT RELATED NOTIFICATIONS: Always go to Chat list (Index 2), NEVER chat detail
-    final bool isChat = (upperType == 'NEW_MESSAGE' ||
+    final bool isChat =
+        (upperType == 'NEW_MESSAGE' ||
             (upperType == 'MESSAGE' &&
                 resourceType != 'SUPPORT_TICKET' &&
                 resourceType != 'DOCUMENT' &&
@@ -524,7 +543,8 @@ class FirebaseNotificationService {
     }
 
     // 5. JOB / RIDE RELATED NOTIFICATIONS: Always open Ride page & Bottom Sheet
-    final bool isJob = !isVehicle &&
+    final bool isJob =
+        !isVehicle &&
         !isDocument &&
         !isSupport &&
         (upperType == 'CHAUFFEUR_APPLIED' ||
@@ -612,12 +632,13 @@ class FirebaseNotificationService {
     final Map<String, dynamic> data = message.data;
     final String type = (data['type'] ?? data['notificationType'] ?? '')
         .toString();
-    final String? jobId = data['jobId']?.toString() ?? data['rideId']?.toString();
+    final String? jobId =
+        data['jobId']?.toString() ?? data['rideId']?.toString();
     final String? chatId = data['chatId']?.toString();
-    final String title = message.notification?.title ??
-        data['title']?.toString() ??
-        '';
-    final String subtitle = message.notification?.body ??
+    final String title =
+        message.notification?.title ?? data['title']?.toString() ?? '';
+    final String subtitle =
+        message.notification?.body ??
         data['body']?.toString() ??
         data['message']?.toString() ??
         '';
