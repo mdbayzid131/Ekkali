@@ -58,12 +58,13 @@ class SettingsView extends StatelessWidget {
             ),
             SizedBox(height: 12.h),
 
-            Container(
-              decoration: BoxDecoration(
-                color: const Color(0xFF1A1A1A),
+            Material(
+              color: const Color(0xFF1A1A1A),
+              clipBehavior: Clip.antiAlias,
+              shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16.r),
-                border: Border.all(
-                  color: const Color(0xFF2C2C2C),
+                side: const BorderSide(
+                  color: Color(0xFF2C2C2C),
                   width: 0.98,
                 ),
               ),
@@ -87,9 +88,12 @@ class SettingsView extends StatelessWidget {
                     titleColor: Colors.redAccent,
                     subtitle: "Permanently delete your account and data",
                     onTap: () {
-                      Get.bottomSheet(
-                        DeleteAccountBottomSheet(),
+                      showModalBottomSheet<void>(
+                        context: context,
+                        builder: (_) => const DeleteAccountBottomSheet(),
                         isScrollControlled: true,
+                        useSafeArea: true,
+                        enableDrag: false,
                         backgroundColor: Colors.transparent,
                       );
                     },

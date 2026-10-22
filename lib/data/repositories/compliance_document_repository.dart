@@ -7,8 +7,17 @@ import 'package:moeb_26/core/services/api_client.dart';
 
 class ComplianceDocumentRepository {
   final ApiClient apiClient;
+  final Dio _mediaClient;
 
-  ComplianceDocumentRepository({required this.apiClient});
+  ComplianceDocumentRepository({required this.apiClient, Dio? mediaClient})
+    : _mediaClient =
+          mediaClient ??
+          Dio(
+            BaseOptions(
+              connectTimeout: const Duration(seconds: 30),
+              receiveTimeout: const Duration(seconds: 30),
+            ),
+          );
 
   /// 1. GET /api/v1/documents/licenses
   /// Retrieves compliance license documents (DRIVING_LICENSE, HACK_LICENSE, LOCAL_PERMIT)
@@ -17,38 +26,52 @@ class ComplianceDocumentRepository {
   }
 
   /// 2. PATCH /api/v1/documents/:id
-  /// Updates document expiry date (JSON) and/or attached file (Multipart FormData)
+  /// Always submits a file with the expiry, reusing existing media if needed.
   Future<Response<dynamic>> updateDocument({
     required String documentId,
     String? expiryDate,
     File? file,
+    String? existingFileUrl,
   }) async {
+    final MultipartFile attachment;
     if (file != null) {
-      final formData = FormData();
-      if (expiryDate != null && expiryDate.trim().isNotEmpty) {
-        final formattedDate = _formatDateToIso(expiryDate);
-        formData.fields.add(MapEntry('expiryDate', formattedDate));
-      }
-      formData.files.add(
-        MapEntry(
-          'file',
-          await MultipartFile.fromFile(file.path),
-        ),
-      );
-      return await apiClient.patchData(
-        '${ApiConstants.documents}/$documentId',
-        formData,
-      );
+      attachment = await MultipartFile.fromFile(file.path);
     } else {
-      final String formattedDate =
-          expiryDate != null ? _formatDateToIso(expiryDate) : '';
-      return await apiClient.patchData(
-        '${ApiConstants.documents}/$documentId',
-        {
-          if (formattedDate.isNotEmpty) "expiryDate": formattedDate,
-        },
+      final uri = Uri.tryParse(existingFileUrl?.trim() ?? '');
+      if (uri == null ||
+          !const ['http', 'https'].contains(uri.scheme) ||
+          uri.host.isEmpty) {
+        throw ArgumentError(
+          'An existing or newly selected document file is required.',
+        );
+      }
+      // Public document media uses a separate client so API credentials are
+      // never forwarded to a storage/CDN host.
+      final response = await _mediaClient.get<List<int>>(
+        uri.toString(),
+        options: Options(responseType: ResponseType.bytes),
+      );
+      final bytes = response.data;
+      if (bytes == null || bytes.isEmpty) {
+        throw StateError('The existing document file could not be loaded.');
+      }
+      attachment = MultipartFile.fromBytes(
+        bytes,
+        filename: uri.pathSegments.isNotEmpty
+            ? uri.pathSegments.last
+            : 'document',
       );
     }
+    final formData = FormData();
+    if (expiryDate != null && expiryDate.trim().isNotEmpty) {
+      final formattedDate = _formatDateToIso(expiryDate);
+      formData.fields.add(MapEntry('expiryDate', formattedDate));
+    }
+    formData.files.add(MapEntry('file', attachment));
+    return await apiClient.patchData(
+      '${ApiConstants.documents}/$documentId',
+      formData,
+    );
   }
 
   /// 3. POST /api/v1/documents

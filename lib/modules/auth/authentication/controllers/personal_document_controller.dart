@@ -101,9 +101,11 @@ class PersonalDocumentController extends GetxController {
     final fileRx = _getFileRx(documentType);
     final expireController = _getExpireController(documentType);
     final isUpdatingRx = _getIsUpdatingRx(documentType);
+    if (isUpdatingRx.value) return;
 
     final docId = docIdRx.value;
     final file = fileRx.value;
+    final existingFileUrl = _getUrlRx(documentType).value;
     final expiryText = expireController.text.trim();
 
     // Strict Validation: Expiration date is mandatory
@@ -115,8 +117,11 @@ class PersonalDocumentController extends GetxController {
       return;
     }
 
-    // New upload requires a file
-    if ((docId == null || docId.isEmpty) && file == null) {
+    // Never submit an expiry date without an accompanying document.
+    if (file == null &&
+        ((docId == null || docId.isEmpty) ||
+            existingFileUrl == null ||
+            existingFileUrl.trim().isEmpty)) {
       Helpers.showCustomSnackBar(
         'Please attach a document file (Photo or PDF) to upload $title.',
         isError: true,
@@ -133,6 +138,7 @@ class PersonalDocumentController extends GetxController {
               documentId: docId,
               expiryDate: expiryText.isNotEmpty ? expiryText : null,
               file: file,
+              existingFileUrl: existingFileUrl,
             )
           : await _documentRepo.uploadDocument(
               documentType: documentType,
@@ -162,12 +168,6 @@ class PersonalDocumentController extends GetxController {
           final doc = ComplianceDocumentModel.fromJson(docMap);
           _applyDocState(documentType, doc);
         }
-
-        final msg = response.data?['message'] ??
-            (docId != null && docId.isNotEmpty
-                ? '$title updated successfully.'
-                : '$title uploaded successfully.');
-        Helpers.showCustomSnackBar(msg, isError: false);
       } else {
         final msg = response.data?['message'] ?? 'Failed to save $title.';
         Helpers.showCustomSnackBar(msg, isError: true);
@@ -188,51 +188,51 @@ class PersonalDocumentController extends GetxController {
   String _getTitle(String type) => type == 'DRIVING_LICENSE'
       ? "Driving License"
       : type == 'HACK_LICENSE'
-          ? "Hack License"
-          : "Local Permit";
+      ? "Hack License"
+      : "Local Permit";
 
   RxnString _getDocIdRx(String type) => type == 'DRIVING_LICENSE'
       ? drivingLicenseId
       : type == 'HACK_LICENSE'
-          ? hackLicenseId
-          : localPermitId;
+      ? hackLicenseId
+      : localPermitId;
 
   RxnString _getStatusRx(String type) => type == 'DRIVING_LICENSE'
       ? drivingLicenseStatus
       : type == 'HACK_LICENSE'
-          ? hackLicenseStatus
-          : localPermitStatus;
+      ? hackLicenseStatus
+      : localPermitStatus;
 
   RxnString _getUrlRx(String type) => type == 'DRIVING_LICENSE'
       ? drivingLicenseUrl
       : type == 'HACK_LICENSE'
-          ? hackLicenseUrl
-          : localPermitUrl;
+      ? hackLicenseUrl
+      : localPermitUrl;
 
   Rx<File?> _getFileRx(String type) => type == 'DRIVING_LICENSE'
       ? drivingLicenseFile
       : type == 'HACK_LICENSE'
-          ? hackLicenseFile
-          : localPermitFile;
+      ? hackLicenseFile
+      : localPermitFile;
 
   TextEditingController _getExpireController(String type) =>
       type == 'DRIVING_LICENSE'
-          ? drivingLicenseExpireController
-          : type == 'HACK_LICENSE'
-              ? hackLicenseExpireController
-              : localPermitExpireController;
+      ? drivingLicenseExpireController
+      : type == 'HACK_LICENSE'
+      ? hackLicenseExpireController
+      : localPermitExpireController;
 
   RxString getExpiryRx(String type) => type.toUpperCase() == 'DRIVING_LICENSE'
       ? drivingLicenseExpiry
       : type.toUpperCase() == 'HACK_LICENSE'
-          ? hackLicenseExpiry
-          : localPermitExpiry;
+      ? hackLicenseExpiry
+      : localPermitExpiry;
 
   RxBool _getIsUpdatingRx(String type) => type == 'DRIVING_LICENSE'
       ? isUpdatingDrivingLicense
       : type == 'HACK_LICENSE'
-          ? isUpdatingHackLicense
-          : isUpdatingLocalPermit;
+      ? isUpdatingHackLicense
+      : isUpdatingLocalPermit;
 
   void _applyDocState(String documentType, ComplianceDocumentModel doc) {
     final type = documentType.toUpperCase();

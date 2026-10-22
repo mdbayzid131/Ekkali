@@ -488,10 +488,6 @@ class SignupController extends GetxController {
         return;
       }
 
-      Helpers.showCustomSnackBar(
-        'Account setup submitted for review',
-        isError: false,
-      );
       Get.offAllNamed(Routes.applicationSubmitedView);
     } catch (e) {
       Helpers.showCustomSnackBar(
