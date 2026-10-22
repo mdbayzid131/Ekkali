@@ -753,16 +753,11 @@ class _AddScheduleJobSheetState extends State<AddScheduleJobSheet> {
               SizedBox(height: 24.h),
 
               Obx(
-                () => controller.isSubmitting.value
-                    ? const Center(
-                        child: CircularProgressIndicator(
-                          color: AppColors.primaryColor,
-                        ),
-                      )
-                    : CustomButton(
-                        text: isEdit ? "Update Booking" : "Save Direct Booking",
-                        onPressed: _submit,
-                      ),
+                () => CustomButton(
+                  text: isEdit ? "Update Booking" : "Save Direct Booking",
+                  loading: controller.isSubmitting.value,
+                  onPressed: _submit,
+                ),
               ),
               SizedBox(height: 10.h),
             ],

@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:moeb_26/config/themes/app_theme.dart';
 import 'package:moeb_26/data/models/notifications_model.dart';
+import '../views/notification_media_view.dart';
 
-/// An announcement is read in place, with no link or tap action.
+/// Announcement text stays in place; attached media opens in a viewer.
 class BroadcastNotificationCard extends StatelessWidget {
   final NotificationItem notification;
   const BroadcastNotificationCard({super.key, required this.notification});
@@ -27,33 +28,92 @@ class BroadcastNotificationCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (imageUrl != null)
-            Image.network(
-              imageUrl,
-              key: const ValueKey('broadcast-image'),
-              width: double.infinity,
-              fit: BoxFit.fitWidth,
-              loadingBuilder: (context, child, progress) => progress == null
-                  ? child
-                  : const AspectRatio(
-                      aspectRatio: 16 / 9,
-                      child: Center(
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: AppColors.primaryColor,
-                        ),
+          if (imageUrl != null || notification.videoUrl != null)
+            Semantics(
+              button: true,
+              label: notification.videoUrl != null
+                  ? 'Play video'
+                  : 'View full screen image',
+              child: GestureDetector(
+                key: const ValueKey('broadcast-media'),
+                onTap: () => showDialog<void>(
+                  context: context,
+                  barrierColor: Colors.black87,
+                  builder: (context) => Dialog(
+                    backgroundColor: Colors.black,
+                    clipBehavior: Clip.antiAlias,
+                    insetPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 32,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: SizedBox(
+                      width: 700,
+                      height: MediaQuery.sizeOf(context).height * 0.75,
+                      child: NotificationMediaView(
+                        title: notification.title,
+                        imageUrl: imageUrl,
+                        videoUrl: notification.videoUrl,
                       ),
                     ),
-              errorBuilder: (context, error, stackTrace) => const AspectRatio(
-                aspectRatio: 16 / 9,
-                child: ColoredBox(
-                  color: Color(0xFF1A1A20),
-                  child: Center(
-                    child: Text(
-                      'Image unavailable',
-                      style: TextStyle(color: Color(0xFF94A3B8)),
-                    ),
                   ),
+                ),
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    if (imageUrl == null)
+                      const AspectRatio(
+                        aspectRatio: 16 / 9,
+                        child: ColoredBox(color: Color(0xFF1A1A20)),
+                      )
+                    else
+                      Image.network(
+                        imageUrl,
+                        key: const ValueKey('broadcast-image'),
+                        width: double.infinity,
+                        fit: BoxFit.fitWidth,
+                        loadingBuilder: (context, child, progress) =>
+                            progress == null
+                            ? child
+                            : const AspectRatio(
+                                aspectRatio: 16 / 9,
+                                child: Center(
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: AppColors.primaryColor,
+                                  ),
+                                ),
+                              ),
+                        errorBuilder: (context, error, stackTrace) =>
+                            const AspectRatio(
+                              aspectRatio: 16 / 9,
+                              child: ColoredBox(
+                                color: Color(0xFF1A1A20),
+                                child: Center(
+                                  child: Text(
+                                    'Image unavailable',
+                                    style: TextStyle(color: Color(0xFF94A3B8)),
+                                  ),
+                                ),
+                              ),
+                            ),
+                      ),
+                    if (notification.videoUrl != null)
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: const BoxDecoration(
+                          color: Colors.black54,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.play_arrow_rounded,
+                          color: Colors.white,
+                          size: 44,
+                        ),
+                      ),
+                  ],
                 ),
               ),
             ),

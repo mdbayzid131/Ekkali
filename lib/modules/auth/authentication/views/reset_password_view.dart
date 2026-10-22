@@ -12,8 +12,38 @@ import '../../../../core/widgets/CustomTextGary.dart';
 import '../../../../core/widgets/custom_sub_appbar.dart';
 import '../controllers/forget_password_controller.dart';
 
-class ResetPasswordView extends GetView<ForgotPasswordController> {
+class ResetPasswordView extends StatefulWidget {
   const ResetPasswordView({super.key});
+
+  @override
+  State<ResetPasswordView> createState() => _ResetPasswordViewState();
+}
+
+class _ResetPasswordViewState extends State<ResetPasswordView> {
+  late final ForgotPasswordController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = ForgotPasswordController();
+    controller.onStart();
+  }
+
+  @override
+  void dispose() {
+    controller.onDelete();
+    super.dispose();
+  }
+
+  void _returnToSignIn() {
+    FocusScope.of(context).unfocus();
+    var foundSignIn = false;
+    Get.until((route) {
+      foundSignIn = route.settings.name == Routes.signinView;
+      return foundSignIn || route.isFirst;
+    });
+    if (!foundSignIn) Get.offNamed(Routes.signinView);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,9 +51,7 @@ class ResetPasswordView extends GetView<ForgotPasswordController> {
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
         backgroundColor: Colors.black,
-        appBar: const CustomSubAppBar(
-          title: "Forgot Password",
-        ),
+        appBar: const CustomSubAppBar(title: "Forgot Password"),
         body: SafeArea(
           child: Form(
             key: controller.formKey,
@@ -108,17 +136,19 @@ class ResetPasswordView extends GetView<ForgotPasswordController> {
                   ),
                   SizedBox(height: 24.h),
 
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: 6,
+                    runSpacing: 8,
                     children: [
                       CustomTextgray(
                         text: "Remember your password?",
                         fontSize: 14.sp,
                         color: AppColors.gray100,
                       ),
-                      SizedBox(width: 6.w),
                       GestureDetector(
-                        onTap: () => Get.offNamed(Routes.signinView),
+                        onTap: _returnToSignIn,
                         child: Text(
                           "Sign In",
                           style: GoogleFonts.inter(

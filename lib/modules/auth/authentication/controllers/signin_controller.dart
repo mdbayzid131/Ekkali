@@ -37,6 +37,7 @@ class SigninController extends GetxController {
   }
 
   Future<void> _handleUnverifiedEmail(String email, String message) async {
+    if (isClosed) return;
     Helpers.showCustomSnackBar(
       message.isNotEmpty
           ? message
@@ -50,6 +51,7 @@ class SigninController extends GetxController {
       debugPrint("resendOtp during login unverified email error: $e");
     }
 
+    if (isClosed) return;
     Get.toNamed(
       Routes.otpVerificationView,
       arguments: {'email': email, 'isRegister': true},
@@ -58,6 +60,7 @@ class SigninController extends GetxController {
 
   // ─── Login ───────────────────────────────────────────────────
   Future<void> login() async {
+    if (isClosed || isLoading.value) return;
     FocusManager.instance.primaryFocus?.unfocus();
     if (formKey.currentState?.validate() != true) return;
 
@@ -72,19 +75,24 @@ class SigninController extends GetxController {
         email: email,
         password: password,
       );
+      if (isClosed) return;
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         // ─── Save or clear Remember Me credentials ───────────
         if (rememberMe.value) {
           await StorageService.setBool(StorageConstants.rememberMe, true);
           await StorageService.setString(StorageConstants.savedEmail, email);
-          await StorageService.setString(StorageConstants.savedPassword, password);
+          await StorageService.setString(
+            StorageConstants.savedPassword,
+            password,
+          );
         } else {
           await StorageService.setBool(StorageConstants.rememberMe, false);
           await StorageService.remove(StorageConstants.savedEmail);
           await StorageService.remove(StorageConstants.savedPassword);
         }
 
+        if (isClosed) return;
         final authData = response.data?['data'] ?? {};
         final bool isApproved = authData['isApproved'] == true;
         final bool isOnboard = authData['isOnboard'] == true;
@@ -95,8 +103,7 @@ class SigninController extends GetxController {
             .toUpperCase();
         final String rejectionReason =
             authData['rejectionReason']?.toString() ?? '';
-        final String blockReason =
-            authData['blockReason']?.toString() ?? '';
+        final String blockReason = authData['blockReason']?.toString() ?? '';
 
         if (appState == 'REJECTED') {
           await StorageService.setBool(StorageConstants.isApproved, false);
@@ -154,6 +161,7 @@ class SigninController extends GetxController {
         Helpers.showCustomSnackBar(errorMsg, isError: true);
       }
     } on DioException catch (e) {
+      if (isClosed) return;
       final responseData = e.response?.data;
       final String errorMsg =
           (responseData is Map ? responseData['message']?.toString() : null) ??
@@ -169,6 +177,7 @@ class SigninController extends GetxController {
       errorMessage.value = errorMsg;
       Helpers.showCustomSnackBar(errorMsg, isError: true);
     } catch (e) {
+      if (isClosed) return;
       Helpers.showDebugLog("login error => $e");
       errorMessage.value = 'Login failed. Please try again.';
       Helpers.showCustomSnackBar(
@@ -176,7 +185,7 @@ class SigninController extends GetxController {
         isError: true,
       );
     } finally {
-      isLoading.value = false;
+      if (!isClosed) isLoading.value = false;
     }
   }
 
@@ -192,12 +201,15 @@ class SigninController extends GetxController {
     try {
       final bool isRemember =
           await StorageService.getBool(StorageConstants.rememberMe) ?? false;
-      rememberMe.value = isRemember;
       if (isRemember) {
-        final email =
-            await StorageService.getString(StorageConstants.savedEmail);
-        final password =
-            await StorageService.getString(StorageConstants.savedPassword);
+        final email = await StorageService.getString(
+          StorageConstants.savedEmail,
+        );
+        final password = await StorageService.getString(
+          StorageConstants.savedPassword,
+        );
+        if (isClosed) return;
+        rememberMe.value = true;
         if (email.isNotEmpty) {
           emailController.text = email;
         }
@@ -205,6 +217,8 @@ class SigninController extends GetxController {
           passwordController.text = password;
         }
       } else {
+        if (isClosed) return;
+        rememberMe.value = false;
         emailController.clear();
         passwordController.clear();
       }

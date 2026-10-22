@@ -386,33 +386,17 @@ class ProfileController extends GetxController {
   }
 
   Future<void> saveProfile() async {
+    if (isUpdating.value) return;
     isUpdating.value = true;
     try {
-      Map<String, dynamic> body = {
-        "phone": phoneController.text.trim(),
+      final body = <String, dynamic>{
         "nickname": nickNameController.text.trim(),
-        "companyName": companyController.text.trim(),
       };
-
-      dynamic requestBody;
-      if (pickedImage.value != null) {
-        requestBody = dio.FormData.fromMap({
-          ...body,
-          "profilePicture": await dio.MultipartFile.fromFile(
-            pickedImage.value!.path,
-            filename: pickedImage.value!.path.split('/').last,
-          ),
-        });
-      } else {
-        requestBody = body;
-      }
-
-      var response = await _profileService.patchProfile(requestBody);
+      var response = await _profileService.patchProfile(body);
       if ((response.statusCode == 200 || response.statusCode == 201) &&
           response.data?['success'] != false &&
           response.data?['data'] != null) {
         _applyProfileData(response.data['data']);
-        pickedImage.value = null; // Clear picked image after success
         Get.back(); // Only close on actual success
         Helpers.showCustomSnackBar(
           response.data?['message'] ?? "Profile updated successfully",

@@ -8,6 +8,7 @@ import 'package:moeb_26/config/themes/app_theme.dart';
 import 'package:moeb_26/core/utils/validators.dart';
 import 'package:moeb_26/modules/auth/authentication/controllers/signup_controller.dart';
 import 'package:moeb_26/core/services/vehicle_config_service.dart';
+import 'package:moeb_26/core/widgets/vehicle_type_options.dart';
 import 'package:moeb_26/data/models/vehicle_model.dart';
 import 'package:moeb_26/core/widgets/custom_sub_appbar.dart';
 import 'package:moeb_26/core/widgets/CustomButton.dart';
@@ -43,6 +44,7 @@ class _VehicleInformationViewState extends State<VehicleInformationView> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
+        vehicleConfigService.fetchVehicleOptions();
         controller.showErrors.value = false;
         if (controller.vehiclesList.any((v) => v.isDisposed)) {
           controller.vehiclesList.assignAll([VehicleModel()]);
@@ -63,69 +65,72 @@ class _VehicleInformationViewState extends State<VehicleInformationView> {
             title: "Vehicle Information",
             showBackButton: false,
           ),
-        body: Form(
-          key: _formKey,
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 12.w),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(height: 20.h),
-                CustomTextgray(
-                  text: "Add your professional vehicles",
-                  fontSize: 15.sp,
-                  fontWeight: FontWeight.w400,
-                ),
-                SizedBox(height: 24.h),
+          body: Form(
+            key: _formKey,
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 12.w),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(height: 20.h),
+                  CustomTextgray(
+                    text: "Add your professional vehicles",
+                    fontSize: 15.sp,
+                    fontWeight: FontWeight.w400,
+                  ),
+                  SizedBox(height: 24.h),
 
-                // Vehicle list
-                Expanded(
-                  child: ListView(
-                    children: [
-                      Obx(
-                        () => Column(
-                          children: List.generate(
-                            controller.vehiclesList.length,
-                            (index) => _buildVehicleCard(
-                              context,
-                              index,
-                              controller.vehiclesList[index],
-                              key: ValueKey(controller.vehiclesList[index].id),
+                  // Vehicle list
+                  Expanded(
+                    child: ListView(
+                      children: [
+                        Obx(
+                          () => Column(
+                            children: List.generate(
+                              controller.vehiclesList.length,
+                              (index) => _buildVehicleCard(
+                                context,
+                                index,
+                                controller.vehiclesList[index],
+                                key: ValueKey(
+                                  controller.vehiclesList[index].id,
+                                ),
+                              ),
                             ),
                           ),
                         ),
-                      ),
 
-                      SizedBox(height: 25.h),
-                      CustomAddButton(
-                        onPressed: () => controller.addVehicle(),
-                      ),
-                      SizedBox(height: 30.h),
-
-                      Obx(
-                        () => CustomButton(
-                          loading: controller.isLoading.value,
-                          text: "Continue",
-                          onPressed: () {
-                            FocusScope.of(context).unfocus();
-                            controller.showErrors.value = true;
-                            final bool isFormValid =
-                                _formKey.currentState?.validate() ?? false;
-                            if (isFormValid) {
-                              controller.submitVehicleInfo();
-                            }
-                          },
+                        SizedBox(height: 25.h),
+                        CustomAddButton(
+                          onPressed: () => controller.addVehicle(),
                         ),
-                      ),
-                      SizedBox(height: 60.h),
-                    ],
+                        SizedBox(height: 30.h),
+
+                        Obx(
+                          () => CustomButton(
+                            loading: controller.isLoading.value,
+                            text: "Continue",
+                            onPressed: () {
+                              FocusScope.of(context).unfocus();
+                              controller.showErrors.value = true;
+                              final bool isFormValid =
+                                  _formKey.currentState?.validate() ?? false;
+                              if (isFormValid) {
+                                controller.submitVehicleInfo();
+                              }
+                            },
+                          ),
+                        ),
+                        SizedBox(height: 60.h),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
-      ),)
+      ),
     );
   }
 
@@ -237,15 +242,9 @@ class _VehicleInformationViewState extends State<VehicleInformationView> {
           SizedBox(height: 10.h),
 
           // Vehicle Type Chips
-          Wrap(
-            spacing: 12.w,
-            runSpacing: 10.h,
-            children: [
-              _buildVehicleTypeChip(model, "Sedan"),
-              _buildVehicleTypeChip(model, "SUV"),
-              _buildVehicleTypeChip(model, "Sprinter"),
-              _buildVehicleTypeChip(model, "LimoStretch"),
-            ],
+          VehicleTypeOptions(
+            service: vehicleConfigService,
+            chipBuilder: (type) => _buildVehicleTypeChip(model, type),
           ),
 
           // Validation Error
@@ -283,6 +282,7 @@ class _VehicleInformationViewState extends State<VehicleInformationView> {
               children: [
                 _buildFieldLabel("Make & Model"),
                 DropdownButtonFormField<String>(
+                  isExpanded: true,
                   key: ValueKey("${type}_${cars.length}"),
                   value: value,
                   dropdownColor: const Color(0xFF1A1A1E),
@@ -341,6 +341,8 @@ class _VehicleInformationViewState extends State<VehicleInformationView> {
                         padding: EdgeInsets.symmetric(vertical: 2.h),
                         child: Text(
                           car,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: GoogleFonts.inter(
                             color: Colors.white,
                             fontSize: 14.sp,
@@ -394,7 +396,8 @@ class _VehicleInformationViewState extends State<VehicleInformationView> {
                     _buildFieldLabel("Color (Outside)", isRequired: true),
                     Obx(() {
                       final type = model.selectedVehicleType.value;
-                      final colors = vehicleConfigService.getAllowedColorsForType(type);
+                      final colors = vehicleConfigService
+                          .getAllowedColorsForType(type);
                       final currentSelection =
                           model.colorOutsideController.text;
                       final value = colors.contains(currentSelection)
@@ -509,7 +512,9 @@ class _VehicleInformationViewState extends State<VehicleInformationView> {
                       keyboardType: TextInputType.number,
                       validator: (value) {
                         final type = model.selectedVehicleType.value;
-                        final maxAge = vehicleConfigService.getMaxAgeForType(type);
+                        final maxAge = vehicleConfigService.getMaxAgeForType(
+                          type,
+                        );
                         return Validators.year(
                           value,
                           min: DateTime.now().year - maxAge,
@@ -1010,8 +1015,7 @@ class _VehicleInformationViewState extends State<VehicleInformationView> {
   Widget _buildVehicleTypeChip(VehicleModel model, String type) {
     return Obx(() {
       final selectedType = model.selectedVehicleType.value;
-      final isSelected =
-          selectedType.toLowerCase().trim() == type.toLowerCase().trim();
+      final isSelected = vehicleConfigService.matchesType(selectedType, type);
       return GestureDetector(
         onTap: () {
           if (model.isDisposed) return;
@@ -1020,8 +1024,9 @@ class _VehicleInformationViewState extends State<VehicleInformationView> {
             if (!model.isDisposed) model.makeController.clear();
             if (!model.isDisposed) model.modelController.clear();
             if (!model.isDisposed) model.yearController.clear();
-            final allowedColors =
-                vehicleConfigService.getAllowedColorsForType(type);
+            final allowedColors = vehicleConfigService.getAllowedColorsForType(
+              type,
+            );
             if (allowedColors.length == 1) {
               if (!model.isDisposed) {
                 model.colorOutsideController.text = allowedColors.first;
@@ -1086,4 +1091,3 @@ class CustomAddButton extends StatelessWidget {
     );
   }
 }
-

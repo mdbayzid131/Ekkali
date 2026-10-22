@@ -47,15 +47,22 @@ class NotificationPayload {
     return null;
   }
 
-  static String? imageUrl(Map? data) {
+  static String? imageUrl(Map? data) =>
+      _mediaUrl(data, const ['image', 'imageUrl', 'image_url']);
+
+  static String? videoUrl(Map? data) =>
+      _mediaUrl(data, const ['video', 'videoUrl', 'video_url']);
+
+  static String? _mediaUrl(Map? data, List<String> fields) {
     for (final layer in _layers(data)) {
-      for (final key in const ['image', 'imageUrl', 'image_url']) {
+      for (final key in fields) {
         final value = layer[key];
         final url = value is Map ? value['url'] : value;
         if (url is! String || url.trim().isEmpty) continue;
         final uri = Uri.tryParse(url.trim());
         if (uri == null) continue;
-        final resolved = Uri.parse(ApiConstants.baseUrl).resolveUri(
+        final apiUri = Uri.parse(ApiConstants.baseUrl);
+        var resolved = apiUri.resolveUri(
           uri.hasScheme || uri.hasAuthority
               ? uri
               : Uri(
@@ -65,6 +72,32 @@ class NotificationPayload {
         );
         if ((resolved.scheme == 'http' || resolved.scheme == 'https') &&
             resolved.host.isNotEmpty) {
+          // Backend uploads can contain its own loopback origin, which is
+          // unreachable from the phone. Keep the media path and query intact.
+          final host = resolved.host.toLowerCase();
+          final octets = host.split('.').map(int.tryParse).toList();
+          final privateIp =
+              octets.length == 4 &&
+              octets.every(
+                (part) => part != null && part >= 0 && part <= 255,
+              ) &&
+              (octets[0] == 10 ||
+                  (octets[0] == 172 && octets[1]! >= 16 && octets[1]! <= 31) ||
+                  (octets[0] == 192 && octets[1] == 168));
+          if (host == 'localhost' ||
+              host == '127.0.0.1' ||
+              host == '::1' ||
+              host == '[::1]' ||
+              host == '0.0.0.0' ||
+              privateIp) {
+            resolved = apiUri.resolveUri(
+              Uri(
+                path: resolved.path,
+                query: resolved.hasQuery ? resolved.query : null,
+                fragment: resolved.hasFragment ? resolved.fragment : null,
+              ),
+            );
+          }
           return resolved.toString();
         }
       }

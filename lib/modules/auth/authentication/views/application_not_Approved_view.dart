@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:moeb_26/core/services/auth_service.dart';
 import 'package:moeb_26/config/constants/icon_paths.dart';
 import 'package:moeb_26/config/routes/app_pages.dart';
 import 'package:moeb_26/core/widgets/CustomText.dart';
@@ -94,7 +95,9 @@ class ApplicationNotApprovedView extends StatelessWidget {
                   backgroundColor: Colors.transparent,
                   borderColor: const Color(0xFF3B4453),
                   textColor: Colors.white,
-                  onPressed: () {
+                  onPressed: () async {
+                    await Get.find<AuthService>().clearLocalAuth();
+                    if (!context.mounted) return;
                     Get.offAllNamed(Routes.signinView);
                   },
                 ),

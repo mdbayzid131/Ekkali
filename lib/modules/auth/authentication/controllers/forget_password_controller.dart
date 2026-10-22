@@ -8,19 +8,21 @@ class ForgotPasswordController extends GetxController {
   final AuthService _authService = Get.find();
 
   final isLoading = false.obs;
-  GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   final emailController = TextEditingController();
 
   // ─── Forgot Password ──────────────────────────────────────────
   Future<void> forgotPassword() async {
-    if (!formKey.currentState!.validate()) return;
+    if (isClosed || isLoading.value || formKey.currentState?.validate() != true) {
+      return;
+    }
 
     isLoading.value = true;
+    final email = emailController.text.trim();
 
     try {
-      final response = await _authService.forgotPassword(
-        emailController.text.trim(),
-      );
+      final response = await _authService.forgotPassword(email);
+      if (isClosed) return;
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final message =
@@ -32,14 +34,15 @@ class ForgotPasswordController extends GetxController {
         // Navigate to OTP screen, pass email for verification
         Get.toNamed(
           Routes.forgetotpVerificationView,
-          arguments: {'email': emailController.text.trim()},
+          arguments: {'email': email},
         );
       }
     } catch (e) {
+      if (isClosed) return;
       Helpers.showDebugLog("forgotPassword error => $e");
       Helpers.showCustomSnackBar('Something went wrong.', isError: true);
     } finally {
-      isLoading.value = false;
+      if (!isClosed) isLoading.value = false;
     }
   }
 
@@ -53,6 +56,7 @@ class ForgotPasswordController extends GetxController {
   // ─── Dispose ──────────────────────────────────────────────────
   @override
   void onClose() {
+    emailController.dispose();
     super.onClose();
   }
 }

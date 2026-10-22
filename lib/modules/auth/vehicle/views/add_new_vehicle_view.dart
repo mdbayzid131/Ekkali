@@ -11,6 +11,7 @@ import 'package:moeb_26/core/widgets/CustomButton.dart';
 import 'package:moeb_26/core/widgets/CustomText.dart';
 import 'package:moeb_26/core/widgets/CustomTextGary.dart';
 import 'package:moeb_26/core/services/vehicle_config_service.dart';
+import 'package:moeb_26/core/widgets/vehicle_type_options.dart';
 import 'package:moeb_26/modules/auth/vehicle/controllers/vehicle_action_controller.dart';
 
 class AddNewVehicleView extends StatefulWidget {
@@ -39,6 +40,9 @@ class _AddNewVehicleViewState extends State<AddNewVehicleView> {
     vehicleConfigService = Get.isRegistered<VehicleConfigService>()
         ? Get.find<VehicleConfigService>()
         : Get.put(VehicleConfigService());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) vehicleConfigService.fetchVehicleOptions();
+    });
   }
 
   @override
@@ -82,10 +86,7 @@ class _AddNewVehicleViewState extends State<AddNewVehicleView> {
                     onPressed: () {
                       showErrors.value = true;
                       if (_formKey.currentState!.validate()) {
-                        if (controller
-                            .selectedVehicleType
-                            .value
-                            .isEmpty) {
+                        if (controller.selectedVehicleType.value.isEmpty) {
                           Helpers.showCustomSnackBar(
                             "Please select a vehicle type",
                             isError: true,
@@ -135,15 +136,9 @@ class _AddNewVehicleViewState extends State<AddNewVehicleView> {
           SizedBox(height: 10.h),
 
           // Vehicle Type Chips
-          Wrap(
-            spacing: 10.w,
-            runSpacing: 10.h,
-            children: [
-              _buildVehicleTypeChip("Sedan"),
-              _buildVehicleTypeChip("SUV"),
-              _buildVehicleTypeChip("Sprinter"),
-              _buildVehicleTypeChip("LimoStretch"),
-            ],
+          VehicleTypeOptions(
+            service: vehicleConfigService,
+            chipBuilder: _buildVehicleTypeChip,
           ),
 
           // Vehicle type validation error
@@ -194,6 +189,7 @@ class _AddNewVehicleViewState extends State<AddNewVehicleView> {
                 ),
                 SizedBox(height: 8.h),
                 DropdownButtonFormField<String>(
+                  isExpanded: true,
                   key: ValueKey("${type}_${cars.length}"),
                   value: value,
                   dropdownColor: const Color(0xFF1A1A1E),
@@ -252,6 +248,8 @@ class _AddNewVehicleViewState extends State<AddNewVehicleView> {
                         padding: EdgeInsets.symmetric(vertical: 2.h),
                         child: Text(
                           car,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: GoogleFonts.inter(
                             color: Colors.white,
                             fontSize: 14.sp,
@@ -326,11 +324,13 @@ class _AddNewVehicleViewState extends State<AddNewVehicleView> {
                     SizedBox(height: 8.h),
                     Obx(() {
                       final type = controller.selectedVehicleType.value;
-                      final colors = vehicleConfigService.getAllowedColorsForType(type);
+                      final colors = vehicleConfigService
+                          .getAllowedColorsForType(type);
 
                       // Auto-populate first allowed color if only 1 color is allowed and current text doesn't match
                       if (colors.length == 1 &&
-                          controller.colorOutsideController.text != colors.first) {
+                          controller.colorOutsideController.text !=
+                              colors.first) {
                         WidgetsBinding.instance.addPostFrameCallback((_) {
                           controller.colorOutsideController.text = colors.first;
                         });
@@ -466,7 +466,9 @@ class _AddNewVehicleViewState extends State<AddNewVehicleView> {
                       keyboardType: TextInputType.number,
                       validator: (value) {
                         final type = controller.selectedVehicleType.value;
-                        final maxAge = vehicleConfigService.getMaxAgeForType(type);
+                        final maxAge = vehicleConfigService.getMaxAgeForType(
+                          type,
+                        );
                         return Validators.year(
                           value,
                           min: DateTime.now().year - maxAge,
@@ -604,10 +606,7 @@ class _AddNewVehicleViewState extends State<AddNewVehicleView> {
         decoration: BoxDecoration(
           color: const Color(0xFF141414),
           borderRadius: BorderRadius.circular(16.r),
-          border: Border.all(
-            color: const Color(0xFF262626),
-            width: 1.2,
-          ),
+          border: Border.all(color: const Color(0xFF262626), width: 1.2),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -662,10 +661,7 @@ class _AddNewVehicleViewState extends State<AddNewVehicleView> {
                           ),
                         )
                       else
-                        CustomTextgray(
-                          text: "PDF, JPG, PNG",
-                          fontSize: 11.sp,
-                        ),
+                        CustomTextgray(text: "PDF, JPG, PNG", fontSize: 11.sp),
                     ],
                   ),
                 ),
@@ -674,7 +670,10 @@ class _AddNewVehicleViewState extends State<AddNewVehicleView> {
                   children: [
                     IconButton(
                       constraints: const BoxConstraints(),
-                      padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 4.h),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 4.w,
+                        vertical: 4.h,
+                      ),
                       onPressed: () => controller.pickFromCamera(fileRx),
                       icon: Icon(
                         Icons.camera_alt_outlined,
@@ -686,9 +685,11 @@ class _AddNewVehicleViewState extends State<AddNewVehicleView> {
                     SizedBox(width: 2.w),
                     IconButton(
                       constraints: const BoxConstraints(),
-                      padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 4.h),
-                      onPressed: () =>
-                          controller.pickFromFile(context, fileRx),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 4.w,
+                        vertical: 4.h,
+                      ),
+                      onPressed: () => controller.pickFromFile(context, fileRx),
                       icon: Icon(
                         Icons.file_upload_outlined,
                         color: Colors.white,
@@ -799,18 +800,12 @@ class _AddNewVehicleViewState extends State<AddNewVehicleView> {
                           overflow: TextOverflow.ellipsis,
                         )
                       else if (hasUrl)
-                         Text(
+                        Text(
                           "Current file on record",
-                          style: TextStyle(
-                            color: Colors.grey,
-                            fontSize: 11.sp,
-                          ),
+                          style: TextStyle(color: Colors.grey, fontSize: 11.sp),
                         )
                       else
-                        CustomTextgray(
-                          text: "PDF, JPG, PNG",
-                          fontSize: 11.sp,
-                        ),
+                        CustomTextgray(text: "PDF, JPG, PNG", fontSize: 11.sp),
                     ],
                   ),
                 ),
@@ -888,12 +883,9 @@ class _AddNewVehicleViewState extends State<AddNewVehicleView> {
                           overflow: TextOverflow.ellipsis,
                         )
                       else if (hasUrl)
-                         Text(
+                        Text(
                           "Current photo on record",
-                          style: TextStyle(
-                            color: Colors.grey,
-                            fontSize: 11.sp,
-                          ),
+                          style: TextStyle(color: Colors.grey, fontSize: 11.sp),
                         )
                       else
                         CustomTextgray(
@@ -1004,16 +996,19 @@ class _AddNewVehicleViewState extends State<AddNewVehicleView> {
   Widget _buildVehicleTypeChip(String vehicleType) {
     return Obx(() {
       final selectedType = controller.selectedVehicleType.value;
-      final isSelected =
-          selectedType.toLowerCase().trim() == vehicleType.toLowerCase().trim();
+      final isSelected = vehicleConfigService.matchesType(
+        selectedType,
+        vehicleType,
+      );
       return GestureDetector(
         onTap: () {
           if (controller.selectedVehicleType.value != vehicleType) {
             controller.makeController.clear();
             controller.modelController.clear();
             controller.yearController.clear();
-            final allowedColors =
-                vehicleConfigService.getAllowedColorsForType(vehicleType);
+            final allowedColors = vehicleConfigService.getAllowedColorsForType(
+              vehicleType,
+            );
             if (allowedColors.length == 1) {
               controller.colorOutsideController.text = allowedColors.first;
             } else {
@@ -1068,12 +1063,14 @@ class _AddNewVehicleViewState extends State<AddNewVehicleView> {
     final hasLocal = file != null;
     final hasUrl = url != null && url.isNotEmpty;
 
-    final isLocalImage = hasLocal &&
+    final isLocalImage =
+        hasLocal &&
         (file.path.toLowerCase().endsWith('.jpg') ||
             file.path.toLowerCase().endsWith('.jpeg') ||
             file.path.toLowerCase().endsWith('.png'));
 
-    final isNetworkImage = hasUrl &&
+    final isNetworkImage =
+        hasUrl &&
         (url.toLowerCase().contains('.jpg') ||
             url.toLowerCase().contains('.jpeg') ||
             url.toLowerCase().contains('.png') ||
@@ -1103,7 +1100,8 @@ class _AddNewVehicleViewState extends State<AddNewVehicleView> {
     }
 
     return GestureDetector(
-      onTap: () => controller.previewImage(context, fileRx, urlRx, title: title),
+      onTap: () =>
+          controller.previewImage(context, fileRx, urlRx, title: title),
       child: Container(
         width: 38.r,
         height: 38.r,

@@ -58,9 +58,7 @@ class AuthService extends GetxService {
   }
 
   /// ===================== VEHICLE SETUP =====================
-  Future<Response> addVehicle({
-    required List<VehicleModel> vehicles,
-  }) async {
+  Future<Response> addVehicle({required List<VehicleModel> vehicles}) async {
     return await _authRepo.addVehicle(vehicles: vehicles);
   }
 
@@ -145,14 +143,8 @@ class AuthService extends GetxService {
   }
 
   /// ===================== OTP VERIFY =====================
-  Future<Response> verifyOtp({
-    required String email,
-    required int otp,
-  }) async {
-    final response = await _authRepo.otpVerify(
-      email: email,
-      oneTimeCode: otp,
-    );
+  Future<Response> verifyOtp({required String email, required int otp}) async {
+    final response = await _authRepo.otpVerify(email: email, oneTimeCode: otp);
     await handleAuthResponse(response);
     return response;
   }
@@ -266,6 +258,11 @@ class AuthService extends GetxService {
 
   /// ===================== CLEAR LOCAL AUTH =====================
   Future<void> clearLocalAuth() async {
+    if (Get.isRegistered<SocketService>()) {
+      Get.find<SocketService>().disconnect();
+    }
+    ApiClient.temporaryToken = null;
+    isLoggedIn.value = false;
     await StorageService.remove(StorageConstants.bearerToken);
     await StorageService.remove(StorageConstants.refreshToken);
     await StorageService.remove(StorageConstants.userData);
@@ -284,8 +281,6 @@ class AuthService extends GetxService {
       }
     } catch (_) {}
 
-    ApiClient.temporaryToken = null;
-    isLoggedIn.value = false;
     await BadgeService.clearBadge();
   }
 

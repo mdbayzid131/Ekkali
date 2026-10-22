@@ -17,23 +17,37 @@ class VehicleConfigService extends GetxService {
   }
 
   Future<void> fetchVehicleOptions() async {
+    if (isLoading.value) return;
     isLoading.value = true;
     try {
-      final response = await _apiClient.getData(
-        ApiConstants.vehicleConfigOptions,
-      );
-      if (response.statusCode == 200 && response.data != null) {
-        final rawData = response.data['data'];
-        if (rawData is List) {
-          final List<VehicleConfigOption> parsed = [];
-          for (var item in rawData) {
-            if (item is Map<String, dynamic>) {
-              parsed.add(VehicleConfigOption.fromJson(item));
+      final parsed = <VehicleConfigOption>[];
+      String? nextCursor;
+      final seenCursors = <String>{};
+      do {
+        final response = await _apiClient.getData(
+          ApiConstants.vehicleConfigOptions,
+          query: nextCursor == null ? null : {'cursor': nextCursor},
+        );
+        if (response.statusCode == 200 && response.data != null) {
+          final rawData = response.data['data'];
+          if (rawData is List) {
+            for (var item in rawData) {
+              if (item is Map<String, dynamic>) {
+                parsed.add(VehicleConfigOption.fromJson(item));
+              }
             }
           }
-          options.assignAll(parsed);
+          final cursor = response.data['cursor'];
+          nextCursor = cursor is Map && cursor['hasMore'] == true
+              ? cursor['nextCursor']?.toString()
+              : null;
+        } else {
+          return;
         }
-      }
+      } while (nextCursor != null &&
+          nextCursor.isNotEmpty &&
+          seenCursors.add(nextCursor));
+      options.assignAll(parsed);
     } catch (e) {
       debugPrint('Error fetching vehicle config options: $e');
     } finally {
@@ -41,29 +55,40 @@ class VehicleConfigService extends GetxService {
     }
   }
 
+  List<String> get vehicleTypes {
+    final seen = <String>{};
+    return options
+        .map((option) => option.vehicleType.trim())
+        .where((type) => type.isNotEmpty && seen.add(type.toLowerCase()))
+        .toList();
+  }
+
+  static String _typeKey(String type) {
+    final key = type.trim().toLowerCase();
+    if (const ['van/sprinter', 'sprinter', 'van'].contains(key)) {
+      return 'sprinter';
+    }
+    if (const [
+      'stretch limousine',
+      'limo stretch',
+      'limostretch',
+      'limo',
+    ].contains(key)) {
+      return 'limo';
+    }
+    return key;
+  }
+
+  bool matchesType(String a, String b) => _typeKey(a) == _typeKey(b);
+
   /// Helper to find vehicle option configuration by vehicle type name (case-insensitive & alias-tolerant)
   VehicleConfigOption? getOptionForType(String? type) {
     if (type == null || type.trim().isEmpty || options.isEmpty) return null;
-    final normalized = type.toLowerCase().trim();
-
-    return options.firstWhereOrNull((opt) {
-      final optType = opt.vehicleType.toLowerCase().trim();
-      if (optType == normalized) return true;
-
-      // Match Sprinter aliases ("Van/Sprinter", "Sprinter", "Van")
-      if ((optType.contains('sprinter') || optType.contains('van')) &&
-          (normalized.contains('sprinter') || normalized.contains('van'))) {
-        return true;
-      }
-
-      // Match Limousine aliases ("Stretch Limousine", "LimoStretch", "Limo", "Limo Stretch")
-      if ((optType.contains('limo') || optType.contains('stretch')) &&
-          (normalized.contains('limo') || normalized.contains('stretch'))) {
-        return true;
-      }
-
-      return false;
-    });
+    return options.firstWhereOrNull(
+          (opt) =>
+              opt.vehicleType.trim().toLowerCase() == type.trim().toLowerCase(),
+        ) ??
+        options.firstWhereOrNull((opt) => matchesType(opt.vehicleType, type));
   }
 
   /// Get allowed colors for a type

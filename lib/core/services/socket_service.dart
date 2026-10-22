@@ -14,6 +14,8 @@ class SocketService extends GetxService with WidgetsBindingObserver {
   late IO.Socket socket;
   final isConnected = false.obs;
   bool isSocketInitialized = false;
+  String? _socketToken;
+  int _connectionRevision = 0;
   String? _currentRoomId;
 
   // Stream for global message updates
@@ -52,8 +54,14 @@ class SocketService extends GetxService with WidgetsBindingObserver {
   }
 
   Future<void> initSocket() async {
+    final revision = ++_connectionRevision;
+    String token = await StorageService.getString(StorageConstants.bearerToken);
+    if (revision != _connectionRevision || isClosed) return;
+    if (token.isEmpty && Get.isRegistered<ApiClient>()) {
+      token = ApiClient.temporaryToken ?? '';
+    }
     // If socket already exists and is connected, don't re-init
-    if (isSocketInitialized && socket.connected) {
+    if (isSocketInitialized && socket.connected && _socketToken == token) {
       debugPrint('ℹ️ SocketService: Socket already connected, skipping init');
       return;
     }
@@ -62,13 +70,6 @@ class SocketService extends GetxService with WidgetsBindingObserver {
     if (isSocketInitialized) {
       socket.dispose();
       isSocketInitialized = false;
-    }
-
-    String token = await StorageService.getString(StorageConstants.bearerToken);
-
-    // Check temporary token if bearer token is missing (Restricted mode support)
-    if (token.isEmpty && Get.isRegistered<ApiClient>()) {
-      token = ApiClient.temporaryToken ?? "";
     }
 
     if (token.isEmpty) {
@@ -83,6 +84,7 @@ class SocketService extends GetxService with WidgetsBindingObserver {
     debugPrint('🌐 SocketService: Initializing socket on: $socketUrl');
 
     socket = IO.io(socketUrl, <String, dynamic>{
+      'forceNew': true,
       'transports': ['websocket'],
       'autoConnect': false,
       'reconnection': true,
@@ -98,6 +100,7 @@ class SocketService extends GetxService with WidgetsBindingObserver {
     });
 
     isSocketInitialized = true;
+    _socketToken = token;
 
     socket.onConnect((_) {
       isConnected.value = true;
@@ -464,9 +467,23 @@ class SocketService extends GetxService with WidgetsBindingObserver {
 
   @override
   void onClose() {
+    WidgetsBinding.instance.removeObserver(this);
+    disconnect();
+    super.onClose();
+  }
+
+  /// Stop reconnects and discard room context before returning to sign in.
+  void disconnect() {
+    ++_connectionRevision;
     if (isSocketInitialized) {
       socket.dispose();
     }
-    super.onClose();
+    isSocketInitialized = false;
+    isConnected.value = false;
+    _socketToken = null;
+    _currentRoomId = null;
+    activeChatId = null;
+    currentCommunityArea = null;
+    isCommunityActive = false;
   }
 }

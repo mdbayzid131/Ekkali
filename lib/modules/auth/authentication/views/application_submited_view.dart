@@ -21,8 +21,9 @@ class ApplicationSubmitedView extends StatelessWidget {
         automaticallyImplyLeading: false,
         actions: [
           IconButton(
-            onPressed: () {
-              Get.find<AuthService>().clearLocalAuth();
+            onPressed: () async {
+              await Get.find<AuthService>().clearLocalAuth();
+              if (!context.mounted) return;
               Get.offAllNamed(Routes.signinView);
             },
             icon: const Icon(Icons.close, color: Colors.white),

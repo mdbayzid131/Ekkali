@@ -4,11 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
+import 'package:moeb_26/config/constants/api_constants.dart';
 import 'package:moeb_26/config/routes/app_pages.dart';
 import 'package:moeb_26/core/services/firebase_notification_service.dart';
 import 'package:moeb_26/data/models/notification_payload.dart';
 import 'package:moeb_26/data/models/notifications_model.dart';
 import 'package:moeb_26/modules/notifications/widgets/broadcast_notification_card.dart';
+import 'package:moeb_26/modules/notifications/views/notification_media_view.dart';
 
 NotificationItem announcement({String? image}) => NotificationItem.fromJson({
   '_id': 'announcement',
@@ -21,6 +23,102 @@ NotificationItem announcement({String? image}) => NotificationItem.fromJson({
 });
 
 void main() {
+  test('image and video from private backend origin survive read updates', () {
+    final item = NotificationItem.fromJson({
+      'isBroadcast': true,
+      'metadata': {
+        'image': 'http://10.10.7.11:5001/uploads/images/thumb.png',
+        'video': 'http://10.10.7.11:5001/uploads/media/movie.mp4',
+      },
+    }).copyWith(isRead: true);
+    final origin = Uri.parse(ApiConstants.baseUrl).origin;
+    expect(item.imageUrl, '$origin/uploads/images/thumb.png');
+    expect(item.videoUrl, '$origin/uploads/media/movie.mp4');
+    expect(
+      NotificationPayload.videoUrl({'video': 'javascript:alert(1)'}),
+      isNull,
+    );
+  });
+
+  testWidgets(
+    'image attachment opens a zoomable overlay above the existing page and closes',
+    (tester) async {
+      await tester.pumpWidget(
+        ScreenUtilInit(
+          designSize: const Size(376, 856),
+          builder: (_, child) => MaterialApp(
+            home: Scaffold(
+              body: SingleChildScrollView(
+                child: BroadcastNotificationCard(
+                  notification: announcement(
+                    image: 'https://example.com/banner.jpg',
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      expect(find.byIcon(Icons.play_arrow_rounded), findsNothing);
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('broadcast-media')));
+      await tester.pumpAndSettle();
+      expect(find.byType(NotificationMediaView), findsOneWidget);
+      expect(find.byType(Dialog), findsOneWidget);
+      expect(find.byType(BroadcastNotificationCard), findsOneWidget);
+      expect(find.byType(InteractiveViewer), findsOneWidget);
+      await tester.tap(find.byTooltip('Close'));
+      await tester.pumpAndSettle();
+      expect(find.byType(NotificationMediaView), findsNothing);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'video attachment displays a play overlay even without a thumbnail',
+    (tester) async {
+      await tester.pumpWidget(
+        ScreenUtilInit(
+          designSize: const Size(376, 856),
+          builder: (_, child) => MaterialApp(
+            home: Scaffold(
+              body: SingleChildScrollView(
+                child: BroadcastNotificationCard(
+                  notification: announcement().copyWith(
+                    videoUrl: 'https://example.com/movie.mp4',
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      expect(find.byIcon(Icons.play_arrow_rounded), findsOneWidget);
+      expect(find.bySemanticsLabel('Play video'), findsOneWidget);
+      expect(find.byKey(const ValueKey('broadcast-media')), findsOneWidget);
+    },
+  );
+
+  test('backend loopback image URLs use the public API origin', () {
+    final origin = Uri.parse(ApiConstants.baseUrl).origin;
+    for (final host in ['localhost', '127.0.0.1', '[::1]', '0.0.0.0']) {
+      final item = NotificationItem.fromJson({
+        'type': 'ADMIN',
+        'metadata': {
+          'broadcast': true,
+          'image': 'http://$host:5001/uploads/images/banner.png?v=2',
+        },
+      });
+      expect(item.imageUrl, '$origin/uploads/images/banner.png?v=2');
+    }
+    expect(
+      NotificationPayload.imageUrl({
+        'image': 'https://cdn.example.com:8443/uploads/banner.png?v=2',
+      }),
+      'https://cdn.example.com:8443/uploads/banner.png?v=2',
+    );
+  });
+
   tearDown(() {
     Get.reset();
   });

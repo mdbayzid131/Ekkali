@@ -14,6 +14,7 @@ class NotificationItem {
   final Map<String, dynamic>? data;
   final bool isBroadcast;
   final String? imageUrl;
+  final String? videoUrl;
 
   NotificationItem({
     required this.id,
@@ -28,6 +29,7 @@ class NotificationItem {
     this.data,
     this.isBroadcast = false,
     this.imageUrl,
+    this.videoUrl,
   });
 
   NotificationItem copyWith({
@@ -43,6 +45,7 @@ class NotificationItem {
     Map<String, dynamic>? data,
     bool? isBroadcast,
     String? imageUrl,
+    String? videoUrl,
   }) {
     return NotificationItem(
       id: id ?? this.id,
@@ -57,6 +60,7 @@ class NotificationItem {
       data: data ?? this.data,
       isBroadcast: isBroadcast ?? this.isBroadcast,
       imageUrl: imageUrl ?? this.imageUrl,
+      videoUrl: videoUrl ?? this.videoUrl,
     );
   }
 
@@ -201,6 +205,7 @@ class NotificationItem {
       data: combinedData,
       isBroadcast: broadcast,
       imageUrl: broadcast ? NotificationPayload.imageUrl(combinedData) : null,
+      videoUrl: broadcast ? NotificationPayload.videoUrl(combinedData) : null,
     );
   }
 
