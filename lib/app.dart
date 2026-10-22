@@ -6,6 +6,7 @@ import 'package:moeb_26/config/routes/app_pages.dart';
 import 'package:moeb_26/config/themes/app_theme.dart';
 import 'package:moeb_26/core/bindings/initial_binding.dart';
 import 'package:moeb_26/core/services/screen_protector_service.dart';
+import 'package:moeb_26/core/widgets/android_navigation_safe_area.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -18,6 +19,8 @@ class MyApp extends StatelessWidget {
       minTextAdapt: true,
       splitScreenMode: true,
       child: GetMaterialApp(
+        builder: (context, child) =>
+            AndroidNavigationSafeArea(child: child ?? const SizedBox.shrink()),
         theme: ThemeData(
           brightness: Brightness.dark,
           scaffoldBackgroundColor: AppColors.black100,
