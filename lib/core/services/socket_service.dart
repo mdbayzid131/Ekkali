@@ -5,7 +5,6 @@ import 'package:get/get.dart';
 import 'package:moeb_26/config/constants/api_constants.dart';
 import 'package:moeb_26/config/constants/storage_constants.dart';
 import 'package:moeb_26/data/models/chat_message_model.dart';
-import 'package:moeb_26/modules/notifications/controllers/notifications_controller.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:moeb_26/core/services/storege_service.dart';
 import 'api_client.dart';
@@ -258,20 +257,8 @@ class SocketService extends GetxService with WidgetsBindingObserver {
       });
     }
 
-    // 9. Support: Global in-app event for new support messages (no intrusive snackbar)
-    final List<String> supportMessageEvents = [
-      'NEW_SUPPORT_MESSAGE',
-      'new_support_message',
-      'support_message',
-    ];
-    for (var event in supportMessageEvents) {
-      socket.on(event, (data) {
-        debugPrint('🔔 SocketService: Received support event [$event]: $data');
-        if (Get.isRegistered<NotificationController>()) {
-          Get.find<NotificationController>().fetchNotifications();
-        }
-      });
-    }
+    // Support ticket messages are handled by their ticket-specific listener.
+    // They do not change the notifications feed.
 
     // 10. Real-time Account Suspension & Reactivation State Sync
     final List<String> userStatusEvents = [

@@ -34,8 +34,13 @@ class _ContactSupportViewState extends State<ContactSupportView> {
   @override
   void initState() {
     super.initState();
-    controller = Get.put(SupportController());
-    controller.fetchMyTickets();
+    if (Get.isRegistered<SupportController>()) {
+      controller = Get.find<SupportController>();
+      controller.fetchMyTickets();
+    } else {
+      // onInit loads tickets when the controller is first created.
+      controller = Get.put(SupportController());
+    }
   }
 
   @override

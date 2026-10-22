@@ -345,13 +345,17 @@ class ProfileController extends GetxController {
   }
 
   Future<void> savePaymentDetails() async {
+    if (isUpdating.value) return;
     isUpdating.value = true;
     try {
       Map<String, dynamic> body = {
         "paymentMethods": {
-          "zelle": {"email": zelleController.text.trim()},
-          "venmo": {"username": venmoController.text.trim()},
-          "cashApp": {"cashtag": cashAppController.text.trim()},
+          if (zelleController.text.trim().isNotEmpty)
+            "zelle": {"email": zelleController.text.trim()},
+          if (venmoController.text.trim().isNotEmpty)
+            "venmo": {"username": venmoController.text.trim()},
+          if (cashAppController.text.trim().isNotEmpty)
+            "cashApp": {"cashtag": cashAppController.text.trim()},
           "cardPayment": {
             "status": cardPaymentAccepted.value ? "ACCEPTED" : "NOT_ACCEPTED",
           },
